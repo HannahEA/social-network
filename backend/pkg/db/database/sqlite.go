@@ -25,7 +25,10 @@ func CreateDatabase() {
 		log.Fatal(err.Error())
 	}
 
-	_, err = sqliteDatabase.Exec(`
+	Database = sqliteDatabase
+
+	// Create the Users table if it doesn't exist
+	_, err = Database.Exec(`
 		CREATE TABLE IF NOT EXISTS Users (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			email TEXT UNIQUE,
@@ -35,8 +38,6 @@ func CreateDatabase() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
-	Database = sqliteDatabase
 }
 
 func IsEmailTaken(email string) bool {

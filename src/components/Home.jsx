@@ -15,7 +15,7 @@ const Home = () => {
             Connect with friends and build relationships with Social-Network. Join our vibrant community and stay connected virtually.
           </div>
           <div className="btn-wrap flex w-full items-center justify-center gap-3 font-bold text-white">
-            <Link to="/registration" className="rounded-3xl bg-[#4D96A9] px-4 py-2.5 sm:px-6 sm:py-3.5 text-sm sm:text-md">
+            <Link to="/register" className="rounded-3xl bg-[#4D96A9] px-4 py-2.5 sm:px-6 sm:py-3.5 text-sm sm:text-md">
               Get Started
             </Link>
             <button className="rounded-3xl bg-[#855FB1] px-4 py-2.5 sm:px-6 sm:py-3.5 text-sm sm:text-md">Learn More</button>
@@ -74,7 +74,7 @@ const Home = () => {
         <p className="max-w-sm text-white text-center sm:text-start">
           Stay connected with your friends, join interest groups, and participate in engaging discussions and events.
         </p>
-        <Link to="/registration" className="rounded-3xl bg-[#855FB1] px-4 py-2.5 sm:px-6 sm:py-3.5 text-sm sm:text-md font-bold text-white">
+        <Link to="/register" className="rounded-3xl bg-[#855FB1] px-4 py-2.5 sm:px-6 sm:py-3.5 text-sm sm:text-md font-bold text-white">
           Login
         </Link>
       </div>
