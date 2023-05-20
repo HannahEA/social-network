@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 
-const LoginPage = () => {
+const LoginPage = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
   const notyf = new Notyf();
 
   const handleEmailChange = (event) => {
@@ -40,7 +42,11 @@ const LoginPage = () => {
           // Display a success notification
           notyf.success("Login successful");
 
-          // Perform any additional logic (e.g., redirecting to a different page)
+          // Update the authentication state in the parent component
+          onLogin();
+
+          // Redirect to the home page
+          navigate("/home");
         } else if (data.message === "Invalid credentials") {
           notyf.error("Invalid credentials");
         }
