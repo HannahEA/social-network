@@ -45,8 +45,8 @@ const LoginPage = ({ onLogin }) => {
           // Update the authentication state in the parent component
           onLogin();
 
-          // Redirect to the home page
-          navigate("/home");
+          // Redirect to the feed page instead of home
+          navigate("/feed");
         } else if (data.message === "Invalid credentials") {
           notyf.error("Invalid credentials");
         }
