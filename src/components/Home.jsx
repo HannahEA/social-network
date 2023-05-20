@@ -7,8 +7,8 @@ const Home = () => {
       <div className="nav flex h-28 w-full items-center justify-center bg-white px-8">
         <img src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/logo.svg" alt="" />
       </div>
-      <div className="call-to-action flex h-96 w-full items-center justify-center gap-28 px-10">
-        <img src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/desktop/image-hero-left.png" className="w-" alt="" />
+      <div className="call-to-action flex h-96 w-full items-center justify-center gap-28 px-10 overflow-clip">
+        <img src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/desktop/image-hero-left.png" className="" alt="" />
         <div className="flex min-w-[360px] flex-col justify-center gap-4 px-12 sm:px-0">
           <div className="title text-center text-4xl font-[800] leading-none text-[#29283e] sm:text-5xl">The New Way to Connect</div>
           <div className="desc text-center text-[#87879D]">
@@ -21,7 +21,7 @@ const Home = () => {
             <button className="rounded-3xl bg-[#855FB1] px-4 py-2.5 sm:px-6 sm:py-3.5 text-sm sm:text-md">Learn More</button>
           </div>
         </div>
-        <img src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/desktop/image-hero-right.png" alt="" />
+        <img src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/desktop/image-hero-right.png" className="" alt="" />
       </div>
       <div className="flex w-full flex-col items-center justify-center">
         <div className="line h-[75px] w-[1px] bg-[#87879D50]"></div>
@@ -30,25 +30,25 @@ const Home = () => {
         </div>
       </div>
       <div className="flex w-full items-center justify-center">
-        <div className="gallery mt-24 flex gap-6 flex-col sm:flex-row sm:px-8">
+        <div className="gallery mt-24 flex gap-6 flex-col sm:flex-row sm:px-8 w-80vw overflow-auto">
           <img
             src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/desktop/image-woman-in-videocall.jpg"
-            className="w-[250px] rounded-xl"
+            className="max-w-[250px] rounded-xl"
             alt=""
           />
           <img
             src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/desktop/image-women-videochatting.jpg"
-            className="w-[250px] rounded-xl"
+            className="max-w-[250px] rounded-xl"
             alt=""
           />
           <img
             src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/desktop/image-men-in-meeting.jpg"
-            className="w-[250px] rounded-xl"
+            className="max-w-[250px] rounded-xl"
             alt=""
           />
           <img
             src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/desktop/image-man-texting.jpg"
-            className="w-[250px] rounded-xl"
+            className="max-w-[250px] rounded-xl"
             alt=""
           />
         </div>
