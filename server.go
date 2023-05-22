@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"social-network/backend/pkg/db/database"
 	"text/template"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -85,14 +86,13 @@ func ValidateLogin(email, password string) (bool, error) {
 	err := db.QueryRow("SELECT COUNT(*) FROM Users WHERE email = ? AND password = ?", email, password).Scan(&count)
 	if err != nil {
 		log.Println(err)
-		return false, fmt.Errorf("Failed to validate login")
+		return false, fmt.Errorf("failed to validate login")
 	}
 	return count > 0, nil
 }
 
-
 func main() {
-	createDatabase()
+	database.CreateDatabase()
 	defer db.Close()
 
 	http.HandleFunc("/", reactHandler)
@@ -104,25 +104,6 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
 
-func createDatabase() {
-	sqliteDatabase, err := sql.Open("sqlite3", "database.db")
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	_, err = sqliteDatabase.Exec(`
-		CREATE TABLE IF NOT EXISTS Users (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			email TEXT UNIQUE,
-			password TEXT
-		)
-	`)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	db = sqliteDatabase
-}
 
 func IsEmailTaken(email string) bool {
 	var count int
@@ -136,13 +117,13 @@ func IsEmailTaken(email string) bool {
 
 func RegisterUser(email, password string) error {
 	if IsEmailTaken(email) {
-		return fmt.Errorf("Email already taken")
+		return fmt.Errorf("email already taken")
 	}
 
 	_, err := db.Exec("INSERT INTO Users (email, password) VALUES (?, ?)", email, password)
 	if err != nil {
 		log.Println(err)
-		return fmt.Errorf("Failed to register user")
+		return fmt.Errorf("failed to register user")
 	}
 
 	return nil
