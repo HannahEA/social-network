@@ -24,10 +24,11 @@ func handleRegistration(w http.ResponseWriter, r *http.Request) {
 	var data RegistrationData
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
+		fmt.Println("handleRegistratio: jsonDecoder failed")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	fmt.Println("Registration Data recieved: ", data)
 	// Check if the email already exists
 	if IsEmailTaken(data.Email) {
 		response := map[string]string{"message": "Email already taken"}
@@ -117,7 +118,8 @@ func getUserEmail(userID string) (string, error) {
 }
 func main() {
 	database.CreateDatabase()
-	defer db.Close()
+	db = database.Database
+	defer database.Database.Close()
 
 	http.HandleFunc("/", reactHandler)
 	http.HandleFunc("/register", handleRegistration)
