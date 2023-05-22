@@ -1,6 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const Feed = ({ onLogout }) => {
+  const [email, setEmail] = useState("");
+
   useEffect(() => {
     const handleClick = () => {
       const dropdown = document.querySelector("#dropdown");
@@ -1059,12 +1061,12 @@ const Feed = ({ onLogout }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div className="profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img
-              class="w-16 h-16 mb-2 rounded-full"
+              className="w-16 h-16 mb-2 rounded-full"
               src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
               alt="user photo"
             />
             <div className="flex justify-center items-center flex-col">
-              <h2>@Username</h2>
+              <p>Email: {email}</p>
               <p>Followers: 0</p>
               <p>Posts: 0</p>
             </div>
