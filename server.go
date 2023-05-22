@@ -135,6 +135,7 @@ func IsEmailTaken(email string) bool {
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM Users WHERE email = ?", email).Scan(&count)
 	if err != nil {
+		fmt.Println("IsEmailTaken: Failed to access user database")
 		log.Println(err)
 		return false
 	}

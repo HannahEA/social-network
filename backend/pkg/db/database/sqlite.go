@@ -210,30 +210,3 @@ func CreateDatabase() {
 								// }
 }
 							
-func IsEmailTaken(email string) bool {
-	var count int
-	fmt.Println("got inside email function")
-	err := Database.QueryRow("SELECT COUNT(*) FROM Users WHERE email = ?", email).Scan(&count)
-	
-	if err != nil {
-		fmt.Println("IsEmailTaken: DB Query error:")
-		log.Fatal(err.Error())
-		return false
-	}
-	return count > 0
-}
-
-func RegisterUser(email, password string) error {
-	if IsEmailTaken(email) {
-		return errors.New("email already taken")
-	}
-
-	_, err := Database.Exec("INSERT INTO Users (email, password) VALUES (?, ?)", email, password)
-	if err != nil {
-		fmt.Println("Failed to Register User: Could not insert into database:")
-		log.Println(err)
-		return errors.New("failed to register user")
-	}
-
-	return nil
-}
