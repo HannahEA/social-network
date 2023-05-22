@@ -69,16 +69,31 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Send a response back to the client based on validation result
 	if valid {
-		response := map[string]string{"message": "Login successful"}
+		response := map[string]interface{}{
+			"message": "Login successful",
+			"email":   data.Email,
+		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+			return
+		}
 	} else {
 		response := map[string]string{"message": "Invalid credentials"}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response)
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+			return
+		}
 	}
 }
+
+
 
 func ValidateLogin(email, password string) (bool, error) {
 	var count int
@@ -91,6 +106,36 @@ func ValidateLogin(email, password string) (bool, error) {
 }
 
 
+// func handleFeed(w http.ResponseWriter, r *http.Request) {
+// 	userID := r.Header.Get("UserID")
+// 	email, err := getUserEmail(userID)
+// 	if err != nil {
+// 		log.Println(err)
+// 		http.Error(w, "Failed to retrieve user email", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	response := map[string]string{"email": email}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	err = json.NewEncoder(w).Encode(response)
+// 	if err != nil {
+// 		log.Println(err)
+// 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+// 		return
+// 	}
+// }
+
+
+
+func getUserEmail(userID string) (string, error) {
+	var email string
+	err := db.QueryRow("SELECT email FROM Users WHERE id = ?", userID).Scan(&email)
+	if err != nil {
+		return "", err
+	}
+	return email, nil
+}
+
 func main() {
 	createDatabase()
 	defer db.Close()
@@ -98,11 +143,12 @@ func main() {
 	http.HandleFunc("/", reactHandler)
 	http.HandleFunc("/register", handleRegistration)
 	http.HandleFunc("/login", handleLogin)
-	// http.HandleFunc("/api/checkEmail", checkEmailHandler)
+	// http.HandleFunc("/feed", handleFeed) // Add the /feed route
 
 	fmt.Println("Server started on http://localhost:8000")
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
+
 
 func createDatabase() {
 	sqliteDatabase, err := sql.Open("sqlite3", "database.db")
