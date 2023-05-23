@@ -39,7 +39,7 @@ func CreateDatabase() {
 			"password" BLOB NOT NULL,
 			"Avatar" BLOB,
 			"Image" BLOB,
-			"abouitMe" BLOB 
+			"aboutMe" BLOB 
 			);
 			`)
 

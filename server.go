@@ -7,15 +7,19 @@ import (
 	"log"
 	"net/http"
 	"social-network/backend/pkg/db/database"
+	"strings"
 	"text/template"
+
+	"io"
 	"time"
+	"unicode/utf8"
 
 	_ "github.com/mattn/go-sqlite3"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
-//===============> Structs <===============================
+//===============> Structs : if moved to handlers/structs.go will throw error: 'struct has no field or method..'<===============================
 type RegistrationData struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -124,7 +128,7 @@ func RegisterUser(email, password string) error {
 
 //==================> Start of Login <=========================
 
-var oneUser User
+var oneUser int
 
 func handleLogin(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body into a LoginData struct
@@ -163,7 +167,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		})
 
 		// storing the cookie values in struct
-		user_session := Cookie{cookieNm, sessionToken, expiresAt}
+		user_session := Cookie{Name: cookieNm, Value: sessionToken, Expires: expiresAt}
 		fmt.Println("Values in 'Cookie' struct :", user_session)
 
 		//------>End of making a sessionToken to be used as session cookie <---------------
@@ -173,7 +177,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		theID := "SELECT id FROM Users WHERE email = ?"
 		rowCurrentUser := db.QueryRow(theID, data.Email)
 		//Writing user id into User.id struct field
-		err3 := rowCurrentUser.Scan(&oneUser.id)
+		err3 := rowCurrentUser.Scan(&oneUser)
 		if err3 != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("ERROR"))
@@ -190,7 +194,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		}
 
 		defer insertsessStmt.Close()
-		insertsessStmt.Exec(oneUser.id, user_session.Name, user_session.Value)
+		insertsessStmt.Exec(oneUser, user_session.Name, user_session.Value)
 		fmt.Println("PASSWORD IS CORRECT")
 		fmt.Println("User successfully logged in")
 
@@ -265,15 +269,170 @@ func ValidateLogin(email, password string) (bool, error) {
 }
 
 //===================> End of Login <============================
+// each session contains the username of the user and the time at which it expires
 
+//====================> Start of Session <=======================
 
-//====================> Start of Session <===========================
+// NewSession ...
+func NewSession() *Session {
+	return &Session{}
+}
 
+//======> Functions: 'AddSession' and 'InsertSession' are not needed as browser and Session tables get cookie in 'Login' <======
 
+// Add session cookie to browser
+/*func AddSession(w http.ResponseWriter, sessionName string, user *User) {
+	sessionToken := uuid.NewV4().String()
+	expiresAt := time.Now().Add(120 * time.Minute)
+	cookieSession := &http.Cookie{
+		Name:    sessionName,
+		Value:   sessionToken,
+		Expires: expiresAt,
+	}
+	http.SetCookie(w, cookieSession)
+	if sessionName != "guest" {
+		InsertSession(user, cookieSession)
+	}
+}
 
+// Insert session to database
+func InsertSession(u *User, session *Cookie) *Session {
+	cookie := NewSession()
+	stmnt, err := db.Prepare("INSERT OR IGNORE INTO Sessions (userID, cookieName, cookieValue) VALUES (?, ?, ?)")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	_, err = stmnt.Exec(u.id, session.Name, session.Value)
+	if err != nil {
+		fmt.Println("AddSession error inserting into DB: ", err)
+	}
+	cookie.sessionName = session.Name
+	cookie.sessionUUID = session.Value
+	cookie.UserID = u.id
+	return cookie
+}*/
 
-//====================> End of Session <===========================
+// IsUserAuthenticated ...
+func IsUserAuthenticated(w http.ResponseWriter, u *User) error {
+	var cookieValue string
+	//if user is not found in "sessions" db table return err = nil
+	if err := db.QueryRow("SELECT cookieValue FROM Sessions WHERE userID = ?", u.id).Scan(&cookieValue); err != nil {
+		fmt.Println("The cookie value", cookieValue)
+		// w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("checking sessions table err:     ", err)
+		return nil
+	}
+	if err := DeleteSession(w, cookieValue); err != nil {
+		// w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("Error from inside delete sessions: ", err)
+		return err
+	}
+	return nil
+}
 
+// User's cookie expires when browser is closed, delete the cookie from the database.
+func DeleteSession(w http.ResponseWriter, cookieValue string) error {
+	fmt.Println("-----> DeleteSession called")
+	var cookieName string
+	//if cookieName is not found in 'Sessions' db table return err = nil
+	if err := db.QueryRow("SELECT cookieName FROM Sessions WHERE cookieValue = ?", cookieValue).Scan(&cookieName); err != nil {
+		fmt.Println("there was an error selecting ", cookieValue)
+		return nil
+	}
+	//removing cookie from browser
+	cookie := &http.Cookie{
+		Name:   cookieName,
+		Value:  "",
+		MaxAge: -1,
+		//HttpOnly: true,
+	}
+
+	fmt.Println("the cookie after changing its values -->", cookie)
+	//to delete the cookie in the browser
+	http.SetCookie(w, cookie)
+	//to remove session record from 'Sessions' table
+	stmt, err := db.Prepare("DELETE FROM Sessions WHERE cookieValue=?;")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	defer stmt.Close()
+	stmt.Exec(cookieValue)
+	if err != nil {
+		fmt.Println("DeleteSession err: ", err)
+		return err
+	}
+	return nil
+}
+
+// GetUserByCookie ...
+func GetUserByCookie(cookieValue string) *User {
+	var userID int64
+
+	if err := db.QueryRow("SELECT userID from Sessions WHERE cookieValue = ?", cookieValue).Scan(&userID); err != nil {
+		fmt.Println("cookieValue===", cookieValue)
+		return nil
+	}
+	u := FindByUserID(userID)
+	return u
+}
+
+// function for new user
+func NewUser() *User {
+	return &User{}
+}
+
+// Find the user by their ID
+func FindByUserID(UID int64) *User {
+	u := NewUser()
+	if err := db.QueryRow("firstName, lastName, nickName, age, gender, email, password, Avatar, Image, aboutMe FROM Users WHERE userID = ?", UID).
+		Scan(&u.FirstName, &u.LastName, &u.NickName, &u.Age, &u.Gender, &u.Email, &u.Password, &u.Avatar, &u.Image, &u.AboutMe); err != nil {
+		fmt.Println("error FindByUserID: ", err)
+		return nil
+	}
+
+	return u
+}
+
+// logout handle
+//func Logout(w http.ResponseWriter, r *http.Request, hub *Hub) {
+func Logout(w http.ResponseWriter, r *http.Request) {
+	var cooky Cookie
+
+	if r.URL.Path == "/logout" {
+
+		cookieVal, err := io.ReadAll(r.Body)
+		fmt.Println("cookieVal before unmarshalled", cookieVal)
+		if err != nil {
+			log.Fatal(err)
+		}
+		cookieStringBefore := string(cookieVal[:])
+		//separate cookie name from cookie value
+		cValue := strings.Split(cookieStringBefore, ":")
+		//get cookie value
+		cookieStringAfter := (cValue[1])
+		//count the number of runes in coookieStringAfter
+		//so that you drop the final '}'
+		numRunes := utf8.RuneCountInString(cookieStringAfter)
+		fmt.Println("the number of runes in cookie: ", numRunes)
+		cookieStringByte := []byte(cookieStringAfter)
+		//to remove the curly bracket at end of cookie value
+		cookieStringAfter = string(cookieStringByte[0 : numRunes-1])
+		fmt.Println("the correct cookie: --->", cookieStringAfter)
+		//populate the Cookie struct field 'Value' with cookie value
+		json.Unmarshal([]byte(cookieStringAfter), &cooky.Value)
+
+		fmt.Println("cookie value before unmarshal: ", cookieStringBefore)
+		fmt.Println("cookie value after unmarshal: ", string(cookieStringAfter))
+		//delete corresponding row in 'Sessions' table
+		//and delete cookie in browser
+		userName := GetUserByCookie(string(cooky.Value))
+		fmt.Print("the user", userName.id)
+		DeleteSession(w, string(cooky.Value))
+
+	}
+}
+
+//====================> End of Session <=========================
 
 func getUserEmail(userID string) (string, error) {
 	var email string
@@ -291,13 +450,14 @@ func main() {
 	http.HandleFunc("/", reactHandler)
 	http.HandleFunc("/register", handleRegistration)
 	http.HandleFunc("/login", handleLogin)
+	http.HandleFunc("/logout", Logout)
 	// http.HandleFunc("/feed", handleFeed) // Add the /feed route
 
 	fmt.Println("Server started on http://localhost:8000")
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
 
-//Included into Register Handler
+
 func IsEmailTaken(email string) bool {
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM Users WHERE email = ?", email).Scan(&count)
@@ -308,7 +468,6 @@ func IsEmailTaken(email string) bool {
 	}
 	return count > 0
 }
-
 
 func reactHandler(w http.ResponseWriter, r *http.Request) {
 	http.FileServer(http.Dir("build")).ServeHTTP(w, r)
