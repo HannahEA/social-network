@@ -36,7 +36,7 @@ func CreateDatabase() {
 		"age" INTEGER,
 		"gender" TEXT ,
 		"email" TEXT NOT NULL UNIQUE, 
-			"password" TEXT NOT NULL,
+			"password" BLOB NOT NULL,
 			"Avatar" BLOB,
 			"Image" BLOB,
 			"abouitMe" BLOB 
