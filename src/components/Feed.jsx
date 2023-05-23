@@ -1,7 +1,33 @@
 import React, { useEffect, useState } from "react";
+import SubmitPost from "./feed/Posts";
 
 const Feed = ({ onLogout }) => {
   const [email, setEmail] = useState("");
+  const [Title, setTitle] = useState("");
+  const [Content, setContent] = useState("");
+
+  //set New Post Constants
+  const [Visibility, setVisibility] = useState("")
+  const handleTitle = (event) => {
+    
+  
+    setTitle(event.target.value)
+    
+  };
+  const handleContent = (event) => {
+    setContent(event.target.value)
+  };
+  const handleVisibility = (event) => {
+    setVisibility(event.target.value)
+  };
+  // on new post form submission, handle in post file
+  const submitPost = (event) => {
+    let e = document.getElementById("Visibility")
+    console.log("v",e.options[e.selectedIndex].text)
+    let v = e.options[e.selectedIndex].text
+    event.preventDefault();
+    SubmitPost({title: Title, content: Content, visibility: v})
+  }
 
   useEffect(() => {
     const handleClick = () => {
@@ -1075,7 +1101,28 @@ const Feed = ({ onLogout }) => {
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
         </div>
-        <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4" />
+        <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4" >
+        <div className="flex justify-left items-left flex-col">
+                <form onSubmit={submitPost}>
+                <div className="flex justify-left items-left flex-col">
+                <h3>Upadate Feed</h3>
+                <p>Title</p>
+              <input type="text" value= {Title} onChange={handleTitle} />
+              </div>
+              <div className="flex justify-right items-right flex-col">
+              <p>Content</p>
+              <textarea name="postContent" id="postContent" cols="30" rows="10" value={Content} onChange= {handleContent}></textarea>
+              </div>
+              <select name="Visibility" id="Visibility" onChange={handleVisibility}>
+                <option name="public" value ={Visibility}>Public</option>
+                <option name="private"value={Visibility}>Private</option>
+              </select>
+              <br />
+              <button type="submit" >Post</button>
+                </form>
+              
+            </div>
+        </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" />
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" />
