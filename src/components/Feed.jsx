@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from "react";
-import SubmitPost from "./feed/Posts";
+import {SubmitPost, Tags} from "./feed/Posts";
 
 const Feed = ({ onLogout }) => {
   const [email, setEmail] = useState("");
   const [Title, setTitle] = useState("");
   const [Content, setContent] = useState("");
+  const [Visibility, setVisibility] = useState("")
+  const [Tag, setTag] = useState("")
 
   //set New Post Constants
-  const [Visibility, setVisibility] = useState("")
   const handleTitle = (event) => {
-    
-  
     setTitle(event.target.value)
-    
   };
   const handleContent = (event) => {
     setContent(event.target.value)
@@ -20,14 +18,25 @@ const Feed = ({ onLogout }) => {
   const handleVisibility = (event) => {
     setVisibility(event.target.value)
   };
+  const handleTag = (event) => {
+    setTag(event.target.value)
+  }
   // on new post form submission, handle in post file
   const submitPost = (event) => {
-    let e = document.getElementById("Visibility")
-    console.log("v",e.options[e.selectedIndex].text)
-    let v = e.options[e.selectedIndex].text
     event.preventDefault();
+    let e = document.getElementById("Visibility")
+    let v = e.options[e.selectedIndex].text
     SubmitPost({title: Title, content: Content, visibility: v})
   }
+  const addTag = (event) => {
+    event.preventDefault();
+    
+      console.log('adding tag');
+      console.log(Tag)
+      return Tags({tag:Tag})
+    
+  }
+  
 
   useEffect(() => {
     const handleClick = () => {
@@ -1103,15 +1112,18 @@ const Feed = ({ onLogout }) => {
         </div>
         <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4" >
         <div className="flex justify-left items-left flex-col">
-                <form onSubmit={submitPost}>
-                <div className="flex justify-left items-left flex-col">
                 <h3>Upadate Feed</h3>
                 <p>Title</p>
-              <input type="text" value= {Title} onChange={handleTitle} />
-              </div>
+                <input type="text" value= {Title} onChange={handleTitle} />
+                <form onSubmit={addTag}>
+                <p>Tags</p>
+                <input type="text" id="postTags" value={Tag} onChange={handleTag} className="m-5"/>
+                <button type="submit" value="Add Tag"> Add Tag</button>
+                </form>
+                <form onSubmit={submitPost}>
               <div className="flex justify-right items-right flex-col">
               <p>Content</p>
-              <textarea name="postContent" id="postContent" cols="30" rows="10" value={Content} onChange= {handleContent}></textarea>
+              <textarea name="postContent" id="postContent" cols="20" rows="6" value={Content} onChange= {handleContent}></textarea>
               </div>
               <select name="Visibility" id="Visibility" onChange={handleVisibility}>
                 <option name="public" value ={Visibility}>Public</option>

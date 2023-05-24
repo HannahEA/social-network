@@ -78,14 +78,14 @@ func CreateDatabase() {
 	// Create Post table if none exists
 	_, err3 := sqliteDatabase.Exec(`
 	CREATE TABLE IF NOT EXISTS "Posts" ( 
-		"postID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
-		"authorID" INTEGER NOT NULL,
-		"Author" TEXT NOT NULL,
+		"postID" TEXT NOT NULL, 
+		"authorID" TEXT ,
+		"Author" TEXT,
 		"title" TEXT NOT NULL, 
 		"content" TEXT NOT NULL, 
 		"category" TEXT NOT NULL,
 		"creationDate" TIMESTAMP,
-		"cookieID" TEXT NOT NULL,
+		"cookieID" TEXT,
 		"postVisibility" TEXT NOT NULL,
 		FOREIGN KEY(authorID)REFERENCES Users(id)
 		);`)

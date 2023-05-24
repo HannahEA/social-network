@@ -10,7 +10,8 @@ const SubmitPost = ({title, content, visibility}) => {
  const newPost = {
     title: title,
     content: content,
-    visibility: visibility
+    visibility: visibility,
+    type: "newPost"
  }
  // Make a POST request to the server
  fetch("/post", {
@@ -32,6 +33,14 @@ const SubmitPost = ({title, content, visibility}) => {
       console.error("Error:", error);
     });
 }
+const Tags = ({tag}) => {
+  console.log("new tag", tag)
+  return (
+    <>
+    <div style="background-color: green;" width="20px" height="20px">{tag}</div>
+    </>
+  )
+ }
 
 
-export default SubmitPost;
+export {SubmitPost, Tags};
