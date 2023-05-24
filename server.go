@@ -4,11 +4,14 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"social-network/backend/pkg/db/database"
+	"strings"
 	"text/template"
 	"time"
+	"unicode/utf8"
 
 	_ "github.com/mattn/go-sqlite3"
 	uuid "github.com/satori/go.uuid"
@@ -136,8 +139,17 @@ func RegisterUser(email, password string) error {
 	if IsEmailTaken(email) {
 		return fmt.Errorf("email already taken")
 	}
+	//turn the password into a hash to be stored into the db
+	var hash []byte
+	hash, err1 := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err1 != nil {
+		fmt.Println("bcrypt err1:", err1)
+	}
 
-	_, err := db.Exec("INSERT INTO Users (email, password) VALUES (?, ?)", email, password)
+	fmt.Println("hash: ", hash)
+
+	//_, err := db.Exec("INSERT INTO Users (email, password) VALUES (?, ?)", email, password)
+	_, err := db.Exec("INSERT INTO Users (email, password) VALUES (?, ?)", email, hash)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf("failed to register user")
@@ -145,6 +157,10 @@ func RegisterUser(email, password string) error {
 
 	return nil
 }
+
+//====> End of Register 2 <============================
+
+//==================> Start of Login <=========================
 
 var oneUser int
 
@@ -239,6 +255,8 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+//-----------> End: Retrieve user id from db and populate User.id struct field <-----------
 
 func ValidateLogin(email, password string) (bool, error) {
 	//------> code replaced to compare password hashes instead of just passwords <--------------
@@ -379,6 +397,76 @@ func DeleteSession(w http.ResponseWriter, cookieValue string) error {
 	}
 	return nil
 }
+
+// GetUserByCookie ...
+func GetUserByCookie(cookieValue string) *User {
+	var userID int64
+
+	if err := db.QueryRow("SELECT userID from Sessions WHERE cookieValue = ?", cookieValue).Scan(&userID); err != nil {
+		fmt.Println("cookieValue===", cookieValue)
+		return nil
+	}
+	u := FindByUserID(userID)
+	return u
+}
+
+// function for new user
+func NewUser() *User {
+	return &User{}
+}
+
+// Find the user by their ID
+func FindByUserID(UID int64) *User {
+	u := NewUser()
+	if err := db.QueryRow("firstName, lastName, nickName, age, gender, email, password, Avatar, Image, aboutMe FROM Users WHERE userID = ?", UID).
+		Scan(&u.FirstName, &u.LastName, &u.NickName, &u.Age, &u.Gender, &u.Email, &u.Password, &u.Avatar, &u.Image, &u.AboutMe); err != nil {
+		fmt.Println("error FindByUserID: ", err)
+		return nil
+	}
+
+	return u
+}
+
+// logout handle
+// func Logout(w http.ResponseWriter, r *http.Request, hub *Hub) {
+func Logout(w http.ResponseWriter, r *http.Request) {
+	var cooky Cookie
+
+	if r.URL.Path == "/logout" {
+
+		cookieVal, err := io.ReadAll(r.Body)
+		fmt.Println("cookieVal before unmarshalled", cookieVal)
+		if err != nil {
+			log.Fatal(err)
+		}
+		cookieStringBefore := string(cookieVal[:])
+		//separate cookie name from cookie value
+		cValue := strings.Split(cookieStringBefore, ":")
+		//get cookie value
+		cookieStringAfter := (cValue[1])
+		//count the number of runes in coookieStringAfter
+		//so that you drop the final '}'
+		numRunes := utf8.RuneCountInString(cookieStringAfter)
+		fmt.Println("the number of runes in cookie: ", numRunes)
+		cookieStringByte := []byte(cookieStringAfter)
+		//to remove the curly bracket at end of cookie value
+		cookieStringAfter = string(cookieStringByte[0 : numRunes-1])
+		fmt.Println("the correct cookie: --->", cookieStringAfter)
+		//populate the Cookie struct field 'Value' with cookie value
+		json.Unmarshal([]byte(cookieStringAfter), &cooky.Value)
+
+		fmt.Println("cookie value before unmarshal: ", cookieStringBefore)
+		fmt.Println("cookie value after unmarshal: ", string(cookieStringAfter))
+		//delete corresponding row in 'Sessions' table
+		//and delete cookie in browser
+		userName := GetUserByCookie(string(cooky.Value))
+		fmt.Print("the user", userName.id)
+		DeleteSession(w, string(cooky.Value))
+
+	}
+}
+
+//====================> End of Session <=========================
 
 func getUserEmail(userID string) (string, error) {
 	var email string
