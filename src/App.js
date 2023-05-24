@@ -8,6 +8,7 @@ import Feed from "./components/Feed";
 
 function App() {
   const [authenticated, setAuthenticated] = useState(false);
+  
 
   const handleLogin = () => {
     // Perform login logic
@@ -25,7 +26,7 @@ function App() {
         <Route path="/" element={<Home onLogout={handleLogout} />} />
         <Route path="/register" element={<Registration />} />
         <Route path="/login" element={authenticated ? <Navigate to="/feed" /> : <Login onLogin={handleLogin} />} />
-        <Route path="/feed" element={authenticated ? <Feed /> : <Navigate to="/login" />} />
+        <Route path="/feed" element={authenticated ? <Feed onLogout = {handleLogout}/> : <Navigate to="/login" />} />
       </Routes>
     </Router>
   );

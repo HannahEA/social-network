@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {SubmitPost, Tags} from "./feed/Posts";
+import handleLogout from "./feed/Logout";
 
 const Feed = ({ onLogout }) => {
   const [email, setEmail] = useState("");
@@ -606,8 +607,8 @@ const Feed = ({ onLogout }) => {
                 </li>
               </ul>
               <ul className="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
-                <li>
-                  <a href="#" className="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                <li onClick= {event => {handleLogout(event, onLogout)}}>
+                  <a href="/"  className="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                     Sign out
                   </a>
                 </li>

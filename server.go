@@ -78,6 +78,7 @@ func main() {
 	http.HandleFunc("/register", handleRegistration)
 	http.HandleFunc("/login", handleLogin)
 	http.HandleFunc("/post", postHandler)
+	http.HandleFunc("/logout", Logout)
 	// http.HandleFunc("/feed", handleFeed) // Add the /feed route
 
 	fmt.Println("Server started on http://localhost:8000")
@@ -371,6 +372,7 @@ func DeleteSession(w http.ResponseWriter, cookieValue string) error {
 	//if cookieName is not found in 'Sessions' db table return err = nil
 	if err := db.QueryRow("SELECT cookieName FROM Sessions WHERE cookieValue = ?", cookieValue).Scan(&cookieName); err != nil {
 		fmt.Println("there was an error selecting ", cookieValue)
+		fmt.Println("the error: ",err.Error())
 		return nil
 	}
 	//removing cookie from browser
@@ -459,8 +461,8 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("cookie value after unmarshal: ", string(cookieStringAfter))
 		//delete corresponding row in 'Sessions' table
 		//and delete cookie in browser
-		userName := GetUserByCookie(string(cooky.Value))
-		fmt.Print("the user", userName.id)
+		//userName := GetUserByCookie(string(cooky.Value))
+		//fmt.Print("the user", userName.id)
 		DeleteSession(w, string(cooky.Value))
 
 	}

@@ -1,12 +1,16 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+
+import { redirect } from "react-router-dom";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 
 const notyf = new Notyf(); // Create a single instance of Notyf
 
-const handleLogout = ({onLogout})  => {
-    Event.preventDefault(); // Prevent default form submission
+
+
+const handleLogout = (event, setAuthToFalse)  => {
+    
+     event.preventDefault(); 
 
 //remove cookie from browser when logout
 //function LogoutDeleteCookie(){
@@ -31,6 +35,8 @@ fetch("/logout", configLogout)
   console.log(response);
   if (response.status == 200) {
     console.log("successful logout");
+    setAuthToFalse();
+    redirect("/")
 
   } else {
     console.log("unccessful logout");
