@@ -39,7 +39,7 @@ fetch("/logout", configLogout)
     redirect("/")
 
   } else {
-    console.log("unccessful logout");
+    console.log("unsuccessful logout");
 
   }
 })

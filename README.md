@@ -1,3 +1,24 @@
+Modularization source by Ricky Adriell: https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html
+
+# After downloading this project locally, in VSC terminal run:
+ 
+1. To install node files and create the package-lock.json and package.json files:
+npm install react scripts
+
+2. To run the GO back-end server:
+go run server.go
+
+3. To run the React front-end server, in a separate VSC terminal window type:
+npm start
+
+# To delete the back-end server, in VSC terminal run:
+1. To print you PID of process bound on e.g. port 8000:
+8000/tcp
+
+2. To kill port 8000:
+fuser -k 8000/tcp
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
