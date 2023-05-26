@@ -130,6 +130,7 @@ func main() {
 	http.HandleFunc("/", reactHandler)
 	http.HandleFunc("/register", newService.HandleRegistration)
 	http.HandleFunc("/login", newService.HandleLogin)
+	http.HandleFunc("/logout", newService.HandleLogout)
 	http.HandleFunc("/checkCookie", checkCookieHandler)
 	// http.HandleFunc("/feed", handleFeed) // Add the /feed route
 

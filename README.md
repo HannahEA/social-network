@@ -3,12 +3,15 @@ Modularization source by Ricky Adriell: https://pace.dev/blog/2018/05/09/how-I-w
 # After downloading this project locally, in VSC terminal run:
 
 1. To install node files and create the package-lock.json and package.json files:
+   cd frontend
    npm install react scripts
 
 2. To run the GO back-end server:
+   cd backend
    go run server.go
 
 3. To run the React front-end server, in a separate VSC terminal window type:
+   cd frontend
    npm start
 
 # To delete the back-end server, in VSC terminal run:

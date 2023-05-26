@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
@@ -45,10 +45,6 @@ const LoginPage = ({ onLogin }) => {
           // Display a success notification
           notyf.success("Login successful");
 
-          // Store the session cookie
-          console.log("Session Token:", data.sessionToken); // Check the session token value
-          document.cookie = `user_session=${data.sessionToken}`;
-
           // Update the authentication state in the parent component
           onLogin();
 
@@ -63,41 +59,6 @@ const LoginPage = ({ onLogin }) => {
         console.error("Error:", error);
       });
   };
-
-  const checkCookie = () => {
-    // Check if the user has a session cookie
-    const sessionCookie = document.cookie.replace(/(?:(?:^|.*;\s*)user_session\s*\=\s*([^;]*).*$)|^.*$/, "$1").trim();
-
-    // Make an API call to validate the session cookie
-    fetch("/checkCookie", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "same-origin", // Include cookies in the request
-      body: JSON.stringify({ cookie: sessionCookie }), // Update key to 'cookie'
-    })
-      .then((response) => response.text()) // Parse the response as text
-      .then((data) => {
-        if (data === "Cookie is found") {
-          console.log(data);
-          // Session cookie is valid, allow access to /feed
-          onLogin();
-          navigate("/feed");
-        } else {
-          // Session cookie is not valid, redirect to /login
-          navigate("/login");
-        }
-      })
-      .catch((error) => {
-        // Handle any errors
-        console.error("Error:", error);
-      });
-  };
-
-  useEffect(() => {
-    checkCookie(); // Check session cookie on component mount
-  }, []);
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">

@@ -40,3 +40,10 @@ type LoginData struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type Post struct {
+	Title      string `json:"title"`
+	Content    string `json:"content"`
+	Visibility string `json:"visibility"`
+	PostType   string `json:"type"`
+}

@@ -46,6 +46,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
     "tailwindcss": "^3.3.2"
   }
 }

@@ -10,12 +10,17 @@ type MovieService interface {
 	HandleRegistration(w http.ResponseWriter, r *http.Request)
 	checkEmailHandler(w http.ResponseWriter, r *http.Request)
 	HandleLogin(w http.ResponseWriter, r *http.Request)
+	HandleLogout(w http.ResponseWriter, r *http.Request)
 	HandleSession(w http.ResponseWriter, r *http.Request)
 	// checkCookieHandler(w http.ResponseWriter, r *http.Request)
 }
 type movieService struct {
 	repo MovieRepository
 }
+//HS: I think it should look like this:
+// func NewService(repo MovieRepository) *movieService {
+// 	return &movieService{repo}
+// }
 
 func NewService(repo MovieRepository) MovieService {
 	return &movieService{repo}
@@ -38,6 +43,7 @@ type MovieRepository interface {
 }
 type movieRepository struct {
 	db *sql.DB
+	
 }
 
 func NewRepository(db *sql.DB) MovieRepository {
