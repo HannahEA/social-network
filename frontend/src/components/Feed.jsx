@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { SubmitPost, Tags } from "./feed/Posts";
 import handleLogout from "./feed/Logout";
 import { useNavigate, Link } from "react-router-dom";
+import { Notyf } from "notyf";
 
 const Feed = ({ onLogout }) => {
   const [email, setEmail] = useState("");
@@ -10,6 +11,7 @@ const Feed = ({ onLogout }) => {
   const [Visibility, setVisibility] = useState("");
   const [Tag, setTag] = useState("");
   const navigate = useNavigate();
+  const notyf = new Notyf();
 
   // const logoutUser = (event) => {
   //   event.preventDefault();
@@ -52,6 +54,9 @@ const Feed = ({ onLogout }) => {
 
           // Remove the cookie from the client-side
           document.cookie = "user_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+          // Notify the user
+          notyf.success("Logout successful");
 
           // Redirect to the login page
           navigate("/login");
