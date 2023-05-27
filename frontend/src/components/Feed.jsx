@@ -1,43 +1,75 @@
 import React, { useEffect, useState } from "react";
-import {SubmitPost, Tags} from "./feed/Posts";
+import { SubmitPost, Tags } from "./feed/Posts";
 import handleLogout from "./feed/Logout";
+import { useNavigate, Link } from "react-router-dom";
 
 const Feed = ({ onLogout }) => {
   const [email, setEmail] = useState("");
   const [Title, setTitle] = useState("");
   const [Content, setContent] = useState("");
-  const [Visibility, setVisibility] = useState("")
-  const [Tag, setTag] = useState("")
+  const [Visibility, setVisibility] = useState("");
+  const [Tag, setTag] = useState("");
+  const navigate = useNavigate();
+
+  // const logoutUser = (event) => {
+  //   event.preventDefault();
+  //   console.log("Logout button clicked");
+
+  //   // Perform any logout logic
+
+  //   // Use useNavigate to redirect the user to the "/" route
+  //   const navigate = useNavigate();
+  //   navigate("/");
+  // };
+
+  const deleteCookie = () => {
+    fetch("/deleteCookie")
+      .then((response) => response.text())
+      .then((data) => {
+        // Handle the response from the server
+        console.log("Sending cookie to be deleted:", data);
+
+        // Redirect to the feed page if the cookie is found
+        if (data === "Cookie is deleted") {
+          console.log("Cookie is deleted");
+          navigate("/login");
+        } else {
+          console.log("Cookie is not deleted");
+        }
+      })
+      .catch((error) => {
+        // Handle any errors
+        console.error("Error:", error);
+      });
+  };
 
   //set New Post Constants
   const handleTitle = (event) => {
-    setTitle(event.target.value)
+    setTitle(event.target.value);
   };
   const handleContent = (event) => {
-    setContent(event.target.value)
+    setContent(event.target.value);
   };
   const handleVisibility = (event) => {
-    setVisibility(event.target.value)
+    setVisibility(event.target.value);
   };
   const handleTag = (event) => {
-    setTag(event.target.value)
-  }
+    setTag(event.target.value);
+  };
   // on new post form submission, handle in post file
   const submitPost = (event) => {
     event.preventDefault();
-    let e = document.getElementById("Visibility")
-    let v = e.options[e.selectedIndex].text
-    SubmitPost({title: Title, content: Content, visibility: v})
-  }
+    let e = document.getElementById("Visibility");
+    let v = e.options[e.selectedIndex].text;
+    SubmitPost({ title: Title, content: Content, visibility: v });
+  };
   const addTag = (event) => {
     event.preventDefault();
-    
-      console.log('adding tag');
-      console.log(Tag)
-      return Tags({tag:Tag})
-    
-  }
-  
+
+    console.log("adding tag");
+    console.log(Tag);
+    return Tags({ tag: Tag });
+  };
 
   useEffect(() => {
     const handleClick = () => {
@@ -607,10 +639,12 @@ const Feed = ({ onLogout }) => {
                 </li>
               </ul>
               <ul className="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
-                <li onClick= {event => {handleLogout(event, onLogout)}}>
-                  <a href="/"  className="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                    Sign out
-                  </a>
+                <li
+                  onClick={(event) => {
+                    deleteCookie();
+                  }}
+                >
+                  <a className="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
                 </li>
               </ul>
             </div>
@@ -1111,30 +1145,36 @@ const Feed = ({ onLogout }) => {
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
         </div>
-        <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4" >
-        <div className="flex justify-left items-left flex-col">
-                <h3>Upadate Feed</h3>
-                <p>Title</p>
-                <input type="text" value= {Title} onChange={handleTitle} />
-                <form onSubmit={addTag}>
-                <p>Tags</p>
-                <input type="text" id="postTags" value={Tag} onChange={handleTag} className="m-5"/>
-                <button type="submit" value="Add Tag"> Add Tag</button>
-                </form>
-                <form onSubmit={submitPost}>
+        <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4">
+          <div className="flex justify-left items-left flex-col">
+            <h3>Upadate Feed</h3>
+            <p>Title</p>
+            <input type="text" value={Title} onChange={handleTitle} />
+            <form onSubmit={addTag}>
+              <p>Tags</p>
+              <input type="text" id="postTags" value={Tag} onChange={handleTag} className="m-5" />
+              <button type="submit" value="Add Tag">
+                {" "}
+                Add Tag
+              </button>
+            </form>
+            <form onSubmit={submitPost}>
               <div className="flex justify-right items-right flex-col">
-              <p>Content</p>
-              <textarea name="postContent" id="postContent" cols="20" rows="6" value={Content} onChange= {handleContent}></textarea>
+                <p>Content</p>
+                <textarea name="postContent" id="postContent" cols="20" rows="6" value={Content} onChange={handleContent}></textarea>
               </div>
               <select name="Visibility" id="Visibility" onChange={handleVisibility}>
-                <option name="public" value ={Visibility}>Public</option>
-                <option name="private"value={Visibility}>Private</option>
+                <option name="public" value={Visibility}>
+                  Public
+                </option>
+                <option name="private" value={Visibility}>
+                  Private
+                </option>
               </select>
               <br />
-              <button type="submit" >Post</button>
-                </form>
-              
-            </div>
+              <button type="submit">Post</button>
+            </form>
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
@@ -9,6 +9,11 @@ const LoginPage = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check the cookie value on page load
+    checkCookie();
+  }, []);
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
@@ -48,10 +53,32 @@ const LoginPage = ({ onLogin }) => {
           // Update the authentication state in the parent component
           onLogin();
 
+          // Check the cookie value
+          checkCookie();
+
           // Redirect to the feed page instead of home
           navigate("/feed");
         } else if (data.message === "Invalid credentials") {
           notyf.error("Invalid credentials");
+        }
+      })
+      .catch((error) => {
+        // Handle any errors
+        console.error("Error:", error);
+      });
+  };
+
+  const checkCookie = () => {
+    fetch("/checkCookie")
+      .then((response) => response.text())
+      .then((data) => {
+        // Handle the response from the server
+        console.log("Cookie check:", data);
+
+        // Redirect to the feed page if the cookie is found
+        if (data === "Cookie is found") {
+          console.log("Cookie is found");
+          navigate("/feed");
         }
       })
       .catch((error) => {

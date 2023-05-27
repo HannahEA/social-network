@@ -132,10 +132,62 @@ func main() {
 	http.HandleFunc("/login", newService.HandleLogin)
 	http.HandleFunc("/logout", newService.HandleLogout)
 	http.HandleFunc("/checkCookie", checkCookieHandler)
+	http.HandleFunc("/deleteCookie", deleteCookie)
 	// http.HandleFunc("/feed", handleFeed) // Add the /feed route
 
 	fmt.Println("Server started on http://localhost:8000")
 	log.Fatal(http.ListenAndServe(":8000", nil))
+}
+
+
+func deleteCookie(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("delete cookie function called")
+
+	// Retrieve the cookie value from the request
+	cookie, err := r.Cookie("user_session")
+	if err != nil {
+		fmt.Fprint(w, "No cookie provided by the client")
+		return
+	}
+
+	// Get the cookie value
+	cookieValue := cookie.Value
+
+	fmt.Println("Cookie to be deleted:", cookieValue)
+
+	// Open the SQLite3 database connection
+	db, err := sql.Open("sqlite3", "database.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// Prepare the SQL statement to delete the cookie value from the Sessions table
+	stmt, err := db.Prepare("DELETE FROM Sessions WHERE cookieValue = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Execute the SQL statement to delete the cookie value
+	result, err := stmt.Exec(cookieValue)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Check the affected rows count
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Return the result based on the affected rows count
+	if rowsAffected > 0 {
+		// Cookie is deleted
+		fmt.Fprint(w, "Cookie is deleted")
+	} else {
+		// Cookie is not found or not deleted
+		fmt.Fprint(w, "Cookie is not found or not deleted")
+	}
 }
 
 
