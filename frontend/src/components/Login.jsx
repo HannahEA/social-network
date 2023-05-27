@@ -5,7 +5,7 @@ import "notyf/notyf.min.css";
 
 const notyf = new Notyf(); // Create a single instance of Notyf
 
-const LoginPage = ({ onLogin }) => {
+const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -50,14 +50,8 @@ const LoginPage = ({ onLogin }) => {
           // Display a success notification
           notyf.success("Login successful");
 
-          // Update the authentication state in the parent component
-          onLogin();
-
           // Check the cookie value
           checkCookie();
-
-          // Redirect to the feed page instead of home
-          navigate("/feed");
         } else if (data.message === "Invalid credentials") {
           notyf.error("Invalid credentials");
         }
@@ -77,8 +71,11 @@ const LoginPage = ({ onLogin }) => {
 
         // Redirect to the feed page if the cookie is found
         if (data === "Cookie is found") {
-          console.log("Cookie is found");
+          console.log("Cookie is found, redirecting to feed");
           navigate("/feed");
+        } else {
+          // console.log("Cookie is not found, redirecting to home");
+          // navigate("/");
         }
       })
       .catch((error) => {

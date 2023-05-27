@@ -23,7 +23,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home onLogout={handleLogout} />} />
         <Route path="/register" element={<Registration />} />
-        <Route path="/login" element={authenticated ? <Navigate to="/feed" /> : <Login onLogin={handleLogin} />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/feed" element={<Feed />} />
       </Routes>
     </Router>

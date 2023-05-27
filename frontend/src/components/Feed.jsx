@@ -22,6 +22,23 @@ const Feed = ({ onLogout }) => {
   //   navigate("/");
   // };
 
+  const verifyCookie = () => {
+    fetch("/checkCookie")
+      .then((response) => response.text())
+      .then((data) => {
+        // Redirect user to login page if cookie not found
+        if (data !== "Cookie is found") {
+          console.log(data);
+          console.log("Cookie is not found, redirecting to login");
+          navigate("/");
+        }
+      })
+      .catch((error) => {
+        // Handle any errors
+        console.error("Error:", error);
+      });
+  };
+
   const deleteCookie = () => {
     fetch("/deleteCookie")
       .then((response) => response.text())
@@ -31,7 +48,12 @@ const Feed = ({ onLogout }) => {
 
         // Redirect to the feed page if the cookie is found
         if (data === "Cookie is deleted") {
-          console.log("Cookie is deleted");
+          console.log("Cookie is deleted from server");
+
+          // Remove the cookie from the client-side
+          document.cookie = "user_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+          // Redirect to the login page
           navigate("/login");
         } else {
           console.log("Cookie is not deleted");
@@ -72,6 +94,8 @@ const Feed = ({ onLogout }) => {
   };
 
   useEffect(() => {
+    verifyCookie();
+
     const handleClick = () => {
       const dropdown = document.querySelector("#dropdown");
 
