@@ -42,23 +42,20 @@ const LoginPage = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        // Handle the response from the server
-        console.log(data);
-
         // Check if the login was successful
         if (data.message === "Login successful") {
           // Display a success notification
           notyf.success("Login successful");
-
           // Check the cookie value
           checkCookie();
-        } else if (data.message === "Invalid credentials") {
-          notyf.error("Invalid credentials");
+        } else if (data.message === "Login unsuccessful") {
+          notyf.error("Incorrect email or password");
         }
       })
       .catch((error) => {
         // Handle any errors
         console.error("Error:", error);
+        console.log("Error:", error);
       });
   };
 

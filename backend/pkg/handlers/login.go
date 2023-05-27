@@ -24,7 +24,16 @@ func (service *movieService) HandleLogin(w http.ResponseWriter, r *http.Request)
 	valid, err := service.repo.ValidateLogin(data.Email, data.Password)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Failed to process login", http.StatusInternalServerError)
+		response := map[string]interface{}{
+			"message": "Login unsuccessful",
+		}
+		w.Header().Set("Content-Type", "application/json")
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
