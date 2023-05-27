@@ -90,9 +90,11 @@ func (service *movieService) HandleLogin(w http.ResponseWriter, r *http.Request)
 			return
 		}
 	} else {
-		response := map[string]string{"message": "Invalid credentials"}
+		response := map[string]interface{}{
+			"message": "Login unsuccessful",
+			"email":   data.Email,
+		}
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnauthorized)
 		err := json.NewEncoder(w).Encode(response)
 		if err != nil {
 			log.Println(err)
