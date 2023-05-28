@@ -69,7 +69,7 @@ const LoginPage = () => {
         // Redirect to the feed page if the cookie is found
         if (data === "Cookie is found") {
           console.log("Cookie is found, redirecting to feed");
-          navigate("/feed");
+          navigate("/feed", { state: { email: email } });
         } else {
           // console.log("Cookie is not found, redirecting to home");
           // navigate("/");

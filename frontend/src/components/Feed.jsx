@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { SubmitPost, Tags } from "./feed/Posts";
 import handleLogout from "./feed/Logout";
 import { useNavigate, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
 
-const Feed = ({ onLogout }) => {
-  const [email, setEmail] = useState("");
+const Feed = () => {
+  const location = useLocation();
+  const email = location.state?.email || ""; // Access the passed email
   const [Title, setTitle] = useState("");
   const [Content, setContent] = useState("");
   const [Visibility, setVisibility] = useState("");
@@ -610,7 +612,7 @@ const Feed = ({ onLogout }) => {
             >
               <div className="py-3 px-4">
                 <span className="block text-sm font-semibold text-gray-900 dark:text-white">First Last</span>
-                <span className="block text-sm text-gray-900 truncate dark:text-white">test@test.com</span>
+                <span className="block text-sm text-gray-900 truncate dark:text-white">{email}</span>
               </div>
               <ul className="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
                 <li>
@@ -1200,9 +1202,9 @@ const Feed = ({ onLogout }) => {
               alt="user photo"
             />
             <div className="flex justify-center items-center flex-col">
-              <p>Email: {email}</p>
               <p>Followers: 0</p>
               <p>Posts: 0</p>
+              <p>Email: {email}</p>
             </div>
           </div>
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
