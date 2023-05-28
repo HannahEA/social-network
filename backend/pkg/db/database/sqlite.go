@@ -42,7 +42,7 @@ func CreateDatabase() *sql.DB {
 	// Create Images table if none exists
 	_, err = sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS Images (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		filename TEXT NOT NULL,
+		username TEXT NOT NULL,
 		data BLOB NOT NULL
 	);`)
 

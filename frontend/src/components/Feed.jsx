@@ -14,17 +14,6 @@ const Feed = () => {
   const [Tag, setTag] = useState("");
   const navigate = useNavigate();
   const notyf = new Notyf();
-
-  // const logoutUser = (event) => {
-  //   event.preventDefault();
-  //   console.log("Logout button clicked");
-
-  //   // Perform any logout logic
-
-  //   // Use useNavigate to redirect the user to the "/" route
-  //   const navigate = useNavigate();
-  //   navigate("/");
-  // };
   const [avatar, setAvatar] = useState(null);
 
   const handleAvatarChange = (event) => {
@@ -32,14 +21,15 @@ const Feed = () => {
   };
 
   const uploadAvatar = (event) => {
-    event.preventDefault(); // Prevent default form submission
+    event.preventDefault();
 
-    // Create a new FormData object
     const formData = new FormData();
     formData.append("profilePicture", avatar);
+    const email = location.state?.email || ""; // Access the passed email
+    const username = "test"; // Replace with the desired username
 
-    // Make a POST request to the server
-    fetch("/uploadAvatar", {
+    // Make a POST request to the server with the username as a query parameter
+    fetch(`/uploadAvatar?username=${username}`, {
       method: "POST",
       body: formData,
     })
@@ -48,7 +38,6 @@ const Feed = () => {
         notyf.success("Profile picture uploaded successfully");
       })
       .catch((error) => {
-        // Handle any errors
         console.log("Error:", error);
       });
   };

@@ -40,6 +40,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
 
+// http://localhost:8000/image?id=1
 func handleImage(w http.ResponseWriter, r *http.Request) {
 	// Get the image ID from the URL parameter
 	imageID := r.URL.Query().Get("id")
@@ -56,7 +57,7 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Query the database to retrieve the image data
-	var filename string
+	var username string
 	var imageData []byte
 
 	// Open the SQLite database connection
@@ -66,20 +67,20 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	err = db.QueryRow("SELECT filename, data FROM Images WHERE id = ?", id).Scan(&filename, &imageData)
+	err = db.QueryRow("SELECT username, data FROM Images WHERE id = ?", id).Scan(&username, &imageData)
 	if err != nil {
 		http.Error(w, "Failed to retrieve image data", http.StatusInternalServerError)
 		return
 	}
 
 	// Set the Content-Type header based on the file extension
-	contentType := mime.TypeByExtension(filepath.Ext(filename))
+	contentType := mime.TypeByExtension(filepath.Ext(username))
 	if contentType == "" {
 		contentType = "application/octet-stream"
 	}
 
 	// Set the Content-Disposition header to force the browser to download the image
-	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; username="%s"`, username))
 	w.Header().Set("Content-Type", contentType)
 
 	// Write the image data to the response
@@ -91,7 +92,7 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 }
 
 
-func insertImageIntoDB(filename string, imageData []byte) error {
+func insertImageIntoDB(username string, imageData []byte) error {
 	// Open the SQLite database connection
 	db, err := sql.Open("sqlite3", "database.db")
 	if err != nil {
@@ -100,14 +101,14 @@ func insertImageIntoDB(filename string, imageData []byte) error {
 	defer db.Close()
 
 	// Prepare the SQL statement to insert the image into the table
-	stmt, err := db.Prepare("INSERT INTO Images (filename, data) VALUES (?, ?)")
+	stmt, err := db.Prepare("INSERT INTO Images (username, data) VALUES (?, ?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	// Execute the SQL statement with the filename and image data
-	_, err = stmt.Exec(filename, imageData)
+	// Execute the SQL statement with the username and image data
+	_, err = stmt.Exec(username, imageData)
 	if err != nil {
 		return err
 	}
@@ -118,7 +119,7 @@ func insertImageIntoDB(filename string, imageData []byte) error {
 
 func handleProfilePictureUpload(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the uploaded file from the form data
-	file, handler, err := r.FormFile("profilePicture")
+	file, _, err := r.FormFile("profilePicture")
 	if err != nil {
 		http.Error(w, "Failed to retrieve file from form data", http.StatusBadRequest)
 		return
@@ -132,11 +133,15 @@ func handleProfilePictureUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Generate a unique filename for the uploaded file
-	filename := generateUniqueFilename(handler.Filename)
+	// Get the username from the query parameter
+	username := r.URL.Query().Get("username")
+	if username == "" {
+		http.Error(w, "username is required", http.StatusBadRequest)
+		return
+	}
 
 	// Insert the image into the database
-	err = insertImageIntoDB(filename, fileData)
+	err = insertImageIntoDB(username, fileData)
 	if err != nil {
 		http.Error(w, "Failed to insert image into database", http.StatusInternalServerError)
 		return
@@ -145,7 +150,7 @@ func handleProfilePictureUpload(w http.ResponseWriter, r *http.Request) {
 	// Return a success response
 	response := map[string]interface{}{
 		"message":  "Image uploaded successfully",
-		"filename": filename,
+		"username": username,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(response)
@@ -155,19 +160,19 @@ func handleProfilePictureUpload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func generateUniqueFilename(originalFilename string) string {
-	// Generate a unique filename using a combination of original filename and current timestamp
+
+
+func generateUniqueusername(originalusername string) string {
+	// Generate a unique username using a combination of original username and current timestamp
 	timestamp := time.Now().UnixNano()
-	ext := filepath.Ext(originalFilename)
-	filename := fmt.Sprintf("%d%s", timestamp, ext)
-	return filename
+	ext := filepath.Ext(originalusername)
+	username := fmt.Sprintf("%d%s", timestamp, ext)
+	return username
 }
 
 
 
 func deleteCookie(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("delete cookie function called")
-
 	// Retrieve the cookie value from the request
 	cookie, err := r.Cookie("user_session")
 	if err != nil {
@@ -177,8 +182,6 @@ func deleteCookie(w http.ResponseWriter, r *http.Request) {
 
 	// Get the cookie value
 	cookieValue := cookie.Value
-
-	fmt.Println("Cookie to be deleted:", cookieValue)
 
 	// Open the SQLite3 database connection
 	db, err := sql.Open("sqlite3", "database.db")
@@ -218,7 +221,6 @@ func deleteCookie(w http.ResponseWriter, r *http.Request) {
 
 // checkCookieHandler handles the "/checkCookie" endpoint
 func checkCookieHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("cookie function called")
 
 	// Retrieve the cookie value from the request
 	cookie, err := r.Cookie("user_session")
@@ -230,8 +232,6 @@ func checkCookieHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get the cookie value
 	cookieValue := cookie.Value
-
-	fmt.Println("cookie received:", cookieValue)
 
 	// Open the SQLite3 database connection
 	db, err := sql.Open("sqlite3", "database.db")
@@ -263,32 +263,6 @@ func checkCookieHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//==>moved to handlers/register.go
-// func IsEmailTaken(email string) bool {
-// 	var count int
-// 	err := db.QueryRow("SELECT COUNT(*) FROM Users WHERE email = ?", email).Scan(&count)
-// 	if err != nil {
-// 		fmt.Println("IsEmailTaken: Failed to access user database")
-// 		log.Println(err)
-// 		return false
-// 	}
-// 	return count > 0
-// }
-
-// func RegisterUser(email, password string) error {
-// 	if IsEmailTaken(email) {
-// 		return fmt.Errorf("email already taken")
-// 	}
-
-// 	_, err := db.Exec("INSERT INTO Users (email, password) VALUES (?, ?)", email, password)
-// 	if err != nil {
-// 		log.Println(err)
-// 		return fmt.Errorf("failed to register user")
-// 	}
-
-// 	return nil
-// }
-
 func reactHandler(w http.ResponseWriter, r *http.Request) {
 	http.FileServer(http.Dir("build")).ServeHTTP(w, r)
 }
@@ -298,17 +272,3 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("build/index.html"))
 	tmpl.Execute(w, nil)
 }
-
-//==>moved to handlers/register.go
-// func checkEmailHandler(w http.ResponseWriter, r *http.Request) {
-// 	email := r.URL.Query().Get("email")
-
-// 	if IsEmailTaken(email) {
-// 		w.WriteHeader(http.StatusConflict)
-// 		fmt.Fprint(w, "Email already taken")
-// 		return
-// 	}
-
-// 	w.WriteHeader(http.StatusOK)
-// 	fmt.Fprint(w, "Email available")
-// }

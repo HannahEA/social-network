@@ -58,7 +58,6 @@ func (service *movieService) HandleLogin(w http.ResponseWriter, r *http.Request)
 
 		// storing the cookie values in struct
 		user_session := Cookie{cookieNm, sessionToken, expiresAt}
-		fmt.Println("Values in 'Cookie' struct :", user_session)
 
 		// var uID int
 		userId, err3 := service.repo.ReturnId(data.Email)
@@ -75,8 +74,6 @@ func (service *movieService) HandleLogin(w http.ResponseWriter, r *http.Request)
 			fmt.Println("err4 with inserting session:", err4)
 			return
 		}
-		fmt.Println("PASSWORD IS CORRECT")
-		fmt.Println("User successfully logged in")
 
 		response := map[string]interface{}{
 			"message": "Login successful",
@@ -132,9 +129,6 @@ func (repo *movieRepository) ValidateLogin(email, password string) (bool, error)
 
 	// compare the hash value of user supplied pw with hash stored in db
 	comparePass := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-
-	fmt.Println("output of compare 'passwordhash' with user's pw: ", comparePass)
-	fmt.Println("'passwordhash' and 'hash': ", []byte(password), []byte(hash))
 
 	// comparePass returns nil on success
 	if comparePass != nil {
