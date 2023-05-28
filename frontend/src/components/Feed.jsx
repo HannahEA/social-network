@@ -23,6 +23,33 @@ const Feed = ({ onLogout }) => {
   //   const navigate = useNavigate();
   //   navigate("/");
   // };
+  const [avatar, setAvatar] = useState(null);
+
+  const handleAvatarChange = (event) => {
+    setAvatar(event.target.files[0]);
+  };
+
+  const uploadAvatar = (event) => {
+    event.preventDefault(); // Prevent default form submission
+
+    // Create a new FormData object
+    const formData = new FormData();
+    formData.append("profilePicture", avatar);
+
+    // Make a POST request to the server
+    fetch("/uploadAvatar", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        notyf.success("Profile picture uploaded successfully");
+      })
+      .catch((error) => {
+        // Handle any errors
+        console.log("Error:", error);
+      });
+  };
 
   const verifyCookie = () => {
     fetch("/checkCookie")
@@ -1157,6 +1184,14 @@ const Feed = ({ onLogout }) => {
         </div>
       </aside>
       <main className="p-4 md:ml-64 h-auto pt-20">
+        <h1>Profile Picture Upload</h1>
+        <form id="uploadForm" encType="multipart/form-data">
+          <input type="file" accept="image/*" onChange={handleAvatarChange} />
+          <button type="submit" onClick={uploadAvatar}>
+            Upload
+          </button>
+        </form>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div className="profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img

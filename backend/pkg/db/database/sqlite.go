@@ -25,6 +25,34 @@ func CreateDatabase() *sql.DB {
 		log.Fatal(err.Error())
 	}
 
+	// Create Profile table if none exists
+	_, err = sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "Profile" (
+		"userID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		"nickName" TEXT,
+		filename TEXT,
+		image BLOB,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		);`)
+
+	if err != nil {
+		fmt.Print("Profile table not built")
+		log.Fatal(err.Error())
+	}
+
+	// Create Images table if none exists
+	_, err = sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS Images (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		filename TEXT NOT NULL,
+		data BLOB NOT NULL
+	);`)
+
+	if err != nil {
+		fmt.Println("Failed to create Images table:", err.Error())
+		log.Fatal(err.Error())
+	}
+
+		
+
 	// Create the Users table if it doesn't exist
 	//"passwordhash" BLOB NOT NULL
 	_, err0 := sqliteDatabase.Exec(`
@@ -186,21 +214,21 @@ func CreateDatabase() *sql.DB {
 		log.Fatal(err8.Error())
 	}
 
-	_, err9 := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS Profile (
-							"userID" INTEGER,
-							"postID" INTEGER,
-							"followerID" INTEGER,
-							"influencerID" INTEGER,
-							FOREIGN KEY(followerID)REFERENCES Followers(followerID),
-							FOREIGN KEY(postID)REFERENCES Posts(postID),
-							FOREIGN KEY(userID)REFERENCES Users(id)
-							);
-							`)
+	// _, err9 := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS Profile (
+	// 						"userID" INTEGER,
+	// 						"postID" INTEGER,
+	// 						"followerID" INTEGER,
+	// 						"influencerID" INTEGER,
+	// 						FOREIGN KEY(followerID)REFERENCES Followers(followerID),
+	// 						FOREIGN KEY(postID)REFERENCES Posts(postID),
+	// 						FOREIGN KEY(userID)REFERENCES Users(id)
+	// 						);
+	// 						`)
 
-	if err9 != nil {
-		fmt.Print("Profile table not built")
-		log.Fatal(err9.Error())
-	}
+	// if err9 != nil {
+	// 	fmt.Print("Profile table not built")
+	// 	log.Fatal(err9.Error())
+	// }
 	//Database = sqliteDatabase
 	return sqliteDatabase
 	//return Database

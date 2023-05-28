@@ -47,3 +47,10 @@ type Post struct {
 	Visibility string `json:"visibility"`
 	PostType   string `json:"type"`
 }
+
+// type Profile struct {
+// 	FirstName string `json:"FirstName"`
+// 	LastName  string `json:"LastName"`
+// 	Username string `json:"Username"`
+// 	Avatar	string `json:"Avatar"`
+// }
