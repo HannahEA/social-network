@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (service *movieService) HandleRegistration(w http.ResponseWriter, r *http.Request) {
+func (service *AllDbMethodsWrapper) HandleRegistration(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body into a RegistrationData struct
 	var data RegistrationData
 	err := json.NewDecoder(r.Body).Decode(&data)
@@ -44,7 +44,7 @@ func (service *movieService) HandleRegistration(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(response)
 }
 
-func (r *movieRepository) IsEmailTaken(email string) bool {
+func (r *dbStruct) IsEmailTaken(email string) bool {
 	var count int
 	err := r.db.QueryRow("SELECT COUNT(*) FROM Users WHERE email = ?", email).Scan(&count)
 	if err != nil {
@@ -55,7 +55,7 @@ func (r *movieRepository) IsEmailTaken(email string) bool {
 	return count > 0
 }
 
-func (repo *movieRepository) RegisterUser(email, password string) error {
+func (repo *dbStruct) RegisterUser(email, password string) error {
 	if repo.IsEmailTaken(email) {
 		return fmt.Errorf("email already taken")
 	}
@@ -78,7 +78,7 @@ func (repo *movieRepository) RegisterUser(email, password string) error {
 }
 
 // Not being used:
-func (service *movieService) checkEmailHandler(w http.ResponseWriter, r *http.Request) {
+func (service *AllDbMethodsWrapper) checkEmailHandler(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 
 	if service.repo.IsEmailTaken(email) {

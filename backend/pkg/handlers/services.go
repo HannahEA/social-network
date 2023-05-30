@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 // To group all backend handlers
-type MovieService interface {
+type AllHandlersMethods interface {
 	// IsEmailTaken(email string) bool
 	HandleRegistration(w http.ResponseWriter, r *http.Request)
 	checkEmailHandler(w http.ResponseWriter, r *http.Request)
@@ -15,19 +15,19 @@ type MovieService interface {
 	PostHandler(w http.ResponseWriter, r *http.Request)
 	// checkCookieHandler(w http.ResponseWriter, r *http.Request)
 }
-// A wrapper for 'MovieRepository' that groups all database methods.
-type movieService struct {
-	repo MovieRepository
+// A wrapper for 'AllDbMethods' that groups all database methods.
+type AllDbMethodsWrapper struct {
+	repo AllDbMethods
 }
 
 
-//Receive a group of database methods (= MovieRepository) and returns a new database methods wrapper
-func NewService(repo MovieRepository) MovieService {
-	return &movieService{repo}
+//Receives a group of database methods (= AllDbMethods) and returns a new database methods wrapper
+func NewService(repo AllDbMethods) AllHandlersMethods {
+	return &AllDbMethodsWrapper{repo}
 }
 
 // To group database methods
-type MovieRepository interface {
+type AllDbMethods interface {
 	IsEmailTaken(email string) bool
 	RegisterUser(email, password string) error
 	ValidateLogin(email, password string) (bool, error)
@@ -45,12 +45,12 @@ type MovieRepository interface {
 	AddPostToDB(data Post) error
 }
 //The dabataseStruct
-type movieRepository struct {
+type dbStruct struct {
 	db *sql.DB
 	
 }
 
 //To instantiate a new database struct
-func NewRepository(db *sql.DB) MovieRepository {
-	return &movieRepository{db}
+func NewDbStruct(db *sql.DB) AllDbMethods {
+	return &dbStruct{db}
 }
