@@ -34,6 +34,7 @@ func main() {
 	http.HandleFunc("/deleteCookie", deleteCookie)
 	http.HandleFunc("/uploadAvatar", handleProfilePictureUpload)
 	http.HandleFunc("/image", handleImage)
+	http.HandleFunc("/post", newService.PostHandler)
 	// http.HandleFunc("/feed", handleFeed) // Add the /feed route
 
 	fmt.Println("Server started on http://localhost:8000")

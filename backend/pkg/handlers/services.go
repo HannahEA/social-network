@@ -12,6 +12,7 @@ type MovieService interface {
 	HandleLogin(w http.ResponseWriter, r *http.Request)
 	HandleLogout(w http.ResponseWriter, r *http.Request)
 	HandleSession(w http.ResponseWriter, r *http.Request)
+	PostHandler(w http.ResponseWriter, r *http.Request)
 	// checkCookieHandler(w http.ResponseWriter, r *http.Request)
 }
 type movieService struct {
@@ -40,6 +41,8 @@ type MovieRepository interface {
 	FindByUserID(UID int64) *User
 	PopulateTheSessionsDB(userID int, cookieName, cookieValue string) error
 	ReturnId(email string) (int, error)
+	//post database queries
+	AddPostToDB(data Post) error
 }
 type movieRepository struct {
 	db *sql.DB
