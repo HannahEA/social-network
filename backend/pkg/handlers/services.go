@@ -8,7 +8,7 @@ import (
 type MovieService interface {
 	// IsEmailTaken(email string) bool
 	HandleRegistration(w http.ResponseWriter, r *http.Request)
-	checkEmailHandler(w http.ResponseWriter, r *http.Request)
+	// checkEmailHandler(w http.ResponseWriter, r *http.Request)
 	HandleLogin(w http.ResponseWriter, r *http.Request)
 	HandleLogout(w http.ResponseWriter, r *http.Request)
 	HandleSession(w http.ResponseWriter, r *http.Request)
@@ -28,8 +28,8 @@ func NewService(repo MovieRepository) MovieService {
 }
 
 type MovieRepository interface {
-	IsEmailTaken(email string) bool
-	RegisterUser(email, password string) error
+	IsEmailNicknameTaken(email string, nickname string) bool
+	RegisterUser(data User) error
 	ValidateLogin(email, password string) (bool, error)
 	GetUserEmail(userId string) (string, error)
 	AddSession(w http.ResponseWriter, sessionName string, user *User)

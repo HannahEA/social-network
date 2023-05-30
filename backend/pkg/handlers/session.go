@@ -15,7 +15,7 @@ func NewSession() *Session {
 }
 
 func (service *movieService) HandleSession(w http.ResponseWriter, r *http.Request) {
-	
+
 }
 
 // Add session cookie to browser
@@ -122,8 +122,8 @@ func (repo *movieRepository) NewUser() *User {
 // Find the user by their ID
 func (repo *movieRepository) FindByUserID(UID int64) *User {
 	u := repo.NewUser()
-	if err := repo.db.QueryRow("SELECT id, firstName, lastName, nickName, age, gender, email, password, Avatar, Image, aboutMe FROM Users WHERE userID = ?", UID).
-		Scan(&u.id, &u.FirstName, &u.LastName, &u.NickName, &u.Age, &u.Gender, &u.Email, &u.Password, &u.Avatar, &u.Image, &u.AboutMe); err != nil {
+	if err := repo.db.QueryRow("SELECT id, firstName, lastName, nickName, age, gender, email, password, aboutMe FROM Users WHERE userID = ?", UID).
+		Scan(&u.id, &u.FirstName, &u.LastName, &u.NickName, &u.Age, &u.Gender, &u.Email, &u.Password, &u.AboutMe); err != nil {
 		fmt.Println("error FindByUserID: ", err)
 		return nil
 	}

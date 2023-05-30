@@ -6,16 +6,15 @@ import (
 
 type User struct {
 	id        int
-	FirstName string   `json:"FirstName"`
-	LastName  string   `json:"LastName"`
-	NickName  string   `json:"NickName"`
-	Age       string   `json:"Age"`
-	Gender    string   `json:"Gender"`
+	FirstName string   `json:"firstName"`
+	LastName  string   `json:"lastName"`
+	NickName  string   `json:"username"`
+	Age       string   `json:"age"`
+	Gender    string   `json:"gender"`
 	Email     string   `json:"email"`
 	Password  string   `json:"passWord"`
-	Avatar    []string `json:"Avatar"`
-	Image     []string `json:"Image"`
-	AboutMe   []string `json:"AboutMe"`
+	Avatar    []string `json:"avatar"`
+	AboutMe   []string `json:"bio"`
 }
 
 // each session contains the username of the user and the time at which it expires

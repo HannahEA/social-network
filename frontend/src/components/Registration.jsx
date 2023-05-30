@@ -60,81 +60,23 @@ const RegistrationPage = () => {
     setBio(event.target.value);
   };
 
-  const handleRegistration = (event) => {
-    event.preventDefault();
-
-    // Create an object with the form data
-    const formData = {
-      email: email,
-      password: password,
-      confirmPassword: confirmPassword,
-    };
-
-    // Make a POST request to the server
-    fetch("/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle the response from the server
-        console.log(data);
-
-        // Check if the registration was successful
-        if (data.message === "Registration successful") {
-          // Display a success notification
-          notyf.success("Registration successful");
-
-          // Reset the form
-          setEmail("");
-          setPassword("");
-          setConfirmPassword("");
-
-          // Redirect to the login page
-          navigate("/login");
-        } else if (data.message === "Email already taken") {
-          notyf.error("Email already taken");
-        } else {
-          notyf.error("Invalid registration");
-        }
-      })
-      .catch((error) => {
-        // Handle any errors
-        console.error("Error:", error);
-      });
-  };
-
-  // NEW UPDATED CODE FOR REGISTRATION
   // const handleRegistration = (event) => {
   //   event.preventDefault();
 
   //   // Create an object with the form data
   //   const formData = {
-  //     firstName: firstName,
-  //     lastName: lastName,
-  //     username: username,
-  //     age: age,
-  //     gender: gender,
   //     email: email,
   //     password: password,
   //     confirmPassword: confirmPassword,
-  //     avatar: avatar,
-  //     bio: bio
   //   };
-
-  //   // Create a FormData object for sending the data as multipart/form-data
-  //   const formDataToSend = new FormData();
-  //   for (const key in formData) {
-  //     formDataToSend.append(key, formData[key]);
-  //   }
-
+  
   //   // Make a POST request to the server
   //   fetch("/register", {
   //     method: "POST",
-  //     body: formDataToSend
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify(formData),
   //   })
   //     .then((response) => response.json())
   //     .then((data) => {
@@ -147,16 +89,9 @@ const RegistrationPage = () => {
   //         notyf.success("Registration successful");
 
   //         // Reset the form
-  //         setFirstName("");
-  //         setLastName("");
-  //         setUsername("");
-  //         setAge("");
-  //         setGender("");
   //         setEmail("");
   //         setPassword("");
   //         setConfirmPassword("");
-  //         setAvatar(null);
-  //         setBio("");
 
   //         // Redirect to the login page
   //         navigate("/login");
@@ -172,17 +107,88 @@ const RegistrationPage = () => {
   //     });
   // };
 
+  //check if password and confirm password match 
+
+  // NEW UPDATED CODE FOR REGISTRATION
+  const handleRegistration = (event) => {
+    event.preventDefault();
+
+    // Create an object with the form data
+    const formData = {
+      firstName: firstName,
+      lastName: lastName,
+      username: username,
+      age: age,
+      gender: gender,
+      email: email,
+      password: password,
+      avatar: {
+        
+      }
+      bio: bio
+    };
+    
+
+    // Create a FormData object for sending the data as multipart/form-data
+    const formDataToSend = new FormData();
+    for (const key in formData) {
+      formDataToSend.append(key, formData[key]);
+    }
+    console.log(formDataToSend)
+    // Make a POST request to the server
+    fetch("/register", {
+      method: "POST",
+      body: formDataToSend
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle the response from the server
+        console.log(data);
+
+        // Check if the registration was successful
+        if (data.message === "Registration successful") {
+          // Display a success notification
+          notyf.success("Registration successful");
+
+          // Reset the form
+          setFirstName("");
+          setLastName("");
+          setUsername("");
+          setAge("");
+          setGender("");
+          setEmail("");
+          setPassword("");
+          setConfirmPassword("");
+          setAvatar(null);
+          setBio("");
+
+          // Redirect to the login page
+          navigate("/login");
+        } else if (data.message === "Email already taken") {
+          notyf.error("Email already taken");
+        } else {
+          notyf.error("Invalid registration");
+        }
+      })
+      .catch((error) => {
+        // Handle any errors
+        console.error("Error:", error);
+      });
+  };
+
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <Link to="/" className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
+      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:auto lg:py-0">
+        <Link to="/" className="flex items-center mb-6 my-10 text-2xl font-semibold text-gray-900 dark:text-white">
           <img className="w-8 h-8 mr-2" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg" alt="logo" />
           Social-Network
         </Link>
-        <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+        <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-3xl max- xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">Create an account</h1>
             <form className="space-y-4 md:space-y-6" onSubmit={handleRegistration}>
+            <div id ="row" className="flex gap-20">
+              <div id = "column1" className="flex-1">
               <div>
                 <label htmlFor="firstName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   First Name
@@ -253,6 +259,8 @@ const RegistrationPage = () => {
                   onChange={handleGenderChange}
                 />
               </div>
+              </div>
+              <div id = "column2" className="flex-1">
               <div>
                 <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Your email
@@ -298,6 +306,8 @@ const RegistrationPage = () => {
                   required
                 />
               </div>
+              </div>
+              <div id = "column3" className="flex-1">
               <div>
                 <label htmlFor="avatar" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Avatar
@@ -305,7 +315,7 @@ const RegistrationPage = () => {
                 <input type="file" name="avatar" id="avatar" accept="image/*" className="hidden" onChange={handleAvatarChange} />
                 <label
                   htmlFor="avatar"
-                  className="flex items-center justify-center w-full px-6 py-3 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  className="flex items-center justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                 >
                   Select Avatar
                 </label>
@@ -327,10 +337,12 @@ const RegistrationPage = () => {
               <div>
                 <button
                   type="submit"
-                  className="flex justify-center w-full px-6 py-3 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  className="flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                 >
                   Register
                 </button>
+              </div>
+              </div>
               </div>
             </form>
             <p className="text-xs text-center text-gray-400">

@@ -12,7 +12,7 @@ import (
 
 func (service *movieService) HandleRegistration(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body into a RegistrationData struct
-	var data RegistrationData
+	var data User
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		fmt.Println("handleRegistratio: jsonDecoder failed")
@@ -21,7 +21,7 @@ func (service *movieService) HandleRegistration(w http.ResponseWriter, r *http.R
 	}
 	fmt.Println("Registration Data recieved: ", data)
 	// Check if the email already exists
-	if service.repo.IsEmailTaken(data.Email) {
+	if service.repo.IsEmailNicknameTaken(data.Email, data.NickName) {
 		fmt.Println("isEmailTaken", data.Email)
 		response := map[string]string{"message": "Email already taken"}
 		w.Header().Set("Content-Type", "application/json")
@@ -31,7 +31,7 @@ func (service *movieService) HandleRegistration(w http.ResponseWriter, r *http.R
 	}
 
 	// Register the user
-	err = service.repo.RegisterUser(data.Email, data.Password)
+	err = service.repo.RegisterUser(data)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Failed to register user", http.StatusInternalServerError)
@@ -44,9 +44,9 @@ func (service *movieService) HandleRegistration(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(response)
 }
 
-func (r *movieRepository) IsEmailTaken(email string) bool {
+func (r *movieRepository) IsEmailNicknameTaken(email string, nickname string) bool {
 	var count int
-	err := r.db.QueryRow("SELECT COUNT(*) FROM Users WHERE email = ?", email).Scan(&count)
+	err := r.db.QueryRow("SELECT COUNT(*) FROM Users WHERE email = ? OR nickName = ?", email, nickname).Scan(&count)
 	if err != nil {
 		fmt.Println("IsEmailTaken: Failed to access user database")
 		log.Println(err)
@@ -55,20 +55,18 @@ func (r *movieRepository) IsEmailTaken(email string) bool {
 	return count > 0
 }
 
-func (repo *movieRepository) RegisterUser(email, password string) error {
-	if repo.IsEmailTaken(email) {
-		return fmt.Errorf("email already taken")
-	}
+func (repo *movieRepository) RegisterUser(data User) error {
+	
 	// turn the password into a hash to be stored into the db
 	var hash []byte
-	hash, err1 := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hash, err1 := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err1 != nil {
 		fmt.Println("bcrypt err1:", err1)
 	}
 
 	fmt.Println("hash: ", hash)
 
-	_, err := repo.db.Exec("INSERT INTO Users (email, password) VALUES (?, ?)", email, hash)
+	_, err := repo.db.Exec("INSERT INTO Users (firstName, lastNam, nickName, age, gender, email, password, Avatar, aboutMe) VALUES (?, ?)",data.FirstName, data.LastName, data.NickName, data.Age, data.Gender, data.Email, hash, data.Avatar, data.AboutMe)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf("failed to register user")
@@ -78,15 +76,15 @@ func (repo *movieRepository) RegisterUser(email, password string) error {
 }
 
 // Not being used:
-func (service *movieService) checkEmailHandler(w http.ResponseWriter, r *http.Request) {
-	email := r.URL.Query().Get("email")
+// func (service *movieService) checkEmailHandler(w http.ResponseWriter, r *http.Request) {
+// 	email := r.URL.Query().Get("email")
 
-	if service.repo.IsEmailTaken(email) {
-		w.WriteHeader(http.StatusConflict)
-		fmt.Fprint(w, "Email already taken")
-		return
-	}
+// 	if service.repo.IsEmailTaken(email) {
+// 		w.WriteHeader(http.StatusConflict)
+// 		fmt.Fprint(w, "Email already taken")
+// 		return
+// 	}
 
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "Email available")
-}
+// 	w.WriteHeader(http.StatusOK)
+// 	fmt.Fprint(w, "Email available")
+// }
