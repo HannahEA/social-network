@@ -6,16 +6,16 @@ import (
 
 type User struct {
 	id        int
-	FirstName string   `json:"FirstName"`
-	LastName  string   `json:"LastName"`
-	NickName  string   `json:"NickName"`
-	Age       string   `json:"Age"`
-	Gender    string   `json:"Gender"`
+	FirstName string   `json:"firstName"`
+	LastName  string   `json:"lastName"`
+	NickName  string   `json:"nickName"`
+	Age       string   `json:"age"`
+	Gender    string   `json:"gender"`
 	Email     string   `json:"email"`
 	Password  string   `json:"passWord"`
-	Avatar    []string `json:"Avatar"`
-	Image     []string `json:"Image"`
-	AboutMe   []string `json:"AboutMe"`
+	Avatar    []string `json:"avatar"`
+	Image     []string `json:"image"`
+	AboutMe   []string `json:"aboutMe"`
 }
 
 // each session contains the username of the user and the time at which it expires
@@ -31,9 +31,22 @@ type Cookie struct {
 	Expires time.Time
 }
 
+// type RegistrationData struct {
+// 	Email    string `json:"email"`
+// 	Password string `json:"password"`
+// }
 type RegistrationData struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	FirstName string   `json:"firstName"`
+	LastName  string   `json:"lastName"`
+	NickName  string   `json:"username"`
+	Age       string   `json:"age"`
+	Gender    string   `json:"gender"`
+	Email     string   `json:"email"`
+	Password  string   `json:"password"`
+	ConfPwd   string   `json:"confirPwd"`
+	Avatar    string   `json:"avatar"`
+	Image     string   `json:"image"`
+	AboutMe   string `json:"aboutMe"`
 }
 
 type LoginData struct {

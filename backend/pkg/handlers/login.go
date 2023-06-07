@@ -165,3 +165,32 @@ func (repo *dbStruct) ReturnId(email string) (int, error) {
 	}
 	return id, nil
 }
+
+//Code to send avatar image back to the front end:
+/*import (
+    "database/sql"
+    "net/http"
+)
+
+func getAvatar(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+    // Retrieve the avatar image from the database
+    query := "SELECT avatar FROM your_table WHERE id = ?"
+
+    var avatar []byte
+    err := db.QueryRow(query, userID).Scan(&avatar)
+    if err != nil {
+        http.Error(w, "Failed to retrieve avatar", http.StatusInternalServerError)
+        return
+    }
+
+    // Set the response header for content type
+    w.Header().Set("Content-Type", "image/jpeg")
+
+    // Write the avatar image data to the response
+    _, err = w.Write(avatar)
+    if err != nil {
+        http.Error(w, "Failed to write avatar image", http.StatusInternalServerError)
+        return
+    }
+}
+*/

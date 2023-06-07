@@ -1,3 +1,7 @@
+@import "import-normalize";
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+
 .App {
   text-align: center;
 }
@@ -28,6 +32,8 @@
   color: #61dafb;
 }
 
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -36,3 +42,29 @@
     transform: rotate(360deg);
   }
 }
+
+/*====> Start of Dark mode <===== */
+@layer components{
+
+  .top-navigation {
+    @apply ffixed top-0 left-0 h-screen w-16 flex flex-col
+    bg-white dark:bg-gray-900 shadow-lg;
+  }
+  
+  .top-navigation-icon {
+    @apply text-gray-500
+    mr-3 ml-4
+    transition duration-300 ease-in-out 
+    hover:text-pink-400 
+    cursor-pointer;
+  }
+  
+  .top-navigation-icon:first {
+    @apply ml-auto mr-4;
+  }
+  
+
+}
+
+
+/*====> End of Dark mode <===== */

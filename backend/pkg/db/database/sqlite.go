@@ -51,10 +51,9 @@ func CreateDatabase() *sql.DB {
 		log.Fatal(err.Error())
 	}
 
-		
-
 	// Create the Users table if it doesn't exist
 	//"passwordhash" BLOB NOT NULL
+	//add field avatarURL TEXT if storing image URLs
 	_, err0 := sqliteDatabase.Exec(`
 	CREATE TABLE IF NOT EXISTS Users (
 		"id" INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,8 +64,8 @@ func CreateDatabase() *sql.DB {
 		"gender" TEXT ,
 		"email" TEXT NOT NULL UNIQUE, 
 		"password" BLOB NOT NULL,
-		"Avatar" BLOB,
-		"Image" BLOB,
+		"avatarURL" STRING,
+		"imageFile" BLOB,
 		"aboutMe" BLOB 
 			);
 			`)

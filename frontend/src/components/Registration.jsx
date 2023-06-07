@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import TopNavigation from './TopNavigation.jsx';
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import { useNavigate, Link } from "react-router-dom";
@@ -50,17 +51,39 @@ const RegistrationPage = () => {
     setConfirmPassword(event.target.value);
   };
 
+  //This code handles both files and image URLs
+  //By using FileReader and readAsDataURL, the file is converted to a base64-encoded string, 
+  //which can be sent as a string value in the JSON data.
   const handleAvatarChange = (event) => {
+    const { value } = event.target;
+  
+    if (value.startsWith('http') || value.startsWith('https')) {
+      // It's an image URL
+      setAvatar(value);
+    } else {
+      // It's a file upload
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatar(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  //This code handles image files only, not URLs
+  /*const handleAvatarChange = (event) => {
     // Handle avatar file upload here
     const file = event.target.files[0];
     setAvatar(file);
-  };
+  };*/
 
   const handleBioChange = (event) => {
     setBio(event.target.value);
   };
 
-  const handleRegistration = (event) => {
+//Replaced by code starting at line 110
+  /*const handleRegistration = (event) => {
     event.preventDefault();
 
     // Create an object with the form data
@@ -105,76 +128,85 @@ const RegistrationPage = () => {
         // Handle any errors
         console.error("Error:", error);
       });
+  };*/
+
+  //NEW UPDATED CODE FOR REGISTRATION
+  const handleRegistration = (event) => {
+    event.preventDefault();
+
+  //Create an object with the form data
+    const formData = {
+      firstName: firstName,
+      lastName: lastName,
+      username: username,
+      age: age,
+      gender: gender,
+      email: email,
+      password: password,
+      confirPwd: confirmPassword,
+      avatar: avatar,
+      image: avatar,
+      aboutMe: bio
+    };
+
+    console.log({formData})
+
+  //Not using a multipart/form-data object anymore
+  //Create a FormData object for sending the data as multipart/form-data
+    /*const formDataToSend = new FormData();
+    for (const key in formData) {
+      formDataToSend.append(key, formData[key]);
+    }*/
+
+  //Make a POST request to the server
+    fetch("/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+  //Handle the response from the server
+        console.log(data);
+
+  //Check if the registration was successful
+        if (data.message === "Registration successful") {
+  //Display a success notification
+          notyf.success("Registration successful");
+
+  //Reset the form
+          setFirstName("");
+          setLastName("");
+          setUsername("");
+          setAge("");
+          setGender("");
+          setEmail("");
+          setPassword("");
+          setConfirmPassword("");
+          setAvatar(null);
+          setBio("");
+
+  //Redirect to the login page
+          navigate("/login");
+        } else if (data.message === "Email already taken") {
+          notyf.error("Email already taken");
+        } else {
+          notyf.error("Invalid registration");
+        }
+      })
+      .catch((error) => {
+        // Handle any errors
+        console.error("Error:", error);
+      });
   };
-
-  // NEW UPDATED CODE FOR REGISTRATION
-  // const handleRegistration = (event) => {
-  //   event.preventDefault();
-
-  //   // Create an object with the form data
-  //   const formData = {
-  //     firstName: firstName,
-  //     lastName: lastName,
-  //     username: username,
-  //     age: age,
-  //     gender: gender,
-  //     email: email,
-  //     password: password,
-  //     confirmPassword: confirmPassword,
-  //     avatar: avatar,
-  //     bio: bio
-  //   };
-
-  //   // Create a FormData object for sending the data as multipart/form-data
-  //   const formDataToSend = new FormData();
-  //   for (const key in formData) {
-  //     formDataToSend.append(key, formData[key]);
-  //   }
-
-  //   // Make a POST request to the server
-  //   fetch("/register", {
-  //     method: "POST",
-  //     body: formDataToSend
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       // Handle the response from the server
-  //       console.log(data);
-
-  //       // Check if the registration was successful
-  //       if (data.message === "Registration successful") {
-  //         // Display a success notification
-  //         notyf.success("Registration successful");
-
-  //         // Reset the form
-  //         setFirstName("");
-  //         setLastName("");
-  //         setUsername("");
-  //         setAge("");
-  //         setGender("");
-  //         setEmail("");
-  //         setPassword("");
-  //         setConfirmPassword("");
-  //         setAvatar(null);
-  //         setBio("");
-
-  //         // Redirect to the login page
-  //         navigate("/login");
-  //       } else if (data.message === "Email already taken") {
-  //         notyf.error("Email already taken");
-  //       } else {
-  //         notyf.error("Invalid registration");
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       // Handle any errors
-  //       console.error("Error:", error);
-  //     });
-  // };
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+    <div className='content-container'>
+    <TopNavigation /></div>
+      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:min-h-screen lg:py-0">
         <Link to="/" className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
           <img className="w-8 h-8 mr-2" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg" alt="logo" />
           Social-Network

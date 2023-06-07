@@ -54,3 +54,4 @@ type dbStruct struct {
 func NewDbStruct(db *sql.DB) AllDbMethods {
 	return &dbStruct{db}
 }
+

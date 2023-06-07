@@ -28,6 +28,14 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Available Scripts
 
+This will create a brand new react application in the current folder:
+
+### `npm rm -g create-react-app`
+### `npm install -g create-react-app`
+### `npx create-react-app`
+
+
+
 In the project directory, you can run:
 
 ### `npm start`
@@ -92,3 +100,4 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+

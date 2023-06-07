@@ -10,12 +10,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var data RegistrationData
+
 func (service *AllDbMethodsWrapper) HandleRegistration(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body into a RegistrationData struct
-	var data RegistrationData
+	
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		fmt.Println("handleRegistratio: jsonDecoder failed")
+		fmt.Println("handleRegistration: jsonDecoder failed")
+		fmt.Print("Registration data:",data)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -68,7 +71,8 @@ func (repo *dbStruct) RegisterUser(email, password string) error {
 
 	fmt.Println("hash: ", hash)
 
-	_, err := repo.db.Exec("INSERT INTO Users (email, password) VALUES (?, ?)", email, hash)
+	_, err := repo.db.Exec("INSERT INTO Users (firstName, lastName, nickName, age, gender, email, password, avatarURL, imageFile, aboutMe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data.FirstName, data.LastName, data.NickName, data.Age, data.
+	Gender, email, hash, data.Avatar, data.Image, data.AboutMe)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf("failed to register user")
