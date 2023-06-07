@@ -13,7 +13,8 @@ const RegistrationPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [avatar, setAvatar] = useState(null);
+  const [avatarURL, setAvatarURL] = useState(null);
+  const [avatarImage, setAvatarImage] = useState("");
   const [bio, setBio] = useState("");
 
   const notyf = new Notyf();
@@ -51,38 +52,33 @@ const RegistrationPage = () => {
     setConfirmPassword(event.target.value);
   };
 
-  //This code handles both files and image URLs
-  //By using FileReader and readAsDataURL, the file is converted to a base64-encoded string, 
-  //which can be sent as a string value in the JSON data.
+
+  //HS: This code handles both files and image URLs
+  //By using FileReader and readAsDataURL, the image file is converted  
+  //to a base64-encoded string, which can be sent as a string value in the JSON data.
   const handleAvatarChange = (event) => {
     const { value } = event.target;
   
     if (value.startsWith('http') || value.startsWith('https')) {
       // It's an image URL
-      setAvatar(value);
+      setAvatarURL(value);
     } else {
       // It's a file upload
       const file = event.target.files[0];
       const reader = new FileReader();
       reader.onloadend = () => {
-        setAvatar(reader.result);
+        setAvatarImage(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
-
-  //This code handles image files only, not URLs
-  /*const handleAvatarChange = (event) => {
-    // Handle avatar file upload here
-    const file = event.target.files[0];
-    setAvatar(file);
-  };*/
+  
 
   const handleBioChange = (event) => {
     setBio(event.target.value);
   };
 
-//Replaced by code starting at line 110
+//HS: Replaced by code starting at line 110
   /*const handleRegistration = (event) => {
     event.preventDefault();
 
@@ -130,11 +126,11 @@ const RegistrationPage = () => {
       });
   };*/
 
-  //NEW UPDATED CODE FOR REGISTRATION
+  //HS: NEW UPDATED CODE FOR REGISTRATION
   const handleRegistration = (event) => {
     event.preventDefault();
 
-  //Create an object with the form data
+  //HS: Create an object with the form data
     const formData = {
       firstName: firstName,
       lastName: lastName,
@@ -144,14 +140,14 @@ const RegistrationPage = () => {
       email: email,
       password: password,
       confirPwd: confirmPassword,
-      avatar: avatar,
-      image: avatar,
+      avatar: avatarURL,
+      image: avatarImage,
       aboutMe: bio
     };
 
     console.log({formData})
 
-  //Not using a multipart/form-data object anymore
+  //HS: Not using a multipart/form-data object anymore
   //Create a FormData object for sending the data as multipart/form-data
     /*const formDataToSend = new FormData();
     for (const key in formData) {
@@ -185,7 +181,8 @@ const RegistrationPage = () => {
           setEmail("");
           setPassword("");
           setConfirmPassword("");
-          setAvatar(null);
+          setAvatarURL("");
+          setAvatarImage(null);
           setBio("");
 
   //Redirect to the login page
@@ -335,14 +332,27 @@ const RegistrationPage = () => {
                   Avatar
                 </label>
                 <input type="file" name="avatar" id="avatar" accept="image/*" className="hidden" onChange={handleAvatarChange} />
-                <label
-                  htmlFor="avatar"
-                  className="flex items-center justify-center w-full px-6 py-3 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                >
-                  Select Avatar
-                </label>
+               {/* START of image URL */}
+                <div className="flex">
+                  <input
+                    type="text"
+                    name="avatarUrl"
+                    id="avatarUrl"
+                    placeholder="Enter image URL"
+                    className="w-full mr-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600"
+                    onChange={handleAvatarChange}
+                  />
+                  {/* END of image URL */}
+                  <label
+                    htmlFor="avatar"
+                    className="flex items-center justify-center px-6 py-3 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:block w-full p-2.5 outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  >
+                    Select Avatar
+                  </label>
+                </div>
               </div>
               <div>
+              
                 <label htmlFor="bio" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Bio
                 </label>
