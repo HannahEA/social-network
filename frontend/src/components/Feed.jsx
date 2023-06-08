@@ -6,7 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
 
-const Feed = () => {
+const Feed = (props) => {
   const location = useLocation();
   const email = location.state?.email || ""; // Access the passed email
   const [Title, setTitle] = useState("");
@@ -595,7 +595,8 @@ const Feed = () => {
               <span className="sr-only">Open user menu</span>
               <img
                 className="w-8 h-8 rounded-full"
-                src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
+                // src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
+                src={props.userAvatar}
                 alt="user photo"
               />
             </button>
@@ -1192,7 +1193,8 @@ const Feed = () => {
           <div className="  dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img
               className="w-16 h-16 mb-2 rounded-full"
-              src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
+              //src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
+              src={props.userAvatar}
               alt="user photo"
             />
             <div className="flex justify-center items-center flex-col">

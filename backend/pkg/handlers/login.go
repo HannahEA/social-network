@@ -75,10 +75,21 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 			return
 		}
 
-		response := map[string]interface{}{
-			"message": "Login successful",
-			"email":   data.Email,
+		userAvatar, err5 := service.repo.getAvatar(data.Email)
+		if err5 != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Println("err5: missing userAvatar", err5)
+			return
 		}
+
+		fmt.Print(userAvatar)
+
+		response := map[string]interface{}{
+			"message":    "Login successful",
+			"email":      data.Email,
+			"userAvatar": userAvatar,
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(w).Encode(response)
 		if err != nil {
@@ -167,30 +178,29 @@ func (repo *dbStruct) ReturnId(email string) (int, error) {
 }
 
 //Code to send avatar image back to the front end:
-/*import (
-    "database/sql"
-    "net/http"
-)
+//Make it like: func (repo *dbStruct) ValidateLogin(email, password string) (bool, error) {...
+func (repo *dbStruct) getAvatar(email string) (string, error) {
+	// Retrieve the avatar image or URL from the database
+	query := "SELECT avatarURL, imageFile FROM Users WHERE email = ?"
+	var avatarImage string // need to be handle
+	var avatarURL string
+	err := repo.db.QueryRow(query, email).Scan(&avatarURL, &avatarImage)
+	if err != nil {
+		//http.Error(w, "Failed to retrieve avatar", http.StatusInternalServerError)
+		return "", err
+	}
 
-func getAvatar(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-    // Retrieve the avatar image from the database
-    query := "SELECT avatar FROM your_table WHERE id = ?"
+	if avatarImage != "" {
+		// Set the response header for content type
+		// w.Header().Set("Content-Type", "image/jpeg")
 
-    var avatar []byte
-    err := db.QueryRow(query, userID).Scan(&avatar)
-    if err != nil {
-        http.Error(w, "Failed to retrieve avatar", http.StatusInternalServerError)
-        return
-    }
+		return avatarImage, nil
+	} else if avatarURL != "" {
+		//Write the avatar URL to the response
+		return avatarURL, nil
+	} else {
+		//Alternatively, give user a default avatar
+		return "", err
+	}
 
-    // Set the response header for content type
-    w.Header().Set("Content-Type", "image/jpeg")
-
-    // Write the avatar image data to the response
-    _, err = w.Write(avatar)
-    if err != nil {
-        http.Error(w, "Failed to write avatar image", http.StatusInternalServerError)
-        return
-    }
 }
-*/
