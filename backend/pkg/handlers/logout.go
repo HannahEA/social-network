@@ -11,7 +11,7 @@ import (
 )
 
 // func Logout(w http.ResponseWriter, r *http.Request, hub *Hub) {
-func (service *movieService) HandleLogout(w http.ResponseWriter, r *http.Request) {
+func (service *AllDbMethodsWrapper) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	var cooky Cookie
 
 	if r.URL.Path == "/logout" {

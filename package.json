@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@uidotdev/usehooks": "^2.0.1",
+    "react-icons": "^4.9.0"
+  }
+}

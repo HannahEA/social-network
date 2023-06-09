@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (service *movieService) HandleLogin(w http.ResponseWriter, r *http.Request) {
+func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body into a LoginData struct
 	var data LoginData
 	err := json.NewDecoder(r.Body).Decode(&data)
@@ -101,7 +101,7 @@ func (service *movieService) HandleLogin(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (repo *movieRepository) PopulateTheSessionsDB(userID int, cookieName, cookieValue string) error {
+func (repo *dbStruct) PopulateTheSessionsDB(userID int, cookieName, cookieValue string) error {
 	insertsessStmt, err4 := repo.db.Prepare(`INSERT INTO Sessions (userID, cookieName, cookieValue) VALUES (?, ?, ?)`)
 	if err4 != nil {
 		fmt.Println("err4 with inserting session:", err4)
@@ -113,7 +113,7 @@ func (repo *movieRepository) PopulateTheSessionsDB(userID int, cookieName, cooki
 	return nil
 }
 
-func (repo *movieRepository) ValidateLogin(email, password string) (bool, error) {
+func (repo *dbStruct) ValidateLogin(email, password string) (bool, error) {
 	var count int
 
 	// retrieve passwordhash from db.  Turn user supplied password into a hash
@@ -144,7 +144,7 @@ func (repo *movieRepository) ValidateLogin(email, password string) (bool, error)
 	return count > 0, nil
 }
 
-func (repo *movieRepository) GetUserEmail(userID string) (string, error) {
+func (repo *dbStruct) GetUserEmail(userID string) (string, error) {
 	var email string
 	err := repo.db.QueryRow("SELECT email FROM Users WHERE id = ?", userID).Scan(&email)
 	if err != nil {
@@ -153,7 +153,7 @@ func (repo *movieRepository) GetUserEmail(userID string) (string, error) {
 	return email, nil
 }
 
-func (repo *movieRepository) ReturnId(email string) (int, error) {
+func (repo *dbStruct) ReturnId(email string) (int, error) {
 	id := 0
 	theID := "SELECT id FROM Users WHERE email = ?"
 	rowCurrentUser := repo.db.QueryRow(theID, email)
@@ -165,3 +165,32 @@ func (repo *movieRepository) ReturnId(email string) (int, error) {
 	}
 	return id, nil
 }
+
+//Code to send avatar image back to the front end:
+/*import (
+    "database/sql"
+    "net/http"
+)
+
+func getAvatar(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+    // Retrieve the avatar image from the database
+    query := "SELECT avatar FROM your_table WHERE id = ?"
+
+    var avatar []byte
+    err := db.QueryRow(query, userID).Scan(&avatar)
+    if err != nil {
+        http.Error(w, "Failed to retrieve avatar", http.StatusInternalServerError)
+        return
+    }
+
+    // Set the response header for content type
+    w.Header().Set("Content-Type", "image/jpeg")
+
+    // Write the avatar image data to the response
+    _, err = w.Write(avatar)
+    if err != nil {
+        http.Error(w, "Failed to write avatar image", http.StatusInternalServerError)
+        return
+    }
+}
+*/

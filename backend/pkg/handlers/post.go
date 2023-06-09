@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (repo *movieRepository) AddPostToDB(post Post) error {
+func (repo *dbStruct) AddPostToDB(post Post) error {
 	// time
 	date := time.Now()
 	//cookie
@@ -27,7 +27,7 @@ func (repo *movieRepository) AddPostToDB(post Post) error {
 	return nil
 }
 
-func (service *movieService) PostHandler(w http.ResponseWriter, r *http.Request) {
+func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.Request) {
 	var data Post
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
@@ -35,8 +35,15 @@ func (service *movieService) PostHandler(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	//We get the cookie
+	c, err := r.Cookie("user_session")
+	if err != nil {
+		fmt.Println("Cookie is empty", err)
+		return
+	}
+	fmt.Println("Cookie -----", c)
 	fmt.Println("Post Data recieved: ", data)
-
+	data.Cookie = c.String()
 	if data.PostType == "newPost" {
 		err := service.repo.AddPostToDB(data)
 		if err != nil {
@@ -45,5 +52,5 @@ func (service *movieService) PostHandler(w http.ResponseWriter, r *http.Request)
 			return
 		}
 	}
-
+	fmt.Println("Post")
 }

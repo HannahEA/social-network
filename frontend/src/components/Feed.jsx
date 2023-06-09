@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SubmitPost, Tags } from "./feed/Posts";
 import handleLogout from "./feed/Logout";
+import TopNavigation from './TopNavigation.jsx';
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
@@ -76,8 +77,8 @@ const Feed = () => {
           // Notify the user
           notyf.success("Logout successful");
 
-          // Redirect to the login page
-          navigate("/login");
+          // Redirect to the welcome page
+          navigate("/");
         } else {
           console.log("Cookie is not deleted");
         }
@@ -143,6 +144,8 @@ const Feed = () => {
 
   return (
     <div className="antialiased bg-gray-50 dark:bg-gray-900">
+    <div className='content-container'>
+    <TopNavigation /></div>
       <nav className="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
         <div className="flex flex-wrap justify-between items-center">
           <div className="flex justify-start items-center">
@@ -168,9 +171,11 @@ const Feed = () => {
               </svg>
               <span className="sr-only">Toggle sidebar</span>
             </button>
+            <div className='content-container'>
+          <TopNavigation /> </div>
             <a href="" className="flex items-center justify-between mr-4">
               <img src="https://flowbite.s3.amazonaws.com/logo.svg" className="mr-3 h-8" alt="Social-Network Logo" />
-              <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Social-Network</span>
+              <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Social-Network </span>
             </a>
             <form action="#" method="GET" className="hidden md:block md:pl-2">
               <label htmlFor="topbar-search" className="sr-only">
@@ -1184,7 +1189,7 @@ const Feed = () => {
         </form>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div className="profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
+          <div className="  dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img
               className="w-16 h-16 mb-2 rounded-full"
               src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
@@ -1201,13 +1206,13 @@ const Feed = () => {
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
         </div>
         <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4">
-          <div className="flex justify-left items-left flex-col">
+          <div className="  dark:bg-gray-900 dark:text-white flex justify-left items-left flex-col">
             <h3>Upadate Feed</h3>
             <p>Title</p>
-            <input type="text" value={Title} onChange={handleTitle} />
+            <input class=" dark:bg-gray-900 dark:text-white" type="text" value={Title} onChange={handleTitle} />
             <form onSubmit={addTag}>
               <p>Tags</p>
-              <input type="text" id="postTags" value={Tag} onChange={handleTag} className="m-5" />
+              <input type="text" id="postTags" value={Tag} onChange={handleTag} className=" m-5  dark:bg-gray-900 dark:text-white" />
               <button type="submit" value="Add Tag">
                 {" "}
                 Add Tag
@@ -1216,7 +1221,7 @@ const Feed = () => {
             <form onSubmit={submitPost}>
               <div className="flex justify-right items-right flex-col">
                 <p>Content</p>
-                <textarea name="postContent" id="postContent" cols="20" rows="6" value={Content} onChange={handleContent}></textarea>
+                <textarea class=" dark:bg-gray-900 dark:text-white" name="postContent" id="postContent" cols="20" rows="6" value={Content} onChange={handleContent}></textarea>
               </div>
               <select name="Visibility" id="Visibility" onChange={handleVisibility}>
                 <option name="public" value={Visibility}>

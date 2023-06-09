@@ -22,7 +22,7 @@ import (
 func main() {
 	db := database.CreateDatabase()
 
-	newRepo := handlers.NewRepository(db)
+	newRepo := handlers.NewDbStruct(db)
 	newService := handlers.NewService(newRepo)
 	defer database.Database.Close()
 
