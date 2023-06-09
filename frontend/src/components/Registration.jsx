@@ -422,7 +422,7 @@ const RegistrationPage = () => {
                     htmlFor="avatar"
                     className="flex items-center justify-center px-6 py-3 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:block w-full p-2.5 outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                   >
-                    Select Avatar
+                    Select Image File
                   </label>
                 </div>
               </div>

@@ -42,7 +42,7 @@ type AllDbMethods interface {
 	ReturnId(email string) (int, error)
 	//post database queries
 	AddPostToDB(data Post) error
-	
+	getAvatar(email string)(string, error)
 }
 //The dabataseStruct
 type dbStruct struct {

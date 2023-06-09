@@ -19,14 +19,15 @@ function App() {
     setAuthenticated(false);
   };
 
+  const [userAvatar, setUserAvatar] = useState("");
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home onLogout={handleLogout} />} />
         <Route path="/" element={<TopNavigation />} />
         <Route path="/register" element={<RegistrationPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/feed" element={<Feed />} />
+        <Route path="/login" element={<Login setUserAvatar={setUserAvatar} />} />
+        <Route path="/feed" element={<Feed userAvatar={userAvatar}/>} />
       </Routes>
     </Router>
   );

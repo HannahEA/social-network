@@ -6,7 +6,7 @@ import "notyf/notyf.min.css";
 
 const notyf = new Notyf(); // Create a single instance of Notyf
 
-const LoginPage = () => {
+const LoginPage = ({setUserAvatar}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -45,6 +45,8 @@ const LoginPage = () => {
       .then((data) => {
         // Check if the login was successful
         if (data.message === "Login successful") {
+          console.log({data});
+          setUserAvatar(data.userAvatar)
           // Display a success notification
           notyf.success("Login successful");
           // Check the cookie value

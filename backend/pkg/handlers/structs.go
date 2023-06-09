@@ -13,9 +13,9 @@ type User struct {
 	Gender    string   `json:"gender"`
 	Email     string   `json:"email"`
 	Password  string   `json:"passWord"`
-	Avatar    []string `json:"avatar"`
-	Image		[]string `json:"image"`
-	AboutMe   []string `json:"bio"`
+	Avatar    string `json:"avatar"`
+	Image     []byte `json:"image"`
+	AboutMe   string `json:"aboutMe"`
 }
 
 // each session contains the username of the user and the time at which it expires
@@ -45,7 +45,7 @@ type RegistrationData struct {
 	Password  string   `json:"password"`
 	ConfPwd   string   `json:"confirPwd"`
 	Avatar    string   `json:"avatar"`
-	Image     string   `json:"image"`
+	Image     []byte   `json:"image"`
 	AboutMe   string `json:"aboutMe"`
 }
 
