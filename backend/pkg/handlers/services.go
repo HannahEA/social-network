@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"net/http"
 )
-
-type MovieService interface {
+// To group all backend handlers
+type AllHandlersMethods interface {
 	// IsEmailTaken(email string) bool
 	HandleRegistration(w http.ResponseWriter, r *http.Request)
 	// checkEmailHandler(w http.ResponseWriter, r *http.Request)
@@ -15,19 +15,18 @@ type MovieService interface {
 	PostHandler(w http.ResponseWriter, r *http.Request)
 	// checkCookieHandler(w http.ResponseWriter, r *http.Request)
 }
-type movieService struct {
-	repo MovieRepository
-}
-//HS: I think it should look like this:
-// func NewService(repo MovieRepository) *movieService {
-// 	return &movieService{repo}
-// }
-
-func NewService(repo MovieRepository) MovieService {
-	return &movieService{repo}
+// A wrapper for 'AllDbMethods' that groups all database methods.
+type AllDbMethodsWrapper struct {
+	repo AllDbMethods
 }
 
-type MovieRepository interface {
+
+//Receives a group of database methods (= AllDbMethods) and returns a new database methods wrapper
+func NewService(repo AllDbMethods) AllHandlersMethods {
+	return &AllDbMethodsWrapper{repo}
+}
+
+type AllDbMethods interface {
 	IsEmailNicknameTaken(email string, nickname string) bool
 	RegisterUser(data User) error
 	ValidateLogin(email, password string) (bool, error)
@@ -43,12 +42,16 @@ type MovieRepository interface {
 	ReturnId(email string) (int, error)
 	//post database queries
 	AddPostToDB(data Post) error
+	
 }
-type movieRepository struct {
+//The dabataseStruct
+type dbStruct struct {
 	db *sql.DB
 	
 }
 
-func NewRepository(db *sql.DB) MovieRepository {
-	return &movieRepository{db}
+//To instantiate a new database struct
+func NewDbStruct(db *sql.DB) AllDbMethods {
+	return &dbStruct{db}
 }
+

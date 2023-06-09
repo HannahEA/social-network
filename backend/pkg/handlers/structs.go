@@ -14,6 +14,7 @@ type User struct {
 	Email     string   `json:"email"`
 	Password  string   `json:"passWord"`
 	Avatar    []string `json:"avatar"`
+	Image		[]string `json:"image"`
 	AboutMe   []string `json:"bio"`
 }
 
@@ -30,9 +31,22 @@ type Cookie struct {
 	Expires time.Time
 }
 
+// type RegistrationData struct {
+// 	Email    string `json:"email"`
+// 	Password string `json:"password"`
+// }
 type RegistrationData struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	FirstName string   `json:"firstName"`
+	LastName  string   `json:"lastName"`
+	NickName  string   `json:"username"`
+	Age       string   `json:"age"`
+	Gender    string   `json:"gender"`
+	Email     string   `json:"email"`
+	Password  string   `json:"password"`
+	ConfPwd   string   `json:"confirPwd"`
+	Avatar    string   `json:"avatar"`
+	Image     string   `json:"image"`
+	AboutMe   string `json:"aboutMe"`
 }
 
 type LoginData struct {

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import TopNavigation from './TopNavigation.jsx';
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import { useNavigate, Link } from "react-router-dom";
@@ -12,7 +13,8 @@ const RegistrationPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [avatar, setAvatar] = useState(null);
+  const [avatarURL, setAvatarURL] = useState(null);
+  const [avatarImage, setAvatarImage] = useState("");
   const [bio, setBio] = useState("");
 
   const notyf = new Notyf();
@@ -50,33 +52,185 @@ const RegistrationPage = () => {
     setConfirmPassword(event.target.value);
   };
 
+
+  //HS: This code handles both files and image URLs
+  //By using FileReader and readAsDataURL, the image file is converted  
+  //to a base64-encoded string, which can be sent as a string value in the JSON data.
   const handleAvatarChange = (event) => {
-    // Handle avatar file upload here
-    const file = event.target.files[0];
-    setAvatar(file);
+    const { value } = event.target;
+  
+    if (value.startsWith('http') || value.startsWith('https')) {
+      // It's an image URL
+      setAvatarURL(value);
+    } else {
+      // It's a file upload
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
+  
 
   const handleBioChange = (event) => {
     setBio(event.target.value);
   };
 
+//HS: Replaced by code starting at line 110
+  /*const handleRegistration = (event) => {
+    event.preventDefault();
+
+    // Create an object with the form data
+    const formData = {
+      email: email,
+      password: password,
+      confirmPassword: confirmPassword,
+    };
+
+    // Make a POST request to the server
+    fetch("/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle the response from the server
+        console.log(data);
+
+        // Check if the registration was successful
+        if (data.message === "Registration successful") {
+          // Display a success notification
+          notyf.success("Registration successful");
+
+          // Reset the form
+          setEmail("");
+          setPassword("");
+          setConfirmPassword("");
+
+          // Redirect to the login page
+          navigate("/login");
+        } else if (data.message === "Email already taken") {
+          notyf.error("Email already taken");
+        } else {
+          notyf.error("Invalid registration");
+        }
+      })
+      .catch((error) => {
+        // Handle any errors
+        console.error("Error:", error);
+      });
+  };*/
+
+  // //HS: NEW UPDATED CODE FOR REGISTRATION
+  const handleRegistration = (event) => {
+    event.preventDefault();
+
+  //HS: Create an object with the form data
+    const formData = {
+      firstName: firstName,
+      lastName: lastName,
+      username: username,
+      age: age,
+      gender: gender,
+      email: email,
+      password: password,
+      confirPwd: confirmPassword,
+      avatar: avatarURL,
+      image: avatarImage,
+      aboutMe: bio
+    };
+
+    console.log({formData})
+
+  //HS: Not using a multipart/form-data object anymore
+  //Create a FormData object for sending the data as multipart/form-data
+    /*const formDataToSend = new FormData();
+    for (const key in formData) {
+      formDataToSend.append(key, formData[key]);
+    }*/
+
+  //Make a POST request to the server
+    fetch("/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+  //Handle the response from the server
+        console.log(data);
+
+  //Check if the registration was successful
+        if (data.message === "Registration successful") {
+  //Display a success notification
+          notyf.success("Registration successful");
+
+  //Reset the form
+          setFirstName("");
+          setLastName("");
+          setUsername("");
+          setAge("");
+          setGender("");
+          setEmail("");
+          setPassword("");
+          setConfirmPassword("");
+          setAvatarURL("");
+          setAvatarImage(null);
+          setBio("");
+
+  //Redirect to the login page
+          navigate("/login");
+        } else if (data.message === "Email already taken") {
+          notyf.error("Email already taken");
+        } else {
+          notyf.error("Invalid registration");
+        }
+      })
+      .catch((error) => {
+        // Handle any errors
+        console.error("Error:", error);
+      });
+  };
+
+  //check if password and confirm password match 
+
+  // NEW UPDATED CODE FOR REGISTRATION
   // const handleRegistration = (event) => {
   //   event.preventDefault();
 
   //   // Create an object with the form data
   //   const formData = {
+  //     firstName: firstName,
+  //     lastName: lastName,
+  //     username: username,
+  //     age: age,
+  //     gender: gender,
   //     email: email,
   //     password: password,
-  //     confirmPassword: confirmPassword,
+  //     avatar: {
+  //       file: avatarURL
+  //     },
+  //     bio: bio
   //   };
-  
+    
+
+  //   // Create a FormData object for sending the data as multipart/form-data
+  //   const formDataToSend = new FormData();
+  //   for (const key in formData) {
+  //     formDataToSend.append(key, formData[key]);
+  //   }
+  //   console.log(formDataToSend)
   //   // Make a POST request to the server
   //   fetch("/register", {
   //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify(formData),
+  //     body: formDataToSend
   //   })
   //     .then((response) => response.json())
   //     .then((data) => {
@@ -89,9 +243,16 @@ const RegistrationPage = () => {
   //         notyf.success("Registration successful");
 
   //         // Reset the form
+  //         setFirstName("");
+  //         setLastName("");
+  //         setUsername("");
+  //         setAge("");
+  //         setGender("");
   //         setEmail("");
   //         setPassword("");
   //         setConfirmPassword("");
+  //         setAvatarURL(null);
+  //         setBio("");
 
   //         // Redirect to the login page
   //         navigate("/login");
@@ -107,79 +268,12 @@ const RegistrationPage = () => {
   //     });
   // };
 
-  //check if password and confirm password match 
-
-  // NEW UPDATED CODE FOR REGISTRATION
-  const handleRegistration = (event) => {
-    event.preventDefault();
-
-    // Create an object with the form data
-    const formData = {
-      firstName: firstName,
-      lastName: lastName,
-      username: username,
-      age: age,
-      gender: gender,
-      email: email,
-      password: password,
-      avatar: {
-        
-      }
-      bio: bio
-    };
-    
-
-    // Create a FormData object for sending the data as multipart/form-data
-    const formDataToSend = new FormData();
-    for (const key in formData) {
-      formDataToSend.append(key, formData[key]);
-    }
-    console.log(formDataToSend)
-    // Make a POST request to the server
-    fetch("/register", {
-      method: "POST",
-      body: formDataToSend
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle the response from the server
-        console.log(data);
-
-        // Check if the registration was successful
-        if (data.message === "Registration successful") {
-          // Display a success notification
-          notyf.success("Registration successful");
-
-          // Reset the form
-          setFirstName("");
-          setLastName("");
-          setUsername("");
-          setAge("");
-          setGender("");
-          setEmail("");
-          setPassword("");
-          setConfirmPassword("");
-          setAvatar(null);
-          setBio("");
-
-          // Redirect to the login page
-          navigate("/login");
-        } else if (data.message === "Email already taken") {
-          notyf.error("Email already taken");
-        } else {
-          notyf.error("Invalid registration");
-        }
-      })
-      .catch((error) => {
-        // Handle any errors
-        console.error("Error:", error);
-      });
-  };
-
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:auto lg:py-0">
-        <Link to="/" className="flex items-center mb-6 my-10 text-2xl font-semibold text-gray-900 dark:text-white">
+    <div className='content-container'>
+    <TopNavigation /></div>
+      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:min-h-screen lg:py-0">
+        <Link to="/" className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
           <img className="w-8 h-8 mr-2" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg" alt="logo" />
           Social-Network
         </Link>
@@ -313,14 +407,27 @@ const RegistrationPage = () => {
                   Avatar
                 </label>
                 <input type="file" name="avatar" id="avatar" accept="image/*" className="hidden" onChange={handleAvatarChange} />
-                <label
-                  htmlFor="avatar"
-                  className="flex items-center justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                >
-                  Select Avatar
-                </label>
+               {/* START of image URL */}
+                <div className="flex">
+                  <input
+                    type="text"
+                    name="avatarUrl"
+                    id="avatarUrl"
+                    placeholder="Enter image URL"
+                    className="w-full mr-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600"
+                    onChange={handleAvatarChange}
+                  />
+                  {/* END of image URL */}
+                  <label
+                    htmlFor="avatar"
+                    className="flex items-center justify-center px-6 py-3 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:block w-full p-2.5 outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  >
+                    Select Avatar
+                  </label>
+                </div>
               </div>
               <div>
+              
                 <label htmlFor="bio" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Bio
                 </label>

@@ -14,12 +14,12 @@ func NewSession() *Session {
 	return &Session{}
 }
 
-func (service *movieService) HandleSession(w http.ResponseWriter, r *http.Request) {
+func (service *AllDbMethodsWrapper) HandleSession(w http.ResponseWriter, r *http.Request) {
 
 }
 
 // Add session cookie to browser
-func (repo *movieRepository) AddSession(w http.ResponseWriter, sessionName string, user *User) {
+func (repo *dbStruct) AddSession(w http.ResponseWriter, sessionName string, user *User) {
 	sessionToken := uuid.NewV4().String()
 	expiresAt := time.Now().Add(120 * time.Minute)
 	cookieSession := &http.Cookie{
@@ -34,7 +34,7 @@ func (repo *movieRepository) AddSession(w http.ResponseWriter, sessionName strin
 }
 
 // Insert session to database
-func (repo *movieRepository) InsertSession(u *User, session *http.Cookie) *Session {
+func (repo *dbStruct) InsertSession(u *User, session *http.Cookie) *Session {
 	cookie := NewSession()
 	stmnt, err := repo.db.Prepare("INSERT OR IGNORE INTO Sessions (userID, cookieName, cookieValue) VALUES (?, ?, ?)")
 	if err != nil {
@@ -51,7 +51,7 @@ func (repo *movieRepository) InsertSession(u *User, session *http.Cookie) *Sessi
 }
 
 // IsUserAuthenticated ...
-func (repo *movieRepository) IsUserAuthenticated(w http.ResponseWriter, u *User) error {
+func (repo *dbStruct) IsUserAuthenticated(w http.ResponseWriter, u *User) error {
 	var cookieValue string
 	// if user is not found in "sessions" db table return err = nil
 	if err := repo.db.QueryRow("SELECT cookieValue FROM Sessions WHERE userID = ?", u.id).Scan(&cookieValue); err != nil {
@@ -69,7 +69,7 @@ func (repo *movieRepository) IsUserAuthenticated(w http.ResponseWriter, u *User)
 }
 
 // User's cookie expires when browser is closed, delete the cookie from the database.
-func (repo *movieRepository) DeleteSession(w http.ResponseWriter, cookieValue string) error {
+func (repo *dbStruct) DeleteSession(w http.ResponseWriter, cookieValue string) error {
 	fmt.Println("-----> DeleteSession called")
 	var cookieName string
 	// if cookieName is not found in 'Sessions' db table return err = nil
@@ -103,7 +103,7 @@ func (repo *movieRepository) DeleteSession(w http.ResponseWriter, cookieValue st
 }
 
 // GetUserByCookie ...
-func (repo *movieRepository) GetUserByCookie(cookieValue string) *User {
+func (repo *dbStruct) GetUserByCookie(cookieValue string) *User {
 	var userID int64
 
 	if err := repo.db.QueryRow("SELECT userID from Sessions WHERE cookieValue = ?", cookieValue).Scan(&userID); err != nil {
@@ -115,15 +115,16 @@ func (repo *movieRepository) GetUserByCookie(cookieValue string) *User {
 }
 
 // function for new user
-func (repo *movieRepository) NewUser() *User {
+func (repo *dbStruct) NewUser() *User {
 	return &User{}
 }
 
 // Find the user by their ID
-func (repo *movieRepository) FindByUserID(UID int64) *User {
+func (repo *dbStruct) FindByUserID(UID int64) *User {
 	u := repo.NewUser()
-	if err := repo.db.QueryRow("SELECT id, firstName, lastName, nickName, age, gender, email, password, aboutMe FROM Users WHERE userID = ?", UID).
-		Scan(&u.id, &u.FirstName, &u.LastName, &u.NickName, &u.Age, &u.Gender, &u.Email, &u.Password, &u.AboutMe); err != nil {
+	//changed the 'WHERE userID to id
+	if err := repo.db.QueryRow("SELECT id, firstName, lastName, nickName, age, gender, email, password, avatarURL, imageFile, aboutMe FROM Users WHERE id = ?", UID).
+		Scan(&u.id, &u.FirstName, &u.LastName, &u.NickName, &u.Age, &u.Gender, &u.Email, &u.Password, &u.Avatar, &u.Image, &u.AboutMe); err != nil {
 		fmt.Println("error FindByUserID: ", err)
 		return nil
 	}
