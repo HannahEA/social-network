@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { SubmitPost, Tags } from "./feed/Posts";
+import { SubmitPost, Tags, Posts } from "./feed/Posts";
 import handleLogout from "./feed/Logout";
-import TopNavigation from './TopNavigation.jsx';
+// import TopNavigation from './TopNavigation.jsx';
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
@@ -108,6 +108,8 @@ const Feed = (props) => {
     let e = document.getElementById("Visibility");
     let v = e.options[e.selectedIndex].text;
     SubmitPost({ title: Title, content: Content, visibility: v });
+    setTitle("");
+    setContent("");
   };
   const addTag = (event) => {
     event.preventDefault();
@@ -145,7 +147,8 @@ const Feed = (props) => {
   return (
     <div className="antialiased bg-gray-50 dark:bg-gray-900">
     <div className='content-container'>
-    <TopNavigation /></div>
+    {/* <TopNavigation /> */}
+    </div>
       <nav className="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
         <div className="flex flex-wrap justify-between items-center">
           <div className="flex justify-start items-center">
@@ -172,7 +175,8 @@ const Feed = (props) => {
               <span className="sr-only">Toggle sidebar</span>
             </button>
             <div className='content-container'>
-          <TopNavigation /> </div>
+          {/* <TopNavigation />  */}
+          </div>
             <a href="" className="flex items-center justify-between mr-4">
               <img src="https://flowbite.s3.amazonaws.com/logo.svg" className="mr-3 h-8" alt="Social-Network Logo" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Social-Network </span>
@@ -1238,6 +1242,7 @@ const Feed = (props) => {
             </form>
           </div>
         </div>
+        <Posts />
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" />
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" />

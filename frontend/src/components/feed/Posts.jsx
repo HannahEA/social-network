@@ -33,6 +33,29 @@ const SubmitPost = ({title, content, visibility}) => {
       console.error("Error:", error);
     });
 }
+
+const Posts = () => {
+  let cookie = document.cookie
+  fetch("/post", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(cookie),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      // Handle the response from the server
+      console.log(data);
+        // display posts
+        notyf.success("New Post Submitted")
+    })
+    .catch((error) => {
+      // Handle any errors
+      console.error("Error:", error);
+    });
+
+ }
 const Tags = ({tag}) => {
   console.log("new tag", tag)
   return (
@@ -43,4 +66,4 @@ const Tags = ({tag}) => {
  }
 
 
-export {SubmitPost, Tags};
+export {SubmitPost, Tags, Posts};
