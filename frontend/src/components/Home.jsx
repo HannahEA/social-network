@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from "react";
-// import TopNavigation from './TopNavigation.jsx';
+import TopNavigation from './TopNavigation.jsx';
 import { Link } from "react-router-dom";
-// import {FaMoon, FaSun} from 'react-icons/fa';
+import {FaMoon, FaSun} from 'react-icons/fa';
 
 
 const Home = () => {
   return (
     <div className=" dark:bg-gray-900 dark:text-white ">
     <div className='content-container'>
-    {/* <TopNavigation /> */}
+    <TopNavigation />
     </div>
       <div className=" dark:bg-gray-900 dark:text-white nav flex h-28 w-full items-center justify-center bg-white px-8">
         <img src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/logo.svg" alt="" />

@@ -1,3 +1,4 @@
+//inspiration from: https://github.com/fireship-io/tailwind-dashboard/blob/main/src/components/SideBar/index.jsx
 import { useEffect, useState } from 'react';
 
 const useLocalStorage = (key, initialValue) => {

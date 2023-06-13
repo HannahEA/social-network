@@ -23,7 +23,7 @@ func (service *AllDbMethodsWrapper) HandleRegistration(w http.ResponseWriter, r 
 		return
 	}
 	fmt.Println("Registration Data recieved: ", data)
-	// Check if the email already exists
+	// Check if the email & nickname already exists
 	if service.repo.IsEmailNicknameTaken(data.Email, data.NickName) {
 		fmt.Println("isEmailTaken", data.Email)
 		response := map[string]string{"message": "Email already taken"}
