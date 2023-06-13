@@ -14,11 +14,11 @@ var data RegistrationData
 
 func (service *AllDbMethodsWrapper) HandleRegistration(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body into a RegistrationData struct
-	var data User
+	// var data User
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		fmt.Println("handleRegistration: jsonDecoder failed")
-		fmt.Print("Registration data:",data)
+		fmt.Print("Registration data:", data)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -58,7 +58,7 @@ func (r *dbStruct) IsEmailNicknameTaken(email string, nickname string) bool {
 	return count > 0
 }
 
-func (repo *dbStruct) RegisterUser(data User) error {
+func (repo *dbStruct) RegisterUser(data RegistrationData) error {
 	// if repo.IsEmailNicknameTaken(email, nickname) {
 	// 	return fmt.Errorf("email already taken")
 	// }
@@ -69,10 +69,10 @@ func (repo *dbStruct) RegisterUser(data User) error {
 		fmt.Println("bcrypt err1:", err1)
 	}
 
-	fmt.Println("hash: ", hash) 
+	fmt.Println("hash: ", hash)
 
 	_, err := repo.db.Exec("INSERT INTO Users (firstName, lastName, nickName, age, gender, email, password, avatarURL, imageFile, aboutMe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data.FirstName, data.LastName, data.NickName, data.Age, data.
-	Gender, data.Email, hash, data.Avatar, data.Image, data.AboutMe)
+		Gender, data.Email, hash, data.Avatar, data.Image, data.AboutMe)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf("failed to register user")

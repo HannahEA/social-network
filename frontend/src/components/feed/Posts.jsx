@@ -35,20 +35,23 @@ const SubmitPost = ({title, content, visibility}) => {
 }
 
 const Posts = () => {
-  let cookie = document.cookie
+  let getPosts = {
+    cookie: document.cookie, 
+    type: "getPosts"
+  }
   fetch("/post", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(cookie),
+    body: JSON.stringify(getPosts),
   })
     .then((response) => response.json())
     .then((data) => {
       // Handle the response from the server
       console.log(data);
         // display posts
-        notyf.success("New Post Submitted")
+        notyf.success("Sucessfully retrieved posts")
     })
     .catch((error) => {
       // Handle any errors

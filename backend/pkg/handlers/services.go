@@ -28,7 +28,7 @@ func NewService(repo AllDbMethods) AllHandlersMethods {
 
 type AllDbMethods interface {
 	IsEmailNicknameTaken(email string, nickname string) bool
-	RegisterUser(data User) error
+	RegisterUser(data RegistrationData) error
 	ValidateLogin(email, password string) (bool, error)
 	GetUserEmail(userId string) (string, error)
 	AddSession(w http.ResponseWriter, sessionName string, user *User)
@@ -42,6 +42,7 @@ type AllDbMethods interface {
 	ReturnId(email string) (int, error)
 	//post database queries
 	AddPostToDB(data Post) error
+	GetPublicPosts(data Post) ([]Post,error)
 	getAvatar(email string)(string, error)
 }
 //The dabataseStruct

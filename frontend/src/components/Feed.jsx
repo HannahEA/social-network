@@ -1211,25 +1211,29 @@ const Feed = (props) => {
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
         </div>
-        <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4">
+        <div id="submitPosts" className="bg-white border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4">
           <div className="  dark:bg-gray-900 dark:text-white flex justify-left items-left flex-col">
-            <h3>Upadate Feed</h3>
-            <p>Title</p>
-            <input class=" dark:bg-gray-900 dark:text-white" type="text" value={Title} onChange={handleTitle} />
-            <form onSubmit={addTag}>
-              <p>Tags</p>
-              <input type="text" id="postTags" value={Tag} onChange={handleTag} className=" m-5  dark:bg-gray-900 dark:text-white" />
-              <button type="submit" value="Add Tag">
+            <h3 className= "pl-5 mt-3 font-bold text-lg text-blue-500 " >Update Feed</h3>
+           <form onSubmit={submitPost}>
+              <span className ="flex p-2.5 pl-5">
+                <p className= "flex-row mr-5 font-bold" >Title</p>
+                <input class="flex-row border-b-2 border-green shadow-md dark:bg-gray-900 dark:text-white" type="text" value={Title} onChange={handleTitle} />
+              </span>
+              <form onSubmit={addTag}>
+                <span className="flex p-2.5 pl-5">
+                <p className= "flex-row mr-5 font-bold">Tags</p>
+                <input type="text" id="postTags" value={Tag} onChange={handleTag} className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-900 dark:text-white" />
+                <button type="submit" value="Add Tag" className="flex-row pl-2  pr-2 font-bold bg-blue-500 text-white rounded-md">
                 {" "}
                 Add Tag
-              </button>
-            </form>
-            <form onSubmit={submitPost}>
+                </button>
+                </span> 
+              </form>
               <div className="flex justify-right items-right flex-col">
-                <p>Content</p>
-                <textarea class=" dark:bg-gray-900 dark:text-white" name="postContent" id="postContent" cols="20" rows="6" value={Content} onChange={handleContent}></textarea>
+                <p className= "p-2.5 pl-5 font-bold">Content</p>
+                <textarea className="m-5 mt-0 mb-2.5 border-b-2 shadow-md border-green dark:bg-gray-900 dark:text-white" name="postContent" id="postContent" cols="8" rows="3" value={Content} onChange={handleContent}></textarea>
               </div>
-              <select name="Visibility" id="Visibility" onChange={handleVisibility}>
+              <select className= "p-2.5 pl-5 font-bold" name="Visibility" id="Visibility" onChange={handleVisibility}>
                 <option name="public" value={Visibility}>
                   Public
                 </option>
@@ -1238,12 +1242,13 @@ const Feed = (props) => {
                 </option>
               </select>
               <br />
-              <button type="submit">Post</button>
+              <button className= "ml-5 m-2.5 pl-5 pr-5 font-bold bg-blue-500 text-white rounded-md"  type="submit">Post</button>
             </form>
           </div>
         </div>
-        <Posts />
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        {/* <Posts /> */}
+        <div id= "posts">
+          <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" />
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" />
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" />
@@ -1256,6 +1261,8 @@ const Feed = (props) => {
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" />
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" />
         </div>
+        </div>
+        
       </main>
     </div>
   );
