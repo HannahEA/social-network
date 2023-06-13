@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
 import handleLogout from "./feed/Logout";
-// import TopNavigation from './TopNavigation.jsx';
+import TopNavigation from './TopNavigation.jsx';
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
@@ -14,8 +14,9 @@ const Feed = (props) => {
   const [Visibility, setVisibility] = useState("");
   const [Tag, setTag] = useState("");
   const navigate = useNavigate();
-  const notyf = new Notyf();
   const [avatar, setAvatar] = useState(null);
+  const notyf = new Notyf();
+ 
 
   const handleAvatarChange = (event) => {
     setAvatar(event.target.files[0]);
@@ -110,6 +111,7 @@ const Feed = (props) => {
     SubmitPost({ title: Title, content: Content, visibility: v });
     setTitle("");
     setContent("");
+    setTag("");
   };
   const addTag = (event) => {
     event.preventDefault();
@@ -174,18 +176,18 @@ const Feed = (props) => {
               </svg>
               <span className="sr-only">Toggle sidebar</span>
             </button>
-            <div className='content-container'>
-          {/* <TopNavigation />  */}
+            <div className='content-container flex justify-between mr-7'>
+          <TopNavigation /> 
           </div>
-            <a href="" className="flex items-center justify-between mr-4">
-              <img src="https://flowbite.s3.amazonaws.com/logo.svg" className="mr-3 h-8" alt="Social-Network Logo" />
+            <a href="" className="flex items-center justify-between mr-3">
+              <img src="https://flowbite.s3.amazonaws.com/logo.svg" className="mr-4 h-8" alt="Social-Network Logo" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Social-Network </span>
             </a>
             <form action="#" method="GET" className="hidden md:block md:pl-2">
               <label htmlFor="topbar-search" className="sr-only">
                 Search
               </label>
-              <div className="relative md:w-64 md:w-96">
+              <div className="relative md:w-64">
                 <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
                   <svg
                     className="w-5 h-5 text-gray-500 dark:text-gray-400"
@@ -240,7 +242,7 @@ const Feed = (props) => {
             </button>
             {/* Dropdown menu */}
             <div
-              className="hidden overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700 rounded-xl"
+              className="hidden overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700"
               id="notification-dropdown"
             >
               <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300">
@@ -436,7 +438,7 @@ const Feed = (props) => {
             </button>
             {/* Dropdown menu */}
             <div
-              className="hidden overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
+              className="hidden overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:bg-gray-700 dark:divide-gray-600"
               id="apps-dropdown"
             >
               <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300">
@@ -606,7 +608,7 @@ const Feed = (props) => {
             </button>
             {/* Dropdown menu */}
             <div
-              className="absolute top-[45px] right-0 z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
+              className="absolute top-[45px] right-0 z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600"
               id="dropdown"
             >
               <div className="py-3 px-4">
@@ -697,9 +699,9 @@ const Feed = (props) => {
               </ul>
               <ul className="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
                 <li
-                  onClick={(event) => {
-                    deleteCookie();
-                  }}
+                  onClick={
+                    deleteCookie
+                  }
                 >
                   <a className="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
                 </li>
