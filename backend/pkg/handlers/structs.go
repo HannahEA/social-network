@@ -6,13 +6,13 @@ import (
 
 type User struct {
 	id        int
-	FirstName string   `json:"firstName"`
-	LastName  string   `json:"lastName"`
-	NickName  string   `json:"username"`
-	Age       string   `json:"age"`
-	Gender    string   `json:"gender"`
-	Email     string   `json:"email"`
-	Password  string   `json:"passWord"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	NickName  string `json:"username"`
+	Age       string `json:"age"`
+	Gender    string `json:"gender"`
+	Email     string `json:"email"`
+	Password  string `json:"passWord"`
 	Avatar    string `json:"avatar"`
 	Image     []byte `json:"image"`
 	AboutMe   string `json:"aboutMe"`
@@ -36,16 +36,16 @@ type Cookie struct {
 // 	Password string `json:"password"`
 // }
 type RegistrationData struct {
-	FirstName string   `json:"firstName"`
-	LastName  string   `json:"lastName"`
-	NickName  string   `json:"username"`
-	Age       string   `json:"age"`
-	Gender    string   `json:"gender"`
-	Email     string   `json:"email"`
-	Password  string   `json:"password"`
-	ConfPwd   string   `json:"confirPwd"`
-	Avatar    string   `json:"avatar"`
-	Image     []byte   `json:"image"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	NickName  string `json:"username"`
+	Age       string `json:"age"`
+	Gender    string `json:"gender"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	ConfPwd   string `json:"confirPwd"`
+	Avatar    string `json:"avatar"`
+	Image     string `json:"image"`
 	AboutMe   string `json:"aboutMe"`
 }
 

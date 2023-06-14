@@ -4,6 +4,8 @@ import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import { useNavigate, Link } from "react-router-dom";
 
+let fileType
+
 const RegistrationPage = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -65,11 +67,22 @@ const RegistrationPage = () => {
     } else {
       // It's a file upload
       const file = event.target.files[0];
+
+      //now get file type
+      const fType = file.type;
+      console.log({fType});//this should show e.g. "image/jpg"
+      fileType = fType.split("/");
+      fileType = fileType[1];
+      console.log({fileType});//this should show e.g. "jpg"
+
       const reader = new FileReader();
       reader.onloadend = () => {
-        setAvatarImage(reader.result);
+
+        const result = reader.result;
+        setAvatarImage(result);
       };
       reader.readAsDataURL(file);
+      console.log({avatarImage});
     }
   };
   
@@ -142,6 +155,7 @@ const RegistrationPage = () => {
       confirPwd: confirmPassword,
       avatar: avatarURL,
       image: avatarImage,
+      imageType: fileType,
       aboutMe: bio
     };
 
@@ -407,25 +421,32 @@ const RegistrationPage = () => {
                 <label htmlFor="avatar" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Avatar
                 </label>
-                <input type="file" name="avatar" id="avatar" accept="image/*" className="hidden" onChange={handleAvatarChange} />
-               {/* START of image URL */}
-                <div className="flex">
+                
+                <div className = "p-2">
                   <input
                     type="text"
                     name="avatarUrl"
                     id="avatarUrl"
                     placeholder="Enter image URL"
-                    className="w-full mr-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600"
+                    className="p-2 w-full mr-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600"
                     onChange={handleAvatarChange}
                   />
                   {/* END of image URL */}
+                  </div>
+                  <div className="p-2"> 
                   <label
                     htmlFor="avatar"
                     className="flex items-center justify-center px-6 py-3 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:block w-full p-2.5 outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                   >
                     Select Image File
                   </label>
-                </div>
+                
+                
+                <input type="file" name="avatar" id="avatar" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+                  </div>
+                  
+               {/* START of image URL */}
+                
               </div>
               <div>
               
