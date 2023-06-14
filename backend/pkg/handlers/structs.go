@@ -6,13 +6,13 @@ import (
 
 type User struct {
 	id        int
-	FirstName string   `json:"firstName"`
-	LastName  string   `json:"lastName"`
-	NickName  string   `json:"username"`
-	Age       string   `json:"age"`
-	Gender    string   `json:"gender"`
-	Email     string   `json:"email"`
-	Password  string   `json:"passWord"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	NickName  string `json:"username"`
+	Age       string `json:"age"`
+	Gender    string `json:"gender"`
+	Email     string `json:"email"`
+	Password  string `json:"passWord"`
 	Avatar    string `json:"avatar"`
 	Image     []byte `json:"image"`
 	AboutMe   string `json:"aboutMe"`
@@ -31,21 +31,21 @@ type Cookie struct {
 	Expires time.Time
 }
 
-// type RegistrationData struct {
-// 	Email    string `json:"email"`
-// 	Password string `json:"password"`
-// }
+//	type RegistrationData struct {
+//		Email    string `json:"email"`
+//		Password string `json:"password"`
+//	}
 type RegistrationData struct {
-	FirstName string   `json:"firstName"`
-	LastName  string   `json:"lastName"`
-	NickName  string   `json:"username"`
-	Age       string   `json:"age"`
-	Gender    string   `json:"gender"`
-	Email     string   `json:"email"`
-	Password  string   `json:"password"`
-	ConfPwd   string   `json:"confirPwd"`
-	Avatar    string   `json:"avatar"`
-	Image     []byte   `json:"image"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	NickName  string `json:"username"`
+	Age       string `json:"age"`
+	Gender    string `json:"gender"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	ConfPwd   string `json:"confirPwd"`
+	Avatar    string `json:"avatar"`
+	Image     []byte `json:"image"`
 	AboutMe   string `json:"aboutMe"`
 }
 
@@ -55,9 +55,12 @@ type LoginData struct {
 }
 
 type Post struct {
+	PostID     string `json:"postId"`
+	Author     string `json:"author"`
 	Title      string `json:"title"`
 	Content    string `json:"content"`
 	Category   string `json:"category"`
+	Date       string `json:"date"`
 	Visibility string `json:"visibility"`
 	Cookie     string `json:"cookie"`
 	PostType   string `json:"type"`

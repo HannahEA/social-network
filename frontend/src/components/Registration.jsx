@@ -70,6 +70,7 @@ const RegistrationPage = () => {
         setAvatarImage(reader.result);
       };
       reader.readAsDataURL(file);
+      console.log("ai", avatarImage)
     }
   };
   
