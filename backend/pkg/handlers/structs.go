@@ -45,7 +45,7 @@ type RegistrationData struct {
 	Password  string `json:"password"`
 	ConfPwd   string `json:"confirPwd"`
 	Avatar    string `json:"avatar"`
-	Image     []byte `json:"image"`
+	Image     string `json:"image"`
 	AboutMe   string `json:"aboutMe"`
 }
 
