@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
@@ -24,25 +22,24 @@ func (service *AllDbMethodsWrapper) HandleRegistration(w http.ResponseWriter, r 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	//never used
+	//fmt.Println("Data", data.Image)
 	// Remove the data URI scheme prefix before unmarshalling data.Image
-	imageDataString := strings.SplitN(data.Image, ",", 2)[1]
-
+	//imageDataString := strings.SplitN(data.Image, ",", 2)[1]
 	// Trim leading and trailing whitespace
-	imageDataString = strings.TrimSpace(imageDataString)
-
+	//imageDataString = strings.TrimSpace(imageDataString)
 	//fmt.Print("image payload", data.Image)
-	fmt.Print("image payload", imageDataString)
-
+	//fmt.Print("image payload", imageDataString)
 	// Decode the base64-encoded image data
-	imageData, err := base64.StdEncoding.DecodeString(imageDataString)
-	if err != nil {
+	//imageData, err := base64.StdEncoding.DecodeString(imageDataString)
+	/*if err != nil {
 		fmt.Println("handleRegistration: failed to decode image data")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
-	}
-
-	fmt.Println("Registration Data recieved: ", data)
-	fmt.Println("ImageData:", imageData)
+	}*/
+	//fmt.Print("data.Image after unmarshalling", data.Image)
+	//fmt.Println("Registration Data recieved: ", data)
+	//fmt.Println("ImageData:", imageData)
 
 	// Check if the email & nickname already exists
 	if service.repo.IsEmailNicknameTaken(data.Email, data.NickName) {
@@ -105,13 +102,11 @@ func (repo *dbStruct) RegisterUser(data RegistrationData) error {
 // Not being used:
 // func (service *AllDbMethodsWrapper) checkEmailHandler(w http.ResponseWriter, r *http.Request) {
 // 	email := r.URL.Query().Get("email")
-
 // // 	if service.repo.IsEmailTaken(email) {
 // // 		w.WriteHeader(http.StatusConflict)
 // // 		fmt.Fprint(w, "Email already taken")
 // // 		return
 // // 	}
-
 // 	w.WriteHeader(http.StatusOK)
 // 	fmt.Fprint(w, "Email available")
 // }

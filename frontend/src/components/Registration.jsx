@@ -69,11 +69,11 @@ const RegistrationPage = () => {
       const file = event.target.files[0];
 
       //now get file type
-      const fType = file.type;
+      /*const fType = file.type;
       console.log({fType});//this should show e.g. "image/jpg"
       fileType = fType.split("/");
       fileType = fileType[1];
-      console.log({fileType});//this should show e.g. "jpg"
+      console.log({fileType});*///this should show e.g. "jpg"
 
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -155,7 +155,7 @@ const RegistrationPage = () => {
       confirPwd: confirmPassword,
       avatar: avatarURL,
       image: avatarImage,
-      imageType: fileType,
+      //imageType: fileType,
       aboutMe: bio
     };
 

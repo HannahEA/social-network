@@ -178,7 +178,6 @@ func (repo *dbStruct) ReturnId(email string) (int, error) {
 }
 
 //Code to send avatar image back to the front end:
-//Make it like: func (repo *dbStruct) ValidateLogin(email, password string) (bool, error) {...
 func (repo *dbStruct) getAvatar(email string) (string, error) {
 	// Retrieve the avatar image or URL from the database
 	query := "SELECT avatarURL, imageFile FROM Users WHERE email = ?"
