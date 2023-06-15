@@ -77,8 +77,14 @@ const Posts = () => {
     setCommentContent(parseInt(event.target.value))
   }
   const handleGetComments = (event) => {
+    const Id = event.target.value.toString()
     console.log(event.target.value)
-    Comments(parseInt(event.target.value))
+    const comments =  document.getElementById(Id)
+    if (comments.style.display == "flex") {
+      comments.style.display = "none"
+    } else {
+      comments.style.display = "flex"
+    }
   }
   const handleSendComment = (event) => {
     event.preventDefault();
@@ -90,17 +96,25 @@ const Posts = () => {
           <div className="flex grid grid-cols-2 gap-4 mb-4">
             
             {pData.map(post => (
-              <div key={post.postId} id={post.postId} className="flex flex-col justify-center border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" >
+              <div key={post.postId}  className="flex flex-col justify-center border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" >
                 <h1 className="text-4xl text-center ">{post.title}</h1>
                 <h2 className="text-xl text-center ">{post.author}</h2>
                 <h2 className="text-xl text-center ">{post.date}</h2>
                 <h2 className="text-xl text-center ">{post.content}</h2>
                 <h2 className="text-xl text-center ">{post.category}</h2>
                 <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className="text-xl text-center text-blue-300">Comments</button>
-                <div  className="flex justify-center">
-                  <input onChange={(e)=>handleContent(e)}  className="m-2" type="text" />
-                  <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit">Submit</button>
-                </div>
+                  <div className="text-center ">
+                    <input onChange={(e)=>handleContent(e)}  className="m-2" type="text" />
+                    <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit">Submit</button>
+                  </div>
+                  <div id = {post.postId} value = {post.postId} className="hidden flex-1 justify-center">
+                    {post.comments.length > 0 && ( post.comments.map( comment => (
+                      <div className=""> 
+                        <h2>{comment.content}</h2>
+                        <h2>{comment.date}</h2>
+                      </div>
+                    )))}
+                  </div> 
                 
               </div>
             ))}

@@ -51,7 +51,7 @@ func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 		}
 		creationDate = pTime.Format("Mon, 02 Jan 2006 15:04:05 MST")
 		posts = append(posts, Post{
-			PostID: postID,
+			PostID:   postID,
 			Author:   author,
 			Title:    title,
 			Category: category,
@@ -91,13 +91,24 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			return
 		}
 	} else if data.PostType == "getPosts" {
+		fmt.Println("getting Public posts")
 		posts, err := service.repo.GetPublicPosts()
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
 			return
 		}
-		fmt.Println(posts)
+		fmt.Println("getting comments for posts")
+		for i, p := range posts {
+			comments, err := service.repo.GetComments(p)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to get comments", http.StatusInternalServerError)
+				return
+			}
+			posts[i].Comments = comments
+		}
+		fmt.Println("successfully retrieved comments")
 		json.NewEncoder(w).Encode(posts)
 	} else if data.PostType == "getComments" {
 		comments, err := service.repo.GetComments(data)
@@ -120,7 +131,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 }
 
 func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
-	var comments []Comment
+	comments:= []Comment{}
 	rows, err := repo.db.Query(`SELECT commentID, author, content, creationDate FROM comments WHERE postID = ? `, post.PostID)
 	if err != nil {
 		return comments, fmt.Errorf("GetComments DB Query error: %+v\n", err)
@@ -141,10 +152,10 @@ func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 		creationDate = cTime.Format("Mon, 02 Jan 2006 15:04:05 MST")
 		comments = append(comments, Comment{
 			CommentID: commentID,
-			PostID: post.PostID,
-			Author:   author,
-			Content:  content,
-			Date:     creationDate,
+			PostID:    post.PostID,
+			Author:    author,
+			Content:   content,
+			Date:      creationDate,
 		})
 	}
 	err = rows.Err()
@@ -155,7 +166,7 @@ func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 
 }
 
-func (repo *dbStruct) AddCommentToDB(post Post)  error {
+func (repo *dbStruct) AddCommentToDB(post Post) error {
 	// time
 	date := time.Now()
 	//cookie
@@ -164,7 +175,7 @@ func (repo *dbStruct) AddCommentToDB(post Post)  error {
 	//user info
 	user := repo.GetUserByCookie(cookieID)
 
-	_, err := repo.db.Exec("INSERT INTO Comments ( postID, authorID, author, content, creationDate) VALUES ( ?, ?, ?, ?, ?)", post.PostID, user.id , user.NickName, post.Content, date)
+	_, err := repo.db.Exec("INSERT INTO Comments ( postID, authorID, author, content, creationDate) VALUES ( ?, ?, ?, ?, ?)", post.PostID, user.id, user.NickName, post.Content, date)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf("failed to add Comment to Database")
