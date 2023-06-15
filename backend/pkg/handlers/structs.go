@@ -55,7 +55,7 @@ type LoginData struct {
 }
 
 type Post struct {
-	PostID     string `json:"postId"`
+	PostID     int    `json:"postId"`
 	Author     string `json:"author"`
 	Title      string `json:"title"`
 	Content    string `json:"content"`
@@ -64,6 +64,15 @@ type Post struct {
 	Visibility string `json:"visibility"`
 	Cookie     string `json:"cookie"`
 	PostType   string `json:"type"`
+}
+
+type Comment struct {
+	CommentID int    `json:"commentId"`
+	PostID    int    `json:"postId"`
+	AuthorID  int    `json:"authorId"`
+	Author    string `json:"author"`
+	Content   string `json:"content"`
+	Date      string `string:"date"`
 }
 
 // type Profile struct {

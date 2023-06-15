@@ -27,13 +27,16 @@ func NewService(repo AllDbMethods) AllHandlersMethods {
 }
 
 type AllDbMethods interface {
+	//registration
 	IsEmailNicknameTaken(email string, nickname string) bool
 	RegisterUser(data RegistrationData) error
+	//login
 	ValidateLogin(email, password string) (bool, error)
 	GetUserEmail(userId string) (string, error)
 	AddSession(w http.ResponseWriter, sessionName string, user *User)
 	InsertSession(u *User, session *http.Cookie) *Session
 	IsUserAuthenticated(w http.ResponseWriter, u *User) error
+	//logout
 	DeleteSession(w http.ResponseWriter, cookieValue string) error
 	GetUserByCookie(cookieValue string) *User
 	NewUser() *User
@@ -42,7 +45,10 @@ type AllDbMethods interface {
 	ReturnId(email string) (int, error)
 	//post database queries
 	AddPostToDB(data Post) error
-	GetPublicPosts(data Post) ([]Post,error)
+	GetPublicPosts() ([]Post,error)
+	//comment database queries
+	AddCommentToDB(data Post) error
+	GetComments(data Post) ([]Comment,error)
 	getAvatar(email string)(string, error)
 }
 //The dabataseStruct
