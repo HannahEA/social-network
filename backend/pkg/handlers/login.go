@@ -181,7 +181,7 @@ func (repo *dbStruct) ReturnId(email string) (int, error) {
 func (repo *dbStruct) getAvatar(email string) (string, error) {
 	// Retrieve the avatar image or URL from the database
 	query := "SELECT avatarURL, imageFile FROM Users WHERE email = ?"
-	var avatarImage string // need to be handle
+	var avatarImage string
 	var avatarURL string
 	err := repo.db.QueryRow(query, email).Scan(&avatarURL, &avatarImage)
 	if err != nil {

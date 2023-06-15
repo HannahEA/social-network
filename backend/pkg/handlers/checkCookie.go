@@ -1,14 +1,13 @@
 package handlers
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 )
 
 // checkCookieHandler handles the "/checkCookie" endpoint
-func checkCookieHandler(w http.ResponseWriter, r *http.Request) {
+func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("cookie function called")
 
 	// Retrieve the cookie value from the request
@@ -24,15 +23,30 @@ func checkCookieHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("cookie received:", cookieValue)
 
+	count := service.repo.checkCookieDB(cookieValue)
+
+		// Return the result based on the count value
+		if count > 0 {
+			// Cookie is found
+			fmt.Fprint(w, "Cookie is found")
+		} else {
+			// Cookie is not found
+			fmt.Fprint(w, "Cookie is not found")
+		}
+
 	// Open the SQLite3 database connection
-	db, err := sql.Open("sqlite3", "database.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+	// db, err := sql.Open("sqlite3", "database.db")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	//defer db.Close()
 
 	// Prepare the SQL statement to check the cookie value in the Sessions table
-	stmt, err := db.Prepare("SELECT COUNT(*) FROM Sessions WHERE cookieValue = ?")
+	
+}
+
+func (repo *dbStruct)checkCookieDB(cookieValue string) int {
+	stmt, err := repo.db.Prepare("SELECT COUNT(*) FROM Sessions WHERE cookieValue = ?")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,13 +57,6 @@ func checkCookieHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+return count
 
-	// Return the result based on the count value
-	if count > 0 {
-		// Cookie is found
-		fmt.Fprint(w, "Cookie is found")
-	} else {
-		// Cookie is not found
-		fmt.Fprint(w, "Cookie is not found")
-	}
 }

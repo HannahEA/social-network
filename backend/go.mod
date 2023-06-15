@@ -8,4 +8,7 @@ require (
 	golang.org/x/crypto v0.9.0
 )
 
-require gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+require (
+	github.com/golang-migrate/migrate/v4 v4.16.2
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+)

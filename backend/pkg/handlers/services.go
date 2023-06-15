@@ -13,6 +13,7 @@ type AllHandlersMethods interface {
 	HandleLogout(w http.ResponseWriter, r *http.Request)
 	HandleSession(w http.ResponseWriter, r *http.Request)
 	PostHandler(w http.ResponseWriter, r *http.Request)
+	CheckCookieHandler(w http.ResponseWriter, r *http.Request)
 	// checkCookieHandler(w http.ResponseWriter, r *http.Request)
 }
 // A wrapper for 'AllDbMethods' that groups all database methods.
@@ -50,6 +51,7 @@ type AllDbMethods interface {
 	AddCommentToDB(data Post) error
 	GetComments(data Post) ([]Comment,error)
 	getAvatar(email string)(string, error)
+	checkCookieDB(cookieValue string)int
 }
 //The dabataseStruct
 type dbStruct struct {

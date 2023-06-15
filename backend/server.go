@@ -20,8 +20,12 @@ import (
 )
 
 func main() {
-	db := database.CreateDatabase()
+	db := database.OpenDatabase("pkg/db/database/database.db")
 
+	err := database.MigrateDatabe(db, "file://pkg/db/migrations/database")
+	if err != nil {
+		log.Fatal(err)
+	}
 	newRepo := handlers.NewDbStruct(db)
 	newService := handlers.NewService(newRepo)
 	defer database.Database.Close()
@@ -30,7 +34,7 @@ func main() {
 	http.HandleFunc("/register", newService.HandleRegistration)
 	http.HandleFunc("/login", newService.HandleLogin)
 	http.HandleFunc("/logout", newService.HandleLogout)
-	http.HandleFunc("/checkCookie", checkCookieHandler)
+	http.HandleFunc("/checkCookie", newService.CheckCookieHandler)
 	http.HandleFunc("/deleteCookie", deleteCookie)
 	http.HandleFunc("/uploadAvatar", handleProfilePictureUpload)
 	http.HandleFunc("/image", handleImage)
@@ -92,7 +96,6 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 func insertImageIntoDB(username string, imageData []byte) error {
 	// Open the SQLite database connection
 	db, err := sql.Open("sqlite3", "database.db")
@@ -116,7 +119,6 @@ func insertImageIntoDB(username string, imageData []byte) error {
 
 	return nil
 }
-
 
 func handleProfilePictureUpload(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the uploaded file from the form data
@@ -161,8 +163,6 @@ func handleProfilePictureUpload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
-
 func generateUniqueusername(originalusername string) string {
 	// Generate a unique username using a combination of original username and current timestamp
 	timestamp := time.Now().UnixNano()
@@ -170,8 +170,6 @@ func generateUniqueusername(originalusername string) string {
 	username := fmt.Sprintf("%d%s", timestamp, ext)
 	return username
 }
-
-
 
 func deleteCookie(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the cookie value from the request
@@ -218,7 +216,6 @@ func deleteCookie(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Cookie is not found or not deleted")
 	}
 }
-
 
 // checkCookieHandler handles the "/checkCookie" endpoint
 func checkCookieHandler(w http.ResponseWriter, r *http.Request) {

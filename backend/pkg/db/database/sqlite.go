@@ -4,29 +4,66 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var Database *sql.DB
 
-func CreateDatabase() *sql.DB {
-	if _, err := os.Stat("database.db"); os.IsNotExist(err) {
-		file, err := os.Create("database.db")
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		file.Close()
-	}
+func OpenDatabase(filename string) *sql.DB {
+	// if _, err := os.Stat(filename); os.IsNotExist(err) {
+	// 	file, err := os.Create("database.db")
+	// 	if err != nil {
+	// 		log.Fatal(err.Error())
+	// 	}
+	// 	file.Close()
+	// }
 
-	sqliteDatabase, err := sql.Open("sqlite3", "database.db")
+	sqliteDatabase, err := sql.Open("sqlite3", filename)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	return sqliteDatabase
+}
 
+//code from: https://github.com/golang-migrate/migrate#readme
+//creates the latest sqlite.go database
+func MigrateDatabe(sql3 *sql.DB, filePath string) error {
+	driver, err := sqlite3.WithInstance(sql3, &sqlite3.Config{})
+	if err != nil {
+		fmt.Println("With Instance err", err)
+		return err
+	}
+	m, err := migrate.NewWithDatabaseInstance(
+		filePath,
+		"sqlite3", driver)
+	if err != nil {
+		fmt.Println("New with database instance err", err)
+		return err
+	}
+	m.Up() // or m.Step(2) if you want to explicitly set the number of migrations to run
+	return nil
+}
+
+/*func CreateDatabase() *sql.DB {
+	// if _, err := os.Stat("database.db"); os.IsNotExist(err) {
+	// 	file, err := os.Create("database.db")
+	// 	if err != nil {
+	// 		log.Fatal(err.Error())
+	// 	}
+	// 	file.Close()
+	// }
+
+	// sqliteDatabase, err := sql.Open("sqlite3", "database.db")
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// }
+	sqliteDatabase := OpenDatabase("database.db")
 	// Create Profile table if none exists
-	_, err = sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "Profile" (
+	_, err := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "Profile" (
 		"userID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 		"nickName" TEXT,
 		filename TEXT,
@@ -231,4 +268,4 @@ func CreateDatabase() *sql.DB {
 	//Database = sqliteDatabase
 	return sqliteDatabase
 	//return Database
-}
+}*/

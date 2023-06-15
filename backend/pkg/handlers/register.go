@@ -99,6 +99,136 @@ func (repo *dbStruct) RegisterUser(data RegistrationData) error {
 	return nil
 }
 
+/*This is an application of Ricky's and Kievon's approach 
+  that stores image file in the 'uploads' folder:
+var data RegistrationData
+var imgPath string
+
+func (service *AllDbMethodsWrapper) HandleRegistration(w http.ResponseWriter, r *http.Request) {
+	//=====> Start of avatar file handling <=====
+	var imgName string
+
+	// avtPath, err2 := service.SaveAvatarFile(w, r)
+	// if err2 != nil {
+	// 	fmt.Println("Avatar file error", err2)
+
+	// }
+	//=====> End of avatar file handling <=====
+
+	// Parse the request body into a RegistrationData struct
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		fmt.Println("handleRegistration: jsonDecoder failed")
+		fmt.Print("Registration data:", data)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	fmt.Println("Registration Data recieved: ", data)
+	//If avatar = image file, make unique image name
+	//and append img type to it, join folder path and file name,
+	//and store folder path to db.
+	if data.ImgType != "" {
+		id := uuid.New()
+		imgName = id.String() + "." + data.ImgType
+		fmt.Print("imgName:", imgName)
+		path := "./backend/pkg/uploads/"
+		imgPath = path + imgName
+		fmt.Print("imgPath:", imgPath)
+		//Store the avatar image file itself into the 'uploads' folder.
+		//First, create a new file on the server and read image file data into it
+		newFile, err := os.Create(imgPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer newFile.Close()
+
+		// Write the file content to the new file in the 'uploads' directory
+		_, err = newFile.Write(data.Image)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, "File uploaded successfully")
+
+	} else {
+		imgPath = ""
+	}
+
+	// Check if the email & nickname already exists
+	if service.repo.IsEmailNicknameTaken(data.Email, data.NickName) {
+		fmt.Println("isEmailTaken", data.Email)
+		response := map[string]string{"message": "Email already taken"}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusConflict)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	// Register the user
+	err = service.repo.RegisterUser(data.Email, data.Password)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Failed to register user", http.StatusInternalServerError)
+		return
+	}
+
+	// Send a response back to the client
+	response := map[string]string{"message": "Registration successful"}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (r *dbStruct) IsEmailTaken(email string) bool {
+	var count int
+	err := r.db.QueryRow("SELECT COUNT(*) FROM Users WHERE email = ?", email).Scan(&count)
+	if err != nil {
+		fmt.Println("IsEmailTaken: Failed to access user database")
+		log.Println(err)
+		return false
+	}
+	return count > 0
+}
+
+func (r *dbStruct) IsEmailNicknameTaken(email string, nickname string) bool {
+	var count int
+	err := r.db.QueryRow("SELECT COUNT(*) FROM Users WHERE email = ? OR nickName = ?", email, nickname).Scan(&count)
+	if err != nil {
+		fmt.Println("IsEmailTaken: Failed to access user database")
+		log.Println(err)
+		return false
+	}
+	return count > 0
+}
+
+func (repo *dbStruct) RegisterUser(email, password string) error {
+	if repo.IsEmailTaken(email) {
+		return fmt.Errorf("email already taken")
+	}
+	// turn the password into a hash to be stored into the db
+	var hash []byte
+	hash, err1 := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err1 != nil {
+		fmt.Println("bcrypt err1:", err1)
+	}
+
+	fmt.Println("hash: ", hash)
+
+	_, err := repo.db.Exec("INSERT INTO Users (firstName, lastName, nickName, age, gender, email, password, avatarURL, imageFile, aboutMe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data.FirstName, data.LastName, data.NickName, data.Age, data.
+		Gender, email, hash, data.Avatar, imgPath, data.AboutMe)
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf("failed to register user")
+	}
+
+	return nil
+}*/
+
+
+
+
+
 // Not being used:
 // func (service *AllDbMethodsWrapper) checkEmailHandler(w http.ResponseWriter, r *http.Request) {
 // 	email := r.URL.Query().Get("email")
