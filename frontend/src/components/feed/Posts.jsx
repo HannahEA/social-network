@@ -74,7 +74,7 @@ const Posts = () => {
   const [commentContent, setCommentContent] = useState("")
 
   const handleContent = (event) => {
-    setCommentContent(parseInt(event.target.value))
+    setCommentContent(event.target.value)
   }
   const handleGetComments = (event) => {
     const Id = event.target.value.toString()
@@ -88,7 +88,7 @@ const Posts = () => {
   }
   const handleSendComment = (event) => {
     event.preventDefault();
-    SubmitComment(commentContent, event.target.value)
+    SubmitComment(commentContent, parseInt(event.target.value))
   }
     return (
       <div>
