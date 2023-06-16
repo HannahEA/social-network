@@ -1219,7 +1219,7 @@ const Feed = (props) => {
            <form onSubmit={submitPost}>
               <span className ="flex p-2.5 pl-5">
                 <p className= "flex-row mr-5 font-bold" >Title</p>
-                <input class="flex-row border-b-2 border-green shadow-md dark:bg-gray-900 dark:text-white" type="text" value={Title} onChange={handleTitle} />
+                <input className="flex-row border-b-2 border-green shadow-md dark:bg-gray-900 dark:text-white" type="text" value={Title} onChange={handleTitle} />
               </span>
               <form onSubmit={addTag}>
                 <span className="flex p-2.5 pl-5">

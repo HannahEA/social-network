@@ -47,3 +47,58 @@ func (service *AllDbMethodsWrapper) HandleLogout(w http.ResponseWriter, r *http.
 
 	}
 }
+
+func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.Request) {
+	// Retrieve the cookie value from the request
+	cookie, err := r.Cookie("user_session")
+	if err != nil {
+		fmt.Fprint(w, "No cookie provided by the client")
+		return
+	}
+
+	// Get the cookie value
+	cookieValue := cookie.Value
+
+//=======> start of db query <============
+	rowsAffected, err := service.repo.DeleteCookieDB(cookieValue)
+	if err != nil {
+		fmt.Print("Error deleting cookie in db",err)
+		return
+	}
+	//=======> end of db query <============
+
+	// Return the result based on the affected rows count
+	if rowsAffected > 0 {
+		// Cookie is deleted
+		fmt.Fprint(w, "Cookie is deleted")
+	} else {
+		// Cookie is not found or not deleted
+		fmt.Fprint(w, "Cookie is not found or not deleted")
+	}
+}
+
+
+func (repo *dbStruct) DeleteCookieDB(cookieValue string) (int64, error) {
+	// Prepare the SQL statement to delete the cookie value from the Sessions table
+	stmt, err:= repo.db.Prepare("DELETE FROM Sessions WHERE cookieValue = ?")
+	if err != nil {
+		fmt.Println("err with deleting cookie from db:", err)
+		return 0, err
+	}
+
+	// Execute the SQL statement to delete the cookie value
+	result, err := stmt.Exec(cookieValue)
+	if err != nil {
+		log.Fatal(err)
+		return 0, err
+	}
+	// Check the affected rows count
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+		return 0, err
+	}
+	return rowsAffected, err
+	
+}
+

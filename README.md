@@ -1,12 +1,21 @@
 Modularization source by Ricky Adriell: https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html
 
 # Database migration
-Install commands for golang migrate package: 
+Article explaining the install commands for golang migrate package: 
 https://www.geeksforgeeks.org/how-to-install-golang-migrate-on-ubuntu/
 
-VSC terminal command to create up/down migration files: 
-migrate create -ext sql -dir ./pkg/db/migrations/database create_sessions_table
+1. Setup the repository to install the migrate package:
+curl -s https://packagecloud.io/install/repositories/golang-migrate/migrate/script.deb.sh | sudo bash
 
+2. Update the system:
+sudo apt-get update
+
+3. Set up golang-migrate:
+sudo apt-get install migrate
+
+4. VSC terminal command to create up/down migration files: 
+migrate create -ext sql -dir ./pkg/db/migrations/database create_sessions_table
+migrate -database YOUR_DATABASE_URL -path PATH_TO_YOUR_MIGRATIONS up
 
 # After downloading this project locally, in VSC terminal run:
 
