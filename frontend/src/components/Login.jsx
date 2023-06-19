@@ -6,9 +6,10 @@ import "notyf/notyf.min.css";
 
 const notyf = new Notyf(); // Create a single instance of Notyf
 
-const LoginPage = ({setUserAvatar}) => {
+const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [userAvatar, setUserAvatar] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,7 +35,7 @@ const LoginPage = ({setUserAvatar}) => {
     };
 
     // Make a POST request to the server
-    fetch("/login", {
+    const data = fetch("/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,13 +47,15 @@ const LoginPage = ({setUserAvatar}) => {
         // Check if the login was successful
         if (data.message === "Login successful") {
           console.log({data});
-          setUserAvatar(data.userAvatar)
+
           // Display a success notification
           notyf.success("Login successful");
+          return data
           // Check the cookie value
-          checkCookie();
+          
         } else if (data.message === "Login unsuccessful") {
           notyf.error("Incorrect email or password");
+          return data
         }
       })
       .catch((error) => {
@@ -60,28 +63,39 @@ const LoginPage = ({setUserAvatar}) => {
         console.error("Error:", error);
         console.log("Error:", error);
       });
+      (async () =>{
+        const dataObj = await data
+          console.log("data 2", dataObj.userAvatar)
+          checkCookie(dataObj.userAvatar);
+      })()
   };
 
-  const checkCookie = () => {
-    fetch("/checkCookie")
-      .then((response) => response.text())
-      .then((data) => {
-        // Handle the response from the server
-        console.log("Cookie check:", data);
+  const checkCookie = (avatar) => {
+     fetch("/checkCookie")
+    .then((response) => response.text())
+    .then((data) => {
+      // Handle the response from the server
+      console.log("Cookie check:", data);
 
-        // Redirect to the feed page if the cookie is found
-        if (data === "Cookie is found") {
-          console.log("Cookie is found, redirecting to feed");
-          navigate("/feed", { state: { email: email } });
-        } else {
-          // console.log("Cookie is not found, redirecting to home");
-          // navigate("/");
-        }
-      })
-      .catch((error) => {
-        // Handle any errors
-        console.error("Error:", error);
-      });
+      // Redirect to the feed page if the cookie is found
+      if (data === "Cookie is found") {
+        console.log("Cookie is found, redirecting to feed");
+        console.log("user", avatar)
+        navigate("/feed", { state: { email: email, avatar:avatar} });
+        
+      
+      } else {
+        return ""
+        // console.log("Cookie is not found, redirecting to home");
+        // navigate("/");
+      }
+    })
+    .catch((error) => {
+      // Handle any errors
+      console.error("Error:", error);
+    });
+   
+     
   };
 
   return (

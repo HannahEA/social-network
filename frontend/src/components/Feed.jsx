@@ -6,9 +6,11 @@ import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
 
-const Feed = (props) => {
+const Feed = () => {
   const location = useLocation();
+  console.log("location", location)
   const email = location.state?.email || ""; // Access the passed email
+  const userAvatar = location.state?.avatar || ""
   const [Title, setTitle] = useState("");
   const [Content, setContent] = useState("");
   const [Visibility, setVisibility] = useState("");
@@ -634,7 +636,7 @@ const Feed = (props) => {
               <img
                 className="w-8 h-8 rounded-full"
                 // src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
-                src={props.userAvatar}
+                src={userAvatar}
                 alt="user photo"
               />
             </button>
@@ -1232,7 +1234,7 @@ const Feed = (props) => {
             <img
               className="w-16 h-16 mb-2 rounded-full"
               //src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
-              src={props.userAvatar}
+              src={userAvatar}
               alt="user photo"
             />
             <div className="flex justify-center items-center flex-col">
@@ -1275,7 +1277,7 @@ const Feed = (props) => {
                 <option name="private" value={Visibility}>
                   Private
                 </option>
-                <input type="file" />
+                
               </select>
               <div className="flex">
               <input
