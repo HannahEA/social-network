@@ -14,7 +14,7 @@ type AllHandlersMethods interface {
 	HandleSession(w http.ResponseWriter, r *http.Request)
 	PostHandler(w http.ResponseWriter, r *http.Request)
 	CheckCookieHandler(w http.ResponseWriter, r *http.Request)
-	// checkCookieHandler(w http.ResponseWriter, r *http.Request)
+	DeleteCookie(w http.ResponseWriter, r *http.Request)
 }
 // A wrapper for 'AllDbMethods' that groups all database methods.
 type AllDbMethodsWrapper struct {
@@ -44,6 +44,7 @@ type AllDbMethods interface {
 	FindByUserID(UID int64) *User
 	PopulateTheSessionsDB(userID int, cookieName, cookieValue string) error
 	ReturnId(email string) (int, error)
+	DeleteCookieDB(cookieValue string) (int64, error)
 	//post database queries
 	AddPostToDB(data Post) error
 	GetPublicPosts() ([]Post,error)

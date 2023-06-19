@@ -35,7 +35,7 @@ func main() {
 	http.HandleFunc("/login", newService.HandleLogin)
 	http.HandleFunc("/logout", newService.HandleLogout)
 	http.HandleFunc("/checkCookie", newService.CheckCookieHandler)
-	http.HandleFunc("/deleteCookie", deleteCookie)
+	http.HandleFunc("/deleteCookie", newService.DeleteCookie)
 	http.HandleFunc("/uploadAvatar", handleProfilePictureUpload)
 	http.HandleFunc("/image", handleImage)
 	http.HandleFunc("/post", newService.PostHandler)
@@ -171,7 +171,9 @@ func generateUniqueusername(originalusername string) string {
 	return username
 }
 
-func deleteCookie(w http.ResponseWriter, r *http.Request) {
+//============> Start of deleteCookie function moved to logout.go <================
+
+/*func deleteCookie(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the cookie value from the request
 	cookie, err := r.Cookie("user_session")
 	if err != nil {
@@ -181,6 +183,8 @@ func deleteCookie(w http.ResponseWriter, r *http.Request) {
 
 	// Get the cookie value
 	cookieValue := cookie.Value
+
+//=======> start of db query <============
 
 	// Open the SQLite3 database connection
 	db, err := sql.Open("sqlite3", "database.db")
@@ -207,6 +211,8 @@ func deleteCookie(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
+	//=======> end of db query <============
+
 	// Return the result based on the affected rows count
 	if rowsAffected > 0 {
 		// Cookie is deleted
@@ -215,7 +221,10 @@ func deleteCookie(w http.ResponseWriter, r *http.Request) {
 		// Cookie is not found or not deleted
 		fmt.Fprint(w, "Cookie is not found or not deleted")
 	}
-}
+}*/
+
+//============> End of deleteCookie function moved to logout.go <================
+
 
 // checkCookieHandler handles the "/checkCookie" endpoint
 func checkCookieHandler(w http.ResponseWriter, r *http.Request) {

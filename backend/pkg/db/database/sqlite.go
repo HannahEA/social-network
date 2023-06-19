@@ -30,13 +30,15 @@ func OpenDatabase(filename string) *sql.DB {
 }
 
 //code from: https://github.com/golang-migrate/migrate#readme
-//creates the latest sqlite.go database
+//apply migration
 func MigrateDatabe(sql3 *sql.DB, filePath string) error {
+	//create a driver instance for the SQLite database
 	driver, err := sqlite3.WithInstance(sql3, &sqlite3.Config{})
 	if err != nil {
 		fmt.Println("With Instance err", err)
 		return err
 	}
+	// create a new migration instance
 	m, err := migrate.NewWithDatabaseInstance(
 		filePath,
 		"sqlite3", driver)
@@ -44,10 +46,13 @@ func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 		fmt.Println("New with database instance err", err)
 		return err
 	}
-	m.Up() // or m.Step(2) if you want to explicitly set the number of migrations to run
+	// execute the Up method on the migration instance
+	m.Up() // or m.Step(n) if you want to explicitly set the number of migrations to run to n
 	return nil
 }
 
+//Below is not being used as now we implement migration,
+//but good to keep as back-up.
 /*func CreateDatabase() *sql.DB {
 	// if _, err := os.Stat("database.db"); os.IsNotExist(err) {
 	// 	file, err := os.Create("database.db")

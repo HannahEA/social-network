@@ -7,6 +7,8 @@ import {
     FaSun,
   } from 'react-icons/fa';
   import useDarkMode from './useDarkMode.jsx';
+
+  
   
   const TopNavigation = () => {
     return (
@@ -14,7 +16,7 @@ import {
       bg-white dark:bg-gray-900 dark:text-white shadow-lg"'>
 
         {/* <HashtagIcon />*/}
-        <Title /> 
+        {/* <Title />  */}
         <ThemeIcon />
         {/* <Search />
         <BellIcon />
@@ -30,9 +32,15 @@ import {
     return (
       <span onClick={handleMode}>
         {darkTheme ? (
+          <div>
           <FaSun size='24' className='top-navigation-icon' />
+          <h5 className='title-text'>Light Mode</h5>
+          </div>
         ) : (
+          <div>
           <FaMoon size='24' className='top-navigation-icon' />
+          <h5 className='title-text'>Dark Mode</h5>
+          </div>
         )}
       </span>
     );
@@ -47,6 +55,10 @@ import {
 //   const BellIcon = () => <FaRegBell size='24' className='top-navigation-icon' />;
 //   const UserCircle = () => <FaUserCircle size='24' className='top-navigation-icon' />;
 //   const HashtagIcon = () => <FaHashtag size='20' className='title-hashtag' />;
-   const Title = () => <h5 className='title-text'>Dark/ Light Mode</h5>;
+  // const Title = () => <h5 className='title-text'>Dark/ Light Mode</h5>;
   
-  export default TopNavigation;
+  
+  
+  
+  
+   export default TopNavigation;
