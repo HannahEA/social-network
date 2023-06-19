@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS "Posts" (
 		"title" TEXT NOT NULL, 
 		"content" TEXT NOT NULL, 
 		"category" TEXT NOT NULL,
+		"imageURL" STRING,
+		"imageFile" BLOB,
 		"creationDate" TIMESTAMP,
 		"cookieID" BLOB,
 		"postVisibility" TEXT NOT NULL,

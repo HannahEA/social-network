@@ -5,13 +5,15 @@ import "notyf/notyf.min.css";
 
 const notyf = new Notyf(); // Create a single instance of Notyf
 
-const SubmitPost = ({title, content, visibility}) => {
+const SubmitPost = ({title, content, visibility, url, file}) => {
 
- console.log(title, content, visibility)
+ console.log(url, file)
  const newPost = {
     title: title,
     content: content,
     visibility: visibility,
+    url: url,
+    file: file,
     type: "newPost"
  }
  // Make a POST request to the server

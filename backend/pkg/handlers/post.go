@@ -19,7 +19,7 @@ func (repo *dbStruct) AddPostToDB(post Post) error {
 	user := repo.GetUserByCookie(cookieID)
 	//category
 	post.Category = "filler"
-	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, post.Category, date, cookieID, post.Visibility)
+	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, post.Category, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf("failed to add Post to Database")

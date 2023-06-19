@@ -60,6 +60,8 @@ type Post struct {
 	Title      string    `json:"title"`
 	Content    string    `json:"content"`
 	Category   string    `json:"category"`
+	ImageFile  string    `json:"file"`
+	ImageURL   string    `json:"url"`
 	Date       string    `json:"date"`
 	Visibility string    `json:"visibility"`
 	Cookie     string    `json:"cookie"`

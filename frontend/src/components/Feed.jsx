@@ -15,6 +15,8 @@ const Feed = (props) => {
   const [Tag, setTag] = useState("");
   const navigate = useNavigate();
   const [avatar, setAvatar] = useState(null);
+  const [imageURL, setImageURL] = useState("")
+  const [imageFile, setImageFile] = useState("")
   const notyf = new Notyf();
  
 
@@ -103,15 +105,45 @@ const Feed = (props) => {
   const handleTag = (event) => {
     setTag(event.target.value);
   };
+ //image upload for posts 
+ const handlePostImage = (event) => {
+  const { value } = event.target;
+
+  if (value.startsWith('http') || value.startsWith('https')) {
+    // It's an image URL
+    setImageURL(value);
+  } else {
+    // It's a file upload
+    const file = event.target.files[0];
+
+    //now get file type
+    /*const fType = file.type;
+    console.log({fType});//this should show e.g. "image/jpg"
+    fileType = fType.split("/");
+    fileType = fileType[1];
+    console.log({fileType});*///this should show e.g. "jpg"
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+
+      const result = reader.result;
+      setImageFile(result);
+    };
+    reader.readAsDataURL(file);
+    console.log(imageFile);
+  }
+};
   // on new post form submission, handle in post file
   const submitPost = (event) => {
     event.preventDefault();
     let e = document.getElementById("Visibility");
     let v = e.options[e.selectedIndex].text;
-    SubmitPost({ title: Title, content: Content, visibility: v });
+    SubmitPost({ title: Title, content: Content, visibility: v, url: imageURL, file: imageFile});
     setTitle("");
     setContent("");
     setTag("");
+    setImageURL("");
+    setImageFile("")
   };
   const addTag = (event) => {
     event.preventDefault();
@@ -1225,7 +1257,7 @@ const Feed = (props) => {
                 <span className="flex p-2.5 pl-5">
                 <p className= "flex-row mr-5 font-bold">Tags</p>
                 <input type="text" id="postTags" value={Tag} onChange={handleTag} className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-900 dark:text-white" />
-                <button type="submit" value="Add Tag" className="flex-row pl-2  pr-2 font-bold bg-blue-500 text-white rounded-md">
+                <button type="submit" value="Add Tag" className="flex-row pl-2  pr-2 font-bold bg-blue-500 text-sm text-white rounded-md">
                 {" "}
                 Add Tag
                 </button>
@@ -1235,15 +1267,33 @@ const Feed = (props) => {
                 <p className= "p-2.5 pl-5 font-bold">Content</p>
                 <textarea className="m-5 mt-0 mb-2.5 border-b-2 shadow-md border-green dark:bg-gray-900 dark:text-white" name="postContent" id="postContent" cols="8" rows="3" value={Content} onChange={handleContent}></textarea>
               </div>
-              <select className= "p-2.5 pl-5 font-bold" name="Visibility" id="Visibility" onChange={handleVisibility}>
+              
+                <select className= "ml-5 pl-5 font-bold" name="Visibility" id="Visibility" onChange={handleVisibility}>
                 <option name="public" value={Visibility}>
                   Public
                 </option>
                 <option name="private" value={Visibility}>
                   Private
                 </option>
+                <input type="file" />
               </select>
-              <br />
+              <div className="flex">
+              <input
+                    type="text"
+                    name="imageUrl"
+                    id="imageUrl"
+                    placeholder="Enter image URL"
+                    className="ml-5 m-2.5 pl-5 pr-5 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600"
+                    onChange={handlePostImage}
+                  />
+              <label
+                htmlFor="imageFile"
+                className="ml-5 m-2.5 pl-5 pr-5  items-center justify-center text-sm font-bold bg-blue-500 text-white border border-transparent rounded-lg cursor-pointer hover:bg-blue-700 focus:block outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Upload Image File
+              </label>
+              <input type="file" name="mageFile" id="imageFile" accept="image/*" className="hidden" onChange={handlePostImage} />
+              </div>
               <button className= "ml-5 m-2.5 pl-5 pr-5 font-bold bg-blue-500 text-white rounded-md"  type="submit">Post</button>
             </form>
           </div>
