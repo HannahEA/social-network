@@ -99,9 +99,9 @@ const Posts = () => {
           <div className="flex p-2 m-2 grid grid-cols-2 gap-4 mb-4">
             
             {pData.map(post => (
-              <div className="flex flex-wrap justify-between items-center">
+              <div className="flex flex-col justify-center ">
 
-              <div key={post.postId}  className="flex justify-start items-center border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" >
+              <div key={post.postId}  className=" justify-center items-center border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 " >
                 <h1 className="text-xl text-center ">{post.title}</h1>
                 <h2 className="text-xl text-center ">{post.author}</h2>
                 <h2 className="text-xl text-center ">{post.date}</h2>
@@ -111,7 +111,7 @@ const Posts = () => {
                   <img src={post.url} alt="" className="w-60 h-40 m-auto justify-center text-center" />
                 )}
                 
-                <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className="text-xl text-center text-blue-300">Comments</button>
+                <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className="text-xl text-center justify-center text-blue-300">Comments</button>
                   <div className="text-center ">
                     <input onChange={(e)=>handleContent(e)}  className="m-2" type="text" />
                     <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit">Submit</button>
