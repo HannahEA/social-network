@@ -58,6 +58,7 @@ const Posts = () => {
       .then((response) => response.json())
       .then((data) => {
         // Handle the response from the server 
+      
         setpData(data)
           // display posts
           
@@ -95,15 +96,21 @@ const Posts = () => {
     return (
       <div>
         {pData.length > 0 && (
-          <div className="flex grid grid-cols-2 gap-4 mb-4">
+          <div className="flex p-2 m-2 grid grid-cols-2 gap-4 mb-4">
             
             {pData.map(post => (
-              <div key={post.postId}  className="flex flex-col justify-center border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" >
-                <h1 className="text-4xl text-center ">{post.title}</h1>
+              <div className="flex flex-wrap justify-between items-center">
+
+              <div key={post.postId}  className="flex justify-start items-center border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72" >
+                <h1 className="text-xl text-center ">{post.title}</h1>
                 <h2 className="text-xl text-center ">{post.author}</h2>
                 <h2 className="text-xl text-center ">{post.date}</h2>
                 <h2 className="text-xl text-center ">{post.content}</h2>
                 <h2 className="text-xl text-center ">{post.category}</h2>
+                {post.url.length>0 && (
+                  <img src={post.url} alt="" className="w-60 h-40 m-auto justify-center text-center" />
+                )}
+                
                 <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className="text-xl text-center text-blue-300">Comments</button>
                   <div className="text-center ">
                     <input onChange={(e)=>handleContent(e)}  className="m-2" type="text" />
@@ -117,11 +124,12 @@ const Posts = () => {
                       </div>
                     )))}
                   </div> 
-                
+                </div>
               </div>
             ))}
 
           </div>
+              
       )}
       </div>
     );

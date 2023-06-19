@@ -19,7 +19,7 @@ func (repo *dbStruct) AddPostToDB(post Post) error {
 	user := repo.GetUserByCookie(cookieID)
 	//category
 	post.Category = "filler"
-	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, post.Category, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
+	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, post.Category, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf("failed to add Post to Database")
@@ -30,7 +30,7 @@ func (repo *dbStruct) AddPostToDB(post Post) error {
 func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 
 	posts := []Post{}
-	rows, err := repo.db.Query(`SELECT postID, author, title, content, category, creationDate FROM posts WHERE postVisibility = 'Public' `)
+	rows, err := repo.db.Query(`SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM posts WHERE postVisibility = 'Public' `)
 	if err != nil {
 		return posts, fmt.Errorf("GetPosts DB Query error: %+v\n", err)
 	}
@@ -39,9 +39,11 @@ func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 	var author string
 	var title string
 	var category string
+	var imageURL string
+	var imageFile string 
 	var postcontent string
 	for rows.Next() {
-		err := rows.Scan(&postID, &author, &title, &postcontent, &category, &creationDate)
+		err := rows.Scan(&postID, &author, &title, &postcontent, &category, &imageURL, &imageFile, &creationDate)
 		if err != nil {
 			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v\n", err)
 		}
@@ -56,6 +58,8 @@ func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 			Title:    title,
 			Category: category,
 			Content:  postcontent,
+			ImageFile: imageFile,
+			ImageURL: imageURL,
 			Date:     creationDate,
 		})
 	}

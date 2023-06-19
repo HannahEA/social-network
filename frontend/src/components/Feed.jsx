@@ -7,8 +7,7 @@ import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
 
 const Feed = () => {
-  const location = useLocation();
-  console.log("location", location)
+  const location = useLocation()
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
   const [Title, setTitle] = useState("");
