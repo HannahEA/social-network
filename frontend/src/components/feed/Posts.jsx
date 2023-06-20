@@ -99,41 +99,43 @@ const Posts = () => {
           <div className="flex grid grid-cols-2 gap-4 mb-4">
             
             {pData.map(post => (
-              <div className="bg-white">
+              <div className="">
 
-              <div key={post.postId}  className=" border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 " >
-                <div className="flex justify-start items-center bg-white font-bold ">
-                <h2 className="text-l text-center m-4">{post.author}</h2>  
-                <h2 className="text-l text-center ml-60">{post.date}</h2>
+              <div key={post.postId}  className=" border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
+                <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
+                <h2 className="text-l text-left dark:text-white m-6">{post.author}</h2>  
+                <h2 className="text-l text-right dark:text-white m-6">{post.date}</h2>
                 </div>
                 
                 {post.url.length>0 && 
-                  <img src={post.url} alt="" className="w-60 h-40 m-auto justify-center text-center" />}
+                  <img src={post.url} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
 
                 <div className="flex justify-start items-start" >
                   <div className="flex flex-col m-4">
-                    <h1 className="text-l text-left font-bold ">{post.title}</h1>
-                    <h2 className="text-md text-left ">{post.category}</h2>
+                    <h1 className="text-l text-left font-bold dark:text-white">{post.title}</h1>
+                    <h2 className="text-md text-left dark:text-white">{post.category}</h2>
                   </div>
                  
-                     <h2 className="text-md m-4 mr-2">{post.content}</h2>
+                     <h2 className="text-md m-4 mr-2 dark:text-white">{post.content}</h2>
                  
                  
                 </div>
-                <div id = "CommentsContainer" className="bg-white">
-                  <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className="text-l font-bold m-4 mb-2 text-blue-300">Comments</button>
-                  <div className="text-center ">
-                    <input onChange={(e)=>handleContent(e)}  className="m-4 mt-2 border-b-2 border-gray focus:outline-none" type="text" />
-                    <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit">Submit</button>
+                <hr className="w-10/12 m-auto border-gray-700"/>
+                <div id = "CommentsContainer" className="bg-white dark:bg-gray-800 m-2">
+                  
+                  <div className="flex justify-start items-start">
+                    <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className="text-l font-bold m-4 mb-2 text-blue-400">Comments</button>
+                    <input onChange={(e)=>handleContent(e)}  className="m-4 mt-2 border-b-2 border-gray focus:outline-none dark:bg-gray-800 dark:text-white" type="text" />
+                    <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit" className="p-2 text-sm rounded-lg font-bold bg-blue-600 text-white">Submit</button>
                   </div>
-                  <div id = {post.postId} value = {post.postId} className="hidden justify-center">
+                  <div id = {post.postId} value = {post.postId} className="hidden justify-center dark:text-white">
                     {post.comments.length > 0 ? ( post.comments.map( comment => (
                       <div className=""> 
                         <h2 >{comment.content}</h2>
                         <h2>{comment.date}</h2>
                       </div>
                     ))):
-                    <h2 className="text-l text-center font-bold ">No Comments</h2>
+                    <h2 className="text-l text-center font-bold">No Comments</h2>
                     }
                   </div> 
                 </div>
