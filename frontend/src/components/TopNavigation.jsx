@@ -26,12 +26,14 @@ import {
     );
   };
   
+  //darkTheme represents the current mode, and handleMode toggles the mode when clicked.
   const ThemeIcon = () => {
-    const [darkTheme, setDarkTheme] = useDarkMode();
-    const handleMode = () => setDarkTheme(!darkTheme);
+    const [isDarkTheme, setDarkTheme] = useDarkMode();
+    const handleMode = () => setDarkTheme(!isDarkTheme);
+
     return (
       <span onClick={handleMode}>
-        {darkTheme ? (
+        {isDarkTheme ? (
           <div>
           <FaSun size='24' className='top-navigation-icon' />
           <h5 className='title-text'>Light Mode</h5>
@@ -61,4 +63,4 @@ import {
   
   
   
-   export default TopNavigation;
+   export {TopNavigation, ThemeIcon};

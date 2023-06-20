@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
 import handleLogout from "./feed/Logout";
-import TopNavigation from './TopNavigation.jsx';
+import {TopNavigation, ThemeIcon} from './TopNavigation.jsx';
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
@@ -10,6 +10,7 @@ const Feed = () => {
   const location = useLocation()
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
+ const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
   const [Title, setTitle] = useState("");
   const [Content, setContent] = useState("");
   const [Visibility, setVisibility] = useState("");
@@ -19,7 +20,7 @@ const Feed = () => {
   const [imageURL, setImageURL] = useState("")
   const [imageFile, setImageFile] = useState("")
   const notyf = new Notyf();
- 
+
 
   const handleAvatarChange = (event) => {
     setAvatar(event.target.files[0]);
@@ -184,6 +185,7 @@ const Feed = () => {
     <div className='content-container'>
     {/* <TopNavigation /> */}
     </div>
+    <ThemeIcon isDarkTheme={isDarkTheme} setDarkTheme={setDarkTheme} />
       <nav className="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
         <div className="flex flex-wrap justify-between items-center">
           <div className="flex justify-start items-center">
@@ -633,7 +635,7 @@ const Feed = () => {
             >
               <span className="sr-only">Open user menu</span>
               <img
-                className="w-8 h-8 rounded-full"
+                className={`w-10 h-10 rounded-full border-2 border-solid border-[#3b82f6] dark:border-[#f8fafc]`}
                 // src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
                 src={userAvatar}
                 alt="user photo"
@@ -1219,11 +1221,11 @@ const Feed = () => {
           </div>
         </div>
       </aside>
-      <main className="p-4 md:ml-64 h-auto pt-20">
-        <h1>Profile Picture Upload</h1>
-        <form id="uploadForm" encType="multipart/form-data">
+      <main className="p-[8rem] md:ml-64 h-auto pt-20">
+        <h1 className="text-black dark:text-white" >Profile Picture Upload</h1>
+        <form className="text-black dark:text-white" id="uploadForm" encType="multipart/form-data">
           <input type="file" accept="image/*" onChange={handleAvatarChange} />
-          <button type="submit" onClick={uploadAvatar}>
+          <button className="text-black dark:text-white" type="submit" onClick={uploadAvatar}>
             Upload
           </button>
         </form>
@@ -1231,7 +1233,8 @@ const Feed = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div className="  dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img
-              className="w-16 h-16 mb-2 rounded-full"
+              //className="w-16 h-16 mb-2 rounded-full border-2 border-solid border-white-500"
+              className={`w-16 h-16 rounded-full border-2 border-solid border-[#3b82f6] dark:border-[#f8fafc]`}
               //src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
               src={userAvatar}
               alt="user photo"
