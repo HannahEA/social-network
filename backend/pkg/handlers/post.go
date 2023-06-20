@@ -35,33 +35,47 @@ func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 		return posts, fmt.Errorf("GetPosts DB Query error: %+v\n", err)
 	}
 	var postID int
-	var creationDate string
+	var postDate string
 	var author string
 	var title string
 	var category string
 	var imageURL string
-	var imageFile string 
+	var imageFile string
 	var postcontent string
 	for rows.Next() {
-		err := rows.Scan(&postID, &author, &title, &postcontent, &category, &imageURL, &imageFile, &creationDate)
+		err := rows.Scan(&postID, &author, &title, &postcontent, &category, &imageURL, &imageFile, &postDate)
 		if err != nil {
 			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v\n", err)
 		}
-		pTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", creationDate)
+		postTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", postDate)
+		fmt.Println("postTime", postTime)
 		if parseError != nil {
 			log.Fatal("getPublicPosts: parse creationDate Error")
 		}
-		creationDate = pTime.Format("Mon, 02 Jan 2006 15:04:05 MST")
-		posts = append(posts, Post{
-			PostID:   postID,
-			Author:   author,
-			Title:    title,
-			Category: category,
-			Content:  postcontent,
+		//get the current date
+		currTime := time.Now()
+		currDate := currTime.Format("2006-01-02")
+		//get the date the post was created
+		postDate = postTime.Format("2006-01-02")
+		//if the post was created today
+		if currDate == postDate {
+			//send the time insted of the date
+
+			postDate = postTime.Format("3:04PM")
+			fmt.Println("Today")
+		}
+		fmt.Println("currDate", currDate)
+		fmt.Println("postDate", postDate)
+		posts = append( [] Post{{
+			PostID:    postID,
+			Author:    author,
+			Title:     title,
+			Category:  category,
+			Content:   postcontent,
 			ImageFile: imageFile,
-			ImageURL: imageURL,
-			Date:     creationDate,
-		})
+			ImageURL:  imageURL,
+			Date:      postDate,
+	}}, posts...)
 	}
 	err = rows.Err()
 	if err != nil {
@@ -135,7 +149,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 }
 
 func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
-	comments:= []Comment{}
+	comments := []Comment{}
 	rows, err := repo.db.Query(`SELECT commentID, author, content, creationDate FROM comments WHERE postID = ? `, post.PostID)
 	if err != nil {
 		return comments, fmt.Errorf("GetComments DB Query error: %+v\n", err)

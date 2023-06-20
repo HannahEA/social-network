@@ -1252,12 +1252,12 @@ const Feed = () => {
            <form onSubmit={submitPost}>
               <span className ="flex p-2.5 pl-5">
                 <p className= "flex-row mr-5 font-bold" >Title</p>
-                <input className="flex-row border-b-2 border-green shadow-md dark:bg-gray-900 dark:text-white" type="text" value={Title} onChange={handleTitle} />
+                <input className="flex-row border-b-2 border-green shadow-md dark:bg-gray-900 dark:text-white focus:outline-none" type="text" value={Title} onChange={handleTitle} />
               </span>
               <form onSubmit={addTag}>
                 <span className="flex p-2.5 pl-5">
                 <p className= "flex-row mr-5 font-bold">Tags</p>
-                <input type="text" id="postTags" value={Tag} onChange={handleTag} className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-900 dark:text-white" />
+                <input type="text" id="postTags" value={Tag} onChange={handleTag} className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-900 dark:text-white focus:outline-none" />
                 <button type="submit" value="Add Tag" className="flex-row pl-2  pr-2 font-bold bg-blue-500 text-sm text-white rounded-md">
                 {" "}
                 Add Tag
@@ -1266,10 +1266,10 @@ const Feed = () => {
               </form>
               <div className="flex justify-right items-right flex-col">
                 <p className= "p-2.5 pl-5 font-bold">Content</p>
-                <textarea className="m-5 mt-0 mb-2.5 border-b-2 shadow-md border-green dark:bg-gray-900 dark:text-white" name="postContent" id="postContent" cols="8" rows="3" value={Content} onChange={handleContent}></textarea>
+                <textarea className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-900 dark:text-white focus:outline-none" name="postContent" id="postContent" cols="8" rows="3" maxlength="100" value={Content} onChange={handleContent}></textarea>
               </div>
               
-                <select className= "ml-5 pl-5 font-bold" name="Visibility" id="Visibility" onChange={handleVisibility}>
+                <select className= "ml-5 pl-5 font-bold focus:outline-none" name="Visibility" id="Visibility" onChange={handleVisibility}>
                 <option name="public" value={Visibility}>
                   Public
                 </option>
@@ -1285,6 +1285,7 @@ const Feed = () => {
                     id="imageUrl"
                     placeholder="Enter image URL"
                     className="ml-5 m-2.5 pl-5 pr-5 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600"
+                    value={imageURL}
                     onChange={handlePostImage}
                   />
               <label
@@ -1293,7 +1294,7 @@ const Feed = () => {
               >
                 Upload Image File
               </label>
-              <input type="file" name="mageFile" id="imageFile" accept="image/*" className="hidden" onChange={handlePostImage} />
+              <input type="file" name="mageFile" id="imageFile" accept="image/*" className="hidden" value={imageFile} onChange={handlePostImage} />
               </div>
               <button className= "ml-5 m-2.5 pl-5 pr-5 font-bold bg-blue-500 text-white rounded-md"  type="submit">Post</button>
             </form>

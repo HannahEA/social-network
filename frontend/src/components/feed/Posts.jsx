@@ -96,34 +96,47 @@ const Posts = () => {
     return (
       <div>
         {pData.length > 0 && (
-          <div className="flex p-2 m-2 grid grid-cols-2 gap-4 mb-4">
+          <div className="flex grid grid-cols-2 gap-4 mb-4">
             
             {pData.map(post => (
-              <div className="flex flex-col justify-center ">
+              <div className="bg-white">
 
-              <div key={post.postId}  className=" justify-center items-center border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 " >
-                <h1 className="text-xl text-center ">{post.title}</h1>
-                <h2 className="text-xl text-center ">{post.author}</h2>
-                <h2 className="text-xl text-center ">{post.date}</h2>
-                <h2 className="text-xl text-center ">{post.content}</h2>
-                <h2 className="text-xl text-center ">{post.category}</h2>
-                {post.url.length>0 && (
-                  <img src={post.url} alt="" className="w-60 h-40 m-auto justify-center text-center" />
-                )}
+              <div key={post.postId}  className=" border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 " >
+                <div className="flex justify-start items-center bg-white font-bold ">
+                <h2 className="text-l text-center m-4">{post.author}</h2>  
+                <h2 className="text-l text-center ml-60">{post.date}</h2>
+                </div>
                 
-                <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className="text-xl text-center justify-center text-blue-300">Comments</button>
+                {post.url.length>0 && 
+                  <img src={post.url} alt="" className="w-60 h-40 m-auto justify-center text-center" />}
+
+                <div className="flex justify-start items-start" >
+                  <div className="flex flex-col m-4">
+                    <h1 className="text-l text-left font-bold ">{post.title}</h1>
+                    <h2 className="text-md text-left ">{post.category}</h2>
+                  </div>
+                 
+                     <h2 className="text-md m-4 mr-2">{post.content}</h2>
+                 
+                 
+                </div>
+                <div id = "CommentsContainer" className="bg-white">
+                  <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className="text-l font-bold m-4 mb-2 text-blue-300">Comments</button>
                   <div className="text-center ">
-                    <input onChange={(e)=>handleContent(e)}  className="m-2" type="text" />
+                    <input onChange={(e)=>handleContent(e)}  className="m-4 mt-2 border-b-2 border-gray focus:outline-none" type="text" />
                     <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit">Submit</button>
                   </div>
-                  <div id = {post.postId} value = {post.postId} className="hidden flex-1 justify-center">
-                    {post.comments.length > 0 && ( post.comments.map( comment => (
+                  <div id = {post.postId} value = {post.postId} className="hidden justify-center">
+                    {post.comments.length > 0 ? ( post.comments.map( comment => (
                       <div className=""> 
-                        <h2>{comment.content}</h2>
+                        <h2 >{comment.content}</h2>
                         <h2>{comment.date}</h2>
                       </div>
-                    )))}
+                    ))):
+                    <h2 className="text-l text-center font-bold ">No Comments</h2>
+                    }
                   </div> 
+                </div>
                 </div>
               </div>
             ))}
@@ -134,37 +147,6 @@ const Posts = () => {
       </div>
     );
  }
-const Comments = (postId) =>  {
-  const getComments = {
-    postId: postId,
-    type: "getComments"
- }
- const json = JSON.stringify(getComments)
- console.log(json)
-
-    fetch("/post", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(getComments),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle the response from the server
-        console.log("comment data", data);
-          // display posts
-          
-      })
-      .catch((error) => {
-        // Handle any errors
-        console.error("Error:", error);
-      });
-  
-
-
-
-}
 
 const SubmitComment = (comment, postId) => {
   console.log(comment, postId)
