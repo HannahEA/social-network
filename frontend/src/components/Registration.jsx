@@ -1,26 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {TopNavigation, ThemeIcon} from './TopNavigation.jsx';
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import { useNavigate, Link } from "react-router-dom";
 
-let fileType
+ let fileType
 
 const RegistrationPage = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [username, setUsername] = useState("");
-  const [age, setAge] = useState("");
+  // const [age, setAge] = useState("");
+  const [date, setDOB] = useState('');
   const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [avatarURL, setAvatarURL] = useState(null);
-  const [avatarImage, setAvatarImage] = useState("");
+  const [avatarURL, setAvatarURL] = useState("");
+  const [avatarImage, setAvatarImage] = useState(null);
   const [bio, setBio] = useState("");
 
+  const dateInputRef = useRef(null);
   const notyf = new Notyf();
   const navigate = useNavigate();
+
+  //uses the useState hook to keep track of the selected date 
+  //and the useRef hook to get a reference to the date input field. 
+  //It then creates an onChange handler that updates the date state 
+  //when the user selects a date.
+  const handleDateChange = (e) => {
+    setDOB(e.target.value);
+  };
 
   const handleFirstNameChange = (event) => {
     setFirstName(event.target.value);
@@ -34,9 +44,9 @@ const RegistrationPage = () => {
     setUsername(event.target.value);
   };
 
-  const handleAgeChange = (event) => {
-    setAge(event.target.value);
-  };
+  // const handleAgeChange = (event) => {
+  //   setAge(event.target.value);
+  // };
 
   const handleGenderChange = (event) => {
     setGender(event.target.value);
@@ -59,10 +69,11 @@ const RegistrationPage = () => {
   //By using FileReader and readAsDataURL, the image file is converted  
   //to a base64-encoded string, which can be sent as a string value in the JSON data.
   const handleAvatarChange = (event) => {
+    //setAvatarURL("");//throws error: too many renders
     const { value } = event.target;
   
     if (value.startsWith('http') || value.startsWith('https')) {
-      // It's an image URL
+
       setAvatarURL(value);
     } else {
       // It's a file upload
@@ -139,6 +150,12 @@ const RegistrationPage = () => {
       });
   };*/
 
+  //use default image if none was supplied
+    if (avatarImage === null && avatarURL === ""){
+       
+        setAvatarURL("https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj");
+    }
+
   // //HS: NEW UPDATED CODE FOR REGISTRATION
   const handleRegistration = (event) => {
     event.preventDefault();
@@ -148,7 +165,7 @@ const RegistrationPage = () => {
       firstName: firstName,
       lastName: lastName,
       username: username,
-      age: age,
+      age: date,
       gender: gender,
       email: email,
       password: password,
@@ -190,7 +207,7 @@ const RegistrationPage = () => {
           setFirstName("");
           setLastName("");
           setUsername("");
-          setAge("");
+          setDOB("");
           setGender("");
           setEmail("");
           setPassword("");
@@ -340,7 +357,7 @@ const RegistrationPage = () => {
                   onChange={handleUsernameChange}
                 />
               </div>
-              <div>
+              {/* <div>
                 <label htmlFor="age" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Age
                 </label>
@@ -353,7 +370,19 @@ const RegistrationPage = () => {
                   value={age}
                   onChange={handleAgeChange}
                 />
-              </div>
+              </div> */}
+              <div>
+              <label htmlFor="gender" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Your DOB
+              </label>
+              <input
+                type="date"
+                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  onChange={handleDateChange}
+                  ref={dateInputRef}
+              />
+          </div>
+
               <div>
                 <label htmlFor="gender" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Gender

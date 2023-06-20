@@ -1221,7 +1221,7 @@ const Feed = () => {
           </div>
         </div>
       </aside>
-      <main className="p-[8rem] md:ml-64 h-auto pt-20">
+      <main className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
         <h1 className="text-black dark:text-white" >Profile Picture Upload</h1>
         <form className="text-black dark:text-white" id="uploadForm" encType="multipart/form-data">
           <input type="file" accept="image/*" onChange={handleAvatarChange} />
