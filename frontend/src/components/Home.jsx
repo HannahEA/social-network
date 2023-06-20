@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import TopNavigation from './TopNavigation.jsx';
+import {TopNavigation, ThemeIcon} from './TopNavigation.jsx';
 import { Link } from "react-router-dom";
 import {FaMoon, FaSun} from 'react-icons/fa';
 

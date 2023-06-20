@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import TopNavigation from './TopNavigation.jsx';
+import {TopNavigation, ThemeIcon} from './TopNavigation.jsx';
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import { useNavigate, Link } from "react-router-dom";

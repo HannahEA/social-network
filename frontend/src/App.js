@@ -4,7 +4,7 @@ import RegistrationPage from "./components/Registration";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Feed from "./components/Feed";
-import TopNavigation from "./components/TopNavigation";
+import {TopNavigation, ThemeIcon} from "./components/TopNavigation";
 
 function App() {
   const [authenticated, setAuthenticated] = useState(false);
