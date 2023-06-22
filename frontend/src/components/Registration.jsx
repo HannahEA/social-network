@@ -16,8 +16,8 @@ const RegistrationPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [avatarURL, setAvatarURL] = useState("");
-  const [avatarImage, setAvatarImage] = useState(null);
+  const [avatarURL, setAvatarURL] = useState(null);
+  const [avatarImage, setAvatarImage] = useState("");
   const [bio, setBio] = useState("");
 
   const dateInputRef = useRef(null);
@@ -151,7 +151,7 @@ const RegistrationPage = () => {
   };*/
 
   //use default image if none was supplied
-    if (avatarImage === null && avatarURL === ""){
+    if (avatarImage === "" && avatarURL === null){
        
         setAvatarURL("https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj");
     }
@@ -212,8 +212,8 @@ const RegistrationPage = () => {
           setEmail("");
           setPassword("");
           setConfirmPassword("");
-          setAvatarURL("");
-          setAvatarImage(null);
+          setAvatarURL(null);
+          setAvatarImage("");
           setBio("");
 
   //Redirect to the login page
@@ -469,8 +469,6 @@ const RegistrationPage = () => {
                   >
                     Select Image File
                   </label>
-                
-                
                 <input type="file" name="avatar" id="avatar" accept="image/*" className="hidden" onChange={handleAvatarChange} />
                   </div>
                   
