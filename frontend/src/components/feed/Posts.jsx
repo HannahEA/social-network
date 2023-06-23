@@ -109,10 +109,10 @@ const Posts = () => {
                 
                 {post.url.length>0 && 
                   <img src={post.url} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
-{/* ==============> Start post file <==================== */}
+{/* ==============> Start post image file <==================== */}
                 {post.file.length>0 && 
                   <img src={post.file} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
-{/* ==============> End post file <==================== */}
+{/* ==============> End post image file <==================== */}
                 <div className="flex justify-start items-start" >
                   <div className="flex flex-col m-4">
                     <h1 className="text-l text-left font-bold dark:text-white">{post.title}</h1>

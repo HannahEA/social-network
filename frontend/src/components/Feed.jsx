@@ -211,10 +211,10 @@ const Feed = () => {
               </svg>
               <span className="sr-only">Toggle sidebar</span>
             </button>
-            <div className='content-container flex justify-between mr-7'>
+            <div className='content-container flex justify-between mr-7 ml-3'>
           <TopNavigation /> 
           </div>
-            <a href="" className="flex items-center justify-between mr-3">
+            <a href="" className="flex items-center justify-between ml-3 mr-3">
               <img src="https://flowbite.s3.amazonaws.com/logo.svg" className="mr-4 h-8" alt="Social-Network Logo" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Social-Network </span>
             </a>
