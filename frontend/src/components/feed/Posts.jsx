@@ -58,7 +58,7 @@ const Posts = () => {
       .then((response) => response.json())
       .then((data) => {
         // Handle the response from the server 
-      
+       
         setpData(data)
           // display posts
           
@@ -80,8 +80,8 @@ const Posts = () => {
     setCommentContent(event.target.value)
   }
   const handleGetComments = (event) => {
+    // console.log(event.target.value)
     const Id = event.target.value.toString()
-    console.log(event.target.value)
     const comments =  document.getElementById(Id)
     if (comments.style.display == "flex") {
       comments.style.display = "none"
@@ -92,47 +92,124 @@ const Posts = () => {
   const handleSendComment = (event) => {
     event.preventDefault();
     SubmitComment(commentContent, parseInt(event.target.value))
+    setCommentContent("")
   }
     return (
       <div>
         {pData.length > 0 && (
-          <div className="flex grid grid-cols-2 gap-4 mb-4">
-            
-            {pData.map(post => (
-              <div className="">
-
-              <div key={post.postId}  className=" border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
+          <div className=" gap-2 ">
+            <div id="odd" className="float-left w-1/2">
+            {pData.map(post => 
+              (post.postId%2 > 0 &&
+                <div className="m-2  ">
+                <div key={post.postId}  className="  leftborder border-solid rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
                 <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
                 <h2 className="text-l text-left dark:text-white m-6">{post.author}</h2>  
                 <h2 className="text-l text-right dark:text-white m-6">{post.date}</h2>
                 </div>
                 
-                {post.url.length>0 && 
-                  <img src={post.url} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
+                {post.url.length>0 && <img src={post.url} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/> }
 
-                <div className="flex justify-start items-start" >
+                <div id= "postContent" className="flex justify-start items-start" >
                   <div className="flex flex-col m-4">
                     <h1 className="text-l text-left font-bold dark:text-white">{post.title}</h1>
                     <h2 className="text-md text-left dark:text-white">{post.category}</h2>
                   </div>
-                 
-                     <h2 className="text-md m-4 mr-2 dark:text-white">{post.content}</h2>
-                 
-                 
+                  <h2 className="text-md m-4 mr-2 dark:text-white">{post.content}</h2>
                 </div>
-                <hr className="w-10/12 m-auto border-gray-700"/>
-                <div id = "CommentsContainer" className="bg-white dark:bg-gray-800 m-2">
+                <hr className="w-10/12 m-auto border-gray dark:border-gray-700"/>
+                <div id = "CommentsContainer" className="bg-white dark:bg-gray-800 ">
                   
-                  <div className="flex justify-start items-start">
-                    <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className="text-l font-bold m-4 mb-2 text-blue-400">Comments</button>
-                    <input onChange={(e)=>handleContent(e)}  className="m-4 mt-2 border-b-2 border-gray focus:outline-none dark:bg-gray-800 dark:text-white" type="text" />
-                    <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit" className="p-2 text-sm rounded-lg font-bold bg-blue-600 text-white">Submit</button>
+                  <div className="flex justify-start items-center">
+                    <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className=" flex items-center text-l font-bold m-4 mb-2 text-blue-400 ">
+                      Comments 
+                    <svg  aria-hidden="true" value="5" className="w-4 h-4 ml-2 pointer-events-none" fill="black" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path 
+                       fillRule="evenodd" name = {post.postId}
+                       value="5"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                    
+                    <div id="submitComment" className=" grow">
+                      <input onChange={(e)=>handleContent(e)} value={commentContent} className="w-7/12 m-4 mb-2 border-b-2 border-gray focus:outline-none dark:bg-gray-800 dark:text-white" type="text" />
+                      <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit" className="m-2 mb-2 p-2 pt-1 pb-1 text-xs rounded-lg font-bold bg-blue-600 text-white">Submit</button>
+                    </div>
+                    
                   </div>
-                  <div id = {post.postId} value = {post.postId} className="hidden justify-center dark:text-white">
+                  <div id = {post.postId} value = {post.postId} className="hidden flex-col justify-center dark:text-white">
                     {post.comments.length > 0 ? ( post.comments.map( comment => (
-                      <div className=""> 
-                        <h2 >{comment.content}</h2>
-                        <h2>{comment.date}</h2>
+                      <div className="flex flex-row ml-4 mb-2"> 
+                        <div className="flex flex-col">
+                         <h2 className="text-l font-bold">{comment.author}</h2>
+                         <h2 className="text-sm">{comment.Date}</h2> 
+                        </div>
+                        <h2 className="ml-4" >{comment.content}</h2>
+                      </div>
+                     
+                    ))):
+                    <h2 className="text-l text-center font-bold">No Comments</h2>
+                    }
+                  </div> 
+                </div>
+                </div>
+                </div>
+            ))}
+            </div>
+            <div id="even" className="float-left w-1/2">
+              
+                {pData.map(post => (post.postId%2 == 0 && (
+              
+              <div className="m-2  ">
+                <div>
+                
+                <div key={post.postId}  className="  leftborder border-solid rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
+                <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
+                <h2 className="text-l text-left dark:text-white m-6">{post.author}</h2>  
+                <h2 className="text-l text-right dark:text-white m-6">{post.date}</h2>
+                </div>
+                
+                {post.url.length>0 && <img src={post.url} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/> }
+
+                <div id= "postContent" className="flex justify-start items-start" >
+                  <div className="flex flex-col m-4">
+                    <h1 className="text-l text-left font-bold dark:text-white">{post.title}</h1>
+                    <h2 className="text-md text-left dark:text-white">{post.category}</h2>
+                  </div>
+                  <h2 className="text-md m-4 mr-2 dark:text-white">{post.content}</h2>
+                </div>
+                <hr className="w-10/12 m-auto border-gray dark:border-gray-700"/>
+                <div id = "CommentsContainer" className="bg-white dark:bg-gray-800 ">
+                  
+                  <div className="flex justify-start items-center">
+                    <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className=" flex items-center text-l font-bold m-4 mb-2 text-blue-400 ">
+                      Comments 
+                    <svg  aria-hidden="true" value="5" className="w-4 h-4 ml-2 pointer-events-none" fill="black" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path 
+                       fillRule="evenodd" name = {post.postId}
+                       value="5"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                    
+                    <div id="submitComment" className=" grow">
+                      <input onChange={(e)=>handleContent(e)} value={commentContent} className="w-7/12 m-4 mb-2 border-b-2 border-gray focus:outline-none dark:bg-gray-800 dark:text-white" type="text" />
+                      <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit" className="m-2 mb-2 p-2 pt-1 pb-1 text-xs rounded-lg font-bold bg-blue-600 text-white">Submit</button>
+                    </div>
+                    
+                  </div>
+                  <div id = {post.postId} value = {post.postId} className="hidden flex-col justify-center dark:text-white">
+                    {post.comments.length > 0 ? ( post.comments.map( comment => (
+                      <div className="flex flex-row ml-4 mb-2"> 
+                        <div className="flex flex-col">
+                         <h2 className="text-l font-bold">{comment.author}</h2>
+                         <h2 className="text-sm">{comment.Date}</h2> 
+                        </div>
+                        <h2 className="ml-4" >{comment.content}</h2>
                       </div>
                     ))):
                     <h2 className="text-l text-center font-bold">No Comments</h2>
@@ -140,9 +217,11 @@ const Posts = () => {
                   </div> 
                 </div>
                 </div>
+                
+                </div>
               </div>
-            ))}
-
+            )))}
+            </div>
           </div>
               
       )}

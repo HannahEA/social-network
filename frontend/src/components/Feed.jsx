@@ -1269,7 +1269,7 @@ const Feed = () => {
               </form>
               <div className="flex justify-right items-right flex-col">
                 <p className= "p-2.5 pl-5 font-bold">Content</p>
-                <textarea className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none" name="postContent" id="postContent" cols="8" rows="3" maxlength="100" value={Content} onChange={handleContent}></textarea>
+                <textarea className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none" name="postContent" id="postContent" cols="8" rows="3" maxLength="100" value={Content} onChange={handleContent}></textarea>
               </div>
               
                 <select className= "ml-5 pl-5 font-bold focus:outline-none dark:bg-gray-800" name="Visibility" id="Visibility" onChange={handleVisibility}>

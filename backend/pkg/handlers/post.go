@@ -66,7 +66,7 @@ func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 		}
 		fmt.Println("currDate", currDate)
 		fmt.Println("postDate", postDate)
-		posts = append( [] Post{{
+		posts = append([]Post{{
 			PostID:    postID,
 			Author:    author,
 			Title:     title,
@@ -75,7 +75,7 @@ func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 			ImageFile: imageFile,
 			ImageURL:  imageURL,
 			Date:      postDate,
-	}}, posts...)
+		}}, posts...)
 	}
 	err = rows.Err()
 	if err != nil {
@@ -108,6 +108,27 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			http.Error(w, "Failed to add new post", http.StatusInternalServerError)
 			return
 		}
+		fmt.Println("getting Public posts")
+		posts, err := service.repo.GetPublicPosts()
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("getting comments for latest post")
+		
+		comments, err := service.repo.GetComments(posts[0])
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to get comments", http.StatusInternalServerError)
+			return
+		}
+		posts[0].Comments = comments
+			
+		fmt.Println("successfully retrieved comments")
+		fmt.Println("Sending latest post")
+		json.NewEncoder(w).Encode(posts[0])
+		
 	} else if data.PostType == "getPosts" {
 		fmt.Println("getting Public posts")
 		posts, err := service.repo.GetPublicPosts()
@@ -144,6 +165,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			http.Error(w, "Failed to add new comment", http.StatusInternalServerError)
 			return
 		}
+		
 	}
 	fmt.Println("Post")
 }
@@ -155,25 +177,37 @@ func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 		return comments, fmt.Errorf("GetComments DB Query error: %+v\n", err)
 	}
 	var commentID int
-	var creationDate string
+	var commentDate string
 	var author string
 	var content string
 	for rows.Next() {
-		err := rows.Scan(&commentID, &author, &content, &creationDate)
+		err := rows.Scan(&commentID, &author, &content, &commentDate)
 		if err != nil {
 			return comments, fmt.Errorf("GetComments rows.Scan error: %+v\n", err)
 		}
-		cTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", creationDate)
+		cTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", commentDate)
+		fmt.Println("cTime", cTime)
 		if parseError != nil {
-			log.Fatal("getPublicPosts: parse creationDate Error")
+			log.Fatal("getPublicPosts: parse commentDate Error")
 		}
-		creationDate = cTime.Format("Mon, 02 Jan 2006 15:04:05 MST")
+		//get the current date
+		currTime := time.Now()
+		currDate := currTime.Format("2006-01-02")
+		//get the date the post was created
+		commentDate = cTime.Format("2006-01-02")
+		//if the post was created today
+		if currDate == commentDate {
+			//send the time insted of the date
+
+			commentDate = cTime.Format("3:04PM")
+			fmt.Println("Today")
+		}
 		comments = append(comments, Comment{
 			CommentID: commentID,
 			PostID:    post.PostID,
 			Author:    author,
 			Content:   content,
-			Date:      creationDate,
+			Date:      commentDate,
 		})
 	}
 	err = rows.Err()
