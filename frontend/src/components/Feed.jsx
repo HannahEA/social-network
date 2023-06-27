@@ -17,7 +17,7 @@ const Feed = () => {
   const [Tag, setTag] = useState("");
   const navigate = useNavigate();
   const [avatar, setAvatar] = useState(null);
-  const [imageURL, setImageURL] = useState("")
+  const [imageURL, setImageURL] = useState(null)
   const [imageFile, setImageFile] = useState("")
   const notyf = new Notyf();
 
@@ -144,7 +144,7 @@ const Feed = () => {
     setTitle("");
     setContent("");
     setTag("");
-    setImageURL("");
+    setImageURL(null);
     setImageFile("")
   };
   const addTag = (event) => {
@@ -211,10 +211,10 @@ const Feed = () => {
               </svg>
               <span className="sr-only">Toggle sidebar</span>
             </button>
-            <div className='content-container flex justify-between mr-7'>
+            <div className='content-container flex justify-between mr-7 ml-3'>
           <TopNavigation /> 
           </div>
-            <a href="" className="flex items-center justify-between mr-3">
+            <a href="" className="flex items-center justify-between ml-3 mr-3">
               <img src="https://flowbite.s3.amazonaws.com/logo.svg" className="mr-4 h-8" alt="Social-Network Logo" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Social-Network </span>
             </a>
@@ -1288,7 +1288,7 @@ const Feed = () => {
                     id="imageUrl"
                     placeholder="Enter image URL"
                     className="ml-5 m-2.5 pl-5 pr-5 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white"
-                    value={imageURL}
+                    // value={imageURL}
                     onChange={handlePostImage}
                   />
               <label
@@ -1297,7 +1297,8 @@ const Feed = () => {
               >
                 Upload Image File
               </label>
-              <input type="file" name="mageFile" id="imageFile" accept="image/*" className="hidden" value={imageFile} onChange={handlePostImage} />
+               {/* <input type="file" name="imageFile" id="imageFile" accept="image/*" className="hidden" value={imageFile} onChange={handlePostImage} /> */}
+               <input type="file" name="mageFile" id="imageFile" accept="image/*" className="hidden" onChange={handlePostImage} />
               </div>
               <button className= "ml-5 m-2.5 pl-5 pr-5 font-bold bg-blue-500 text-white rounded-md"  type="submit">Post</button>
             </form>

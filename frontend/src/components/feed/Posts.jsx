@@ -108,9 +108,13 @@ const Posts = () => {
                 <h2 className="text-l text-right dark:text-white m-6">{post.date}</h2>
                 </div>
                 
-                {post.url.length>0 && <img src={post.url} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/> }
-
-                <div id= "postContent" className="flex justify-start items-start" >
+                {post.url.length>0 && 
+                  <img src={post.url} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
+{/* ==============> Start post image file <==================== */}
+                {post.file.length>0 && 
+                  <img src={post.file} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
+{/* ==============> End post image file <==================== */}
+                <div className="flex justify-start items-start" >
                   <div className="flex flex-col m-4">
                     <h1 className="text-l text-left font-bold dark:text-white">{post.title}</h1>
                     <h2 className="text-md text-left dark:text-white">{post.category}</h2>

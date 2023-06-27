@@ -15,6 +15,7 @@ sudo apt-get install migrate
 
 4. VSC terminal command to create up/down migration files: 
 migrate create -ext sql -dir ./pkg/db/migrations/database create_sessions_table
+(e.g. migrate create -ext sql -dir ./pkg/db/migrations/database create_followers_table)
 migrate -database YOUR_DATABASE_URL -path PATH_TO_YOUR_MIGRATIONS up
 
 # After downloading this project locally, in VSC terminal run:
