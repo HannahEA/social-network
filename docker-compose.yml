@@ -1,0 +1,46 @@
+version: "3.8"
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+     - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    # attempts to stop any process using port 8000 (fuser -k 8000/tcp), 
+    # and then starts your server (./server). The > /dev/null 2>&1 
+    # redirects the output to suppress any error messages that might occur if the port is not in use.
+    # removed as it stopped the backend container from running at all
+    # command: sh -c "fuser -k 8000/tcp > /dev/null 2>&1 && ./server"
+    environment:
+      DB_URL: "nouchka/sqlite3://db/social-network"
+  db:
+    image: nouchka/sqlite3
+    volumes:
+      - socialnetwork:/backend/pkg/db/database
+
+volumes:
+  socialnetwork:
+
+networks:
+  default:
+    name: socialnetwork
+# name: socialnetwork
+# tags: 
+#   - social-network
+#   - 01F_JS_Project_4
+# authors:
+#   - Hannah
+#   - Helena
+#   - Connor 

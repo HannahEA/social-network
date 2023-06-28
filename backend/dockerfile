@@ -1,0 +1,32 @@
+## FROM alpinelinux/golang
+## FROM golang:latest
+## FROM GO:1.21rc2-alpine3.18
+
+## I am running go1.18.1 linux/amd64 locally, but am using a slightly older 
+## but well-established and tested GO image to minimize any unforeseen complications. 
+FROM golang:1.16-alpine3.14
+# Explicitly install the C compiler ('gcc')  and the required libraries (musl-dev) 
+## which is necessary for Go SQLite library (github.com/mattn/go-sqlite3)
+RUN apk add --no-cache gcc musl-dev
+## Set the working directory inside the container
+WORKDIR /backend
+## Copy the entire project to the working directory
+COPY . .
+## Download and install the Go module dependencies
+## can also use:
+## RUN yarn install --production
+RUN go mod download
+
+## Compiles the Go code and generates an executable named 'server' inside the Docker image.
+RUN go build -o server .
+## Specifies that the container should run the compiled binary when it starts.
+CMD ["./server"]
+
+## Below command attempts to compile and run the code simultaneously 
+## every time the container starts, which is less efficient.
+## ENTRYPOINT ["build/social-network/backend/server"]
+## CMD ["go", "run", "./server.go"]
+
+## Expose the back end port
+EXPOSE 8000
+

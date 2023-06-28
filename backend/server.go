@@ -19,7 +19,34 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Middleware to handle CORS headers
+func corsMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Allow requests from any origin
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+
+		// Allow specific headers
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		// Allow specific HTTP methods
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+
+		// Allow credentials
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		// If it's a preflight request, send a 200 OK status
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// Call the next handler
+		handler.ServeHTTP(w, r)
+	})
+}
 func main() {
+	router := http.NewServeMux()
+	communicateBackFront := corsMiddleware(router)
 	db := database.OpenDatabase("pkg/db/database/database.db")
 
 	err := database.MigrateDatabe(db, "file://pkg/db/migrations/database")
@@ -30,19 +57,19 @@ func main() {
 	newService := handlers.NewService(newRepo)
 	defer database.Database.Close()
 
-	http.HandleFunc("/", reactHandler)
-	http.HandleFunc("/register", newService.HandleRegistration)
-	http.HandleFunc("/login", newService.HandleLogin)
-	http.HandleFunc("/logout", newService.HandleLogout)
-	http.HandleFunc("/checkCookie", newService.CheckCookieHandler)
-	http.HandleFunc("/deleteCookie", newService.DeleteCookie)
-	http.HandleFunc("/uploadAvatar", handleProfilePictureUpload)
-	http.HandleFunc("/image", handleImage)
-	http.HandleFunc("/post", newService.PostHandler)
-	// http.HandleFunc("/feed", handleFeed) // Add the /feed route
+	router.HandleFunc("/", reactHandler)
+	router.HandleFunc("/register", newService.HandleRegistration)
+	router.HandleFunc("/login", newService.HandleLogin)
+	router.HandleFunc("/logout", newService.HandleLogout)
+	router.HandleFunc("/checkCookie", newService.CheckCookieHandler)
+	router.HandleFunc("/deleteCookie", newService.DeleteCookie)
+	router.HandleFunc("/uploadAvatar", handleProfilePictureUpload)
+	router.HandleFunc("/image", handleImage)
+	router.HandleFunc("/post", newService.PostHandler)
+	// router.HandleFunc("/feed", handleFeed) // Add the /feed route
 
 	fmt.Println("Server started on http://localhost:8000")
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	log.Fatal(http.ListenAndServe(":8000", communicateBackFront))
 }
 
 // http://localhost:8000/image?id=1
@@ -224,7 +251,6 @@ func generateUniqueusername(originalusername string) string {
 }*/
 
 //============> End of deleteCookie function moved to logout.go <================
-
 
 // checkCookieHandler handles the "/checkCookie" endpoint
 func checkCookieHandler(w http.ResponseWriter, r *http.Request) {

@@ -4,6 +4,13 @@ import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import { useNavigate, Link } from "react-router-dom";
 
+// environment variable from the docker-compose.yml file. 
+//This variable will contain the URL of your backend service, 
+//allowing your frontend code to make requests to the correct endpoint.
+const apiURL = process.env.REACT_APP_API_URL;
+//const apiURL = "http://localhost:8000"
+
+
  let fileType
 
 const RegistrationPage = () => {
@@ -120,6 +127,7 @@ const RegistrationPage = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
+      credentials: 'include',
     })
       .then((response) => response.json())
       .then((data) => {
@@ -186,12 +194,13 @@ const RegistrationPage = () => {
     }*/
 
   //Make a POST request to the server
-    fetch("/register", {
+    fetch(`${apiURL}/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
+      credentials: 'include',
     })
       .then((response) => response.json())
       .then((data) => {
@@ -217,7 +226,7 @@ const RegistrationPage = () => {
           setBio("");
 
   //Redirect to the login page
-          navigate("/login");
+          navigate(`${apiURL}/login`);
         } else if (data.message === "Email already taken") {
           notyf.error("Email already taken");
         } else {
@@ -262,6 +271,7 @@ const RegistrationPage = () => {
   //   fetch("/register", {
   //     method: "POST",
   //     body: formDataToSend
+  //    credentials: 'include',
   //   })
   //     .then((response) => response.json())
   //     .then((data) => {

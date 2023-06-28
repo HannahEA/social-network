@@ -1,0 +1,16 @@
+# FROM node:20-alpine3.18
+# I am running Node.js v18.16.0 locally, but am using a slightly older but well-established 
+# and tested 'node' image to minimize any unforeseen complications.
+FROM node:14-alpine
+# Set the working directory inside the container
+WORKDIR /frontend
+# Copy package.json and package-lock.json separately to leverage Docker caching
+COPY package*.json ./
+# Install dependencies
+RUN npm install
+# Copy the entire project to the working directory
+COPY . .
+# Set the command to start the frontend
+CMD ["npm", "start"]
+# Expose the front end port
+EXPOSE 3000
