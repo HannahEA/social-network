@@ -6,6 +6,13 @@ import "notyf/notyf.min.css";
 
 const notyf = new Notyf(); // Create a single instance of Notyf
 
+// environment variable from the docker-compose.yml file. 
+//This variable will contain the URL of your backend service, 
+//allowing your frontend code to make requests to the correct endpoint.
+ const apiURL = process.env.REACT_APP_API_URL;
+//const apiURL = "http://localhost:8000"
+
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,13 +41,15 @@ const LoginPage = () => {
       password: password,
     };
 
+
     // Make a POST request to the server
-    const data = fetch("/login", {
+    const data = fetch(`${apiURL}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
+      credentials: 'include',
     })
       .then((response) => response.json())
       .then((data) => {
@@ -71,7 +80,7 @@ const LoginPage = () => {
   };
 
   const checkCookie = (avatar) => {
-     fetch("/checkCookie")
+     fetch(`${apiURL}/checkCookie`,{credentials: 'include',})
     .then((response) => response.text())
     .then((data) => {
       // Handle the response from the server
@@ -81,7 +90,7 @@ const LoginPage = () => {
       if (data === "Cookie is found") {
         console.log("Cookie is found, redirecting to feed");
         console.log("user", avatar)
-        navigate("/feed", { state: { email: email, avatar:avatar} });
+        navigate(`/feed`, { state: { email: email, avatar:avatar} });
         
       
       } else {

@@ -6,11 +6,16 @@ import "notyf/notyf.min.css";
 
 const notyf = new Notyf(); // Create a single instance of Notyf
 
+// Environment variable from the docker-compose.yml file. 
+//This variable will contain the URL of the backend service, 
+//allowing the frontend code to make requests to the correct endpoint.
+const apiURL = process.env.REACT_APP_API_URL;
+//const apiURL = "http://localhost:8000"
 
 
 const handleLogout = (event, setAuthToFalse)  => {
     
-     event.preventDefault(); 
+    event.preventDefault(); 
 
 //remove cookie from browser when logout
 //function LogoutDeleteCookie(){
@@ -26,11 +31,11 @@ const handleLogout = (event, setAuthToFalse)  => {
         "Content-Type": "application/json",
         "Accept": "application/json",
     },
-   body: JSON.stringify(objDeleteCookie)
-
+   body: JSON.stringify(objDeleteCookie),
+   credentials: 'include',
 };
 
-fetch("/logout", configLogout)
+fetch(`${apiURL}/logout`, configLogout)
 .then(function (response) {
   console.log(response);
   if (response.status == 200) {

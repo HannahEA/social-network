@@ -5,6 +5,13 @@ import "notyf/notyf.min.css";
 
 const notyf = new Notyf(); // Create a single instance of Notyf
 
+//Environment variable from the docker-compose.yml file. 
+//This variable will contain the URL of the backend service, 
+//allowing the frontend code to make requests to the correct endpoint.
+const apiURL = process.env.REACT_APP_API_URL;
+//const apiURL = "http://localhost:8000"
+
+
 const SubmitPost = ({title, content, visibility, url, file}) => {
 
  console.log(url, file)
@@ -18,12 +25,13 @@ const SubmitPost = ({title, content, visibility, url, file}) => {
  }
  // Make a POST request to the server
 
-  fetch("/post", {
+  fetch(`${apiURL}/post`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(newPost),
+    credentials: 'include',
   })
     .then((response) => response.json())
     .then((data) => {
@@ -48,12 +56,13 @@ const Posts = () => {
   }
 
   const fetchPosts = () => {
-    fetch("/post", {
+    fetch(`${apiURL}/post`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(getPosts),
+      credentials: 'include',
     })
       .then((response) => response.json())
       .then((data) => {
@@ -245,12 +254,13 @@ const SubmitComment = (comment, postId) => {
 console.log("json", json)
  // Make a POST request to the server
  
-  fetch("/post", {
+  fetch(`/post`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(newComment),
+    credentials: 'include',
   })
     .then((response) => response.json())
     .then((data) => {

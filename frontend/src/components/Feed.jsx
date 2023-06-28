@@ -6,6 +6,12 @@ import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
 
+//Environment variable from the docker-compose.yml file. 
+//This variable will contain the URL of the backend service, 
+//allowing the frontend code to make requests to the correct endpoint.
+ const apiURL = process.env.REACT_APP_API_URL;
+//const apiURL = "http://localhost:8000"
+
 const Feed = () => {
   const location = useLocation()
   const email = location.state?.email || ""; // Access the passed email
@@ -35,9 +41,10 @@ const Feed = () => {
     const username = "test"; // Replace with the desired username
 
     // Make a POST request to the server with the username as a query parameter
-    fetch(`/uploadAvatar?username=${username}`, {
+    fetch(`${apiURL}/uploadAvatar?username=${username}`, {
       method: "POST",
       body: formData,
+      credentials: 'include',
     })
       .then((response) => response.json())
       .then((data) => {
@@ -49,7 +56,7 @@ const Feed = () => {
   };
 
   const verifyCookie = () => {
-    fetch("/checkCookie")
+    fetch(`${apiURL}/checkCookie`,{credentials: 'include',})
       .then((response) => response.text())
       .then((data) => {
         // Redirect user to login page if cookie not found
@@ -66,7 +73,7 @@ const Feed = () => {
   };
 
   const deleteCookie = () => {
-    fetch("/deleteCookie")
+    fetch(`${apiURL}/deleteCookie`,{credentials: 'include',})
       .then((response) => response.text())
       .then((data) => {
         // Handle the response from the server
