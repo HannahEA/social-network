@@ -153,6 +153,8 @@ const Feed = () => {
     setTag("");
     setImageURL(null);
     setImageFile("")
+    let column = document.getElementById("odd")
+
   };
   const addTag = (event) => {
     event.preventDefault();
@@ -1256,7 +1258,7 @@ const Feed = () => {
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
         </div>
-        <div id="submitPosts" className="bg-white border-2 border-dashed rounded-lg border-gray-300 dark:bg-gray-800 h-96 mb-4">
+        <div id="submitPosts" className="bg-white border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 dark:bg-gray-800 mb-4" >
           <div className="  dark:bg-gray-800 dark:text-white flex justify-left items-left flex-col">
             <h3 className= "pl-5 mt-3 font-bold text-xl text-blue-500 " >Update Feed</h3>
            <form onSubmit={submitPost}>
@@ -1311,7 +1313,10 @@ const Feed = () => {
             </form>
           </div>
         </div>
-        <Posts />
+        <div className="bg-white dark:bg-gray-800">
+           <Posts />
+        </div>
+       
       </main>
     </div>
   );
