@@ -175,10 +175,10 @@ const Posts = () => {
               
                 {pData.map(post => (post.postId%2 == 0 && (
               
-              <div className="m-2  ">
+              <div key={post.postId} className="m-2  ">
                 <div>
                 
-                <div key={post.postId}  className="  leftborder border-solid rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800" >
+                <div className="  leftborder border-solid rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800" >
                 <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
                 <h2 className="text-l text-left dark:text-white m-6">{post.author}</h2>  
                 <h2 className="text-l text-right dark:text-white m-6">{post.date}</h2>
@@ -222,7 +222,7 @@ const Posts = () => {
                   </div>
                   <div id = {post.postId} value = {post.postId} className="hidden flex-col justify-center dark:text-white">
                     {post.comments.length > 0 ? ( post.comments.map( comment => (
-                      <div className="flex flex-row ml-4 mb-2"> 
+                      <div key={comment.Id} className="flex flex-row ml-4 mb-2"> 
                         <div className="flex flex-col">
                          <h2 className="text-l font-bold">{comment.author}</h2>
                          <h2 className="text-sm">{comment.Date}</h2> 
