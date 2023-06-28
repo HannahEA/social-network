@@ -42,7 +42,8 @@ const Feed = () => {
     const username = "test"; // Replace with the desired username
 
     // Make a POST request to the server with the username as a query parameter
-    fetch(`${apiURL}/uploadAvatar?username=${username}`, {
+    // fetch(`${apiURL}/uploadAvatar?username=${username}`, {
+      fetch(`${apiURL}/uploadAvatar?username=${username}`, {
       method: "POST",
       body: formData,
       credentials: 'include',

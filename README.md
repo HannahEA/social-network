@@ -34,7 +34,7 @@ In VSC terminal
 4. To stop containers type: docker ps rm -a
 
 # to run 'social-network' locally type below commands in VSC terminal:
-
+Note: 
 1. To install node files and create the package-lock.json and package.json files:
    cd frontend
    npm install react scripts
