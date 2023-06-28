@@ -52,7 +52,7 @@ const LoginPage = () => {
       body: JSON.stringify(formData),
       credentials: 'include',
     })
-      .then((response) => response.json())
+      .then((response) => {console.log(response); return response.json()})
       .then((data) => {
         // Check if the login was successful
         if (data.message === "Login successful") {

@@ -18,6 +18,7 @@ const Feed = () => {
   const userAvatar = location.state?.avatar || ""
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
   const [Title, setTitle] = useState("");
+  const [sPost, setSpost] = useState("");
   const [Content, setContent] = useState("");
   const [Visibility, setVisibility] = useState("");
   const [Tag, setTag] = useState("");
@@ -143,18 +144,18 @@ const Feed = () => {
   }
 };
   // on new post form submission, handle in post file
-  const submitPost = (event) => {
+  const submitPost = async (event) => {
     event.preventDefault();
     let e = document.getElementById("Visibility");
     let v = e.options[e.selectedIndex].text;
-    SubmitPost({ title: Title, content: Content, visibility: v, url: imageURL, file: imageFile});
+    let data = await SubmitPost({ title: Title, content: Content, visibility: v, url: imageURL, file: imageFile});
+    setSpost(data)
     setTitle("");
     setContent("");
     setTag("");
     setImageURL(null);
     setImageFile("")
     let column = document.getElementById("odd")
-
   };
   const addTag = (event) => {
     event.preventDefault();
@@ -187,7 +188,7 @@ const Feed = () => {
     return () => {
       button.removeEventListener("click", handleClick);
     };
-  }, []);
+  }, [sPost]);
 
   return (
     <div className="antialiased bg-gray-50 dark:bg-gray-900">
@@ -1314,7 +1315,7 @@ const Feed = () => {
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800">
-           <Posts />
+           <Posts sPost={sPost} />
         </div>
        
       </main>

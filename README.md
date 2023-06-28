@@ -45,7 +45,7 @@ In VSC terminal
 
 3. To run the React front-end server, in a separate VSC terminal window type:
    cd frontend
-   npm start
+   REACT_APP_API_URL=http://localhost:8000 npm start
 
 # To delete the back-end server, in VSC terminal run:
 

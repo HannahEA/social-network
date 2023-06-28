@@ -25,7 +25,7 @@ const SubmitPost = ({title, content, visibility, url, file}) => {
  }
  // Make a POST request to the server
 
-  fetch(`${apiURL}/post`, {
+  const data = fetch(`${apiURL}/post`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -36,18 +36,21 @@ const SubmitPost = ({title, content, visibility, url, file}) => {
     .then((response) => response.json())
     .then((data) => {
       // Handle the response from the server
-      console.log(data);
+      console.log({data});
         // display posts
         notyf.success("New Post Submitted")
+        return data
     })
     .catch((error) => {
       // Handle any errors
       console.error("Error:", error);
     });
-   
+    
+    return data;
+    
 }
 
-const Posts = () => {
+const Posts = ({sPost}) => {
   const [pData, setpData] = useState([])
   
   let getPosts = {
@@ -66,9 +69,20 @@ const Posts = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        // Handle the response from the server 
-       
-        setpData(data)
+        // if (Object.keys(sPost).length === 0) {
+          setpData(data)
+        // } 
+        // else {
+        //   console.log("new data", sPost)
+        //   const updated = [...pData, sPost]
+        //   setpData(updated)
+        //   console.log("submitted post", pData)
+        //   // Handle the response from the server 
+        //   const updatedP = [...pData, data]
+        //   setpData(updatedP)
+        //   console.log("submitted post", pData)
+        // }
+        
           // display posts
           
       })
@@ -80,7 +94,7 @@ const Posts = () => {
 
   useEffect(() => {
     fetchPosts()
-  }, [])
+  }, [sPost])
 
 
   const [commentContent, setCommentContent] = useState("")
@@ -109,7 +123,7 @@ const Posts = () => {
           <div className="">
             <div id="odd" className="float-left w-1/2">
             {pData.map(post => 
-              (post.postId%2 > 0 &&
+              (post.postId%2 > 0 && post != {} &&
                 <div key={post.postId} className="m-2  ">
                   <div className="  leftborder border-solid rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
                   <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
@@ -173,7 +187,7 @@ const Posts = () => {
             </div>
             <div id="even" className="float-left w-1/2">
               
-                {pData.map(post => (post.postId%2 == 0 && (
+                {pData.map(post => (post.postId%2 == 0 && post != {} && (
               
               <div key={post.postId} className="m-2  ">
                 <div>
