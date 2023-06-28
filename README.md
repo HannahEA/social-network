@@ -22,7 +22,7 @@ migrate -database YOUR_DATABASE_URL -path PATH_TO_YOUR_MIGRATIONS up
 # How To Run social-network
 
 # to run 'social-network' in Docker:
-1. In VSC terminal type: docker-compose up
+1. In VSC terminal access 'social-network' root folder and type: docker-compose up
 2. When images have been built and the containers are running,
    go to browser url address and type: http//localhost:3000
 
