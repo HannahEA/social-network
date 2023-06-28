@@ -1,3 +1,4 @@
+
 Modularization source by Ricky Adriell: https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html
 
 # Database migration
@@ -18,7 +19,21 @@ migrate create -ext sql -dir ./pkg/db/migrations/database create_sessions_table
 (e.g. migrate create -ext sql -dir ./pkg/db/migrations/database create_followers_table)
 migrate -database YOUR_DATABASE_URL -path PATH_TO_YOUR_MIGRATIONS up
 
-# After downloading this project locally, in VSC terminal run:
+# How To Run social-network
+
+# to run 'social-network' in Docker:
+1. In VSC terminal type: docker-compose up
+2. When images have been built and the containers are running,
+   go to browser url address and type: http//localhost:3000
+
+To exit Docker:
+In VSC terminal 
+1. type: CTRL + C.
+2. type: docker-compose down
+3. To remove images type: docker image rm -f $(docker image ls)
+4. To stop containers type: docker ps rm -a
+
+# to run 'social-network' locally type below commands in VSC terminal:
 
 1. To install node files and create the package-lock.json and package.json files:
    cd frontend
