@@ -226,7 +226,7 @@ const RegistrationPage = () => {
           setBio("");
 
   //Redirect to the login page
-          navigate(`${apiURL}/login`);
+          navigate(`/login`);
         } else if (data.message === "Email already taken") {
           notyf.error("Email already taken");
         } else {
