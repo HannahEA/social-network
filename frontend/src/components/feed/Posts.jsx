@@ -95,13 +95,13 @@ const Posts = () => {
     setCommentContent("")
   }
     return (
-      <div>
+      <div className="">
         {pData.length > 0 && (
-          <div className=" gap-2 ">
+          <div className="">
             <div id="odd" className="float-left w-1/2">
             {pData.map(post => 
               (post.postId%2 > 0 &&
-                <div className="m-2  ">
+                <div className="m-2  leftborder border-solid rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800">
                 <div key={post.postId}  className="  leftborder border-solid rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
                 <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
                 <h2 className="text-l text-left dark:text-white m-6">{post.author}</h2>  
@@ -169,13 +169,18 @@ const Posts = () => {
               <div className="m-2  ">
                 <div>
                 
-                <div key={post.postId}  className="  leftborder border-solid rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
+                <div key={post.postId}  className="  leftborder border-solid rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800" >
                 <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
                 <h2 className="text-l text-left dark:text-white m-6">{post.author}</h2>  
                 <h2 className="text-l text-right dark:text-white m-6">{post.date}</h2>
                 </div>
                 
-                {post.url.length>0 && <img src={post.url} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/> }
+                {post.url.length>0 && 
+                  <img src={post.url} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
+{/* ==============> Start post image file <==================== */}
+                {post.file.length>0 && 
+                  <img src={post.file} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
+{/* ==============> End post image file <==================== */}
 
                 <div id= "postContent" className="flex justify-start items-start" >
                   <div className="flex flex-col m-4">
