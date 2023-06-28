@@ -44,6 +44,7 @@ func corsMiddleware(handler http.Handler) http.Handler {
 		handler.ServeHTTP(w, r)
 	})
 }
+
 func main() {
 	router := http.NewServeMux()
 	communicateBackFront := corsMiddleware(router)

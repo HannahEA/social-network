@@ -12,6 +12,7 @@ const notyf = new Notyf(); // Create a single instance of Notyf
  const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
 
+console.log({apiURL})
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -66,17 +67,20 @@ const LoginPage = () => {
           notyf.error("Incorrect email or password");
           return data
         }
-      })
+       })//.then((data)=> {
+      //   console.log("data2:",data.userAvatar)
+
+      // })
       .catch((error) => {
         // Handle any errors
         console.error("Error:", error);
         console.log("Error:", error);
       });
-      (async () =>{
-        const dataObj = await data
-          console.log("data 2", dataObj.userAvatar)
-          checkCookie(dataObj.userAvatar);
-      })()
+       (async () =>{
+         const dataObj = await data
+           console.log("data 2", dataObj.userAvatar)
+           checkCookie(dataObj.userAvatar);
+       })()
   };
 
   const checkCookie = (avatar) => {
