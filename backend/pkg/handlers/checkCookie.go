@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -25,13 +26,45 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 
 	count := service.repo.checkCookieDB(cookieValue)
 
+	//browser to show logged in user info 
+	//if browser window was previously closed down without logging out
+	loggedInUser := service.repo.GetUserByCookie(cookieValue)
+
+	loggedUserInfoFound := map[string]interface{}{
+		"message":"Cookie is found",
+		"email" : loggedInUser.Email,
+		"avatar": loggedInUser.Avatar,
+		"image": loggedInUser.Image,
+	}
+
+	loggedUserInfoNotFound := map[string]interface{}{
+		"message":"Cookie is not found",
+		"email" : "",
+		"avatar": "",
+		"image": "",
+	}
+
 		// Return the result based on the count value
 		if count > 0 {
 			// Cookie is found
-			fmt.Fprint(w, "Cookie is found")
+			//fmt.Fprint(w, loggedUser)
+			w.Header().Set("Content-Type", "application/json")
+			err := json.NewEncoder(w).Encode(loggedUserInfoFound)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+				return
+			}
 		} else {
 			// Cookie is not found
-			fmt.Fprint(w, "Cookie is not found")
+			//fmt.Fprint(w,"Cookie is not found")
+			w.Header().Set("Content-Type", "application/json")
+			err := json.NewEncoder(w).Encode(loggedUserInfoNotFound)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+				return
+			}
 		}
 
 	// Open the SQLite3 database connection
@@ -60,3 +93,5 @@ func (repo *dbStruct)checkCookieDB(cookieValue string) int {
 return count
 
 }
+
+
