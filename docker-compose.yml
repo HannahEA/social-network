@@ -25,10 +25,12 @@ services:
     # command: sh -c "fuser -k 8000/tcp > /dev/null 2>&1 && ./server"
     environment:
       DB_URL: "nouchka/sqlite3://db/social-network"
+    volumes:
+      - ./backend/pkg/db/database:/backend/pkg/db/database
   db:
     image: nouchka/sqlite3
     volumes:
-      - socialnetwork:/backend/pkg/db/database
+     - socialnetwork:/backend/pkg/db/database
 
 volumes:
   socialnetwork:

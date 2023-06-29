@@ -56,22 +56,41 @@ const Feed = () => {
       });
   };
 
-  const verifyCookie = () => {
-    fetch(`${apiURL}/checkCookie`,{credentials: 'include',})
-      .then((response) => response.text())
-      .then((data) => {
+  const verifyCookie = async() => {
+   try { 
+    console.log("entering try")
+    const response = await fetch(`${apiURL}/checkCookie`,{credentials: 'include',})
+    const data = await response.text();
+
+        const dataObj = JSON.parse(data);
+        console.log("user avatar and email",dataObj)
         // Redirect user to login page if cookie not found
-        if (data !== "Cookie is found") {
+        if (dataObj.message !== "Cookie is found") {
           console.log(data);
           console.log("Cookie is not found, redirecting to login");
           navigate("/");
+          //Otherwise show user avatar and email
+
+        }else{
+          console.log("fetching avatar and email")
+          let userImage;
+          if( dataObj.avatar != ""){
+            userImage = dataObj.avatar;
+          } else if (dataObj.image !=""){
+            userImage = dataObj.image;
+          } else {
+            //default avatar image
+            userImage = "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"
+          }
+           navigate(`/feed`, { state: { email: dataObj.email, avatar: userImage} });
         }
-      })
-      .catch((error) => {
+   }
+      catch(error) {
         // Handle any errors
         console.error("Error:", error);
-      });
-  };
+      };
+  }
+
 
   const deleteCookie = () => {
     fetch(`${apiURL}/deleteCookie`,{credentials: 'include',})
