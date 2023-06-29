@@ -25,7 +25,7 @@ const SubmitPost = ({title, content, visibility, url, file}) => {
  }
  // Make a POST request to the server
 
-  fetch(`${apiURL}/post`, {
+  const data = fetch(`${apiURL}/post`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -36,18 +36,21 @@ const SubmitPost = ({title, content, visibility, url, file}) => {
     .then((response) => response.json())
     .then((data) => {
       // Handle the response from the server
-      console.log(data);
+      console.log({data});
         // display posts
         notyf.success("New Post Submitted")
+        return data
     })
     .catch((error) => {
       // Handle any errors
       console.error("Error:", error);
     });
-   
+    
+    return data;
+    
 }
 
-const Posts = () => {
+const Posts = ({sPost}) => {
   const [pData, setpData] = useState([])
   
   let getPosts = {
@@ -66,9 +69,20 @@ const Posts = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        // Handle the response from the server 
-       
-        setpData(data)
+        // if (Object.keys(sPost).length === 0) {
+          setpData(data)
+        // } 
+        // else {
+        //   console.log("new data", sPost)
+        //   const updated = [...pData, sPost]
+        //   setpData(updated)
+        //   console.log("submitted post", pData)
+        //   // Handle the response from the server 
+        //   const updatedP = [...pData, data]
+        //   setpData(updatedP)
+        //   console.log("submitted post", pData)
+        // }
+        
           // display posts
           
       })
@@ -80,10 +94,12 @@ const Posts = () => {
 
   useEffect(() => {
     fetchPosts()
-  }, [])
+  }, [sPost])
 
 
   const [commentContent, setCommentContent] = useState("")
+  const [Id, setId] = useState(0)
+  const [newComment, setNewComment] = useState("")
 
   const handleContent = (event) => {
     setCommentContent(event.target.value)
@@ -100,8 +116,11 @@ const Posts = () => {
   }
   const handleSendComment = (event) => {
     event.preventDefault();
-    SubmitComment(commentContent, parseInt(event.target.value))
-    setCommentContent("")
+    //postID set
+    let newComment = SubmitComment(commentContent, parseInt(event.target.value))
+    let allInput = document.querySelectorAll("input")
+    allInput.forEach(singleInput => singleInput.value = '')
+    setNewComment(newComment)
   }
     return (
       <div className="">
@@ -109,9 +128,9 @@ const Posts = () => {
           <div className="">
             <div id="odd" className="float-left w-1/2">
             {pData.map(post => 
-              (post.postId%2 > 0 &&
+              (post.postId%2 > 0 && post != {} &&
                 <div key={post.postId} className="m-2  ">
-                  <div className="  leftborder border-solid rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
+                  <div className=" border-solid rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
                   <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
                   <h2 className="text-l text-left dark:text-white m-6">{post.author}</h2>  
                   <h2 className="text-l text-right dark:text-white m-6">{post.date}</h2>
@@ -147,25 +166,12 @@ const Posts = () => {
                     </button>
                     
                     <div id="submitComment" className=" grow">
-                      <input onChange={(e)=>handleContent(e)} value={commentContent} className="w-7/12 m-4 mb-2 border-b-2 border-gray focus:outline-none dark:bg-gray-800 dark:text-white" type="text" />
+                      <input onChange={(e)=>handleContent(e)} name={commentContent} className="w-7/12 m-4 mb-2 border-b-2 border-gray focus:outline-none dark:bg-gray-800 dark:text-white" type="text" />
                       <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit" className="m-2 mb-2 p-2 pt-1 pb-1 text-xs rounded-lg font-bold bg-blue-600 text-white">Submit</button>
                     </div>
                     
                   </div>
-                  <div id = {post.postId} value = {post.postId} className="hidden flex-col justify-center dark:text-white">
-                    {post.comments.length > 0 ? ( post.comments.map( comment => (
-                      <div key={comment.Id} className="flex flex-row ml-4 mb-2"> 
-                        <div className="flex flex-col">
-                         <h2 className="text-l font-bold">{comment.author}</h2>
-                         <h2 className="text-sm">{comment.Date}</h2> 
-                        </div>
-                        <h2 className="ml-4" >{comment.content}</h2>
-                      </div>
-                     
-                    ))):
-                    <h2 className="text-l text-center font-bold">No Comments</h2>
-                    }
-                  </div> 
+                  <Comments postID={post.postId} newComment={newComment}/>
                 </div>
                 </div>
                 </div>
@@ -173,7 +179,7 @@ const Posts = () => {
             </div>
             <div id="even" className="float-left w-1/2">
               
-                {pData.map(post => (post.postId%2 == 0 && (
+                {pData.map(post => (post.postId%2 == 0 && post != {} && (
               
               <div key={post.postId} className="m-2  ">
                 <div>
@@ -215,24 +221,12 @@ const Posts = () => {
                     </button>
                     
                     <div id="submitComment" className=" grow">
-                      <input onChange={(e)=>handleContent(e)} value={commentContent} className="w-7/12 m-4 mb-2 border-b-2 border-gray focus:outline-none dark:bg-gray-800 dark:text-white" type="text" />
+                      <input onChange={(e)=>handleContent(e)} name={commentContent} className="w-7/12 m-4 mb-2 border-b-2 border-gray focus:outline-none dark:bg-gray-800 dark:text-white" type="text" />
                       <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit" className="m-2 mb-2 p-2 pt-1 pb-1 text-xs rounded-lg font-bold bg-blue-600 text-white">Submit</button>
                     </div>
                     
                   </div>
-                  <div id = {post.postId} value = {post.postId} className="hidden flex-col justify-center dark:text-white">
-                    {post.comments.length > 0 ? ( post.comments.map( comment => (
-                      <div key={comment.Id} className="flex flex-row ml-4 mb-2"> 
-                        <div className="flex flex-col">
-                         <h2 className="text-l font-bold">{comment.author}</h2>
-                         <h2 className="text-sm">{comment.Date}</h2> 
-                        </div>
-                        <h2 className="ml-4" >{comment.content}</h2>
-                      </div>
-                    ))):
-                    <h2 className="text-l text-center font-bold">No Comments</h2>
-                    }
-                  </div> 
+                 <Comments postID={post.postId} newComment={newComment}/>
                 </div>
                 </div>
                 
@@ -256,10 +250,10 @@ const SubmitComment = (comment, postId) => {
     type: "newComment"
  }
  const json = JSON.stringify(newComment)
-console.log("json", json)
+  console.log("json", json)
  // Make a POST request to the server
  
-  fetch(`/post`, {
+  const data = fetch(`/post`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -270,13 +264,65 @@ console.log("json", json)
     .then((response) => response.json())
     .then((data) => {
       // Handle the response from the server
-      console.log(data);
+      
+      return data
         // display posts
     })
     .catch((error) => {
       // Handle any errors
       console.error("Error:", error);
     });
+  return data 
+}
+
+const Comments = ({postID, newComment}) => {
+  const [cData, setCData] = useState([])
+  const getComments = {
+    postId: postID,
+    type: "getComments"
+ }
+  const fetchComments = () => {
+    fetch(`/post`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(getComments),
+      credentials: 'include',
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle the response from the server
+        
+        setCData(data)
+          // display posts
+      })
+      .catch((error) => {
+        // Handle any errors
+        console.error("Error:", error);
+      });
+  }
+
+  useEffect(() => {
+    fetchComments()
+  }, [newComment])
+  
+  return (
+    <div id = {postID} value = {postID} className="hidden flex-col justify-center dark:text-white">
+      {cData.length > 0 ? ( cData.map( comment => (
+        <div key={comment.commentId} className="flex flex-row ml-4 mb-2"> 
+          <div className="flex flex-col">
+            <h2 className="text-l font-bold">{comment.author}</h2>
+            <h2 className="text-sm">{comment.Date}</h2> 
+          </div>
+          <h2 className="ml-4" >{comment.content}</h2>
+        </div>
+        ))):
+        <h2 className="text-l text-center font-bold">No Comments</h2>
+      }
+    </div> 
+  )
+
 }
 const Tags = ({tag}) => {
   console.log("new tag", tag)

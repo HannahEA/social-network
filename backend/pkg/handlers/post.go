@@ -116,7 +116,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			return
 		}
 		fmt.Println("getting comments for latest post")
-		
+
 		comments, err := service.repo.GetComments(posts[0])
 		if err != nil {
 			log.Println(err)
@@ -124,11 +124,11 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			return
 		}
 		posts[0].Comments = comments
-			
+
 		fmt.Println("successfully retrieved comments")
 		fmt.Println("Sending latest post")
 		json.NewEncoder(w).Encode(posts[0])
-		
+
 	} else if data.PostType == "getPosts" {
 		fmt.Println("getting Public posts")
 		posts, err := service.repo.GetPublicPosts()
@@ -165,7 +165,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			http.Error(w, "Failed to add new comment", http.StatusInternalServerError)
 			return
 		}
-		
+
 	}
 	fmt.Println("Post")
 }
@@ -202,13 +202,13 @@ func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 			commentDate = cTime.Format("3:04PM")
 			fmt.Println("Today")
 		}
-		comments = append(comments, Comment{
+		comments = append([]Comment{{
 			CommentID: commentID,
 			PostID:    post.PostID,
 			Author:    author,
 			Content:   content,
 			Date:      commentDate,
-		})
+		}}, comments...)
 	}
 	err = rows.Err()
 	if err != nil {
