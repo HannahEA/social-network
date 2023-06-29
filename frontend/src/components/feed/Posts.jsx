@@ -12,13 +12,14 @@ const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
 
 
-const SubmitPost = ({title, content, visibility, url, file}) => {
+const SubmitPost = ({title, content, visibility, url, file, category}) => {
 
  console.log(url, file)
  const newPost = {
     title: title,
     content: content,
     visibility: visibility,
+    category: category,
     url: url,
     file: file,
     type: "newPost"
@@ -324,12 +325,14 @@ const Comments = ({postID, newComment}) => {
   )
 
 }
-const Tags = ({tag}) => {
-  console.log("new tag", tag)
+const Tags = ({tags}) => {
+  
   return (
-    <>
-    <div style="background-color: green;" width="20px" height="20px">{tag}</div>
-    </>
+    <div className="flex justify-start">
+       {tags.length > 0 && tags.map( tag => 
+       <div className="bg-blue text-blue border-solid rounded-md w-5 h-5 m-2 ml-5">{tag}</div>
+       )}
+    </div> 
   )
  }
 

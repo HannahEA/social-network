@@ -21,7 +21,7 @@ const Feed = () => {
   const [sPost, setSpost] = useState("");
   const [Content, setContent] = useState("");
   const [Visibility, setVisibility] = useState("");
-  const [Tag, setTag] = useState("");
+  const [tag, setTags] = useState([]);
   const navigate = useNavigate();
   const [avatar, setAvatar] = useState(null);
   const [imageURL, setImageURL] = useState(null)
@@ -113,9 +113,9 @@ const Feed = () => {
   const handleVisibility = (event) => {
     setVisibility(event.target.value);
   };
-  const handleTag = (event) => {
-    setTag(event.target.value);
-  };
+  // const handleTag = (event) => {
+  //   setTag(event.target.value);
+  // };
  //image upload for posts 
  const handlePostImage = (event) => {
   const { value } = event.target;
@@ -149,21 +149,24 @@ const Feed = () => {
     event.preventDefault();
     let e = document.getElementById("Visibility");
     let v = e.options[e.selectedIndex].text;
-    let data = await SubmitPost({ title: Title, content: Content, visibility: v, url: imageURL, file: imageFile});
+    let data = await SubmitPost({ title: Title, content: Content, visibility: v, url: imageURL, file: imageFile, category: tag});
     setSpost(data)
     setTitle("");
     setContent("");
-    setTag("");
+    setTags([]);
     setImageURL(null);
     setImageFile("")
-    let column = document.getElementById("odd")
   };
   const addTag = (event) => {
     event.preventDefault();
-
+    let input = document.getElementById("postTags")
     console.log("adding tag");
-    console.log(Tag);
-    return Tags({ tag: Tag });
+    console.log("input value", input.value)
+    if (input.value != "") {
+      setTags([...tag, input.value])
+      console.log(tag);
+      input.value = ""
+    }
   };
 
   useEffect(() => {
@@ -1268,16 +1271,16 @@ const Feed = () => {
                 <p className= "flex-row mr-5 font-bold" >Title</p>
                 <input className="flex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none" type="text" value={Title} onChange={handleTitle} />
               </span>
-              <form onSubmit={addTag}>
+              
                 <span className="flex p-2.5 pl-5">
                 <p className= "flex-row mr-5 font-bold">Tags</p>
-                <input type="text" id="postTags" value={Tag} onChange={handleTag} className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none" />
-                <button type="submit" value="Add Tag" className="flex-row pl-2  pr-2 font-bold bg-blue-500 text-sm text-white rounded-md">
-                {" "}
+                <input type="text" id="postTags"  className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none" />
+                <button onClick={addTag} type="submit" value="Add Tag" className="flex-row pl-2  pr-2 font-bold bg-blue-500 text-sm text-white rounded-md">
+                
                 Add Tag
                 </button>
                 </span> 
-              </form>
+                  <Tags tags={tag}/>
               <div className="flex justify-right items-right flex-col">
                 <p className= "p-2.5 pl-5 font-bold">Content</p>
                 <textarea className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none" name="postContent" id="postContent" cols="8" rows="3" maxLength="100" value={Content} onChange={handleContent}></textarea>

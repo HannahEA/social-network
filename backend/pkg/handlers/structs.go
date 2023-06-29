@@ -59,7 +59,7 @@ type Post struct {
 	Author     string    `json:"author"`
 	Title      string    `json:"title"`
 	Content    string    `json:"content"`
-	Category   string    `json:"category"`
+	Category   []string    `json:"category"`
 	ImageFile  string    `json:"file"`
 	ImageURL   string    `json:"url"`
 	Date       string    `json:"date"`

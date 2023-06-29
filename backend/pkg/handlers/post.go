@@ -18,8 +18,8 @@ func (repo *dbStruct) AddPostToDB(post Post) error {
 	//user info
 	user := repo.GetUserByCookie(cookieID)
 	//category
-	post.Category = "filler"
-	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, post.Category, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
+	categories := strings.Join(post.Category, ",")
+	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf("failed to add Post to Database")
@@ -66,11 +66,13 @@ func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 		}
 		fmt.Println("currDate", currDate)
 		fmt.Println("postDate", postDate)
+		//tags 
+		tags := strings.Split(category, ",")
 		posts = append([]Post{{
 			PostID:    postID,
 			Author:    author,
 			Title:     title,
-			Category:  category,
+			Category:  tags,
 			Content:   postcontent,
 			ImageFile: imageFile,
 			ImageURL:  imageURL,
