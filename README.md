@@ -34,18 +34,22 @@ In VSC terminal
 4. To stop containers type: docker ps rm -a
 
 # to run 'social-network' locally type below commands in VSC terminal:
-Note: 
-1. To install node files and create the package-lock.json and package.json files:
+
+1. In the 'frontend' folder make an '.env' file that contains: REACT_APP_API_URL=http://localhost:8000
+
+2. To install node files and create the package-lock.json and package.json files:
    cd frontend
    npm install react scripts
 
-2. To run the GO back-end server:
+3. To run the GO back-end server:
    cd backend
    go run server.go
 
-3. To run the React front-end server, in a separate VSC terminal window type:
+4. To run the React front-end server, in a separate VSC terminal window type:
    cd frontend
-   REACT_APP_API_URL=http://localhost:8000 npm start
+   npm start
+
+
 
 # To delete the back-end server, in VSC terminal run:
 
