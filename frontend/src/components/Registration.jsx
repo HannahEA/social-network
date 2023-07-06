@@ -180,8 +180,6 @@ const RegistrationPage = () => {
       aboutMe: bio,
     };
 
-    console.log({ formData });
-
     //HS: Not using a multipart/form-data object anymore
     //Create a FormData object for sending the data as multipart/form-data
     /*const formDataToSend = new FormData();
@@ -189,50 +187,57 @@ const RegistrationPage = () => {
       formDataToSend.append(key, formData[key]);
     }*/
 
-    //Make a POST request to the server
-    fetch(`${apiURL}/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        //Handle the response from the server
-        console.log(data);
-
-        //Check if the registration was successful
-        if (data.message === "Registration successful") {
-          //Display a success notification
-          notyf.success("Registration successful");
-
-          //Reset the form
-          setFirstName("");
-          setLastName("");
-          setUsername("");
-          setDOB("");
-          setGender("");
-          setEmail("");
-          setPassword("");
-          setConfirmPassword("");
-          setAvatarURL(null);
-          setAvatarImage("");
-          setBio("");
-
-          //Redirect to the login page
-          navigate(`/login`);
-        } else if (data.message === "Email already taken") {
-          notyf.error("Email already taken");
-        } else {
-          notyf.error("Invalid registration");
-        }
+    if (firstName === "" || lastName === "" || username === "" || date === "" || gender === "" || email === "" || password === "") {
+      notyf.error("Please fill in all fields");
+      return;
+    } else {
+      //Make a POST request to the server
+      fetch(`${apiURL}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+        credentials: "include",
       })
-      .catch((error) => {
-        // Handle any errors
-        console.error("Error:", error);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          //Handle the response from the server
+          console.log(data);
+
+          //Check if the registration was successful
+          if (data.message === "Registration successful") {
+            console.log("Successfully sent to backend:", formData);
+
+            //Display a success notification
+            notyf.success("Registration successful");
+
+            //Reset the form
+            setFirstName("");
+            setLastName("");
+            setUsername("");
+            setDOB("");
+            setGender("");
+            setEmail("");
+            setPassword("");
+            setConfirmPassword("");
+            setAvatarURL(null);
+            setAvatarImage("");
+            setBio("");
+
+            //Redirect to the login page
+            navigate(`/login`);
+          } else if (data.message === "Email already taken") {
+            notyf.error("Email already taken");
+          } else {
+            notyf.error("Invalid registration");
+          }
+        })
+        .catch((error) => {
+          // Handle any errors
+          console.error("Error:", error);
+        });
+    }
   };
 
   //check if password and confirm password match
