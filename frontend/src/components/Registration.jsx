@@ -326,30 +326,42 @@ const RegistrationPage = () => {
                 <ul className="w-full flex justify-center">
                   <li class="active form_1_progessbar">
                     <div className="w-fit flex justify-center items-center">
-                      <p className="bg-[#4D96A9] h-8 w-8 flex text-center justify-center items-center text-white rounded-full">
-                        1
-                      </p>
-                      <div className="bg-gradient-to-r from-[#4D96A9] to-gray-400 bg-1/3 h-[3px] w-10"></div>
+                      <p className="bg-[#4D96A9] h-8 w-8 flex text-center justify-center items-center text-white rounded-full">1</p>
+                      <div
+                        className={`${step === 1 ? "bg-gradient-to-r from-[#4D96A9] to-gray-400" : "bg-[#4D96A9]"} bg-1/3 h-[5px] w-10`}
+                      ></div>
                     </div>
                   </li>
                   <li class="form_2_progessbar">
                     <div className="w-fit flex justify-center items-center">
-                      <p className="bg-gray-400 h-8 w-8 flex text-center justify-center items-center text-white rounded-full">
+                      <p
+                        className={`${
+                          step === 1 ? "bg-gray-400" : "bg-[#4D96A9]"
+                        } h-8 w-8 flex text-center justify-center items-center text-white rounded-full`}
+                      >
                         2
                       </p>
-                      <div className="h-[3px] w-10 bg-gray-400"></div>
+                      <div
+                        className={`${
+                          step === 1 ? "bg-gray-400" : step === 2 ? "bg-gradient-to-r from-[#4D96A9] to-gray-400" : "bg-[#4D96A9]"
+                        } bg-1/3 h-[5px] w-10`}
+                      ></div>
                     </div>
                   </li>
                   <li class="form_3_progessbar">
                     <div>
-                      <p className="bg-gray-400 h-8 w-8 flex text-center justify-center items-center text-white rounded-full">
+                      <p
+                        className={`${
+                          step === 3 ? "bg-[#4D96A9]" : "bg-gray-400"
+                        } h-8 w-8 flex text-center justify-center items-center text-white rounded-full`}
+                      >
                         3
                       </p>
                     </div>
                   </li>
                 </ul>
               </div>
-              <h1 className="text-lg text-center font-bold leading-tight tracking-tight text-gray-900 2xl:text-xl dark:text-white">
+              <h1 className="text-lg text-center font-bold leading-tight tracking-tight text-gray-700 2xl:text-xl dark:text-white">
                 {step === 1 ? "Let's Get Started" : step === 2 ? "Nearly There..." : "One last thing..."}
               </h1>
 
@@ -400,7 +412,8 @@ const RegistrationPage = () => {
                   </div>
                   <div
                     onClick={() => handleStepChange(2)}
-                    className="step-1-btn flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-[#4D96A9] border border-transparent rounded-lg cursor-pointer hover:bg-[#438495] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]">
+                    className="step-1-btn flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-[#4D96A9] border border-transparent rounded-lg cursor-pointer hover:bg-[#438495] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
+                  >
                     Continue
                   </div>
                 </div>
@@ -408,40 +421,40 @@ const RegistrationPage = () => {
                 {/* Step 2 */}
                 <div className={`step-2 flex flex-col gap-3.5 ${step === 2 ? "" : "hidden"}`}>
                   <div>
-                    <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="username" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">
                       Username
                     </label>
                     <input
                       type="text"
                       name="username"
                       id="username"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Choose a username"
                       value={username}
                       onChange={handleUsernameChange}
                     />
                   </div>
                   <div>
-                    <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="password" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">
                       Password
                     </label>
                     <input
                       type="password"
                       name="password"
                       id="password"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="••••••••"
                       value={password}
                       onChange={handlePasswordChange}
                     />
                   </div>
                   <div>
-                    <label htmlFor="gender" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="gender" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">
                       Your DOB
                     </label>
                     <input
                       type="date"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       onChange={handleDateChange}
                       ref={dateInputRef}
                     />
@@ -449,12 +462,14 @@ const RegistrationPage = () => {
                   <div className="flex justify-center gap-2">
                     <div
                       onClick={() => handleStepChange(1)}
-                      className="step-2-btn flex justify-center w-fit px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-gray-400 border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]">
+                      className="step-2-btn flex justify-center w-fit px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-gray-400 border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
+                    >
                       Back
                     </div>
                     <div
                       onClick={() => handleStepChange(3)}
-                      className="step-2-btn flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-[#4D96A9] border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]">
+                      className="step-2-btn flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-[#4D96A9] border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
+                    >
                       Continue
                     </div>
                   </div>
@@ -463,7 +478,7 @@ const RegistrationPage = () => {
                 {/* Step 3 */}
                 <div className={`step-3 flex flex-col gap-3.5 ${step === 3 ? "" : "hidden"}`}>
                   <div>
-                    <label htmlFor="avatar" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="avatar" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">
                       Avatar
                     </label>
 
@@ -473,7 +488,7 @@ const RegistrationPage = () => {
                         name="avatarUrl"
                         id="avatarUrl"
                         placeholder="Enter image URL"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         onChange={handleAvatarChange}
                       />
                       {/* END of image URL */}
@@ -481,59 +496,62 @@ const RegistrationPage = () => {
                     <div>
                       <label
                         htmlFor="avatar"
-                        className="flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-gray-300 border-dashed border-[3px] border-gray-200 rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]">
+                        className="flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-gray-300 border-dashed border-[3px] border-gray-200 rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
+                      >
                         Upload From File
                       </label>
-                      <input
-                        type="file"
-                        name="avatar"
-                        id="avatar"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleAvatarChange}
-                      />
+                      <input type="file" name="avatar" id="avatar" accept="image/*" className="hidden" onChange={handleAvatarChange} />
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="gender" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="gender" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">
                       Gender
                     </label>
                     <input
                       type="text"
                       name="gender"
                       id="gender"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Your gender"
                       value={gender}
                       onChange={handleGenderChange}
                     />
                   </div>
                   <div>
-                    <label htmlFor="bio" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="bio" className="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">
                       Bio
                     </label>
                     <textarea
                       name="bio"
                       id="bio"
                       rows="3"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Tell us about yourself"
                       value={bio}
-                      onChange={handleBioChange}></textarea>
+                      onChange={handleBioChange}
+                    ></textarea>
                   </div>
                   <div className="flex justify-center gap-2">
                     <div
                       onClick={() => handleStepChange(2)}
-                      className="step-2-btn flex justify-center w-fit px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-gray-400 border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]">
+                      className="step-2-btn flex justify-center w-fit px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-gray-400 border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
+                    >
                       Back
                     </div>
                     <button
                       type="submit"
-                      className="flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-[#4D96A9] border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]">
+                      className="flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-[#4D96A9] border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
+                    >
                       Register
                     </button>
                   </div>
                 </div>
+                <p className="text-sm text-center text-gray-400 mt-2">
+                  Already registered?{" "}
+                  <Link to="/login" className="font-medium text-[#4D96A9] hover:underline dark:text-primary-500">
+                    Log in
+                  </Link>
+                </p>
               </div>
             </form>
           </div>
@@ -541,9 +559,7 @@ const RegistrationPage = () => {
         {/* Step 2 */}
         <div className="hidden w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-3xl max- xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-            <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-              Create an account
-            </h1>
+            <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">Create an account</h1>
             <form className="space-y-4 md:space-y-6" onSubmit={handleRegistration}>
               <div id="row" className="flex gap-20">
                 <div id="column1" className="flex-1">
@@ -660,9 +676,7 @@ const RegistrationPage = () => {
                     />
                   </div>
                   <div>
-                    <label
-                      htmlFor="confirm-password"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="confirm-password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                       Confirm password
                     </label>
                     <input
@@ -688,12 +702,14 @@ const RegistrationPage = () => {
                       className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Tell us about yourself"
                       value={bio}
-                      onChange={handleBioChange}></textarea>
+                      onChange={handleBioChange}
+                    ></textarea>
                   </div>
                   <div>
                     <button
                       type="submit"
-                      className="flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                      className="flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-primary-600 border border-transparent rounded-lg cursor-pointer hover:bg-primary-700 focus:outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                    >
                       Register
                     </button>
                   </div>
