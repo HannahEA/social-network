@@ -428,7 +428,7 @@ const RegistrationPage = () => {
                       type="text"
                       name="username"
                       id="username"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 outline-[#4d97a92f]"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Choose a username"
                       value={username}
                       onChange={handleUsernameChange}
@@ -442,7 +442,7 @@ const RegistrationPage = () => {
                       type="password"
                       name="password"
                       id="password"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 outline-[#4d97a92f]"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="••••••••"
                       value={password}
                       onChange={handlePasswordChange}
@@ -454,7 +454,7 @@ const RegistrationPage = () => {
                     </label>
                     <input
                       type="date"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 outline-[#4d97a92f]"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       onChange={handleDateChange}
                       ref={dateInputRef}
                     />
@@ -462,13 +462,13 @@ const RegistrationPage = () => {
                   <div className="flex justify-center gap-2">
                     <div
                       onClick={() => handleStepChange(1)}
-                      className="step-2-btn flex justify-center w-fit px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-gray-400 border border-transparent rounded-lg cursor-pointer hover:bg-[#878d98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
+                      className="step-2-btn flex justify-center w-fit px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-gray-400 border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
                     >
                       Back
                     </div>
                     <div
                       onClick={() => handleStepChange(3)}
-                      className="step-2-btn flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-[#4D96A9] border border-transparent rounded-lg cursor-pointer hover:bg-[#438495] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
+                      className="step-2-btn flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-[#4D96A9] border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
                     >
                       Continue
                     </div>
@@ -488,7 +488,7 @@ const RegistrationPage = () => {
                         name="avatarUrl"
                         id="avatarUrl"
                         placeholder="Enter image URL"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-center sm:text-sm rounded-t-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 outline-[#4d97a92f]"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         onChange={handleAvatarChange}
                       />
                       {/* END of image URL */}
@@ -496,7 +496,7 @@ const RegistrationPage = () => {
                     <div>
                       <label
                         htmlFor="avatar"
-                        className="flex justify-center w-full px-4 py-2 mt-0 text-sm font-medium text-white transition duration-200 ease-in bg-[#6b939d] rounded-b-lg cursor-pointer hover:bg-[#438495] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
+                        className="flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-gray-300 border-dashed border-[3px] border-gray-200 rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
                       >
                         Upload From File
                       </label>
@@ -511,7 +511,7 @@ const RegistrationPage = () => {
                       type="text"
                       name="gender"
                       id="gender"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 outline-[#4d97a92f]"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Your gender"
                       value={gender}
                       onChange={handleGenderChange}
@@ -525,7 +525,7 @@ const RegistrationPage = () => {
                       name="bio"
                       id="bio"
                       rows="3"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 outline-[#4d97a92f]"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Tell us about yourself"
                       value={bio}
                       onChange={handleBioChange}
@@ -534,13 +534,13 @@ const RegistrationPage = () => {
                   <div className="flex justify-center gap-2">
                     <div
                       onClick={() => handleStepChange(2)}
-                      className="step-2-btn flex justify-center w-fit px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-gray-400 border border-transparent rounded-lg cursor-pointer hover:bg-[#878d98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
+                      className="step-2-btn flex justify-center w-fit px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-gray-400 border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
                     >
                       Back
                     </div>
                     <button
                       type="submit"
-                      className="flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-[#4D96A9] border border-transparent rounded-lg cursor-pointer hover:bg-[#438495] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
+                      className="flex justify-center w-full px-4 py-2 mt-2 text-sm font-medium text-white transition duration-200 ease-in bg-[#4D96A9] border border-transparent rounded-lg cursor-pointer hover:bg-[#855FB1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4d97a94f]"
                     >
                       Register
                     </button>
