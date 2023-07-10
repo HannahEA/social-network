@@ -15,8 +15,19 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 	cookie, err := r.Cookie("user_session")
 	if err != nil {
 		// Cookie is not found
-		fmt.Fprint(w, "Cookie is not found")
-		return
+		fmt.Println("Cookie error ")
+		loggedUserInfoNotFound := map[string]string{
+			"message":"Cookie is not found",
+		}
+		fmt.Println(loggedUserInfoNotFound)
+		w.Header().Set("Content-Type", "application/json")
+			 jsonerr:=json.NewEncoder(w).Encode(loggedUserInfoNotFound)
+			if jsonerr != nil {
+				fmt.Println("json cookie error")
+				http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+				return
+			}
+			return
 	}
 
 	// Get the cookie value

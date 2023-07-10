@@ -5,8 +5,9 @@ import Home from "./components/Home";
 import Login from "./components/Login";
 import Feed from "./components/Feed";
 import {TopNavigation, ThemeIcon} from "./components/TopNavigation";
-
+  const apiURL = process.env.REACT_APP_API_URL;
 function App() {
+
   const [authenticated, setAuthenticated] = useState(false);
 
   const handleLogin = () => {
@@ -18,6 +19,9 @@ function App() {
     // Perform logout logic
     setAuthenticated(false);
   };
+
+
+  
 
   // const [userAvatar, setUserAvatar] = useState("");
   return (

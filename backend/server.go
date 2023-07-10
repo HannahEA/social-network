@@ -4,30 +4,139 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"mime"
 	"net/http"
 	"path/filepath"
 	"strconv"
-	"text/template"
-	"time"
 
 	"social-network-backend/pkg/db/database"
 	"social-network-backend/pkg/handlers"
 
+	"github.com/gorilla/websocket"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+type ChatMessage struct {
+	Username string `json:"username"`
+	Message     string `json:"message"`
+}
+type TypeCheck struct {
+	Type string `json:"type,omitempty"`
+}
+
+var clients = make(map[*websocket.Conn]bool)
+var broadcaster = make(chan ChatMessage)
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+func handleConnections(w http.ResponseWriter, r *http.Request) {
+	//create websocket connection
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("new websocket connection")
+	// ensure connection close when function returns
+	defer ws.Close()
+	clients[ws] = true
+
+	// if it's zero, no messages were ever sent/saved
+	// STORE OLD MESSAGES
+
+	for {
+		var msg ChatMessage
+		// Read in a new message
+		_, b, err := ws.ReadMessage()
+		if err != nil {
+			unsafeError(err)
+		}
+		fmt.Println(string(b))
+
+		//unmarshall type, check message type
+		sm := &TypeCheck{}
+		if err := json.Unmarshal(b, sm); err != nil {
+			unsafeError(err)
+		}
+		switch sm.Type {
+		case "chat":
+			// Unmarshal full message as JSON and map it to a Message object
+			// err := ws.ReadJSON(&msg)
+			jsonErr := json.Unmarshal(b, &msg)
+			fmt.Println("connection message", msg)
+			if jsonErr != nil {
+				delete(clients, ws)
+				break
+			}
+			// send new message to the channel
+			broadcaster <- msg
+		}
+
+	}
+}
+
+func sendPreviousMessages(ws *websocket.Conn) {
+	//GET OLD MESSAGES
+
+	// send previous messages
+	// for _, chatMessage := range chatMessages {
+	// 	var msg ChatMessage
+	// 	json.Unmarshal([]byte(chatMessage), &msg)
+	// 	messageClient(ws, msg)
+	// }
+}
+
+// If a message is sent while a client is closing, ignore the error
+func unsafeError(err error) bool {
+	return !websocket.IsCloseError(err, websocket.CloseGoingAway) && err != io.EOF
+}
+
+func handleMessages() {
+	for {
+		// grab any next message from channel
+		msg := <-broadcaster
+
+		messageClients(msg)
+	}
+}
+
+func messageClients(msg ChatMessage) {
+	// send to every client currently connected
+	for client := range clients {
+		messageClient(client, msg)
+	}
+}
+
+func messageClient(client *websocket.Conn, msg ChatMessage) {
+	err := client.WriteJSON(msg)
+	fmt.Println("handled message", msg)
+	if err != nil && unsafeError(err) {
+		log.Printf("error: %v", err)
+		client.Close()
+		delete(clients, client)
+	}
+}
+
+func reactHandler(w http.ResponseWriter, r *http.Request) {
+	http.FileServer(http.Dir("build")).ServeHTTP(w, r)
+}
 
 // Middleware to handle CORS headers
 func corsMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Allow requests from any origin
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Add("Access-Control-Allow-Origin", "http://localhost:3000")
+		
 
-		// Allow specific headers
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
+		// // Allow specific headers
+		w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Add("Access-Control-Allow-Headers", "Upgrade")
+		w.Header().Add("Access-Control-Allow-Headers", "Connection")
 		// Allow specific HTTP methods
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 
@@ -57,7 +166,8 @@ func main() {
 	newRepo := handlers.NewDbStruct(db)
 	newService := handlers.NewService(newRepo)
 	defer database.Database.Close()
-
+	router.HandleFunc("/websocket", handleConnections)
+	go handleMessages()
 	router.HandleFunc("/", reactHandler)
 	router.HandleFunc("/register", newService.HandleRegistration)
 	router.HandleFunc("/login", newService.HandleLogin)
@@ -191,13 +301,13 @@ func handleProfilePictureUpload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func generateUniqueusername(originalusername string) string {
-	// Generate a unique username using a combination of original username and current timestamp
-	timestamp := time.Now().UnixNano()
-	ext := filepath.Ext(originalusername)
-	username := fmt.Sprintf("%d%s", timestamp, ext)
-	return username
-}
+// func generateUniqueusername(originalusername string) string {
+// 	// Generate a unique username using a combination of original username and current timestamp
+// 	timestamp := time.Now().UnixNano()
+// 	ext := filepath.Ext(originalusername)
+// 	username := fmt.Sprintf("%d%s", timestamp, ext)
+// 	return username
+// }
 
 //============> Start of deleteCookie function moved to logout.go <================
 
@@ -253,6 +363,11 @@ func generateUniqueusername(originalusername string) string {
 
 //============> End of deleteCookie function moved to logout.go <================
 
+// Where is this being used??
+// func indexHandler(w http.ResponseWriter, r *http.Request) {
+// 	tmpl := template.Must(template.ParseFiles("build/index.html"))
+// 	tmpl.Execute(w, nil)
+// }
 // checkCookieHandler handles the "/checkCookie" endpoint
 func checkCookieHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -295,14 +410,4 @@ func checkCookieHandler(w http.ResponseWriter, r *http.Request) {
 		// Cookie is not found
 		fmt.Fprint(w, "Cookie is not found")
 	}
-}
-
-func reactHandler(w http.ResponseWriter, r *http.Request) {
-	http.FileServer(http.Dir("build")).ServeHTTP(w, r)
-}
-
-// Where is this being used??
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("build/index.html"))
-	tmpl.Execute(w, nil)
 }

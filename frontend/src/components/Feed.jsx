@@ -27,7 +27,37 @@ const Feed = () => {
   const [imageURL, setImageURL] = useState(null)
   const [imageFile, setImageFile] = useState("")
   const notyf = new Notyf();
+  let websocketInstance = null;
 
+   const getWebSocketInstance = () => {
+    if (!websocketInstance) {
+      websocketInstance = new WebSocket("ws://localhost:8000/websocket");
+    }
+
+    return websocketInstance;
+  }
+  useEffect(() => {
+    const websocket = getWebSocketInstance();
+
+    websocket.onopen = (e) => {
+      console.log("opening websocket")
+      websocket.send(
+        JSON.stringify({
+          message: "Websocket Connection Successfully Opened",
+          type: "chat"
+        })
+      );
+    };
+
+    websocket.onmessage = (e) => {
+      console.log(e);
+    };
+
+    // Clean up the WebSocket connection when the component unmounts
+    
+  }, []);
+
+  
 
   const handleAvatarChange = (event) => {
     setAvatar(event.target.files[0]);
