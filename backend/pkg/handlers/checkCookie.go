@@ -15,19 +15,16 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 	cookie, err := r.Cookie("user_session")
 	if err != nil {
 		// Cookie is not found
-		fmt.Println("Cookie error ")
-		loggedUserInfoNotFound := map[string]string{
-			"message":"Cookie is not found",
+		noCookie := map[string]interface{}{
+			"message": "Cookie is not found",
 		}
-		fmt.Println(loggedUserInfoNotFound)
-		w.Header().Set("Content-Type", "application/json")
-			 jsonerr:=json.NewEncoder(w).Encode(loggedUserInfoNotFound)
-			if jsonerr != nil {
-				fmt.Println("json cookie error")
-				http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-				return
-			}
+		err := json.NewEncoder(w).Encode(noCookie)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to encode noCookie", http.StatusInternalServerError)
 			return
+		}
+		return
 	}
 
 	// Get the cookie value
@@ -37,46 +34,46 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 
 	count := service.repo.checkCookieDB(cookieValue)
 
-	//browser to show logged in user info 
+	//browser to show logged in user info
 	//if browser window was previously closed down without logging out
 	loggedInUser := service.repo.GetUserByCookie(cookieValue)
 
 	loggedUserInfoFound := map[string]interface{}{
-		"message":"Cookie is found",
-		"email" : loggedInUser.Email,
-		"avatar": loggedInUser.Avatar,
-		"image": loggedInUser.Image,
+		"message": "Cookie is found",
+		"email":   loggedInUser.Email,
+		"avatar":  loggedInUser.Avatar,
+		"image":   loggedInUser.Image,
 	}
 
 	loggedUserInfoNotFound := map[string]interface{}{
-		"message":"Cookie is not found",
-		"email" : "",
-		"avatar": "",
-		"image": "",
+		"message": "Cookie is not found",
+		"email":   "",
+		"avatar":  "",
+		"image":   "",
 	}
 
-		// Return the result based on the count value
-		if count > 0 {
-			// Cookie is found
-			//fmt.Fprint(w, loggedUser)
-			w.Header().Set("Content-Type", "application/json")
-			err := json.NewEncoder(w).Encode(loggedUserInfoFound)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-				return
-			}
-		} else {
-			// Cookie is not found
-			//fmt.Fprint(w,"Cookie is not found")
-			w.Header().Set("Content-Type", "application/json")
-			err := json.NewEncoder(w).Encode(loggedUserInfoNotFound)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-				return
-			}
+	// Return the result based on the count value
+	if count > 0 {
+		// Cookie is found
+		//fmt.Fprint(w, loggedUser)
+		w.Header().Set("Content-Type", "application/json")
+		err := json.NewEncoder(w).Encode(loggedUserInfoFound)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+			return
 		}
+	} else {
+		// Cookie is not found
+		//fmt.Fprint(w,"Cookie is not found")
+		w.Header().Set("Content-Type", "application/json")
+		err := json.NewEncoder(w).Encode(loggedUserInfoNotFound)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+			return
+		}
+	}
 
 	// Open the SQLite3 database connection
 	// db, err := sql.Open("sqlite3", "database.db")
@@ -86,10 +83,10 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 	//defer db.Close()
 
 	// Prepare the SQL statement to check the cookie value in the Sessions table
-	
+
 }
 
-func (repo *dbStruct)checkCookieDB(cookieValue string) int {
+func (repo *dbStruct) checkCookieDB(cookieValue string) int {
 	stmt, err := repo.db.Prepare("SELECT COUNT(*) FROM Sessions WHERE cookieValue = ?")
 	if err != nil {
 		log.Fatal(err)
@@ -101,8 +98,6 @@ func (repo *dbStruct)checkCookieDB(cookieValue string) int {
 	if err != nil {
 		log.Fatal(err)
 	}
-return count
+	return count
 
 }
-
-
