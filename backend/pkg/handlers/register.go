@@ -88,6 +88,7 @@ func (repo *dbStruct) RegisterUser(data RegistrationData) error {
 	}
 
 	fmt.Println("hash: ", hash)
+	
 
 	_, err := repo.db.Exec("INSERT INTO Users (firstName, lastName, nickName, age, gender, email, password, avatarURL, imageFile, aboutMe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data.FirstName, data.LastName, data.NickName, data.Age, data.
 		Gender, data.Email, hash, data.Avatar, data.Image, data.AboutMe)

@@ -37,12 +37,13 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 	//browser to show logged in user info
 	//if browser window was previously closed down without logging out
 	loggedInUser := service.repo.GetUserByCookie(cookieValue)
-
+	var image string = string(loggedInUser.Image)
+	
 	loggedUserInfoFound := map[string]interface{}{
 		"message": "Cookie is found",
 		"email":   loggedInUser.Email,
 		"avatar":  loggedInUser.Avatar,
-		"image":   loggedInUser.Image,
+		"image":   image,
 	}
 
 	loggedUserInfoNotFound := map[string]interface{}{

@@ -192,9 +192,10 @@ func (repo *dbStruct) getAvatar(email string) (string, error) {
 	if avatarImage != "" {
 		// Set the response header for content type
 		// w.Header().Set("Content-Type", "image/jpeg")
-
+		
 		return avatarImage, nil
 	} else if avatarURL != "" {
+		
 		//Write the avatar URL to the response
 		return avatarURL, nil
 	} else {

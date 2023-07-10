@@ -159,15 +159,15 @@ const RegistrationPage = () => {
   };*/
 
   //use default image if none was supplied
-    if (avatarImage === "" && avatarURL === null){
-       
-        setAvatarURL("https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj");
-    }
-
+  
   // //HS: NEW UPDATED CODE FOR REGISTRATION
   const handleRegistration = (event) => {
     event.preventDefault();
-
+    
+    if (avatarImage === "" && avatarURL === null){
+       console.log("no image uploaded by user")
+        setAvatarURL("https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj");
+    }
   //HS: Create an object with the form data
     const formData = {
       firstName: firstName,

@@ -105,12 +105,15 @@ const Feed = () => {
         }else{
           console.log("fetching avatar and email")
           let userImage;
-          if( dataObj.avatar != ""){
-            userImage = dataObj.avatar;
-          } else if (dataObj.image !=""){
+          if (dataObj.image !=""){
+            
             userImage = dataObj.image;
-          } else {
+          } else if( dataObj.avatar != "" && dataObj.image ==""){
+            
+            userImage = dataObj.avatar;
+          }  else {
             //default avatar image
+            console.log("no image found")
             userImage = "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"
           }
            navigate(`/feed`, { state: { email: dataObj.email, avatar: userImage} });
