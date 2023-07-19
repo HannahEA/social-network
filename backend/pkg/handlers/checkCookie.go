@@ -42,6 +42,12 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 	loggedUserInfoFound := map[string]interface{}{
 		"message": "Cookie is found",
 		"email":   loggedInUser.Email,
+		"username": loggedInUser.NickName,
+		"firstName": loggedInUser.FirstName,
+		"lastName": loggedInUser.LastName,
+		"age": loggedInUser.Age,
+		"gender": loggedInUser.Gender,
+		"aboutMe": loggedInUser.AboutMe,
 		"avatar":  loggedInUser.Avatar,
 		"image":   image,
 	}
