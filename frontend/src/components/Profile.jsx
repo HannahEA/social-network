@@ -1,146 +1,86 @@
 import React, { useEffect, useState } from "react";
-import { SubmitPost, Tags, Posts } from "./feed/Posts";
-import handleLogout from "./feed/Logout";
-import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useNavigate, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
+const notyf = new Notyf();
 
-//Environment variable from the docker-compose.yml file.
-//This variable will contain the URL of the backend service,
-//allowing the frontend code to make requests to the correct endpoint.
 const apiURL = process.env.REACT_APP_API_URL;
-//const apiURL = "http://localhost:8000"
 
-const Feed = () => {
-  const location = useLocation();
-  const email = location.state?.email || ""; // Access the passed email
-  const userAvatar = location.state?.avatar || "";
-  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
-  const [Title, setTitle] = useState("");
-  const [sPost, setSpost] = useState("");
-  const [Content, setContent] = useState("");
-  const [Visibility, setVisibility] = useState("");
-  const [tag, setTags] = useState([]);
-  const navigate = useNavigate();
-  const [avatar, setAvatar] = useState(null);
-  const [imageURL, setImageURL] = useState(null);
-  const [imageFile, setImageFile] = useState("");
-  const notyf = new Notyf();
-  let websocketInstance = null;
+const deleteCookie = () => {
+  fetch(`${apiURL}/deleteCookie`, { credentials: "include" })
+    .then((response) => response.text())
+    .then((data) => {
+      // Handle the response from the server
+      console.log("Sending cookie to be deleted:", data);
 
-  const getWebSocketInstance = () => {
-    if (!websocketInstance) {
-      websocketInstance = new WebSocket("ws://localhost:8000/websocket");
-    }
+      // Redirect to the feed page if the cookie is found
+      if (data === "Cookie is deleted") {
+        console.log("Cookie is deleted from server");
 
-    return websocketInstance;
-  };
-  useEffect(() => {
-    const websocket = getWebSocketInstance();
+        // Remove the cookie from the client-side
+        document.cookie = "user_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
-    websocket.onopen = (e) => {
-      console.log("opening websocket");
-      websocket.send(
-        JSON.stringify({
-          message: "Websocket Connection Successfully Opened",
-          type: "chat",
-        })
-      );
-    };
+        // Notify the user
+        notyf.success("Logout successful.");
 
-    websocket.onmessage = (e) => {
-      console.log(e);
-    };
-
-    // Clean up the WebSocket connection when the component unmounts
-  }, []);
-
-  const handleAvatarChange = (event) => {
-    setAvatar(event.target.files[0]);
-  };
-
-  const uploadAvatar = (event) => {
-    event.preventDefault();
-
-    const formData = new FormData();
-    formData.append("profilePicture", avatar);
-    const email = location.state?.email || ""; // Access the passed email
-    const username = "test"; // Replace with the desired username
-
-    // Make a POST request to the server with the username as a query parameter
-    // fetch(`${apiURL}/uploadAvatar?username=${username}`, {
-    fetch(`${apiURL}/uploadAvatar?username=${username}`, {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        notyf.success("Profile picture uploaded successfully");
-      })
-      .catch((error) => {
-        console.log("Error:", error);
-      });
-  };
-
-  const verifyCookie = async () => {
-    try {
-      console.log("entering try");
-      const response = await fetch(`${apiURL}/checkCookie`, { credentials: "include" });
-      const data = await response.text();
-
-      const dataObj = JSON.parse(data);
-      console.log("user avatar and email", dataObj);
-      // Redirect user to login page if cookie not found
-      if (dataObj.message !== "Cookie is found") {
-        console.log(data);
-        console.log("Cookie is not found, redirecting to login");
+        // Redirect to the welcome page
+        const navigate = useNavigate();
         navigate("/");
-        //Otherwise show user avatar and email
       } else {
-        console.log("fetching avatar and email");
-        let userImage;
-        if (dataObj.image != "") {
-          userImage = dataObj.image;
-        } else if (dataObj.avatar != "" && dataObj.image == "") {
-          userImage = dataObj.avatar;
-        } else {
-          //default avatar image
-          console.log("no image found");
-          userImage =
-            "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj";
-        }
-        navigate(`/feed`, { state: { email: dataObj.email, avatar: userImage } });
+        console.log("Cookie is not deleted");
       }
-    } catch (error) {
+    })
+    .catch((error) => {
       // Handle any errors
       console.error("Error:", error);
-    }
-  };
+    });
+};
 
-  const deleteCookie = () => {
-    fetch(`${apiURL}/deleteCookie`, { credentials: "include" })
-      .then((response) => response.text())
+const Profile = () => {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [aboutMe, setAboutMe] = useState("");
+  const [dateOfBirth, setAge] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [image, setImage] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [gender, setGender] = useState("");
+  const [isDarkTheme, setDarkTheme] = useState(false);
+
+  function calculateAge(dateOfBirth) {
+    const dob = new Date(dateOfBirth);
+    const today = new Date();
+
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    const dayDiff = today.getDate() - dob.getDate();
+
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+
+    return age;
+  }
+
+  // Make a POST request to the server
+  const checkCookie = () => {
+    fetch(`${apiURL}/checkCookie`, { credentials: "include" })
+      .then((response) => response.json())
       .then((data) => {
         // Handle the response from the server
-        console.log("Sending cookie to be deleted:", data);
-
-        // Redirect to the feed page if the cookie is found
-        if (data === "Cookie is deleted") {
-          console.log("Cookie is deleted from server");
-
-          // Remove the cookie from the client-side
-          document.cookie = "user_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-          // Notify the user
-          notyf.success("Logout successful");
-
-          // Redirect to the welcome page
-          navigate("/");
-        } else {
-          console.log("Cookie is not deleted");
-        }
+        console.log("Data:", data);
+        setEmail(data.email);
+        setUsername(data.username);
+        setAboutMe(data.aboutMe);
+        setAge(data.age);
+        setAvatar(data.avatar);
+        setFirstName(data.firstName);
+        setLastName(data.lastName);
+        setImage(data.image);
+        setGender(data.gender);
       })
       .catch((error) => {
         // Handle any errors
@@ -148,96 +88,11 @@ const Feed = () => {
       });
   };
 
-  //set New Post Constants
-  const handleTitle = (event) => {
-    setTitle(event.target.value);
-  };
-  const handleContent = (event) => {
-    setContent(event.target.value);
-  };
-  const handleVisibility = (event) => {
-    setVisibility(event.target.value);
-  };
-  // const handleTag = (event) => {
-  //   setTag(event.target.value);
-  // };
-  //image upload for posts
-  const handlePostImage = (event) => {
-    const { value } = event.target;
-
-    if (value.startsWith("http") || value.startsWith("https")) {
-      // It's an image URL
-      setImageURL(value);
-    } else {
-      // It's a file upload
-      const file = event.target.files[0];
-
-      //now get file type
-      /*const fType = file.type;
-    console.log({fType});//this should show e.g. "image/jpg"
-    fileType = fType.split("/");
-    fileType = fileType[1];
-    console.log({fileType});*/ //this should show e.g. "jpg"
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result;
-        setImageFile(result);
-      };
-      reader.readAsDataURL(file);
-      console.log(imageFile);
-    }
-  };
-  // on new post form submission, handle in post file
-  const submitPost = async (event) => {
-    event.preventDefault();
-    let e = document.getElementById("Visibility");
-    let v = e.options[e.selectedIndex].text;
-    let data = await SubmitPost({ title: Title, content: Content, visibility: v, url: imageURL, file: imageFile, category: tag });
-    setSpost(data);
-    setTitle("");
-    setContent("");
-    setTags([]);
-    setImageURL(null);
-    setImageFile("");
-  };
-  const addTag = (event) => {
-    event.preventDefault();
-    let input = document.getElementById("postTags");
-    console.log("adding tag");
-    console.log("input value", input.value);
-    if (input.value != "") {
-      setTags([...tag, input.value]);
-      console.log(tag);
-      input.value = "";
-    }
-  };
-
   useEffect(() => {
-    verifyCookie();
+    checkCookie();
+  }, []);
 
-    const handleClick = () => {
-      const dropdown = document.querySelector("#dropdown");
-
-      if (dropdown.classList.contains("hidden")) {
-        dropdown.classList.remove("hidden");
-      } else {
-        dropdown.classList.add("hidden");
-      }
-    };
-
-    const button = document.getElementById("user-menu-button");
-    button.addEventListener("click", handleClick);
-
-    // Hide the dropdown div by default
-    const dropdown = document.querySelector("#dropdown");
-    dropdown.classList.add("hidden");
-
-    return () => {
-      button.removeEventListener("click", handleClick);
-    };
-  }, [sPost]);
-
+  console.log("email:", email);
   return (
     <div className="antialiased bg-gray-50 dark:bg-gray-900">
       <div className="content-container">{/* <TopNavigation /> */}</div>
@@ -693,7 +548,7 @@ const Feed = () => {
               <img
                 className={`w-10 h-10 rounded-full border-2 border-solid border-[#3b82f6] dark:border-[#f8fafc]`}
                 // src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
-                src={userAvatar}
+                src={image}
                 alt="user photo"
               />
             </button>
@@ -1270,125 +1125,34 @@ const Feed = () => {
         </div>
       </aside>
       <main className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
-        <h1 className="text-black dark:text-white">Profile Picture Upload</h1>
-        <form className="text-black dark:text-white" id="uploadForm" encType="multipart/form-data">
-          <input type="file" accept="image/*" onChange={handleAvatarChange} />
-          <button className="text-black dark:text-white" type="submit" onClick={uploadAvatar}>
-            Upload
-          </button>
-        </form>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div className="  dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
-            <img
-              //className="w-16 h-16 mb-2 rounded-full border-2 border-solid border-white-500"
-              className={`w-16 h-16 rounded-full border-2 border-solid border-[#3b82f6] dark:border-[#f8fafc]`}
-              //src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
-              src={userAvatar}
-              alt="user photo"
-            />
-            <div className="flex justify-center items-center flex-col">
-              <p>Followers: 0</p>
-              <p>Posts: 0</p>
-              <p>Email: {email}</p>
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8">
+          <div className="max-w-md mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-24 h-24 border-gradient border-4 border-[#4D96A9] rounded-[50%] overflow-hidden">
+                <img className="w-full h-full object-cover" src={image} alt="" />
+              </div>
+            </div>
+            <div className="text-center mb-4">
+              <h3 className="text-[#4D96A9] text-2xl font-semibold">
+                <div>
+                  <div className="flex items-center justify-center "></div>
+                  {firstName} {lastName}{" "}
+                </div>
+              </h3>
+              <p className="text-gray-600 text-lg dark:text-gray-400 mb-0.5">@{username}</p>
+              <p className="mb-3 text-md text-gray-500 dark:text-gray-400">{aboutMe}</p>
+              <div className="flex justify-center items-center gap-1">
+                <span className="py-1 px-2.5 bg-[#4D96A9] text-md text-white dark:text-gray-40 text-center rounded-full">
+                  {calculateAge(dateOfBirth)}
+                </span>
+                <span className="py-1 px-2.5 bg-[#4D96A9] text-md text-white dark:text-gray-40 text-center rounded-full">{gender}</span>
+              </div>
             </div>
           </div>
-          <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
-          <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
-          <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
-        </div>
-        <div
-          id="submitPosts"
-          className="bg-white border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 dark:bg-gray-800 mb-4"
-        >
-          <div className="  dark:bg-gray-800 dark:text-white flex justify-left items-left flex-col">
-            <h3 className="pl-5 mt-3 font-bold text-xl text-blue-500 ">Update Feed</h3>
-            <form onSubmit={submitPost}>
-              <span className="flex p-2.5 pl-5">
-                <p className="flex-row mr-5 font-bold">Title</p>
-                <input
-                  className="flex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
-                  type="text"
-                  value={Title}
-                  onChange={handleTitle}
-                />
-              </span>
-
-              <span className="flex p-2.5 pl-5">
-                <p className="flex-row mr-5 font-bold">Tags</p>
-                <input
-                  type="text"
-                  id="postTags"
-                  className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
-                />
-                <button
-                  onClick={addTag}
-                  type="submit"
-                  value="Add Tag"
-                  className="flex-row pl-2  pr-2 font-bold bg-blue-500 text-sm text-white rounded-md"
-                >
-                  Add Tag
-                </button>
-              </span>
-              <Tags tags={tag} />
-              <div className="flex justify-right items-right flex-col">
-                <p className="p-2.5 pl-5 font-bold">Content</p>
-                <textarea
-                  className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none"
-                  name="postContent"
-                  id="postContent"
-                  cols="8"
-                  rows="3"
-                  maxLength="100"
-                  value={Content}
-                  onChange={handleContent}
-                ></textarea>
-              </div>
-
-              <select
-                className="ml-5 pl-5 font-bold focus:outline-none dark:bg-gray-800"
-                name="Visibility"
-                id="Visibility"
-                onChange={handleVisibility}
-              >
-                <option name="public" value={Visibility}>
-                  Public
-                </option>
-                <option name="private" value={Visibility}>
-                  Private
-                </option>
-              </select>
-              <div className="flex">
-                <input
-                  type="text"
-                  name="imageUrl"
-                  id="imageUrl"
-                  placeholder="Enter image URL"
-                  className="ml-5 m-2.5 pl-5 pr-5 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  // value={imageURL}
-                  onChange={handlePostImage}
-                />
-                <label
-                  htmlFor="imageFile"
-                  className="ml-5 m-2.5 pl-5 pr-5  items-center justify-center text-sm font-bold bg-blue-500 text-white border border-transparent rounded-lg cursor-pointer hover:bg-blue-700 focus:block outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                >
-                  Upload Image File
-                </label>
-                {/* <input type="file" name="imageFile" id="imageFile" accept="image/*" className="hidden" value={imageFile} onChange={handlePostImage} /> */}
-                <input type="file" name="mageFile" id="imageFile" accept="image/*" className="hidden" onChange={handlePostImage} />
-              </div>
-              <button className="ml-5 m-2.5 pl-5 pr-5 font-bold bg-blue-500 text-white rounded-md" type="submit">
-                Post
-              </button>
-            </form>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800">
-          <Posts sPost={sPost} />
         </div>
       </main>
     </div>
   );
 };
 
-export default Feed;
+export default Profile;

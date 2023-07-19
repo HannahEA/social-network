@@ -4,10 +4,10 @@ import RegistrationPage from "./components/Registration";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Feed from "./components/Feed";
-import {TopNavigation, ThemeIcon} from "./components/TopNavigation";
-  const apiURL = process.env.REACT_APP_API_URL;
+import Profile from "./components/Profile";
+import { TopNavigation, ThemeIcon } from "./components/TopNavigation";
+const apiURL = process.env.REACT_APP_API_URL;
 function App() {
-
   const [authenticated, setAuthenticated] = useState(false);
 
   const handleLogin = () => {
@@ -20,9 +20,6 @@ function App() {
     setAuthenticated(false);
   };
 
-
-  
-
   // const [userAvatar, setUserAvatar] = useState("");
   return (
     <Router>
@@ -32,6 +29,7 @@ function App() {
         <Route path="/register" element={<RegistrationPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/feed" element={<Feed />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );
