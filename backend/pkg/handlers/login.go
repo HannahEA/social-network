@@ -82,7 +82,7 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 			return
 		}
 
-		fmt.Print(userAvatar)
+		// fmt.Print(userAvatar)
 
 		response := map[string]interface{}{
 			"message":    "Login successful",

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"mime"
@@ -19,109 +18,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type ChatMessage struct {
-	Username string `json:"username"`
-	Message     string `json:"message"`
-}
-type TypeCheck struct {
-	Type string `json:"type,omitempty"`
-}
-
-var clients = make(map[*websocket.Conn]bool)
-var broadcaster = make(chan ChatMessage)
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-func handleConnections(w http.ResponseWriter, r *http.Request) {
-	//create websocket connection
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("new websocket connection")
-	// ensure connection close when function returns
-	defer ws.Close()
-	clients[ws] = true
-
-	// if it's zero, no messages were ever sent/saved
-	// STORE OLD MESSAGES
-
-	for {
-		var msg ChatMessage
-		// Read in a new message
-		_, b, err := ws.ReadMessage()
-		if err != nil {
-			unsafeError(err)
-		}
-		fmt.Println(string(b))
-
-		//unmarshall type, check message type
-		sm := &TypeCheck{}
-		if err := json.Unmarshal(b, sm); err != nil {
-			unsafeError(err)
-		}
-		switch sm.Type {
-		case "chat":
-			// Unmarshal full message as JSON and map it to a Message object
-			// err := ws.ReadJSON(&msg)
-			jsonErr := json.Unmarshal(b, &msg)
-			fmt.Println("connection message", msg)
-			if jsonErr != nil {
-				delete(clients, ws)
-				break
-			}
-			// send new message to the channel
-			broadcaster <- msg
-		}
-
-	}
-}
-
-func sendPreviousMessages(ws *websocket.Conn) {
-	//GET OLD MESSAGES
-
-	// send previous messages
-	// for _, chatMessage := range chatMessages {
-	// 	var msg ChatMessage
-	// 	json.Unmarshal([]byte(chatMessage), &msg)
-	// 	messageClient(ws, msg)
-	// }
-}
-
-// If a message is sent while a client is closing, ignore the error
-func unsafeError(err error) bool {
-	return !websocket.IsCloseError(err, websocket.CloseGoingAway) && err != io.EOF
-}
-
-func handleMessages() {
-	for {
-		// grab any next message from channel
-		msg := <-broadcaster
-
-		messageClients(msg)
-	}
-}
-
-func messageClients(msg ChatMessage) {
-	// send to every client currently connected
-	for client := range clients {
-		messageClient(client, msg)
-	}
-}
-
-func messageClient(client *websocket.Conn, msg ChatMessage) {
-	err := client.WriteJSON(msg)
-	fmt.Println("handled message", msg)
-	if err != nil && unsafeError(err) {
-		log.Printf("error: %v", err)
-		client.Close()
-		delete(clients, client)
-	}
-}
-
 func reactHandler(w http.ResponseWriter, r *http.Request) {
 	http.FileServer(http.Dir("build")).ServeHTTP(w, r)
 }
@@ -131,7 +27,6 @@ func corsMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Allow requests from any origin
 		w.Header().Add("Access-Control-Allow-Origin", "http://localhost:3000")
-		
 
 		// // Allow specific headers
 		w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
@@ -154,6 +49,8 @@ func corsMiddleware(handler http.Handler) http.Handler {
 	})
 }
 
+var broadcaster = make(chan handlers.BroadcastMessage)
+
 func main() {
 	router := http.NewServeMux()
 	communicateBackFront := corsMiddleware(router)
@@ -163,10 +60,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	newRepo := handlers.NewDbStruct(db)
+	newRepo := handlers.NewDbStruct(db, broadcaster)
 	newService := handlers.NewService(newRepo)
 	defer database.Database.Close()
-	router.HandleFunc("/websocket", handleConnections)
+	router.HandleFunc("/websocket", newService.HandleConnections)
 	go handleMessages()
 	router.HandleFunc("/", reactHandler)
 	router.HandleFunc("/register", newService.HandleRegistration)
@@ -181,6 +78,33 @@ func main() {
 
 	fmt.Println("Server started on http://localhost:8000")
 	log.Fatal(http.ListenAndServe(":8000", communicateBackFront))
+}
+
+func handleMessages() {
+	for {
+		// grab any next message from channel
+		msg := <-broadcaster
+
+		messageClients(msg)
+	}
+}
+
+func messageClients(msg handlers.BroadcastMessage) {
+	// send to every client currently connected
+	for client := range msg.Connections {
+		messageClient(client, msg)
+	}
+}
+
+func messageClient(client *websocket.Conn, msg handlers.BroadcastMessage) {
+	send := &msg.WebMessage
+	err := client.WriteJSON(&send)
+	fmt.Println("handled message", msg.WebMessage)
+	if err != nil && handlers.UnsafeError(err) {
+		log.Printf("error: %v", err)
+		client.Close()
+		delete(handlers.Clients, client)
+	}
 }
 
 // http://localhost:8000/image?id=1
@@ -364,50 +288,52 @@ func handleProfilePictureUpload(w http.ResponseWriter, r *http.Request) {
 //============> End of deleteCookie function moved to logout.go <================
 
 // Where is this being used??
-// func indexHandler(w http.ResponseWriter, r *http.Request) {
-// 	tmpl := template.Must(template.ParseFiles("build/index.html"))
-// 	tmpl.Execute(w, nil)
-// }
+//
+//	func indexHandler(w http.ResponseWriter, r *http.Request) {
+//		tmpl := template.Must(template.ParseFiles("build/index.html"))
+//		tmpl.Execute(w, nil)
+//	}
+//
 // checkCookieHandler handles the "/checkCookie" endpoint
-func checkCookieHandler(w http.ResponseWriter, r *http.Request) {
+// func checkCookieHandler(w http.ResponseWriter, r *http.Request) {
 
-	// Retrieve the cookie value from the request
-	cookie, err := r.Cookie("user_session")
-	if err != nil {
-		// Cookie is not found
-		fmt.Fprint(w, "Cookie is not found")
-		return
-	}
+// 	// Retrieve the cookie value from the request
+// 	cookie, err := r.Cookie("user_session")
+// 	if err != nil {
+// 		// Cookie is not found
+// 		fmt.Fprint(w, "Cookie is not found")
+// 		return
+// 	}
 
-	// Get the cookie value
-	cookieValue := cookie.Value
+// 	// Get the cookie value
+// 	cookieValue := cookie.Value
 
-	// Open the SQLite3 database connection
-	db, err := sql.Open("sqlite3", "database.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+// 	// Open the SQLite3 database connection
+// 	db, err := sql.Open("sqlite3", "database.db")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	defer db.Close()
 
-	// Prepare the SQL statement to check the cookie value in the Sessions table
-	stmt, err := db.Prepare("SELECT COUNT(*) FROM Sessions WHERE cookieValue = ?")
-	if err != nil {
-		log.Fatal(err)
-	}
+// 	// Prepare the SQL statement to check the cookie value in the Sessions table
+// 	stmt, err := db.Prepare("SELECT COUNT(*) FROM Sessions WHERE cookieValue = ?")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	// Execute the SQL statement and check if the cookie value exists
-	var count int
-	err = stmt.QueryRow(cookieValue).Scan(&count)
-	if err != nil {
-		log.Fatal(err)
-	}
+// 	// Execute the SQL statement and check if the cookie value exists
+// 	var count int
+// 	err = stmt.QueryRow(cookieValue).Scan(&count)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	// Return the result based on the count value
-	if count > 0 {
-		// Cookie is found
-		fmt.Fprint(w, "Cookie is found")
-	} else {
-		// Cookie is not found
-		fmt.Fprint(w, "Cookie is not found")
-	}
-}
+// 	// Return the result based on the count value
+// 	if count > 0 {
+// 		// Cookie is found
+// 		fmt.Fprint(w, "Cookie is found")
+// 	} else {
+// 		// Cookie is not found
+// 		fmt.Fprint(w, "Cookie is not found")
+// 	}
+// }

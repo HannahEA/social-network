@@ -1,0 +1,127 @@
+package handlers
+
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"strings"
+
+	"github.com/gorilla/websocket"
+)
+
+type TypeCheck struct {
+	Type string `json:"type,omitempty"`
+}
+
+var Clients = make(map[*websocket.Conn]string)
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+func sendPreviousMessages(ws *websocket.Conn) {
+	//GET OLD MESSAGES
+
+	// send previous messages
+	// for _, chatMessage := range chatMessages {
+	// 	var msg ChatMessage
+	// 	json.Unmarshal([]byte(chatMessage), &msg)
+	// 	messageClient(ws, msg)
+	// }
+}
+
+// If a message is sent while a client is closing, ignore the error
+func UnsafeError(err error) bool {
+	return !websocket.IsCloseError(err, websocket.CloseGoingAway) && err != io.EOF
+}
+func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *http.Request) {
+	//create websocket connection
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("new websocket connection")
+	// ensure connection close when function returns
+	defer ws.Close()
+	// clients[ws] = true
+
+	// if it's zero, no messages were ever sent/saved
+	// STORE OLD MESSAGES
+
+	for {
+		var msg WebsocketMessage
+		// Read in a new message
+		_, b, err := ws.ReadMessage()
+		if err != nil {
+			UnsafeError(err)
+			return
+		}
+		fmt.Println(string(b))
+
+		//unmarshall type, check message type
+		sm := &TypeCheck{}
+		if err := json.Unmarshal(b, sm); err != nil {
+			UnsafeError(err)
+		}
+		switch sm.Type {
+		case "connect":
+			// Unmarshal full message as JSON and map it to a Message object
+			// err := ws.ReadJSON(&msg)
+			jsonErr := json.Unmarshal(b, &msg)
+			fmt.Println("connection message", msg)
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: Websocket")
+				break
+			}
+			//get username to send to other logged in users
+			cookie := strings.Split(msg.Cookie, "=")[1]
+			user := service.repo.GetUserByCookie(cookie)
+			Clients[ws] = user.NickName
+			fmt.Println("clients", Clients)
+			//list of evryone you want to send it too: everyone logged in
+			//message you want to send: all usernames
+			var users []string
+			for _, name := range Clients {
+				users= append(users, name)
+			}
+			webMessage:= WebsocketMessage{
+				Presences: Presences {
+					Clients: users,
+				},
+			}
+			
+			// send new message to the channel
+			service.repo.BroadcastToChannel(BroadcastMessage{WebMessage:webMessage, Connections: Clients})
+		case "conversation": 
+			
+		case "chat":
+			var chat Chat
+			// Unmarshal full message as JSON and map it to a Message object
+			// err := ws.ReadJSON(&msg)
+			jsonErr := json.Unmarshal(b, &chat)
+			fmt.Println("chat message", chat)
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: Websocket")
+				break
+			}
+			//
+			//add chat to database
+			//look for reciever in client list
+			//send Chat message to reciever web conn
+			//OR
+			//add to notif table 
+			// send new message to the channel
+			service.repo.BroadcastToChannel(BroadcastMessage{})
+		}
+
+	}
+}
+
+func (r *dbStruct) BroadcastToChannel(msg BroadcastMessage) {
+	fmt.Println("attempting to broadcast")
+	r.broadcaster <- msg
+}

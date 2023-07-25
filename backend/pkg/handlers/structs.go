@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type User struct {
@@ -59,7 +61,7 @@ type Post struct {
 	Author     string    `json:"author"`
 	Title      string    `json:"title"`
 	Content    string    `json:"content"`
-	Category   []string    `json:"category"`
+	Category   []string  `json:"category"`
 	ImageFile  string    `json:"file"`
 	ImageURL   string    `json:"url"`
 	Date       string    `json:"date"`
@@ -78,9 +80,47 @@ type Comment struct {
 	Date      string `string:"date"`
 }
 
-// type Profile struct {
-// 	FirstName string `json:"FirstName"`
-// 	LastName  string `json:"LastName"`
-// 	Username string `json:"Username"`
-// 	Avatar	string `json:"Avatar"`
-// }
+//	type Profile struct {
+//		FirstName string `json:"FirstName"`
+//		LastName  string `json:"LastName"`
+//		Username string `json:"Username"`
+//		Avatar	string `json:"Avatar"`
+//	}
+
+type BroadcastMessage struct {
+	WebMessage WebsocketMessage
+	//clients who will recieve the message
+	Connections map[*websocket.Conn]string 
+}
+type WebsocketMessage struct {
+	Cookie  string `json:"cookie"`
+
+	Presences Presences `json:"presences"`
+
+	Chat Chat `json:"chat"`
+
+	Conversation Conversation `json:"conversation"`
+}
+
+type Presences struct {
+	//logged in users nicknames
+	Clients []string `json:"clients"`
+}
+
+type Conversation struct {
+	Chats          []Chat `json:"chats"`
+	//chat sender username  
+	Sender string `json:"username"`
+	//chat reciever username
+	Reciver string `json:"reciever"`
+	ConversationId string `json:"converstionID"`
+}
+
+type Chat struct {
+	Message string `json:"message"`
+	//chat sender username
+	Sender string `json:"username"`
+	//chat reciever username
+	Reciver string `json:"reciever"`
+	ChatId  string `json:"chatID"`
+}

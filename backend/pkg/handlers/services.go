@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 )
+
 // To group all backend handlers
 type AllHandlersMethods interface {
 	// IsEmailTaken(email string) bool
@@ -15,14 +16,15 @@ type AllHandlersMethods interface {
 	PostHandler(w http.ResponseWriter, r *http.Request)
 	CheckCookieHandler(w http.ResponseWriter, r *http.Request)
 	DeleteCookie(w http.ResponseWriter, r *http.Request)
+	HandleConnections(w http.ResponseWriter, r *http.Request)
 }
+
 // A wrapper for 'AllDbMethods' that groups all database methods.
 type AllDbMethodsWrapper struct {
 	repo AllDbMethods
 }
 
-
-//Receives a group of database methods (= AllDbMethods) and returns a new database methods wrapper
+// Receives a group of database methods (= AllDbMethods) and returns a new database methods wrapper
 func NewService(repo AllDbMethods) AllHandlersMethods {
 	return &AllDbMethodsWrapper{repo}
 }
@@ -47,21 +49,22 @@ type AllDbMethods interface {
 	DeleteCookieDB(cookieValue string) (int64, error)
 	//post database queries
 	AddPostToDB(data Post) error
-	GetPublicPosts() ([]Post,error)
+	GetPublicPosts() ([]Post, error)
 	//comment database queries
 	AddCommentToDB(data Post) error
-	GetComments(data Post) ([]Comment,error)
-	getAvatar(email string)(string, error)
-	checkCookieDB(cookieValue string)int
+	GetComments(data Post) ([]Comment, error)
+	getAvatar(email string) (string, error)
+	checkCookieDB(cookieValue string) int
+	BroadcastToChannel(msg BroadcastMessage)
 }
-//The dabataseStruct
+
+// The dabataseStruct
 type dbStruct struct {
-	db *sql.DB
-	
+	db          *sql.DB
+	broadcaster chan BroadcastMessage
 }
 
-//To instantiate a new database struct
-func NewDbStruct(db *sql.DB) AllDbMethods {
-	return &dbStruct{db}
+// To instantiate a new database struct
+func NewDbStruct(db *sql.DB, broadcaster chan BroadcastMessage) AllDbMethods {
+	return &dbStruct{db, broadcaster}
 }
-

@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/gorilla/websocket"
 )
 
 // func Logout(w http.ResponseWriter, r *http.Request, hub *Hub) {
@@ -59,10 +61,10 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 	// Get the cookie value
 	cookieValue := cookie.Value
 
-//=======> start of db query <============
+	//=======> start of db query <============
 	rowsAffected, err := service.repo.DeleteCookieDB(cookieValue)
 	if err != nil {
-		fmt.Print("Error deleting cookie in db",err)
+		fmt.Print("Error deleting cookie in db", err)
 		return
 	}
 	//=======> end of db query <============
@@ -75,12 +77,23 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 		// Cookie is not found or not deleted
 		fmt.Fprint(w, "Cookie is not found or not deleted")
 	}
+	//delete client from hub
+	var conn *websocket.Conn
+	//get username from cookie
+	user := service.repo.GetUserByCookie(cookieValue)
+	for con, name := range Clients {
+		if name == user.NickName {
+			//get websocket connection from client hub
+			conn = con
+		}
+	}
+	//delete client
+	delete(Clients, conn)
 }
-
 
 func (repo *dbStruct) DeleteCookieDB(cookieValue string) (int64, error) {
 	// Prepare the SQL statement to delete the cookie value from the Sessions table
-	stmt, err:= repo.db.Prepare("DELETE FROM Sessions WHERE cookieValue = ?")
+	stmt, err := repo.db.Prepare("DELETE FROM Sessions WHERE cookieValue = ?")
 	if err != nil {
 		fmt.Println("err with deleting cookie from db:", err)
 		return 0, err
@@ -99,6 +112,5 @@ func (repo *dbStruct) DeleteCookieDB(cookieValue string) (int64, error) {
 		return 0, err
 	}
 	return rowsAffected, err
-	
-}
 
+}

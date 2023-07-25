@@ -93,7 +93,10 @@ const LoginPage = () => {
       // Redirect to the feed page if the cookie is found
       if (data.message === "Cookie is found") {
         console.log("Cookie is found, redirecting to feed");
-        console.log("user", avatar)
+       
+
+          
+       
         navigate(`/feed`, { state: { email: email, avatar:avatar} });
         
       

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
+import {Chat} from "./feed/Chat"
 import handleLogout from "./feed/Logout";
 import {TopNavigation, ThemeIcon} from './TopNavigation.jsx';
 import { useNavigate, Link } from "react-router-dom";
@@ -17,6 +18,7 @@ const Feed = () => {
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
+ // POSTS VARIABLES
   const [Title, setTitle] = useState("");
   const [sPost, setSpost] = useState("");
   const [Content, setContent] = useState("");
@@ -27,38 +29,78 @@ const Feed = () => {
   const [imageURL, setImageURL] = useState(null)
   const [imageFile, setImageFile] = useState("")
   const notyf = new Notyf();
-  let websocketInstance = null;
 
-   const getWebSocketInstance = () => {
-    if (!websocketInstance) {
-      websocketInstance = new WebSocket("ws://localhost:8000/websocket");
-    }
 
-    return websocketInstance;
-  }
   useEffect(() => {
-    const websocket = getWebSocketInstance();
+    verifyCookie();
 
-    websocket.onopen = (e) => {
-      console.log("opening websocket")
-      websocket.send(
-        JSON.stringify({
-          message: "Websocket Connection Successfully Opened",
-          type: "chat"
-        })
-      );
+    const handleClick = () => {
+      const dropdown = document.querySelector("#dropdown");
+
+      if (dropdown.classList.contains("hidden")) {
+        dropdown.classList.remove("hidden");
+      } else {
+        dropdown.classList.add("hidden");
+      }
     };
 
-    websocket.onmessage = (e) => {
-      console.log(e);
+    const button = document.getElementById("user-menu-button");
+    button.addEventListener("click", handleClick);
+
+    // Hide the dropdown div by default
+    const dropdown = document.querySelector("#dropdown");
+    dropdown.classList.add("hidden");
+
+    return () => {
+      button.removeEventListener("click", handleClick);
     };
-
-    // Clean up the WebSocket connection when the component unmounts
-    
-  }, []);
-
+  }, [sPost]);
+// ----------------------HANDLE WEBSOCKETS---------------------- 
+ 
+    const [isWebSocketConnected, setWebSocketConnected] = useState(false);
+    const websocketRef = useRef(null);
+    const allData = useRef({chats:[], presences:[]})
+    useEffect(() => {
+      if (!websocketRef.current) {
+        websocketRef.current = new WebSocket("ws://localhost:8000/websocket");
   
+        websocketRef.current.onopen = (e) => {
+          console.log("WebSocket Connection Successfully Opened");
+          setWebSocketConnected(true);
+          websocketRef.current.send(
+            JSON.stringify({
+              type: "connect",
+              cookie: document.cookie,
+            })
+          );
+        };
+  
+        websocketRef.current.onmessage = (e) => {
+          let message = JSON.parse(e.data)
+          console.log(message)
+          allData.current.presences = message.presences.clients
+          console.log(allData.current.presences)
 
+        };
+
+        websocketRef.current.onclose = () => {
+          console.log("websocket connection ended")
+        }
+      }
+  
+      return () => {
+        // Close the WebSocket connection only if it was connected
+        if (isWebSocketConnected) {
+          console.log("Websocket connection ended");
+          websocketRef.current.close();
+        }
+      };
+    }, [isWebSocketConnected]);
+  
+    // Rest of your component code
+
+
+//--------------UPLOAD AVATAR----------------------
   const handleAvatarChange = (event) => {
     setAvatar(event.target.files[0]);
   };
@@ -94,7 +136,7 @@ const Feed = () => {
     const data = await response.text();
 
         const dataObj = JSON.parse(data);
-        console.log("user avatar and email",dataObj)
+       
         // Redirect user to login page if cookie not found
         if (dataObj.message !== "Cookie is found") {
           console.log(data);
@@ -124,8 +166,8 @@ const Feed = () => {
         console.error("Error:", error);
       };
   }
-
-
+//------------------------lOGGING OUT-----------------------
+  let loggedOut = false
   const deleteCookie = () => {
     fetch(`${apiURL}/deleteCookie`,{credentials: 'include',})
       .then((response) => response.text())
@@ -142,7 +184,8 @@ const Feed = () => {
 
           // Notify the user
           notyf.success("Logout successful");
-
+          websocketRef.current.close()
+          // closeWebsocket()
           // Redirect to the welcome page
           navigate("/");
         } else {
@@ -154,7 +197,7 @@ const Feed = () => {
         console.error("Error:", error);
       });
   };
-
+//-------------------- POST FUNCTIONS--------------------
   //set New Post Constants
   const handleTitle = (event) => {
     setTitle(event.target.value);
@@ -221,30 +264,7 @@ const Feed = () => {
     }
   };
 
-  useEffect(() => {
-    verifyCookie();
-
-    const handleClick = () => {
-      const dropdown = document.querySelector("#dropdown");
-
-      if (dropdown.classList.contains("hidden")) {
-        dropdown.classList.remove("hidden");
-      } else {
-        dropdown.classList.add("hidden");
-      }
-    };
-
-    const button = document.getElementById("user-menu-button");
-    button.addEventListener("click", handleClick);
-
-    // Hide the dropdown div by default
-    const dropdown = document.querySelector("#dropdown");
-    dropdown.classList.add("hidden");
-
-    return () => {
-      button.removeEventListener("click", handleClick);
-    };
-  }, [sPost]);
+ 
 
   return (
     <div className="antialiased bg-gray-50 dark:bg-gray-900">
@@ -1288,6 +1308,7 @@ const Feed = () => {
         </div>
       </aside>
       <main className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
+        <Chat websocketRef={websocketRef} isWebSocketConnected={ isWebSocketConnected} allData={allData}/>
         <h1 className="text-black dark:text-white" >Profile Picture Upload</h1>
         <form className="text-black dark:text-white" id="uploadForm" encType="multipart/form-data">
           <input type="file" accept="image/*" onChange={handleAvatarChange} />

@@ -48,7 +48,7 @@ func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v\n", err)
 		}
 		postTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", postDate)
-		fmt.Println("postTime", postTime)
+
 		if parseError != nil {
 			log.Fatal("getPublicPosts: parse creationDate Error")
 		}
@@ -62,11 +62,10 @@ func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 			//send the time insted of the date
 
 			postDate = postTime.Format("3:04PM")
-			fmt.Println("Today")
+
 		}
-		fmt.Println("currDate", currDate)
-		fmt.Println("postDate", postDate)
-		//tags 
+
+		//tags
 		tags := strings.Split(category, ",")
 		posts = append([]Post{{
 			PostID:    postID,
@@ -100,8 +99,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 		fmt.Println("Cookie is empty", err)
 		return
 	}
-	fmt.Println("Cookie -----", c)
-	fmt.Println("Post Data recieved: ", data)
+
 	data.Cookie = c.String()
 	if data.PostType == "newPost" {
 		err := service.repo.AddPostToDB(data)
@@ -158,7 +156,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
 			return
 		}
-		fmt.Println(comments)
+
 		json.NewEncoder(w).Encode(comments)
 	} else if data.PostType == "newComment" {
 		err := service.repo.AddCommentToDB(data)
@@ -169,7 +167,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 		}
 
 	}
-	fmt.Println("Post")
+
 }
 
 func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
@@ -188,7 +186,7 @@ func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 			return comments, fmt.Errorf("GetComments rows.Scan error: %+v\n", err)
 		}
 		cTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", commentDate)
-		fmt.Println("cTime", cTime)
+
 		if parseError != nil {
 			log.Fatal("getPublicPosts: parse commentDate Error")
 		}
@@ -202,7 +200,7 @@ func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 			//send the time insted of the date
 
 			commentDate = cTime.Format("3:04PM")
-			fmt.Println("Today")
+
 		}
 		comments = append([]Comment{{
 			CommentID: commentID,

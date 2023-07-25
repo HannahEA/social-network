@@ -72,19 +72,7 @@ const Posts = ({sPost}) => {
       .then((data) => {
         // if (Object.keys(sPost).length === 0) {
           setpData(data)
-        // } 
-        // else {
-        //   console.log("new data", sPost)
-        //   const updated = [...pData, sPost]
-        //   setpData(updated)
-        //   console.log("submitted post", pData)
-        //   // Handle the response from the server 
-        //   const updatedP = [...pData, data]
-        //   setpData(updatedP)
-        //   console.log("submitted post", pData)
-        // }
         
-          // display posts
           
       })
       .catch((error) => {
