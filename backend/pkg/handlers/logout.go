@@ -61,6 +61,32 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 	// Get the cookie value
 	cookieValue := cookie.Value
 
+	//delete client from hub
+	var conn *websocket.Conn
+	//get username from cookie
+	user := service.repo.GetUserByCookie(cookieValue)
+	for con, name := range Clients {
+		if name == user.NickName {
+			//get websocket connection from client hub
+			conn = con
+		}
+	}
+	//delete client
+	delete(Clients, conn)
+	fmt.Println("Clients", Clients)
+	//get usernames
+	var users []string
+			for _, name := range Clients {
+				users= append(users, name)
+			}
+			webMessage:= WebsocketMessage{
+				Presences: Presences {
+					Clients: users,
+				},
+			}
+	//send updated list to users
+	service.repo.BroadcastToChannel(BroadcastMessage{WebMessage:webMessage, Connections: Clients})
+
 	//=======> start of db query <============
 	rowsAffected, err := service.repo.DeleteCookieDB(cookieValue)
 	if err != nil {
@@ -77,18 +103,7 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 		// Cookie is not found or not deleted
 		fmt.Fprint(w, "Cookie is not found or not deleted")
 	}
-	//delete client from hub
-	var conn *websocket.Conn
-	//get username from cookie
-	user := service.repo.GetUserByCookie(cookieValue)
-	for con, name := range Clients {
-		if name == user.NickName {
-			//get websocket connection from client hub
-			conn = con
-		}
-	}
-	//delete client
-	delete(Clients, conn)
+	
 }
 
 func (repo *dbStruct) DeleteCookieDB(cookieValue string) (int64, error) {

@@ -38,14 +38,15 @@ const apiURL = process.env.REACT_APP_API_URL;
    } 
   
  }
- const getConversation = ({reciever}) => {
+ const GetConversation = ({reciever}) => {
     const cookie = (document.cookie).split(":")
     const sender = cookie[1]
     const getConversation = {
         reciever: reciever,
         sender: sender,
     }
-    fetch(`${apiURL}/chat`, {
+   
+      fetch(`${apiURL}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,6 +60,8 @@ const apiURL = process.env.REACT_APP_API_URL;
         // revive converstion object with sender, reciever and conversation id
         //id should be attached to all chats
     } )
+  
+  
  }
  return (
     <div>
@@ -75,7 +78,7 @@ const apiURL = process.env.REACT_APP_API_URL;
         </div>
         <aside className=" flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
           {allData.current.presences.length > 0 && allData.current.presences.map(presence => 
-            <button onClick = {getConversation({reciever:presence})}> {presence} </button>
+            <button onClick = {()=> GetConversation({reciever:presence})}> {presence} </button>
           )
           }
         </aside>
