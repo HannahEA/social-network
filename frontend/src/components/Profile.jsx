@@ -79,12 +79,11 @@ const Profile = () => {
         setAvatar(data.avatar);
         setFirstName(data.firstName);
         setLastName(data.lastName);
-        if (!data.image) {
+        if (!data.image){
           setImage(data.avatar)
-        } else {
-          setImage(data.image);
+        }else{
+          setImage(data.image)
         }
-        
         setGender(data.gender);
       })
       .catch((error) => {

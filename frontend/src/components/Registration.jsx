@@ -8,7 +8,7 @@ import { useNavigate, Link } from "react-router-dom";
 //This variable will contain the URL of your backend service, 
 //allowing your frontend code to make requests to the correct endpoint.
 const apiURL = process.env.REACT_APP_API_URL;
-//const apiURL = "http://localhost:8000"
+// const apiURL = "http://localhost:8000"
 
 
  let fileType
@@ -192,7 +192,7 @@ const RegistrationPage = () => {
     for (const key in formData) {
       formDataToSend.append(key, formData[key]);
     }*/
-
+    console.log("###########",apiURL)
   //Make a POST request to the server
     fetch(`${apiURL}/register`, {
       method: "POST",
