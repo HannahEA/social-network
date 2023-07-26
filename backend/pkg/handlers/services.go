@@ -58,6 +58,7 @@ type AllDbMethods interface {
 	checkCookieDB(cookieValue string) int
 	BroadcastToChannel(msg BroadcastMessage)
 	FindConversation(convo Conversation) Conversation
+	NewPrivateChatToDB(convo Conversation) Conversation
 }
 
 // The dabataseStruct
