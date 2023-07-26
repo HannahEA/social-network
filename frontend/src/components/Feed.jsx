@@ -17,6 +17,7 @@ const Feed = () => {
   const location = useLocation();
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
+  const userInfo = location.state?.userInfo || {}
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
  // POSTS VARIABLES
   const [Title, setTitle] = useState("");
@@ -58,7 +59,8 @@ const Feed = () => {
  
     const [isWebSocketConnected, setWebSocketConnected] = useState(false);
     const websocketRef = useRef(null);
-    const allData = useRef({chats:[], presences:[]})
+    const allData = useRef({userInfo: userInfo, chats:[], presences:[]})
+    
     useEffect(() => {
       if (!websocketRef.current) {
         websocketRef.current = new WebSocket("ws://localhost:8000/websocket");
@@ -155,7 +157,7 @@ const Feed = () => {
           userImage =
             "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj";
         }
-        navigate(`/feed`, { state: { email: dataObj.email, avatar: userImage } });
+        navigate(`/feed`, { state: { email: dataObj.email, avatar: userImage, userInfo: dataObj} });
       }
     } catch (error) {
       // Handle any errors

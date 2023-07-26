@@ -17,6 +17,7 @@ type AllHandlersMethods interface {
 	CheckCookieHandler(w http.ResponseWriter, r *http.Request)
 	DeleteCookie(w http.ResponseWriter, r *http.Request)
 	HandleConnections(w http.ResponseWriter, r *http.Request)
+	ConversationHandler(w http.ResponseWriter, r *http.Request)
 }
 
 // A wrapper for 'AllDbMethods' that groups all database methods.
@@ -56,6 +57,7 @@ type AllDbMethods interface {
 	getAvatar(email string) (string, error)
 	checkCookieDB(cookieValue string) int
 	BroadcastToChannel(msg BroadcastMessage)
+	FindConversation(convo Conversation) Conversation
 }
 
 // The dabataseStruct

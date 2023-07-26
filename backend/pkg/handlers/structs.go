@@ -110,9 +110,9 @@ type Presences struct {
 type Conversation struct {
 	Chats          []Chat `json:"chats"`
 	//chat sender username  
-	Sender string `json:"username"`
+	Participant1 string `json:"username"`
 	//chat reciever username
-	Reciver string `json:"reciever"`
+	Participant2 string `json:"reciever"`
 	ConversationId string `json:"converstionID"`
 }
 

@@ -96,7 +96,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			
 			// send new message to the channel
 			service.repo.BroadcastToChannel(BroadcastMessage{WebMessage:webMessage, Connections: Clients})
-		case "conversation": 
+	 
 			
 		case "chat":
 			var chat Chat

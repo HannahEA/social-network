@@ -74,6 +74,7 @@ func main() {
 	router.HandleFunc("/uploadAvatar", handleProfilePictureUpload)
 	router.HandleFunc("/image", handleImage)
 	router.HandleFunc("/post", newService.PostHandler)
+	router.HandleFunc("/chat", newService.ConversationHandler)
 	// router.HandleFunc("/feed", handleFeed) // Add the /feed route
 
 	fmt.Println("Server started on http://localhost:8000")

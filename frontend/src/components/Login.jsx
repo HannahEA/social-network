@@ -78,12 +78,12 @@ const LoginPage = () => {
       });
        (async () =>{
          const dataObj = await data
-           console.log("data 2", dataObj.userAvatar)
-           checkCookie(dataObj.userAvatar);
+           console.log(dataObj)
+           checkCookie(dataObj);
        })()
   };
 
-  const checkCookie = (avatar) => {
+  const checkCookie = (dataObj) => {
      fetch(`${apiURL}/checkCookie`,{credentials: 'include',})
     .then((response) => response.json())
     .then((data) => {
@@ -97,7 +97,7 @@ const LoginPage = () => {
 
           
        
-        navigate(`/feed`, { state: { email: email, avatar:avatar} });
+        navigate(`/feed`, { state: { email: email, avatar:dataObj.userAvatar, userInfo: dataObj.userInfo} });
         
       
       } else {

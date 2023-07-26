@@ -8,7 +8,7 @@ const apiURL = process.env.REACT_APP_API_URL;
  const Chat = ({websocketRef, isWebSocketConnected, allData}) => {
      // ---------CHAT FUNCTIONS--------------------
  const [chatMessage, setChatMessage] = useState("")
- console.log(allData)
+ 
  const handleOpenChat = (e) => {
    let chat = document.getElementById("chatOpen")
    if (chat.style.display == "none") {
@@ -39,11 +39,12 @@ const apiURL = process.env.REACT_APP_API_URL;
   
  }
  const GetConversation = ({reciever}) => {
-    const cookie = (document.cookie).split(":")
-    const sender = cookie[1]
+    // const cookie = (document.cookie).split(":")
+    const sender = allData.current.userInfo.username
+    console.log("conversation participants", allData.current.userInfo.username, reciever)
     const getConversation = {
         reciever: reciever,
-        sender: sender,
+        username: sender,
     }
    
       fetch(`${apiURL}/chat`, {

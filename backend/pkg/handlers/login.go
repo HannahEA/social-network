@@ -81,13 +81,15 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 			fmt.Println("err5: missing userAvatar", err5)
 			return
 		}
-
+		userInfo := service.repo.GetUserByCookie(sessionToken)
+		value := *userInfo
 		// fmt.Print(userAvatar)
 
 		response := map[string]interface{}{
 			"message":    "Login successful",
 			"email":      data.Email,
 			"userAvatar": userAvatar,
+			"userInfo": value,
 		}
 
 		w.Header().Set("Content-Type", "application/json")
