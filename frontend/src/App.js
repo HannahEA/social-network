@@ -4,6 +4,7 @@ import RegistrationPage from "./components/Registration";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Feed from "./components/Feed";
+import WebSocketProvider from "./components/WebSocketProvider";
 import Profile from "./components/Profile";
 import { TopNavigation, ThemeIcon } from "./components/TopNavigation";
 const apiURL = process.env.REACT_APP_API_URL;
@@ -28,7 +29,9 @@ function App() {
         <Route path="/" element={<TopNavigation />} />
         <Route path="/register" element={<RegistrationPage />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/feed" element={<Feed />} />
+        <Route path="/feed" element={<WebSocketProvider>
+      <Feed/>
+    </WebSocketProvider>} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>

@@ -30,7 +30,8 @@ const apiURL = process.env.REACT_APP_API_URL;
        JSON.stringify({
          message: chatMessage,
          type: "chat",
-         cookie: document.cookie,
+         cookie: allData.current.userInfo.username,
+          
        })
      )
        console.log("chat message sent")
