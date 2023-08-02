@@ -33,6 +33,16 @@ func sendPreviousMessages(ws *websocket.Conn) {
 	// 	messageClient(ws, msg)
 	// }
 }
+func checkWebSocketConnections(client map[*websocket.Conn]string) {
+	for conn := range client {
+		err := conn.WriteMessage(websocket.PingMessage, nil)
+		if err != nil {
+			// Connection is closed
+			_ = conn.Close()
+			delete(client, conn)
+		}
+	}
+}
 
 // If a message is sent while a client is closing, ignore the error
 func UnsafeError(err error) bool {
@@ -47,7 +57,8 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 	fmt.Println("new websocket connection")
 	// ensure connection close when function returns
 	defer ws.Close()
-	// clients[ws] = true
+	// close any connctions ended on client side 
+	checkWebSocketConnections(Clients)
 
 	// if it's zero, no messages were ever sent/saved
 	// STORE OLD MESSAGES

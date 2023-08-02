@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
 import {Chat} from "./feed/Chat"
 import handleLogout from "./feed/Logout";
+import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
@@ -14,6 +15,9 @@ const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
 
 const Feed = () => {
+  const { websocketRef} = useWebSocket();
+  const{isWebSocketConnected} = useWebSocket()
+  const {allData} = useWebSocket()
   const location = useLocation();
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
@@ -57,46 +61,50 @@ const Feed = () => {
   }, [sPost]);
 // ----------------------HANDLE WEBSOCKETS---------------------- 
  
-    const [isWebSocketConnected, setWebSocketConnected] = useState(false);
-    const websocketRef = useRef(null);
-    const allData = useRef({userInfo: userInfo, chats:[], presences:[]})
+    // const [isWebSocketConnected, setWebSocketConnected] = useState(false);
+    // const websocketRef = useRef(null);
+    // const allData = useRef({userInfo: userInfo, chats:[], presences:[]})
     
-    useEffect(() => {
-      if (!websocketRef.current) {
-        websocketRef.current = new WebSocket("ws://localhost:8000/websocket");
+    // useEffect(() => {
+    //   console.log("websocket connected", websocketRef.current)
+    //   if (!websocketRef.current) {
+    //     websocketRef.current = new WebSocket("ws://localhost:8000/websocket");
   
-        websocketRef.current.onopen = (e) => {
-          console.log("WebSocket Connection Successfully Opened");
-          setWebSocketConnected(true);
-          websocketRef.current.send(
-            JSON.stringify({
-              type: "connect",
-              cookie: document.cookie,
-            })
-          );
-        };
+    //     websocketRef.current.onopen = (e) => {
+    //       console.log("WebSocket Connection Successfully Opened");
+    //       setWebSocketConnected(true);
+    //       websocketRef.current.send(
+    //         JSON.stringify({
+    //           type: "connect",
+    //           cookie: document.cookie,
+    //         })
+    //       );
+    //     };
   
-        websocketRef.current.onmessage = (e) => {
-          let message = JSON.parse(e.data)
-          console.log(message)
-          allData.current.presences = message.presences.clients
-          console.log(allData.current.presences)
+    //     websocketRef.current.onmessage = (e) => {
+    //       let message = JSON.parse(e.data)
+    //       console.log(message)
+    //       allData.current.presences = message.presences.clients
+    //       console.log(allData.current.presences)
 
-        };
+    //     };
 
-        websocketRef.current.onclose = () => {
-          console.log("websocket connection ended")
-        }
-      }
+    //     websocketRef.current.onclose = () => {
+    //     console.log("websocket connection ended");
+    //     setWebSocketConnected(false); // Update the state when the connection is closed
+    //     websocketRef.current = null; // Reset the ref to null
+    //   };
+    //   }
   
-      return () => {
-        // Close the WebSocket connection only if it was connected
-        if (isWebSocketConnected) {
-          console.log("Websocket connection ended");
-          websocketRef.current.close();
-        }
-      };
-    }, [isWebSocketConnected]);
+    //   // return () => {
+    //   //   // Close the WebSocket connection only if it was connected
+    //   //   if (isWebSocketConnected) {
+    //   //     console.log("Websocket connection ended");
+    //   //     websocketRef.current.close();
+    //   //   }
+    //   // };
+      
+    // }, []);
   
     // Rest of your component code
 
