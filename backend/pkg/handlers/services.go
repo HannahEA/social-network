@@ -18,6 +18,7 @@ type AllHandlersMethods interface {
 	DeleteCookie(w http.ResponseWriter, r *http.Request)
 	HandleConnections(w http.ResponseWriter, r *http.Request)
 	ConversationHandler(w http.ResponseWriter, r *http.Request)
+	HandleChangeProfileVisibility(w http.ResponseWriter, r *http.Request)
 }
 
 // A wrapper for 'AllDbMethods' that groups all database methods.
@@ -33,7 +34,7 @@ func NewService(repo AllDbMethods) AllHandlersMethods {
 type AllDbMethods interface {
 	//registration
 	IsEmailNicknameTaken(email string, nickname string) bool
-	RegisterUser(data RegistrationData) error
+	RegisterUser(data RegistrationData) (int, error)
 	//login
 	ValidateLogin(email, password string) (bool, error)
 	GetUserEmail(userId string) (string, error)
@@ -51,6 +52,7 @@ type AllDbMethods interface {
 	//post database queries
 	AddPostToDB(data Post) error
 	GetPublicPosts() ([]Post, error)
+	UploadVisibilityValue(data ProfileVisibilityData) (string, error)
 	//comment database queries
 	AddCommentToDB(data Post) error
 	GetComments(data Post) ([]Comment, error)

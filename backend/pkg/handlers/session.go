@@ -123,8 +123,8 @@ func (repo *dbStruct) NewUser() *User {
 func (repo *dbStruct) FindByUserID(UID int64) *User {
 	u := repo.NewUser()
 	//changed the 'WHERE userID to id
-	if err := repo.db.QueryRow("SELECT id, firstName, lastName, nickName, age, gender, email, password, avatarURL, imageFile, aboutMe FROM Users WHERE id = ?", UID).
-		Scan(&u.id, &u.FirstName, &u.LastName, &u.NickName, &u.Age, &u.Gender, &u.Email, &u.Password, &u.Avatar, &u.Image, &u.AboutMe); err != nil {
+	if err := repo.db.QueryRow("SELECT id, firstName, lastName, nickName, age, gender, email, password, avatarURL, imageFile, aboutMe, profileVisibility, created_at  FROM Users WHERE id = ?", UID).
+		Scan(&u.id, &u.FirstName, &u.LastName, &u.NickName, &u.Age, &u.Gender, &u.Email, &u.Password, &u.Avatar, &u.Image, &u.AboutMe, &u.ProfVisib, &u.Created_At); err != nil {
 		fmt.Println("error FindByUserID: ", err)
 		return nil
 	}
