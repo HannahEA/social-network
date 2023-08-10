@@ -83,7 +83,7 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 		}
 		userInfo := service.repo.GetUserByCookie(sessionToken)
 		value := *userInfo
-		// fmt.Print(userAvatar)
+		 fmt.Println("the user info:", value)
 
 		response := map[string]interface{}{
 			"message":    "Login successful",

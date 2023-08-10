@@ -16,22 +16,26 @@ sudo apt-get install migrate
 
 4. VSC terminal command to create up/down migration files: 
 migrate create -ext sql -dir ./pkg/db/migrations/database create_sessions_table
-(e.g. migrate create -ext sql -dir ./pkg/db/migrations/database create_followers_table)
-migrate -database YOUR_DATABASE_URL -path PATH_TO_YOUR_MIGRATIONS up
+(e.g. from the root folder in VSC terminal type:
+migrate -database sqlite3:///backend/pkg/db/database/database.db -path backend/pkg/db/migrations/database up
+)
 
 # How To Run social-network
 
 # to run 'social-network' in Docker:
-1. In VSC terminal access 'social-network' root folder and type: docker-compose up
+1. In VSC terminal access 'social-network' root folder and type: 
+   sudo docker-compose up
 2. When images have been built and the containers are running,
    go to browser url address and type: http//localhost:3000
 
 To exit Docker:
 In VSC terminal 
 1. type: CTRL + C.
-2. type: docker-compose down
-3. To remove images type: docker image rm -f $(docker image ls)
-4. To stop containers type: docker ps rm -a
+2. type: sudo docker-compose down
+3. To remove images type: sudo docker image rm -f $(sudo docker image ls)
+4. To view all containers: sudo docker ps -a
+5. To remove a container type: 
+   sudo docker rm container ID e.g. 637a717eb106
 
 # to run 'social-network' locally type below commands in VSC terminal:
 

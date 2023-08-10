@@ -9,7 +9,9 @@ CREATE TABLE IF NOT EXISTS Users (
 		"password" BLOB NOT NULL,
 		"avatarURL" STRING,
 		"imageFile" BLOB,
-		"aboutMe" BLOB 
+		"aboutMe" BLOB,
+		"profileVisibility" TEXT,
+		"created_at" TEXT DEFAULT (datetime('now', 'localtime'))
 			);
 
 

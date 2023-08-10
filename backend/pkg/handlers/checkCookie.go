@@ -50,6 +50,8 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 		"aboutMe": loggedInUser.AboutMe,
 		"avatar":  loggedInUser.Avatar,
 		"image":   image,
+		"profVisib": loggedInUser.ProfVisib,
+		"created_at": loggedInUser.Created_At,
 	}
 
 	loggedUserInfoNotFound := map[string]interface{}{
