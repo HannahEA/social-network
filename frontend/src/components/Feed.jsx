@@ -6,7 +6,12 @@ import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-
+import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
+import Card from "./usersInfo/Card.jsx";
+import createCard from "./usersInfo/CreateCard.jsx";
+import Modal from "./usersInfo/Modal.jsx";
+import Avatar from "./usersInfo/Avatar.jsx";
+import Detail from "./usersInfo/Detail.jsx";
 import { Notyf } from "notyf";
 
 //Environment variable from the docker-compose.yml file.
@@ -58,6 +63,8 @@ const Feed = () => {
   const [usersList, setUsersList] = useState([]);
   const [isUsersListVisible, setIsUsersListVisible] = useState(false);
   const usersListRef = useRef(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   allData.current.userInfo = userInfo
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
  // POSTS VARIABLES
@@ -130,6 +137,22 @@ const handleClickUsersList = () => {
     });
   }
 };
+
+
+const handleShowUserInfo = () => {
+  createCard()
+
+}
+
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+    setIsModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedUser(null);
+    setIsModalVisible(false);
+  };
 
 
 
@@ -1143,7 +1166,7 @@ const handleClickUsersList = () => {
             </li>
             <li>
               <a
-                href="#"
+                href="javascript:void(0)"
                 className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
               >
                 <svg
@@ -1198,15 +1221,33 @@ const handleClickUsersList = () => {
                     className="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
                   >
                     {usersList.map((u)=> (
-                      <li>
-                        {u.username} - online: {u.loggedIn}
+                      <li key={u.id}>
+                       <a onClick={()=>(handleUserClick(u))} style={{cursor: 'pointer'}}> {u.username} - online: {u.loggedIn}</a>
                       </li>
                     ))}
                   </div>
               </ul>
             </div>
             {/* End of the drop-down menu for All users */}
+
             </li>
+                  {/*Start of Modal to display a user's info  */}
+      {isModalVisible && (
+        <Modal onClose={handleCloseModal}>
+          {selectedUser && (
+            <Card
+              id={selectedUser.id}
+              key={selectedUser.id}
+              name={selectedUser.username}
+              avt={selectedUser.avatar}
+              img={selectedUser.image}
+              visib={selectedUser.profVisib}
+              email={selectedUser.loggedIn}
+            />
+          )}
+        </Modal>
+      )}
+      {/*End of Modal to display a user's info  */}
           </ul>
         </div>
         <div className="hidden absolute bottom-0 left-0 justify-center p-4 space-x-4 w-full lg:flex bg-white dark:bg-gray-800 z-20">

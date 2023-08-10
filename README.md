@@ -56,7 +56,7 @@ In VSC terminal
 # VSC commands to merge your branch to master:
 
 1. git checkout master
-2. git add . (Necessary if you need to commit changes  your branch first)
+2. git add . (Necessary if you need to commit changes in your branch first)
 3. git commiit -m "your comment here"
 4. git checkout master
 5. git pull
