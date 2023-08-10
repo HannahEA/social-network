@@ -174,7 +174,7 @@ func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 	comments := []Comment{}
 	rows, err := repo.db.Query(`SELECT commentID, author, content, creationDate FROM comments WHERE postID = ? `, post.PostID)
 	if err != nil {
-		return comments, fmt.Errorf("GetComments DB Query error: %+v\n", err)
+		return comments, fmt.Errorf("GetComments DB Query error %+v", err)
 	}
 	var commentID int
 	var commentDate string
@@ -183,7 +183,7 @@ func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 	for rows.Next() {
 		err := rows.Scan(&commentID, &author, &content, &commentDate)
 		if err != nil {
-			return comments, fmt.Errorf("GetComments rows.Scan error: %+v\n", err)
+			return comments, fmt.Errorf("GetComments rows.Scan error %+v", err)
 		}
 		cTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", commentDate)
 

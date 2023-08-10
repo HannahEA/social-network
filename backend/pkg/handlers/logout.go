@@ -65,6 +65,17 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 	var conn *websocket.Conn
 	//get username from cookie
 	user := service.repo.GetUserByCookie(cookieValue)
+	//get userId from cookie
+	var userId = user.id
+	//Set'loggedIn' field in 'Users' table to 'No'
+	var flag = "No"
+	err6 := service.repo.AddLoggedInFlag(userId, flag)
+	if err6 != nil {
+		w.WriteHeader(http.StatusNotModified)
+		fmt.Println("err6 with setting 'loggedIn' to 'Yes':", err6)
+		return
+	}
+
 	for con, name := range Clients {
 		if name == user.NickName {
 			//get websocket connection from client hub
@@ -93,6 +104,8 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 		fmt.Print("Error deleting cookie in db", err)
 		return
 	}
+
+
 	//=======> end of db query <============
 
 	// Return the result based on the affected rows count

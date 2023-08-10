@@ -7,19 +7,20 @@ import (
 )
 
 type User struct {
-	id        int
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	NickName  string `json:"username"`
-	Age       string `json:"age"`
-	Gender    string `json:"gender"`
-	Email     string `json:"email"`
-	Password  string `json:"passWord"`
-	Avatar    string `json:"avatar"`
-	Image     []byte `json:"image"`
-	AboutMe   string `json:"aboutMe"`
+	id         int
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	NickName   string `json:"username"`
+	Age        string `json:"age"`
+	Gender     string `json:"gender"`
+	Email      string `json:"email"`
+	Password   string `json:"passWord"`
+	Avatar     string `json:"avatar"`
+	Image      []byte `json:"image"`
+	AboutMe    string `json:"aboutMe"`
 	ProfVisib  string `json:"profVisib"`
 	Created_At string `json:"created_at"`
+	LoggedIn   bool   `json:"loggedIn"`
 }
 
 // each session contains the username of the user and the time at which it expires
@@ -37,10 +38,18 @@ type Cookie struct {
 
 type ProfileVisibilityData struct {
 	NickName  string `json:"username"`
-	ProfVisib  string `json:"profVisib"`
+	ProfVisib string `json:"profVisib"`
 }
 
-	
+type AllUsersData struct {
+	ID        int    `json:"id"`
+	NickName  string `json:"username"`
+	Avatar    string `json:"avatar"`
+	Image     []byte `json:"image"`
+	ProfVisib string `json:"profVisib"`
+	LoggedIn  string   `json:"loggedIn"`
+}
+
 type RegistrationData struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
@@ -94,10 +103,10 @@ type Comment struct {
 type BroadcastMessage struct {
 	WebMessage WebsocketMessage
 	//clients who will recieve the message
-	Connections map[*websocket.Conn]string 
+	Connections map[*websocket.Conn]string
 }
 type WebsocketMessage struct {
-	Cookie  string `json:"cookie"`
+	Cookie string `json:"cookie"`
 
 	Presences Presences `json:"presences"`
 
@@ -112,11 +121,11 @@ type Presences struct {
 }
 
 type Conversation struct {
-	Chats          []Chat `json:"chats"`
-	//chat sender username  
+	Chats []Chat `json:"chats"`
+	//chat sender username
 	Participant1 string `json:"username"`
 	//chat reciever username
-	Participant2 string `json:"reciever"`
+	Participant2   string `json:"reciever"`
 	ConversationId string `json:"converstionID"`
 }
 

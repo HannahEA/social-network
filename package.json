@@ -1,5 +1,8 @@
 {
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.14.3",
     "@uidotdev/usehooks": "^2.0.1",
     "react-icons": "^4.9.0"
   }

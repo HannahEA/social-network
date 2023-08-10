@@ -4,9 +4,13 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
+import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
 const notyf = new Notyf();
 
 const apiURL = process.env.REACT_APP_API_URL;
+
+
+
 
 const deleteCookie = () => {
   fetch(`${apiURL}/deleteCookie`, { credentials: "include" })
@@ -596,7 +600,6 @@ const Profile = () => {
               <span className="sr-only">Open user menu</span>
               <img
                 className={`w-10 h-10 rounded-full border-2 border-solid border-[#3b82f6] dark:border-[#f8fafc]`}
-                // src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
                 src={image}
                 alt="user photo"
               />
@@ -977,7 +980,7 @@ const Profile = () => {
                     clipRule="evenodd"
                   />
                 </svg>
-                <span className="ml-3">Help</span>
+                <span className="ml-3">See All Users</span>
               </a>
             </li>
           </ul>
@@ -1190,18 +1193,20 @@ const Profile = () => {
               </h3>
               <div>
                   <span>
-                  <p className="text-black-600 text-lg dark:text-white-400 mb-0.4">This Profile is Curently {profileVisib}</p>
+                  <p className="text-gray-600 text-lg dark:text-gray-200 mb-0.5">This Profile is Curently {profileVisib}</p>
                   <button onClick={changeProfileVisibility} className="bg-[#4D96A9] text-md text-white px-4 rounded-md">Change Visibility </button>
                 </span>
                 
               </div>
-              <p className="text-gray-600 text-lg dark:text-gray-400 mb-0.5">@{username}</p>
+              <p className="text-gray-600 text-lg dark:text-gray-200 mb-0.5">@{username}</p>
               <p className="mb-3 text-md text-gray-500 dark:text-gray-400">{aboutMe}</p>
               <div className="flex justify-center items-center gap-1">
-                <span className="py-1 px-2.5 bg-[#4D96A9] text-md text-white dark:text-gray-40 text-center rounded-full">
-                  {calculateAge(dateOfBirth)}
+                <span className="py-1 px-2.5 bg-[#26b1d4] text-md text-white dark:text-gray-40 text-center rounded-full">
+                  age: {calculateAge(dateOfBirth)}
                 </span>
-                <span className="py-1 px-2.5 bg-[#4D96A9] text-md text-white dark:text-gray-40 text-center rounded-full">{gender}</span>
+                <span className="py-1 px-2.5 bg-[#26b1d4] text-md text-white dark:text-gray-40 text-center rounded-full">gender: {gender}</span>
+                <span className="py-1 px-2.5 bg-[#26b1d4] text-md text-white dark:text-gray-40 text-center rounded-full">followers: 1,000,000</span>
+                <span className="py-1 px-2.5 bg-[#26b1d4] text-md text-white dark:text-gray-40 text-center rounded-full">following: 1</span>
               </div>
             </div>
           </div>

@@ -75,6 +75,15 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 			return
 		}
 
+		//Set'loggedIn' field in 'Users' table to 'Yes'
+		var flag = "Yes"
+		err6 := service.repo.AddLoggedInFlag(userId, flag)
+		if err6 != nil {
+			w.WriteHeader(http.StatusNotModified)
+			fmt.Println("err6 with setting 'loggedIn' to 'Yes':", err4)
+			return
+		}
+
 		userAvatar, err5 := service.repo.getAvatar(data.Email)
 		if err5 != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -125,6 +134,32 @@ func (repo *dbStruct) PopulateTheSessionsDB(userID int, cookieName, cookieValue 
 	insertsessStmt.Exec(userID, cookieName, cookieValue)
 	return nil
 }
+
+func (repo *dbStruct) AddLoggedInFlag(userID int, flag string) error {
+	var LoggedIn = flag
+	// Prepare the SQL statement for updating the 'loggedIn' flag for the given user ID
+	updateLoggedInStmt, err5 := repo.db.Prepare(`UPDATE Users SET loggedIn = ? WHERE id = ?`)
+	if err5 != nil {
+		fmt.Println("err5 with inserting loggedIn flag:", err5)
+		return err5
+	}
+
+	defer updateLoggedInStmt.Close()
+	// Execute the SQL statement to update the 'loggedIn' flag for the given user ID
+	_, err5 = updateLoggedInStmt.Exec(LoggedIn, userID)
+	if err5 != nil {
+		fmt.Println("Error updating 'loggedIn' flag:", err5)
+		return err5
+	}
+
+	return nil
+}
+
+
+
+
+
+
 
 func (repo *dbStruct) ValidateLogin(email, password string) (bool, error) {
 	var count int
