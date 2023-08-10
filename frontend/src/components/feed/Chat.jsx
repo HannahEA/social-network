@@ -4,11 +4,13 @@ import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 
 const apiURL = process.env.REACT_APP_API_URL;
+
  
  const Chat = ({websocketRef, isWebSocketConnected, allData}) => {
      // ---------CHAT FUNCTIONS--------------------
  const [chatMessage, setChatMessage] = useState("")
- 
+ const [chatData, setChatData] = useState({userInfo:{}, chats:[], presences:[]})
+ useEffect(()=> {console.log(chatData); setChatData(allData.current)}, [allData.current])
  const handleOpenChat = (e) => {
    let chat = document.getElementById("chatOpen")
    if (chat.style.display == "none") {
@@ -30,7 +32,7 @@ const apiURL = process.env.REACT_APP_API_URL;
        JSON.stringify({
          message: chatMessage,
          type: "chat",
-         cookie: allData.current.userInfo.username,
+         cookie: chatData.userInfo.username,
           
        })
      )
@@ -41,8 +43,8 @@ const apiURL = process.env.REACT_APP_API_URL;
  }
  const GetConversation = ({reciever}) => {
     // const cookie = (document.cookie).split(":")
-    const sender = allData.current.userInfo.username
-    console.log("conversation participants", allData.current.userInfo.username, reciever)
+    const sender = chatData.userInfo.username
+    console.log("conversation participants", chatData.current.userInfo.username, reciever)
     const getConversation = {
         reciever: reciever,
         username: sender,
@@ -62,8 +64,8 @@ const apiURL = process.env.REACT_APP_API_URL;
         // revive converstion object with sender, reciever and conversation id
         //id should be attached to all chats
     } )
-  
-  
+   
+    console.log("re-rendering chat")
  }
  return (
     <div>
@@ -79,7 +81,7 @@ const apiURL = process.env.REACT_APP_API_URL;
 
         </div>
         <aside className=" flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
-          {allData.current.presences.length > 0 && allData.current.presences.map(presence => 
+          {chatData.presences.length > 0 && chatData.presences.map(presence => 
             <button onClick = {()=> GetConversation({reciever:presence})}> {presence} </button>
           )
           }
