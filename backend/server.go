@@ -75,7 +75,7 @@ func main() {
 	router.HandleFunc("/image", handleImage)
 	router.HandleFunc("/post", newService.PostHandler)
 	router.HandleFunc("/chat", newService.ConversationHandler)
-	// router.HandleFunc("/feed", handleFeed) // Add the /feed route
+	router.HandleFunc("/profleVisibility", newService.HandleChangeProfileVisibility) 
 
 	fmt.Println("Server started on http://localhost:8000")
 	log.Fatal(http.ListenAndServe(":8000", communicateBackFront))

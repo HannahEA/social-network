@@ -1,7 +1,8 @@
-CREATE TABLE IF NOT EXISTS "Profile" (
+CREATE TABLE IF NOT EXISTS "Profile"(
 		"userID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 		"nickName" TEXT,
 		filename TEXT,
 		image BLOB,
+        visibility TEXT,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);

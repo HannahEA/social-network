@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
@@ -52,7 +53,7 @@ func (service *AllDbMethodsWrapper) HandleRegistration(w http.ResponseWriter, r 
 	}
 
 	// Register the user
-	err = service.repo.RegisterUser(data)
+	id, err := service.repo.RegisterUser(data)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Failed to register user", http.StatusInternalServerError)
@@ -60,7 +61,10 @@ func (service *AllDbMethodsWrapper) HandleRegistration(w http.ResponseWriter, r 
 	}
 
 	// Send a response back to the client
-	response := map[string]string{"message": "Registration successful"}
+	response := map[string]string{
+		"message": "Registration successful",
+		"userID":  strconv.Itoa(id),
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
@@ -76,7 +80,7 @@ func (r *dbStruct) IsEmailNicknameTaken(email string, nickname string) bool {
 	return count > 0
 }
 
-func (repo *dbStruct) RegisterUser(data RegistrationData) error {
+func (repo *dbStruct) RegisterUser(data RegistrationData) (int, error) {
 	// if repo.IsEmailNicknameTaken(email, nickname) {
 	// 	return fmt.Errorf("email already taken")
 	// }
@@ -88,19 +92,23 @@ func (repo *dbStruct) RegisterUser(data RegistrationData) error {
 	}
 
 	fmt.Println("hash: ", hash)
-	
+	pVisibility := "public"
+	//the 'id' value of the new user
+	lastInsertId := 0
+	//registerTime := time.Now();
 
-	_, err := repo.db.Exec("INSERT INTO Users (firstName, lastName, nickName, age, gender, email, password, avatarURL, imageFile, aboutMe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data.FirstName, data.LastName, data.NickName, data.Age, data.
-		Gender, data.Email, hash, data.Avatar, data.Image, data.AboutMe)
+	err := repo.db.QueryRow("INSERT INTO Users (firstName, lastName, nickName, age, gender, email, password, avatarURL, imageFile, aboutMe, profileVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id", data.FirstName, data.LastName, data.NickName, data.Age, data.
+		Gender, data.Email, hash, data.Avatar, data.Image, data.AboutMe, pVisibility).Scan(&lastInsertId)
 	if err != nil {
 		log.Println(err)
-		return fmt.Errorf("failed to register user")
+		return 0, fmt.Errorf("failed to register user")
 	}
-
-	return nil
+	//return user id
+	fmt.Println("new user ID is: ", lastInsertId)
+	return lastInsertId, nil
 }
 
-/*This is an application of Ricky's and Kievon's approach 
+/*This is an application of Ricky's and Kievon's approach
   that stores image file in the 'uploads' folder:
 var data RegistrationData
 var imgPath string
@@ -225,10 +233,6 @@ func (repo *dbStruct) RegisterUser(email, password string) error {
 
 	return nil
 }*/
-
-
-
-
 
 // Not being used:
 // func (service *AllDbMethodsWrapper) checkEmailHandler(w http.ResponseWriter, r *http.Request) {

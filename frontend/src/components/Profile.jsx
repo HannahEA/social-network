@@ -48,7 +48,51 @@ const Profile = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [gender, setGender] = useState("");
+  const [profileVisib, setProfileVisib] = useState("public");
   const [isDarkTheme, setDarkTheme] = useState(false);
+
+  //changes user profile visibility
+  //from 'public' to 'private' and vice versa
+  //and update the database with new visibility
+
+  const changeProfileVisibility = () => {
+    if (profileVisib === "private") {
+      setProfileVisib("public");
+    } else if (profileVisib === "public") {
+      setProfileVisib("private");
+    }
+  };
+
+ // useEffect hook to trigger the POST request whenever profileVisib changes
+ useEffect(() => {
+  const updateVisibility = {
+    profVisib: profileVisib, // Use the updated state directly here
+    username: username,
+  };
+
+  // Make a POST request to update profileVisibility in the database
+  fetch(`${apiURL}/profleVisibility`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updateVisibility),
+    credentials: 'include',
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      // Handle the response from the server
+      if (data.message === "Visibility update successful") {
+        console.log(data);
+      } else {
+        console.log("Visibility update unsuccessful", data);
+      }
+    })
+    .catch((error) => {
+      // Handle any errors
+      console.error("Error:", error);
+    });
+}, [profileVisib]); // The effect will only run when profileVisib changes
 
   function calculateAge(dateOfBirth) {
     const dob = new Date(dateOfBirth);
@@ -85,6 +129,7 @@ const Profile = () => {
           setImage(data.image)
         }
         setGender(data.gender);
+        setProfileVisib(data.profVisib);
       })
       .catch((error) => {
         // Handle any errors
@@ -1143,6 +1188,13 @@ const Profile = () => {
                   {firstName} {lastName}{" "}
                 </div>
               </h3>
+              <div>
+                  <span>
+                  <p className="text-black-600 text-lg dark:text-white-400 mb-0.4">This Profile is Curently {profileVisib}</p>
+                  <button onClick={changeProfileVisibility} className="bg-[#4D96A9] text-md text-white px-4 rounded-md">Change Visibility </button>
+                </span>
+                
+              </div>
               <p className="text-gray-600 text-lg dark:text-gray-400 mb-0.5">@{username}</p>
               <p className="mb-3 text-md text-gray-500 dark:text-gray-400">{aboutMe}</p>
               <div className="flex justify-center items-center gap-1">
