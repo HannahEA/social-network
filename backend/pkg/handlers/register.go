@@ -95,10 +95,11 @@ func (repo *dbStruct) RegisterUser(data RegistrationData) (int, error) {
 	pVisibility := "public"
 	//the 'id' value of the new user
 	lastInsertId := 0
+	LoggedIn := "No"
 	//registerTime := time.Now();
 
-	err := repo.db.QueryRow("INSERT INTO Users (firstName, lastName, nickName, age, gender, email, password, avatarURL, imageFile, aboutMe, profileVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id", data.FirstName, data.LastName, data.NickName, data.Age, data.
-		Gender, data.Email, hash, data.Avatar, data.Image, data.AboutMe, pVisibility).Scan(&lastInsertId)
+	err := repo.db.QueryRow("INSERT INTO Users (firstName, lastName, nickName, age, gender, email, password, avatarURL, imageFile, aboutMe, profileVisibility, loggedIn) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id", data.FirstName, data.LastName, data.NickName, data.Age, data.
+		Gender, data.Email, hash, data.Avatar, data.Image, data.AboutMe, pVisibility, LoggedIn).Scan(&lastInsertId)
 	if err != nil {
 		log.Println(err)
 		return 0, fmt.Errorf("failed to register user")

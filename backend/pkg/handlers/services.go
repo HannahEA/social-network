@@ -19,6 +19,7 @@ type AllHandlersMethods interface {
 	HandleConnections(w http.ResponseWriter, r *http.Request)
 	ConversationHandler(w http.ResponseWriter, r *http.Request)
 	HandleChangeProfileVisibility(w http.ResponseWriter, r *http.Request)
+	HandleGetAllUsers(w http.ResponseWriter, r *http.Request)
 }
 
 // A wrapper for 'AllDbMethods' that groups all database methods.
@@ -47,12 +48,14 @@ type AllDbMethods interface {
 	NewUser() *User
 	FindByUserID(UID int64) *User
 	PopulateTheSessionsDB(userID int, cookieName, cookieValue string) error
+	AddLoggedInFlag(userID int, flag string) error
 	ReturnId(email string) (int, error)
 	DeleteCookieDB(cookieValue string) (int64, error)
 	//post database queries
 	AddPostToDB(data Post) error
 	GetPublicPosts() ([]Post, error)
 	UploadVisibilityValue(data ProfileVisibilityData) (string, error)
+	GetUsersData(email string) ([]AllUsersData, error)
 	//comment database queries
 	AddCommentToDB(data Post) error
 	GetComments(data Post) ([]Comment, error)
