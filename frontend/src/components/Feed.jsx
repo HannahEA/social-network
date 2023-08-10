@@ -17,11 +17,26 @@ const apiURL = process.env.REACT_APP_API_URL;
 const Feed = () => {
   const { websocketRef} = useWebSocket();
   const{isWebSocketConnected} = useWebSocket()
-  const {allData} = useWebSocket()
+  const allData = useRef({userInfo: {}, chats:[], presences:[]})
+  // const [chatData, setChatData] = useState({chats:[], presences:[]})
+  useEffect( () => {
+      if (websocketRef.current) {
+        websocketRef.current.onmessage = (e) => {
+          // Handle WebSocket messages here
+          let message = JSON.parse(e.data)
+          // console.log(message)
+          allData.current.presences = message.presences.clients
+          console.log(allData.current.presences)
+          // setChatData(allData.current)
+      };
+    }
+  })
+  
   const location = useLocation();
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
   const userInfo = location.state?.userInfo || {}
+  allData.current.userInfo = userInfo
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
  // POSTS VARIABLES
   const [Title, setTitle] = useState("");
