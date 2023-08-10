@@ -40,6 +40,7 @@ const Feed = () => {
     }
   })
 
+  
   const location = useLocation();
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
@@ -47,6 +48,7 @@ const Feed = () => {
   const [usersList, setUsersList] = useState([]);
   const [isUsersListVisible, setIsUsersListVisible] = useState(false);
   const usersListRef = useRef(null);
+  allData.current.userInfo = userInfo
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
  // POSTS VARIABLES
   const [Title, setTitle] = useState("");
