@@ -9,14 +9,20 @@ return(
 
     <div className="card" >
         <div className="top" >
-            <p>{props.id}</p>
-            <h2 className="name">{props.username}</h2>
-            {/* <img className="circle-img" src={props.img} alt="contact_img" /> */}
-            <Avatar img={props.image} />
+            <img className="circle-img"  src={(props.avt).substring(0,3)=="htt" ? props.avt:props.img} alt="contact_img" />
+            {/* <img className="circle-img"  src={props.avt} alt="contact_img" /> */}
+            <h2 className="name">{(props.name).length>10? (props.name).substring(0,7):props.name}</h2>
         </div>
         <div className="bottom">
-            <Detail detailInfo= {props.profVisib} />
-            <Detail detailInfo= {props.loggedIn} />
+            {/* <div class="flexbox-container"> */}
+            <div className="info">Visibility: {props.visib} </div>
+            {/* <Detail detailInfo= {props.visib} /> */}
+            {/* </div> */}
+            {/* <div class="flexbox-container"> */}
+            <div className="info">Logged in:  {props.logged} </div>
+            {/* <Detail detailInfo= {props.logged} /> */}
+            {/* </div> */}
+            <div className="info">About me:  {props.about} </div>
         </div>
     </div>
 

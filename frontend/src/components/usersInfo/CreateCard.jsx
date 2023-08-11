@@ -7,15 +7,7 @@ function createCard(u){
       
     return(
 
-        <Card 
-        id={u.id}
-        key={u.id}
-        name={u.username}
-        avt={u.avatar}
-        img={u.image}
-        visib={u.profVisib}
-        email={u.loggedIn}
-        />
+        <Card/>
 
 
     )

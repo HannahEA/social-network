@@ -147,6 +147,7 @@ const handleShowUserInfo = () => {
   const handleUserClick = (user) => {
     setSelectedUser(user);
     setIsModalVisible(true);
+    createCard(selectedUser)
   };
 
   const handleCloseModal = () => {
@@ -999,7 +1000,7 @@ const handleShowUserInfo = () => {
                     />
                   </svg>
 
-                  <span className="flex-1 ml-3 text-left whitespace-nowrap">Profile</span>
+                  <span className="flex-1 ml-3 text-left whitespace-nowrap">My Profile</span>
                 </button>
               </a>
               <ul id="dropdown-pages" className="hidden py-2 space-y-2">
@@ -1232,21 +1233,7 @@ const handleShowUserInfo = () => {
 
             </li>
                   {/*Start of Modal to display a user's info  */}
-      {isModalVisible && (
-        <Modal onClose={handleCloseModal}>
-          {selectedUser && (
-            <Card
-              id={selectedUser.id}
-              key={selectedUser.id}
-              name={selectedUser.username}
-              avt={selectedUser.avatar}
-              img={selectedUser.image}
-              visib={selectedUser.profVisib}
-              email={selectedUser.loggedIn}
-            />
-          )}
-        </Modal>
-      )}
+     
       {/*End of Modal to display a user's info  */}
           </ul>
         </div>
@@ -1466,7 +1453,24 @@ const handleShowUserInfo = () => {
               <p>Email: {email}</p>
             </div>
           </div>
-          <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
+          <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+             {/* Start of users Information modal */}
+        {isModalVisible && (
+        <Modal onClose={handleCloseModal} >
+          {selectedUser && (
+            <Card
+              name={selectedUser.username}
+              avt={selectedUser.avatar}
+              img={selectedUser.image}
+              visib={selectedUser.profVisib}
+              logged={selectedUser.loggedIn}
+              about={selectedUser.aboutMe}
+            />
+          )}
+        </Modal>
+      )}
+        {/* End of users Information modal */}
+          </div>
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
         </div>

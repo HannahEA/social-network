@@ -47,7 +47,8 @@ type AllUsersData struct {
 	Avatar    string `json:"avatar"`
 	Image     []byte `json:"image"`
 	ProfVisib string `json:"profVisib"`
-	LoggedIn  string `json:"loggedIn"`
+	AboutMe    string `json:"aboutMe"`
+	LoggedIn  string   `json:"loggedIn"`
 }
 
 type RegistrationData struct {
