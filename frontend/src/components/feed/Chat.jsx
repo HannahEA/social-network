@@ -5,32 +5,106 @@ import "notyf/notyf.min.css";
 
 const apiURL = process.env.REACT_APP_API_URL;
 
-const AddUserToChatList = ({presences})=>  {
-  console.log(presences, "new user online")
+const AddUserToChatList = ({presences, allData})=>  {
+
+  const GetConversation = ({reciever}) => {
+    // const cookie = (document.cookie).split(":")
+    let input = document.getElementById("chatInput")
+    let send = document.getElementById("sendButton")
+    input.classList.remove("hidden")
+    send.classList.remove("hidden")
+    const sender = allData.userInfo.username
+    console.log("conversation participants", allData.userInfo.username, reciever)
+    const getConversation = {
+        reciever: reciever,
+        username: sender,
+    }
+   
+     let data = fetch(`${apiURL}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(getConversation),
+        credentials: 'include',
+    })
+    .then(response => response.json())
+    .then((data) => {
+        console.log("getConversation", {data})
+        
+
+        return data
+    } )
+    let awaitConvo = async(data) =>  {
+      let convo = await data
+      console.log(convo, "convo")
+      // revive converstion object with sender, reciever and conversation id
+        //id should be attached to all chats
+      let chat = document.getElementById("chats")
+      chat.setAttribute("name", convo.conversation.converstionID)
+      allData.conversation = {reciever: reciever, id:convo.conversation.converstionID} 
+      //cear chat container 
+      let chats = document.getElementById("chats")
+      chats.innerHTML = ''
+      //print chat history 
+      if (convo.chats) {
+        convo.chats.forEach((chat) => {
+        PrintNewChat({chat: chat})
+        })
+      }
+      
+      
+    }
+    awaitConvo(data)
+    
  }
 
+  console.log(presences, "new user online")
+
+  allData.presences.forEach((p)=> {
+    if (p != allData.userInfo.username) {
+      let users = document.getElementById('chatUsers')
+      let button = document.createElement('button')
+      button.addEventListener("click", () => {
+        GetConversation({reciever: p})
+      }
+      )
+      button.innerHTML = p
+      users.append(button)
+    }
+  } )
+
+
+  }
+  
+  
+ 
+
 const PrintNewChat = ({chat}) => {
-  console.log(chat, "new chat")
+  
   let chats = document.getElementById("chats")
   let newChat = document.createElement('div')
   let name = document.createElement("p")
+  if (chats.classList.contains('hidden') == false ) {
+    let nameval = chat.username
+    name.innerHTML = nameval
+    name.classList.add('font-bold', 'text-sm', 'ml-2')
+    let message = document.createElement("p")
+    message.classList.add('text-sm', 'ml-4')
+    message.innerHTML = chat.message
+    newChat.classList.add("flex", "flex-row")
+    newChat.append(name)
+    newChat.append(message)
+    chats.append(newChat)
+  }
   
-  name.innerHTML = chat.reciever
-  name.classList.add('font-bold', 'text-sm', 'ml-2')
-  let message = document.createElement("p")
-  message.classList.add('text-sm', 'ml-4')
-  message.innerHTML = chat.message
-  newChat.classList.add("flex", "flex-row")
-  newChat.append(name)
-  newChat.append(message)
-  chats.append(chat)
+  
 }
 
  const Chat = ({websocketRef, isWebSocketConnected, allData}) => {
      // ---------CHAT FUNCTIONS--------------------
  const [chatMessage, setChatMessage] = useState("")
-//  const [allData, setChatData] = useState({userInfo:{}, chats:[], presences:[]})
-//  useEffect(()=> {console.log(allData); setChatData(allData.current)}, [allData.current])
+
 
  const handleOpenChat = (e) => {
    let chat = document.getElementById("chatOpen")
@@ -83,44 +157,7 @@ const PrintNewChat = ({chat}) => {
  }
  
  
- const GetConversation = ({reciever}) => {
-    // const cookie = (document.cookie).split(":")
-    let input = document.getElementById("chatInput")
-    let send = document.getElementById("sendButton")
-    input.classList.remove("hidden")
-    send.classList.remove("hidden")
-    const sender = allData.current.userInfo.username
-    console.log("conversation participants", allData.current.userInfo.username, reciever)
-    const getConversation = {
-        reciever: reciever,
-        username: sender,
-    }
-   
-     let data = fetch(`${apiURL}/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(getConversation),
-        credentials: 'include',
-    })
-    .then(response => response.json())
-    .then((data) => {
-        console.log("getConversation", {data})
-        // revive converstion object with sender, reciever and conversation id
-        //id should be attached to all chats
-        return data
-    } )
-    let awaitConvo = async(data) =>  {
-      let convo = await data
-      console.log(convo, "convo")
-      let chat = document.getElementById("chats")
-      chat.setAttribute("name", convo.conversation.converstionID)
-      allData.current.conversation = {reciever: reciever, id:convo.conversation.converstionID} 
-    }
-    awaitConvo(data)
-    
- }
+
  return (
     <div>
         <button onClick={handleOpenChat} className="fixed bg-gray-500 text-white font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2" > Messages</button>
@@ -135,10 +172,10 @@ const PrintNewChat = ({chat}) => {
 
         </div>
         <aside className=" flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
-          {allData.current.presences && allData.current.presences.map(presence => 
+          {/* {allData.current.presences && allData.current.presences.map(presence => 
             <button onClick = {()=> GetConversation({reciever:presence})}> {presence} </button>
           )
-          }
+          } */}
         </aside>
       </div>
     </div>

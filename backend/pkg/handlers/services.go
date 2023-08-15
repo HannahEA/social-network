@@ -64,9 +64,11 @@ type AllDbMethods interface {
 	BroadcastToChannel(msg BroadcastMessage)
 	FindConversation(convo Conversation) Conversation
 	NewPrivateChatToDB(convo Conversation) Conversation
+	GetChatHistory(convo Conversation) []Chat
 	AddChatToDatabase(chat Chat)
 	AddChatNotification(chat Chat, count int)
 	CheckForNotification(chat Chat) (bool, int, error)
+
 }
 
 // The dabataseStruct

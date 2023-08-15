@@ -103,7 +103,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				Presences: Presences{
 					Clients: users,
 				},
-				Type: sm.Type,
+				Type: "connect",
 			}
 
 			// send new message to the channel
@@ -135,15 +135,17 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 			//send Chat message to reciever web conn
 			if online {
-				service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{Chat: chat, Type: sm.Type}, Connections: reciever})
-			}
-			//OR
+				service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{Chat: chat, Type:"chat"}, Connections: reciever})
+			} else {
+				//OR
 			//check for chat notif
 			oldChats, count, err := service.repo.CheckForNotification(chat)
 			//add new notif to database or add 1 to count
 			if !oldChats || oldChats && err == nil {
 				service.repo.AddChatNotification(chat, count)
 			}
+			}
+			
 		}
 
 	}

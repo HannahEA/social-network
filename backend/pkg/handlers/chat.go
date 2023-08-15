@@ -20,9 +20,11 @@ func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r
 	}
 	fmt.Println("converation", conversation)
 	conversation = service.repo.FindConversation(conversation)
-
+	//get chat history 
+	chats:= service.repo.GetChatHistory(conversation)
 	response := map[string]interface{}{
 		"conversation": conversation,
+		"chats": chats,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -55,9 +57,9 @@ func (repo *dbStruct) FindConversation(convo Conversation) Conversation {
 	}
 	fmt.Println("getting conversation id")
 	query2 := `SELECT conversationID FROM PrivateChat WHERE participant1 IN (?, ?) AND participant2 IN (?,?)`
-	row, err := repo.db.Query(query2, convo.Participant1, convo.Participant2, convo.Participant1, convo.Participant2)
-	if err != nil {
-		fmt.Println("FindConversation: convoID Query Error", err2, convo)
+	row, err3 := repo.db.Query(query2, convo.Participant1, convo.Participant2, convo.Participant1, convo.Participant2)
+	if err3 != nil {
+		fmt.Println("FindConversation: convoID Query Error", err3, convo)
 	}
 
 	fmt.Println("conversationID found")
@@ -89,6 +91,31 @@ func (repo *dbStruct) NewPrivateChatToDB(convo Conversation) Conversation {
 	// fmt.Println(result)
 
 	return convo
+}
+
+func (r *dbStruct) GetChatHistory(convo Conversation) []Chat{
+	var chats []Chat
+	query := `SELECT chatID, chatMessage, sender, creationDate FROM MessageHistory WHERE sender IN (?, ?) AND recipient IN (?,?)`
+	row, err := r.db.Query(query, convo.Participant1, convo.Participant2, convo.Participant1, convo.Participant2)
+	if err != nil {
+		fmt.Println("GetChatHistory: Query Error", err, convo)
+		return chats 
+	}
+
+	fmt.Println("chat messages found")
+	var chat Chat
+	for row.Next() {
+		err := row.Scan(&chat.ConversationId, &chat.Message, &chat.Sender, &chat.Date)
+		if err != nil {
+			fmt.Println("FindConversation: Scan Error", err, convo)
+			return chats 
+		}
+		chats = append(chats, chat)
+		chat = Chat{}
+
+	}
+
+ 	return chats
 }
 
 func (r *dbStruct) AddChatToDatabase(chat Chat) {

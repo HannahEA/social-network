@@ -6,7 +6,7 @@ import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
+
 import { Notyf } from "notyf";
 
 //Environment variable from the docker-compose.yml file.
@@ -32,14 +32,14 @@ const Feed = () => {
         websocketRef.current.onmessage = (e) => {
           // Handle WebSocket messages here
           let message = JSON.parse(e.data)
-          // console.log(message)
-          if (message.type = "connect") {
+          console.log(message)
+          if (message.type == "connect") {
              // console.log(message)
             allData.current.presences = message.presences.clients
             // console.log("current presences", allData.current.presences)
             //update chat user list
-            AddUserToChatList({presences: allData.current.presences})
-          } else if (message.type = "chat") {
+            AddUserToChatList({allData: allData.current})
+          } else if (message.type == "chat") {
             console.log("chat recieved", message)
             // let chat = message.chat
             PrintNewChat({chat: message.chat})
