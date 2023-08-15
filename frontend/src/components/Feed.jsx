@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
-import {Chat} from "./feed/Chat"
+import {Chat, AddUserToChatList, PrintNewChat} from "./feed/Chat"
 import handleLogout from "./feed/Logout";
 import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
@@ -25,9 +25,19 @@ const Feed = () => {
           // Handle WebSocket messages here
           let message = JSON.parse(e.data)
           // console.log(message)
-          allData.current.presences = message.presences.clients
-          console.log(allData.current.presences)
-          // setChatData(allData.current)
+          if (message.type = "connect") {
+             // console.log(message)
+            allData.current.presences = message.presences.clients
+            // console.log("current presences", allData.current.presences)
+            //update chat user list
+            AddUserToChatList({presences: allData.current.presences})
+          } else if (message.type = "chat") {
+            console.log("chat recieved", message)
+            // let chat = message.chat
+            PrintNewChat({chat: message.chat})
+          }
+         
+          
       };
     }
   })

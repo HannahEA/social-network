@@ -56,7 +56,7 @@ const LoginPage = () => {
       .then((data) => {
         // Check if the login was successful
         if (data.message === "Login successful") {
-          console.log({data});
+         
 
           // Display a success notification
           notyf.success("Login successful");
@@ -78,7 +78,7 @@ const LoginPage = () => {
       });
        (async () =>{
          const dataObj = await data
-           console.log(dataObj)
+           
            checkCookie(dataObj);
        })()
   };

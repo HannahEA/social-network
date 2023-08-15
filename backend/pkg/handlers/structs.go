@@ -7,17 +7,17 @@ import (
 )
 
 type User struct {
-	id        int
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	NickName  string `json:"username"`
-	Age       string `json:"age"`
-	Gender    string `json:"gender"`
-	Email     string `json:"email"`
-	Password  string `json:"passWord"`
-	Avatar    string `json:"avatar"`
-	Image     []byte `json:"image"`
-	AboutMe   string `json:"aboutMe"`
+	id         int
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	NickName   string `json:"username"`
+	Age        string `json:"age"`
+	Gender     string `json:"gender"`
+	Email      string `json:"email"`
+	Password   string `json:"passWord"`
+	Avatar     string `json:"avatar"`
+	Image      []byte `json:"image"`
+	AboutMe    string `json:"aboutMe"`
 	ProfVisib  string `json:"profVisib"`
 	Created_At string `json:"created_at"`
 }
@@ -37,10 +37,9 @@ type Cookie struct {
 
 type ProfileVisibilityData struct {
 	NickName  string `json:"username"`
-	ProfVisib  string `json:"profVisib"`
+	ProfVisib string `json:"profVisib"`
 }
 
-	
 type RegistrationData struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
@@ -94,16 +93,18 @@ type Comment struct {
 type BroadcastMessage struct {
 	WebMessage WebsocketMessage
 	//clients who will recieve the message
-	Connections map[*websocket.Conn]string 
+	Connections map[*websocket.Conn]string
 }
 type WebsocketMessage struct {
-	Cookie  string `json:"cookie"`
+	Cookie string `json:"cookie"`
 
 	Presences Presences `json:"presences"`
 
 	Chat Chat `json:"chat"`
 
 	Conversation Conversation `json:"conversation"`
+
+	Type string `json:"type"`
 }
 
 type Presences struct {
@@ -112,11 +113,11 @@ type Presences struct {
 }
 
 type Conversation struct {
-	Chats          []Chat `json:"chats"`
-	//chat sender username  
+	Chats []Chat `json:"chats"`
+	//chat sender username
 	Participant1 string `json:"username"`
 	//chat reciever username
-	Participant2 string `json:"reciever"`
+	Participant2   string `json:"reciever"`
 	ConversationId string `json:"converstionID"`
 }
 
@@ -125,6 +126,6 @@ type Chat struct {
 	//chat sender username
 	Sender string `json:"username"`
 	//chat reciever username
-	Reciver string `json:"reciever"`
-	ChatId  string `json:"chatID"`
+	Reciever string `json:"reciever"`
+	ChatId   string `json:"chatID"`
 }
