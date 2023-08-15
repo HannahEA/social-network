@@ -47,7 +47,7 @@ type AllUsersData struct {
 	Avatar    string `json:"avatar"`
 	Image     []byte `json:"image"`
 	ProfVisib string `json:"profVisib"`
-	LoggedIn  string   `json:"loggedIn"`
+	LoggedIn  string `json:"loggedIn"`
 }
 
 type RegistrationData struct {
@@ -113,6 +113,8 @@ type WebsocketMessage struct {
 	Chat Chat `json:"chat"`
 
 	Conversation Conversation `json:"conversation"`
+
+	Type string `json:"type"`
 }
 
 type Presences struct {
@@ -134,6 +136,8 @@ type Chat struct {
 	//chat sender username
 	Sender string `json:"username"`
 	//chat reciever username
-	Reciver string `json:"reciever"`
-	ChatId  string `json:"chatID"`
+	Reciever string `json:"reciever"`
+	Date     string `json:"date"`
+	ChatId   string `json:"chatID"`
+	ConversationId string `json:"convoID"`
 }

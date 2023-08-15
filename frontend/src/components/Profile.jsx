@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useLocation } from "react-router-dom";
 import { Notyf } from "notyf";
-import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
+
 const notyf = new Notyf();
 
 const apiURL = process.env.REACT_APP_API_URL;

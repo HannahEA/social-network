@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS "Notifications" (
 			"sender" TEXT,
 			"recipient" TEXT,
 			"count" INTEGER,
+			"type"	TEXT,
 			"followingRequest" TEXT,
 			"joinGroupRequest" TEXT,
 			"groupInvite" TEXT,

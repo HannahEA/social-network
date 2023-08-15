@@ -57,7 +57,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 	fmt.Println("new websocket connection")
 	// ensure connection close when function returns
 	defer ws.Close()
-	// close any connctions ended on client side 
+	// close any connctions ended on client side
 	checkWebSocketConnections(Clients)
 
 	// if it's zero, no messages were ever sent/saved
@@ -97,18 +97,18 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			//message you want to send: all usernames
 			var users []string
 			for _, name := range Clients {
-				users= append(users, name)
+				users = append(users, name)
 			}
-			webMessage:= WebsocketMessage{
-				Presences: Presences {
+			webMessage := WebsocketMessage{
+				Presences: Presences{
 					Clients: users,
 				},
+				Type: "connect",
 			}
-			
+
 			// send new message to the channel
-			service.repo.BroadcastToChannel(BroadcastMessage{WebMessage:webMessage, Connections: Clients})
-	 
-			
+			service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: webMessage, Connections: Clients})
+
 		case "chat":
 			var chat Chat
 			// Unmarshal full message as JSON and map it to a Message object
@@ -121,12 +121,31 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			}
 			//
 			//add chat to database
+			service.repo.AddChatToDatabase(chat)
 			//look for reciever in client list
+			online := false
+			reciever:= make(map[*websocket.Conn]string)
+			for conn, client := range Clients {
+				if client == chat.Reciever {
+					fmt.Println("chat reciever is online")
+					reciever[conn] = client 
+					online = true
+				}
+			}
+
 			//send Chat message to reciever web conn
-			//OR
-			//add to notif table 
-			// send new message to the channel
-			service.repo.BroadcastToChannel(BroadcastMessage{})
+			if online {
+				service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{Chat: chat, Type:"chat"}, Connections: reciever})
+			} else {
+				//OR
+			//check for chat notif
+			oldChats, count, err := service.repo.CheckForNotification(chat)
+			//add new notif to database or add 1 to count
+			if !oldChats || oldChats && err == nil {
+				service.repo.AddChatNotification(chat, count)
+			}
+			}
+			
 		}
 
 	}
