@@ -20,6 +20,7 @@ type User struct {
 	AboutMe    string `json:"aboutMe"`
 	ProfVisib  string `json:"profVisib"`
 	Created_At string `json:"created_at"`
+	LoggedIn   bool   `json:"loggedIn"`
 }
 
 // each session contains the username of the user and the time at which it expires
@@ -38,6 +39,15 @@ type Cookie struct {
 type ProfileVisibilityData struct {
 	NickName  string `json:"username"`
 	ProfVisib string `json:"profVisib"`
+}
+
+type AllUsersData struct {
+	ID        int    `json:"id"`
+	NickName  string `json:"username"`
+	Avatar    string `json:"avatar"`
+	Image     []byte `json:"image"`
+	ProfVisib string `json:"profVisib"`
+	LoggedIn  string   `json:"loggedIn"`
 }
 
 type RegistrationData struct {

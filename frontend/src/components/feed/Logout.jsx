@@ -13,7 +13,7 @@ const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
 
 
-const handleLogout = (event, setAuthToFalse)  => {
+export const handleLogout = (event, setAuthToFalse)  => {
     
     event.preventDefault(); 
 
@@ -52,7 +52,7 @@ fetch(`${apiURL}/logout`, configLogout)
 }
 
 //get session cookie
-const GetCookie = (name) => {
+export const GetCookie = (name) => {
     //split cookie string
     //name equals to value pairs in an array
     var CookieArr = document.cookie.split(';');
@@ -72,4 +72,4 @@ const GetCookie = (name) => {
     return null;
   }
 
-  export default handleLogout;
+  // export default {GetCookie, handleLogout};
