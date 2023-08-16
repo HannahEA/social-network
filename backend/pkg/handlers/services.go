@@ -40,6 +40,7 @@ type AllDbMethods interface {
 	ValidateLogin(email, password string) (bool, error)
 	GetUserEmail(userId string) (string, error)
 	AddSession(w http.ResponseWriter, sessionName string, user *User)
+	InsertFollowRequest(uploadFollowRequest UploadFollow) error 
 	InsertSession(u *User, session *http.Cookie) *Session
 	IsUserAuthenticated(w http.ResponseWriter, u *User) error
 	//logout
@@ -50,6 +51,7 @@ type AllDbMethods interface {
 	PopulateTheSessionsDB(userID int, cookieName, cookieValue string) error
 	AddLoggedInFlag(userID int, flag string) error
 	ReturnId(email string) (int, error)
+	GetUserByEmail(email string) (User, error) 
 	DeleteCookieDB(cookieValue string) (int64, error)
 	//post database queries
 	AddPostToDB(data Post) error

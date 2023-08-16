@@ -1,11 +1,14 @@
 import React from "react";
 
-function Modal({ children, onClose }) {
+function Modal({ children, onClose, onFollow}) {
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
+    } else{
+      onFollow();
     }
   };
+
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
@@ -14,7 +17,7 @@ function Modal({ children, onClose }) {
           Close
         </button>
         {children}
-        <button className="modal-follow" onClick={onClose} class="ml-5 m-2.5 pl-5 pr-5 font-bold bg-blue-500 text-white rounded-md">
+        <button className="modal-follow" onClick={onFollow} class="ml-5 m-2.5 pl-5 pr-5 font-bold bg-blue-500 text-white rounded-md">
           Follow
         </button>
       </div>

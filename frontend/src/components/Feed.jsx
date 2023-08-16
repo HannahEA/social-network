@@ -150,10 +150,52 @@ const handleShowUserInfo = () => {
     createCard(selectedUser)
   };
 
+
+
   const handleCloseModal = () => {
     setSelectedUser(null);
     setIsModalVisible(false);
   };
+
+  const handleFollowUser = () => {
+
+    var influencerUN = selectedUser.username;
+    var influencerID = selectedUser.id;
+    var influencerVisib = selectedUser.profVisib;
+// request info sent to the back end
+    const followInfo = {
+      "type": "followingRequest",
+      "followerEmail": email,
+      "influencerUN": influencerUN,
+      "influencerID": influencerID,
+      "influencerVisib": influencerVisib,
+    }
+    //this returns correct influencer info
+    console.log("printing selectedUser to be sent via websocket", selectedUser)
+    //Below returns: Uncaught TypeError: Cannot read properties of null (reading 'send')
+    websocketRef.current.send(
+      JSON.stringify(followInfo)
+    )
+
+  // Make a POST request to store followInfo into db
+  //and handle according to influencer's visibility
+
+  // fetch(`${apiURL}/followRequest`, {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify(followInfo),
+  //   credentials: 'include',
+  // })
+  //   .catch((error) => {
+  //     // Handle any errors
+  //     console.error("Error sending follow request to db:", error);
+  //   });
+  
+};
+    
+
 
 
 
@@ -1456,7 +1498,7 @@ const handleShowUserInfo = () => {
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
              {/* Start of users Information modal */}
         {isModalVisible && (
-        <Modal onClose={handleCloseModal} >
+        <Modal onClose={handleCloseModal} onFollow={handleFollowUser}>
           {selectedUser && (
             <Card
               name={selectedUser.username}

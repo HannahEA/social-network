@@ -124,34 +124,112 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			service.repo.AddChatToDatabase(chat)
 			//look for reciever in client list
 			online := false
-			reciever:= make(map[*websocket.Conn]string)
+			reciever := make(map[*websocket.Conn]string)
 			for conn, client := range Clients {
 				if client == chat.Reciever {
 					fmt.Println("chat reciever is online")
-					reciever[conn] = client 
+					reciever[conn] = client
 					online = true
 				}
 			}
 
 			//send Chat message to reciever web conn
 			if online {
-				service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{Chat: chat, Type:"chat"}, Connections: reciever})
+				service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{Chat: chat, Type: "chat"}, Connections: reciever})
 			} else {
 				//OR
-			//check for chat notif
-			oldChats, count, err := service.repo.CheckForNotification(chat)
-			//add new notif to database or add 1 to count
-			if !oldChats || oldChats && err == nil {
-				service.repo.AddChatNotification(chat, count)
+				//check for chat notif
+				oldChats, count, err := service.repo.CheckForNotification(chat)
+				//add new notif to database or add 1 to count
+				if !oldChats || oldChats && err == nil {
+					service.repo.AddChatNotification(chat, count)
+				}
 			}
+		case "followingRequest":
+
+			var fInfo Follow
+			jsonErr := json.Unmarshal(b, &fInfo)
+			fmt.Println("fInfo:", fInfo)
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: Websocket")
+				break
 			}
-			
+			//retrieve follower's details
+			fEmail := fInfo.FollowerEmail
+
+			follower, err := service.repo.GetUserByEmail(fEmail)
+			if err != nil {
+				fmt.Println("Error retrieving follower info by email", err)
+			}
+			//instantiate struct 'UploadFollow'
+			var uploadFollowInfo UploadFollow
+
+			//assign values to 'UploadFollow' struct
+			uploadFollowInfo.FollowerId = follower.id
+			uploadFollowInfo.FollowerUN = follower.NickName
+			uploadFollowInfo.InfluencerId = fInfo.InfluencerID
+			uploadFollowInfo.InfluencerUN = fInfo.InfliuencerUN
+			uploadFollowInfo.Accept = "Yes"
+			uploadFollowInfo.UFollow = ""
+
+			if fInfo.InfluencerVisib == "public" {
+				//populate the db table 'followers'
+				err := service.repo.InsertFollowRequest(uploadFollowInfo)
+				if err != nil {
+					log.Fatalf(err.Error())
+				}
+
+			} else if fInfo.InfluencerVisib == "private " {
+				online := false
+				fmt.Println("Printing to get rid of the error", online)
+				reciever := make(map[*websocket.Conn]string)
+
+				for conn, client := range Clients {
+					if client == uploadFollowInfo.InfluencerUN {
+						fmt.Println("follow request receiver is online")
+						reciever[conn] = client
+						online = true
+					}
+				}
+				//send a notification to the owner of the private profile
+				service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{UploadFollow: uploadFollowInfo, Type: "followingRequest"}, Connections: reciever})
+			} else {
+				/*OR
+				//TO DO: check for uploadFollowInfo notif
+				oldChats, count, err := service.repo.CheckForNotification(uploadFollowInfo)
+				//add new notif to database or add 1 to count
+				if !olduploadFollowInfo || olduploadFollowInfo && err == nil {
+					service.repo.AddChatNotification(uploadFollowInfo, count)
+				}*/
+				fmt.Println("Influencer is not online, must send notification and store some details")
+			}
 		}
 
 	}
 }
 
+func GetUserByEmail(fEmail string) {
+	panic("unimplemented")
+}
+
 func (r *dbStruct) BroadcastToChannel(msg BroadcastMessage) {
 	fmt.Println("attempting to broadcast")
 	r.broadcaster <- msg
+}
+
+func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) error {
+	//populate the db table 'followers'
+	stmnt, err := repo.db.Prepare("INSERT OR IGNORE INTO Followers (followerID, followerUserName, influencerID, influencerUserName, accepted, unfollow) VALUES (?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		fmt.Println("Error preparing insert stmt for follow request into DB: ", err)
+		return err
+	}
+	_, err = stmnt.Exec(uploadFollowRequest.FollowerId, uploadFollowRequest.FollowerUN, uploadFollowRequest.InfluencerId, uploadFollowRequest.InfluencerUN, uploadFollowRequest.Accept, uploadFollowRequest.UFollow)
+	if err != nil {
+		fmt.Println("Error inserting follow request into DB: ", err)
+		return err
+	}
+
+	return nil
+
 }

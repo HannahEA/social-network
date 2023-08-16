@@ -214,6 +214,19 @@ func (repo *dbStruct) ReturnId(email string) (int, error) {
 	return id, nil
 }
 
+func (repo *dbStruct) GetUserByEmail(email string) (User, error) {
+	var userInfo User
+	theUserQuery := "SELECT * FROM Users WHERE email = ?"
+	rowCurrentUser := repo.db.QueryRow(theUserQuery, email)
+	// Writing user information into userInfo struct
+	err3 := rowCurrentUser.Scan(&userInfo)
+	if err3 != nil {
+		// fmt.Println("error accessing DB")
+		return userInfo, err3
+	}
+	return userInfo, nil
+}
+
 //Code to send avatar image back to the front end:
 func (repo *dbStruct) getAvatar(email string) (string, error) {
 	// Retrieve the avatar image or URL from the database
