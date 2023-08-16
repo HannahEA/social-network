@@ -16,7 +16,7 @@ type User struct {
 	Email      string `json:"email"`
 	Password   string `json:"passWord"`
 	Avatar     string `json:"avatar"`
-	Image      []byte `json:"image"`
+	Image      string `json:"image"`
 	AboutMe    string `json:"aboutMe"`
 	ProfVisib  string `json:"profVisib"`
 	Created_At string `json:"created_at"`
@@ -45,10 +45,10 @@ type AllUsersData struct {
 	ID        int    `json:"id"`
 	NickName  string `json:"username"`
 	Avatar    string `json:"avatar"`
-	Image     []byte `json:"image"`
+	Image     string `json:"image"`
 	ProfVisib string `json:"profVisib"`
-	AboutMe    string `json:"aboutMe"`
-	LoggedIn  string   `json:"loggedIn"`
+	AboutMe   string `json:"aboutMe"`
+	LoggedIn  string `json:"loggedIn"`
 }
 
 type RegistrationData struct {
@@ -137,8 +137,8 @@ type Chat struct {
 	//chat sender username
 	Sender string `json:"username"`
 	//chat reciever username
-	Reciever string `json:"reciever"`
-	Date     string `json:"date"`
-	ChatId   string `json:"chatID"`
+	Reciever       string `json:"reciever"`
+	Date           string `json:"date"`
+	ChatId         string `json:"chatID"`
 	ConversationId string `json:"convoID"`
 }

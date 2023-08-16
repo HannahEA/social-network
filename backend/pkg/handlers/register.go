@@ -85,6 +85,8 @@ func (repo *dbStruct) RegisterUser(data RegistrationData) (int, error) {
 	// 	return fmt.Errorf("email already taken")
 	// }
 	// turn the password into a hash to be stored into the db
+	fmt.Println("the User image we upload in DB", data.Image)
+	fmt.Println("the User avatar we upload in DB", data.Avatar)
 	var hash []byte
 	hash, err1 := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err1 != nil {
