@@ -80,7 +80,7 @@ const RegistrationPage = () => {
     const { value } = event.target;
   
     if (value.startsWith('http') || value.startsWith('https')) {
-
+      console.log("avatarURL:",avatarURL)
       setAvatarURL(value);
     } else {
       // It's a file upload
@@ -163,7 +163,7 @@ const RegistrationPage = () => {
   // //HS: NEW UPDATED CODE FOR REGISTRATION
   const handleRegistration = (event) => {
     event.preventDefault();
-    
+
     if (avatarImage === "" && avatarURL === null){
        console.log("no image uploaded by user")
         setAvatarURL("https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj");
@@ -470,7 +470,7 @@ const RegistrationPage = () => {
                     className="p-2 w-full mr-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600"
                     onChange={handleAvatarChange}
                   />
-                  {/* END of image URL */}
+                  {/* Start of image or URL avatar */}
                   </div>
                   <div className="p-2"> 
                   <label
@@ -482,7 +482,7 @@ const RegistrationPage = () => {
                 <input type="file" name="avatar" id="avatar" accept="image/*" className="hidden" onChange={handleAvatarChange} />
                   </div>
                   
-               {/* START of image URL */}
+               {/* End of image or URL avatar */}
                 
               </div>
               <div>
