@@ -92,13 +92,13 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 		}
 		userInfo := service.repo.GetUserByCookie(sessionToken)
 		value := *userInfo
-		 fmt.Println("the user info:", value)
+		fmt.Println("the user info:", value)
 
 		response := map[string]interface{}{
 			"message":    "Login successful",
 			"email":      data.Email,
 			"userAvatar": userAvatar,
-			"userInfo": value,
+			"userInfo":   value,
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -154,12 +154,6 @@ func (repo *dbStruct) AddLoggedInFlag(userID int, flag string) error {
 
 	return nil
 }
-
-
-
-
-
-
 
 func (repo *dbStruct) ValidateLogin(email, password string) (bool, error) {
 	var count int
@@ -219,7 +213,7 @@ func (repo *dbStruct) GetUserByEmail(email string) (User, error) {
 	theUserQuery := "SELECT * FROM Users WHERE email = ?"
 	rowCurrentUser := repo.db.QueryRow(theUserQuery, email)
 	// Writing user information into userInfo struct
-	err3 := rowCurrentUser.Scan(&userInfo)
+	err3 := rowCurrentUser.Scan(&userInfo.id, &userInfo.FirstName, &userInfo.LastName, &userInfo.NickName, &userInfo.Age, &userInfo.Gender, &userInfo.Email, &userInfo.Password, &userInfo.Avatar, &userInfo.Image, &userInfo.AboutMe, &userInfo.ProfVisib, &userInfo.Created_At, &userInfo.LoggedIn)
 	if err3 != nil {
 		// fmt.Println("error accessing DB")
 		return userInfo, err3
@@ -242,10 +236,10 @@ func (repo *dbStruct) getAvatar(email string) (string, error) {
 	if avatarImage != "" {
 		// Set the response header for content type
 		// w.Header().Set("Content-Type", "image/jpeg")
-		
+
 		return avatarImage, nil
 	} else if avatarURL != "" {
-		
+
 		//Write the avatar URL to the response
 		return avatarURL, nil
 	} else {

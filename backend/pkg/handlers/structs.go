@@ -20,7 +20,7 @@ type User struct {
 	AboutMe    string `json:"aboutMe"`
 	ProfVisib  string `json:"profVisib"`
 	Created_At string `json:"created_at"`
-	LoggedIn   bool   `json:"loggedIn"`
+	LoggedIn   string   `json:"loggedIn"`
 }
 
 // each session contains the username of the user and the time at which it expires

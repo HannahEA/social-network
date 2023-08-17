@@ -208,9 +208,9 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 	}
 }
 
-func GetUserByEmail(fEmail string) {
-	panic("unimplemented")
-}
+// func GetUserByEmail(fEmail string) {
+// 	panic("unimplemented")
+// }
 
 func (r *dbStruct) BroadcastToChannel(msg BroadcastMessage) {
 	fmt.Println("attempting to broadcast")
