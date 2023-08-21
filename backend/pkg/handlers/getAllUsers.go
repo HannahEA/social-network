@@ -46,7 +46,7 @@ func (service *AllDbMethodsWrapper) HandleGetAllUsers(w http.ResponseWriter, r *
 
 func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 	uData := []AllUsersData{}
-	rows, err := repo.db.Query(`SELECT id, nickName, avatarURL, imageFile, profileVisibility, loggedIn FROM Users WHERE email != ? `, email)
+	rows, err := repo.db.Query(`SELECT id, nickName, avatarURL, imageFile, aboutMe, profileVisibility, loggedIn FROM Users WHERE email != ? `, email)
 	//rows, err := repo.db.Query(`SELECT id, nickName, avatarURL, imageFile, profileVisibility, loggedIn FROM Users`)
 	if err != nil {
 		return uData, fmt.Errorf("get allUserData db query error %v", err)
@@ -54,7 +54,7 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 	var oneUser AllUsersData
 
 	for rows.Next() {
-		err := rows.Scan(&oneUser.ID, &oneUser.NickName, &oneUser.Avatar, &oneUser.Image, &oneUser.ProfVisib, &oneUser.LoggedIn)
+		err := rows.Scan(&oneUser.ID, &oneUser.NickName, &oneUser.Avatar, &oneUser.Image, &oneUser.AboutMe, &oneUser.ProfVisib, &oneUser.LoggedIn)
 		if err != nil {
 			return uData, fmt.Errorf("getuData rows.Scan error %+v", err)
 		}

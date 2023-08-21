@@ -53,7 +53,17 @@ In VSC terminal
    cd frontend
    npm start
 
+# VSC commands to merge your branch to master:
 
+1. git checkout master
+2. git add . (Necessary if you need to commit changes in your branch first)
+3. git commiit -m "your comment here"
+4. git checkout master
+5. git pull
+6. git checkout "your branch name here" (Accept or reject the incoming code)
+7. git merge master
+8. git push
+9. Make a pull request in your Github branch
 
 # To delete the back-end server, in VSC terminal run:
 
@@ -62,6 +72,7 @@ In VSC terminal
 
 2. To kill port 8000:
    fuser -k 8000/tcp
+
 
 # Getting Started with Create React App
 
