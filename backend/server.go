@@ -49,6 +49,7 @@ func corsMiddleware(handler http.Handler) http.Handler {
 	})
 }
 
+// channel used to handle chat messages
 var broadcaster = make(chan handlers.BroadcastMessage)
 
 func main() {
@@ -60,6 +61,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//store the database connection  and the chat broadcaster channel in the new db struct
 	newRepo := handlers.NewDbStruct(db, broadcaster)
 	newService := handlers.NewService(newRepo)
 	defer database.Database.Close()
@@ -84,7 +87,7 @@ func main() {
 
 func handleMessages() {
 	for {
-		// grab any next message from channel
+		// grab any next broadcast message from channel
 		msg := <-broadcaster
 
 		messageClients(msg)
@@ -93,19 +96,24 @@ func handleMessages() {
 
 func messageClients(msg handlers.BroadcastMessage) {
 	// send to every client currently connected
-	for client := range msg.Connections {
-		messageClient(client, msg)
+
+	//range through map of clients that will recive a message
+	for conn := range msg.Connections {
+		messageClient(conn, msg)
 	}
 }
 
-func messageClient(client *websocket.Conn, msg handlers.BroadcastMessage) {
+func messageClient(conn *websocket.Conn, msg handlers.BroadcastMessage) {
+	//get the websocket message to send
 	send := &msg.WebMessage
-	err := client.WriteJSON(&send)
-	fmt.Println("handled message", msg.WebMessage)
+
+	//send message over websocket connection
+	err := conn.WriteJSON(&send)
+
 	if err != nil && handlers.UnsafeError(err) {
 		log.Printf("error: %v", err)
-		client.Close()
-		delete(handlers.Clients, client)
+		conn.Close()
+		delete(handlers.Clients, conn)
 	}
 }
 
