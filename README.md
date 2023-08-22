@@ -57,7 +57,7 @@ In VSC terminal
 
 1. git checkout master
 2. git add . (Necessary if you need to commit changes in your branch first)
-3. git commiit -m "your comment here"
+3. git commit -m "your comment here"
 4. git checkout master
 5. git pull
 6. git checkout "your branch name here" (Accept or reject the incoming code)

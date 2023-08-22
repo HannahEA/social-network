@@ -19,17 +19,12 @@ import { Notyf } from "notyf";
 //allowing the frontend code to make requests to the correct endpoint.
 const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
-
-//cookie used in the back-end to identify logged-in user
-//let userCookie = GetCookie("user_session"); // this doesn't work
-
-
-// Create a reference to the users list element
  
 
 const Feed = () => {
-  const { websocketRef} = useWebSocket();
-  const{isWebSocketConnected} = useWebSocket()
+  const { websocketRef, isWebSocketConnected} = useWebSocket();
+  //const{isWebSocketConnected} = useWebSocket()
+  //the different kinds of websocket messages
   const allData = useRef({userInfo: {}, chats:[], presences:[]})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
@@ -53,7 +48,10 @@ const Feed = () => {
           
       };
     }
-  })
+    if (isWebSocketConnected){
+
+}  
+})
 
   
   const location = useLocation();
@@ -157,12 +155,16 @@ const handleShowUserInfo = () => {
     setIsModalVisible(false);
   };
 
-  const handleFollowUser = () => {
 
-    var influencerUN = selectedUser.username;
-    var influencerID = selectedUser.id;
-    var influencerVisib = selectedUser.profVisib;
-// request info sent to the back end
+
+      const handleFollowUser = () => {
+    if (isWebSocketConnected) {
+
+      var influencerUN = selectedUser.username;
+      var influencerID = selectedUser.id;
+      var influencerVisib = selectedUser.profVisib;
+
+  // request info sent to the back end
     const followInfo = {
       "type": "followingRequest",
       "followerEmail": email,
@@ -172,7 +174,9 @@ const handleShowUserInfo = () => {
     }
     //this returns correct influencer info
     console.log("printing selectedUser to be sent via websocket", selectedUser)
-    //Below returns: Uncaught TypeError: Cannot read properties of null (reading 'send')
+
+    //THE ERROR IS HERE. Below code returns: 
+    //Uncaught TypeError: Cannot read properties of null (reading 'send')
     websocketRef.current.send(
       JSON.stringify(followInfo)
     )
@@ -193,8 +197,11 @@ const handleShowUserInfo = () => {
   //     console.error("Error sending follow request to db:", error);
   //   });
   
-};
-    
+
+  }
+}
+
+  
 
 
 
