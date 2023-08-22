@@ -123,6 +123,7 @@ type WebsocketMessage struct {
 type Presences struct {
 	//logged in users nicknames
 	Clients []string `json:"clients"`
+	LoggedIn []string `json:"loggedIn"`
 }
 
 type Conversation struct {
