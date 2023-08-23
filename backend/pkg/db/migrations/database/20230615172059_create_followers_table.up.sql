@@ -1,12 +1,11 @@
 CREATE TABLE IF NOT EXISTS "Followers" (
-						"userID" INTEGER, 
-						"followerID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-						"followerFName" TEXT NOT NULL,
-						"followerLName" TEXT NOT NULL,
-						"influencerFName" TEXT NOT NULL,
-						"influencerLName" TEXT NOT NULL,
+						"follow" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+						"followerID" INTEGER NOT NULL,
+						"followerUserName" TEXT NOT NULL,
+						"influencerID" INTEGER NOT NULL,
+						"influencerUserName" TEXT NOT NULL,
 						"accepted" TEXT,
 						"unfollow" TEXT,
-						FOREIGN KEY(userID)REFERENCES Users(id),
-						FOREIGN KEY(followerID)REFERENCES Users(id)
+						FOREIGN KEY(followerUserName)REFERENCES Users(nickName),
+						FOREIGN KEY(influencerUserName)REFERENCES Users(nickName)
 						);

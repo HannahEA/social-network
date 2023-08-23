@@ -75,7 +75,7 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 		fmt.Println("err6 with setting 'loggedIn' to 'Yes':", err6)
 		return
 	}
-	// find in Client list 
+
 	for con, name := range Clients {
 		if name == user.NickName {
 			//get websocket connection from client hub
@@ -85,8 +85,6 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 	//delete client
 	delete(Clients, conn)
 	fmt.Println("Clients", Clients)
-	//broadast message to all users 
-
 	//get usernames
 	var users []string
 			for _, name := range Clients {
@@ -106,6 +104,7 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 		fmt.Print("Error deleting cookie in db", err)
 		return
 	}
+
 
 	//=======> end of db query <============
 

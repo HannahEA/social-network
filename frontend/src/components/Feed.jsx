@@ -19,41 +19,39 @@ import { Notyf } from "notyf";
 //allowing the frontend code to make requests to the correct endpoint.
 const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
-
-//cookie used in the back-end to identify logged-in user
-//let userCookie = GetCookie("user_session"); // this doesn't work
-
-
-// Create a reference to the users list element
  
 
 const Feed = () => {
-  const { websocketRef} = useWebSocket();
-  const{isWebSocketConnected} = useWebSocket()
+  const { websocketRef, isWebSocketConnected} = useWebSocket();
+  //const{isWebSocketConnected} = useWebSocket()
+  //the different kinds of websocket messages
   const allData = useRef({userInfo: {}, chats:[], presences:[]})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
-      if (websocketRef.current) {
-        websocketRef.current.onmessage = (e) => {
-          // Handle WebSocket messages here
-          let message = JSON.parse(e.data)
-          console.log(message)
-          if (message.type == "connect") {
-             // console.log(message)
-            allData.current.presences = message.presences
-            // console.log("current presences", allData.current.presences)
-            //update chat user list
-            AddUserToChatList({allData: allData.current})
-          } else if (message.type == "chat") {
-            console.log("chat recieved", message)
-            // let chat = message.chat
-            PrintNewChat({chat: message.chat})
-          }
-         
-          
-      };
-    }
-  })
+    if (websocketRef.current) {
+      websocketRef.current.onmessage = (e) => {
+        // Handle WebSocket messages here
+        let message = JSON.parse(e.data)
+        console.log(message)
+        if (message.type == "connect") {
+           // console.log(message)
+          allData.current.presences = message.presences
+          // console.log("current presences", allData.current.presences)
+          //update chat user list
+          AddUserToChatList({allData: allData.current})
+        } else if (message.type == "chat") {
+          console.log("chat recieved", message)
+          // let chat = message.chat
+          PrintNewChat({chat: message.chat})
+        }
+       
+        
+    };
+  }
+    if (isWebSocketConnected){
+
+}  
+})
 
   
   const location = useLocation();
@@ -150,10 +148,61 @@ const handleShowUserInfo = () => {
     createCard(selectedUser)
   };
 
+
+
   const handleCloseModal = () => {
     setSelectedUser(null);
     setIsModalVisible(false);
   };
+
+
+
+      const handleFollowUser = () => {
+    if (isWebSocketConnected) {
+
+      var influencerUN = selectedUser.username;
+      var influencerID = selectedUser.id;
+      var influencerVisib = selectedUser.profVisib;
+
+  // request info sent to the back end
+    const followInfo = {
+      "type": "followingRequest",
+      "followerEmail": email,
+      "influencerUN": influencerUN,
+      "influencerID": influencerID,
+      "influencerVisib": influencerVisib,
+    }
+    //this returns correct influencer info
+    console.log("printing selectedUser to be sent via websocket", selectedUser)
+
+    //THE ERROR IS HERE. Below code returns: 
+    //Uncaught TypeError: Cannot read properties of null (reading 'send')
+    websocketRef.current.send(
+      JSON.stringify(followInfo)
+    )
+
+  // Make a POST request to store followInfo into db
+  //and handle according to influencer's visibility
+
+  // fetch(`${apiURL}/followRequest`, {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify(followInfo),
+  //   credentials: 'include',
+  // })
+  //   .catch((error) => {
+  //     // Handle any errors
+  //     console.error("Error sending follow request to db:", error);
+  //   });
+  
+
+  }
+}
+
+  
+
 
 
 
@@ -1456,7 +1505,7 @@ const handleShowUserInfo = () => {
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
              {/* Start of users Information modal */}
         {isModalVisible && (
-        <Modal onClose={handleCloseModal} >
+        <Modal onClose={handleCloseModal} onFollow={handleFollowUser}>
           {selectedUser && (
             <Card
               name={selectedUser.username}

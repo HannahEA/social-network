@@ -20,7 +20,7 @@ type User struct {
 	AboutMe    string `json:"aboutMe"`
 	ProfVisib  string `json:"profVisib"`
 	Created_At string `json:"created_at"`
-	LoggedIn   bool   `json:"loggedIn"`
+	LoggedIn   string   `json:"loggedIn"`
 }
 
 // each session contains the username of the user and the time at which it expires
@@ -115,6 +115,8 @@ type WebsocketMessage struct {
 
 	Conversation Conversation `json:"conversation"`
 
+	UploadFollow UploadFollow `json:"uploadFollow"`
+
 	Type string `json:"type"`
 }
 
@@ -142,4 +144,21 @@ type Chat struct {
 	Date           string `json:"date"`
 	ChatId         string `json:"chatID"`
 	ConversationId string `json:"convoID"`
+}
+
+type Follow struct {
+	Type            string `json:"type"`
+	FollowerEmail   string `json:"followerEmail"`
+	InfliuencerUN   string `json:"influencerUN"`
+	InfluencerID    int    `json:"influencerID"`
+	InfluencerVisib string `json:"influencerVisib"`
+}
+
+type UploadFollow struct {
+	FollowerId   int
+	FollowerUN   string
+	InfluencerId int
+	InfluencerUN string
+	Accept       string
+	UFollow      string
 }

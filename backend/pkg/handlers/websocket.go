@@ -17,7 +17,8 @@ type TypeCheck struct {
 
 // map of clients: key - webcoket connection value-username
 var Clients = make(map[*websocket.Conn]string)
-//stores the number of clients 
+
+//stores the number of clients
 var prevLen int = 0
 
 var upgrader = websocket.Upgrader{
@@ -26,7 +27,6 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-//checks for connections closed from the client side. ranges through connections and sends a ping to chekk if the connection is still open then deletes any connections that have been closed.
 func checkWebSocketConnections(client map[*websocket.Conn]string) int {
 	for conn := range client {
 		err := conn.WriteMessage(websocket.PingMessage, nil)
@@ -43,7 +43,6 @@ func checkWebSocketConnections(client map[*websocket.Conn]string) int {
 func UnsafeError(err error) bool {
 	return !websocket.IsCloseError(err, websocket.CloseGoingAway) && err != io.EOF
 }
-
 func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *http.Request) {
 	//create websocket connection
 	ws, err := upgrader.Upgrade(w, r, nil)
@@ -58,10 +57,12 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 	newLen := checkWebSocketConnections(Clients)
 	fmt.Println("client list before", prevLen, "after", newLen)
 
+	// if it's zero, no messages were ever sent/saved
+	// STORE OLD MESSAGES
 
 	for {
-		
-		// Read in a new message as slice of bytes - b 
+
+		// Read in a new message
 		_, b, err := ws.ReadMessage()
 		if err != nil {
 			UnsafeError(err)
@@ -69,17 +70,16 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 		}
 		fmt.Println(string(b))
 
-		//unmarshall into typecheck struct (defined above), to check message type
+		//unmarshall type, check message type
 		sm := &TypeCheck{}
 		if err := json.Unmarshal(b, sm); err != nil {
 			UnsafeError(err)
 		}
-		//depending on the type the message should be unmarshalled in to a different struct, Chat struct for chat, Follow for follow notifications etc.
 		switch sm.Type {
 		case "connect":
-			
+
 			// Unmarshal full message as into WebsocketMessage struct as 'connect' messsage only contains the users cookie
-			
+
 			var msg WebsocketMessage
 
 			jsonErr := json.Unmarshal(b, &msg)
@@ -88,16 +88,16 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				fmt.Println("there is an error with json msg: Websocket")
 				break
 			}
-			//get username from cookie to send to other clients 
+			//get username from cookie to send to other clients
 			cookie := strings.Split(msg.Cookie, "=")[1]
 			user := service.repo.GetUserByCookie(cookie)
 			Clients[ws] = user.NickName
-			
+
 			// if the number of clients before the new connection was added is less than the number of clients after the conn was added (and closed connections were deleted) a new client is online
 			if newLen > prevLen {
-				
+
 				fmt.Println("new web connection - new client logged in")
-				
+
 				//create message in websocket message struct to send to clients following the newly logged in user
 				webMessage := WebsocketMessage{
 					Presences: Presences{
@@ -110,43 +110,42 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				// which clients, if any, are following this user? return map of clients
 				list := service.repo.ClientsFollowingUser(user)
 
-				//  if any clients are following the newly online user 
+				//  if any clients are following the newly online user
 				if len(list) > 0 {
 					// send  websocket message in a broadcast message truct to channel, with map of incluencer connections to send to
 					service.repo.BroadcastToChannel(BroadcastMessage{
-						WebMessage: webMessage, 
+						WebMessage:  webMessage,
 						Connections: list,
 					})
 				}
-				
+
 				//set prevLen to the current number of clients
 				prevLen = newLen
 			}
-			
-			// get full list of influencers with online/offline to send to the user with a new websocket connection 
+
+			// get full list of influencers with online/offline to send to the user with a new websocket connection
 			// return a Presence struct which contains an array of username and an array of online status (either yes or no)
 			presences := service.repo.FullChatUserList(user)
 
-			//make a map of only the user with a new websocket connection 
+			//make a map of only the user with a new websocket connection
 			reciever := make(map[*websocket.Conn]string)
 
-			//ws - new connection pointer 
+			//ws - new connection pointer
 			reciever[ws] = user.NickName
 
-			//message to send to user in websocket message struct 
-			webMessage:= WebsocketMessage{
-				Presences: presences, 
-				Type: "connect",
+			//message to send to user in websocket message struct
+			webMessage := WebsocketMessage{
+				Presences: presences,
+				Type:      "connect",
 			}
 
 			// send websocket message to channel in broadcast message  struct with the reciever map
-			if (len(presences.Clients) > 0 ){
+			if len(presences.Clients) > 0 {
 				service.repo.BroadcastToChannel(BroadcastMessage{
-					WebMessage: webMessage, 
+					WebMessage:  webMessage,
 					Connections: reciever,
 				})
 			}
-			
 
 			// less connections than before - logout
 			// which clients are following this user? return list of clients
@@ -161,7 +160,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				fmt.Println("there is an error with json msg: Websocket")
 				break
 			}
-			
+
 			//add chat to database
 			service.repo.AddChatToDatabase(chat)
 			//look for reciever in client list
@@ -179,8 +178,8 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			if online {
 				service.repo.BroadcastToChannel(BroadcastMessage{
 					WebMessage: WebsocketMessage{
-						Chat: chat, 
-						Type: "chat"}, 
+						Chat: chat,
+						Type: "chat"},
 					Connections: reciever,
 				})
 			} else {
@@ -192,18 +191,93 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					service.repo.AddChatNotification(chat, count)
 				}
 			}
+		case "followingRequest":
 
+			var fInfo Follow
+			jsonErr := json.Unmarshal(b, &fInfo)
+			fmt.Println("fInfo:", fInfo)
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: Websocket")
+				break
+			}
+			//retrieve follower's details
+			fEmail := fInfo.FollowerEmail
+
+			follower, err := service.repo.GetUserByEmail(fEmail)
+			if err != nil {
+				fmt.Println("Error retrieving follower info by email", err)
+			}
+			//instantiate struct 'UploadFollow'
+			var uploadFollowInfo UploadFollow
+
+			//assign values to 'UploadFollow' struct
+			uploadFollowInfo.FollowerId = follower.id
+			uploadFollowInfo.FollowerUN = follower.NickName
+			uploadFollowInfo.InfluencerId = fInfo.InfluencerID
+			uploadFollowInfo.InfluencerUN = fInfo.InfliuencerUN
+			uploadFollowInfo.Accept = "Yes"
+			uploadFollowInfo.UFollow = ""
+
+			if fInfo.InfluencerVisib == "public" {
+				//populate the db table 'followers'
+				err := service.repo.InsertFollowRequest(uploadFollowInfo)
+				if err != nil {
+					log.Fatalf(err.Error())
+				}
+
+			} else if fInfo.InfluencerVisib == "private " {
+				online := false
+				fmt.Println("Printing to get rid of the error", online)
+				reciever := make(map[*websocket.Conn]string)
+
+				for conn, client := range Clients {
+					if client == uploadFollowInfo.InfluencerUN {
+						fmt.Println("follow request receiver is online")
+						reciever[conn] = client
+						online = true
+					}
+				}
+				//send a notification to the owner of the private profile
+				service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{UploadFollow: uploadFollowInfo, Type: "followingRequest"}, Connections: reciever})
+			} else {
+				/*OR
+				//TO DO: check for uploadFollowInfo notif
+				oldChats, count, err := service.repo.CheckForNotification(uploadFollowInfo)
+				//add new notif to database or add 1 to count
+				if !olduploadFollowInfo || olduploadFollowInfo && err == nil {
+					service.repo.AddChatNotification(uploadFollowInfo, count)
+				}*/
+				fmt.Println("Influencer is not online, must send notification and store some details")
+			}
 		}
 
 	}
 }
 
+// func GetUserByEmail(fEmail string) {
+// 	panic("unimplemented")
+// }
+
 func (r *dbStruct) BroadcastToChannel(msg BroadcastMessage) {
 	fmt.Println("attempting to broadcast")
-	//sends message to channel 
 	r.broadcaster <- msg
-	
-	// message is recieved in handleMessages go routine in server.go 
+}
+
+func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) error {
+	//populate the db table 'followers'
+	stmnt, err := repo.db.Prepare("INSERT OR IGNORE INTO Followers (followerID, followerUserName, influencerID, influencerUserName, accepted, unfollow) VALUES (?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		fmt.Println("Error preparing insert stmt for follow request into DB: ", err)
+		return err
+	}
+	_, err = stmnt.Exec(uploadFollowRequest.FollowerId, uploadFollowRequest.FollowerUN, uploadFollowRequest.InfluencerId, uploadFollowRequest.InfluencerUN, uploadFollowRequest.Accept, uploadFollowRequest.UFollow)
+	if err != nil {
+		fmt.Println("Error inserting follow request into DB: ", err)
+		return err
+	}
+
+	return nil
+
 }
 
 func (r *dbStruct) ClientsFollowingUser(user *User) map[*websocket.Conn]string {
@@ -211,7 +285,7 @@ func (r *dbStruct) ClientsFollowingUser(user *User) map[*websocket.Conn]string {
 	list := make(map[*websocket.Conn]string)
 	for conn, name := range Clients {
 		fmt.Println(" check if ", name, "follows ", user.NickName)
-		_, err := r.db.Query(`SELECT COUNT (*) FROM Followers WHERE (followerFName, influencerFName) = (?,?) `, name, user.NickName)
+		_, err := r.db.Query(`SELECT COUNT (*) FROM Followers WHERE (followerUserName, influencerUserName) = (?,?) `, name, user.NickName)
 		if err != nil {
 			fmt.Println("ClientsFollowingUser: client not following user, query error", err)
 			//client not following user
@@ -224,7 +298,7 @@ func (r *dbStruct) ClientsFollowingUser(user *User) map[*websocket.Conn]string {
 
 func (r *dbStruct) FullChatUserList(user *User) Presences {
 	var list Presences
-	rows, err := r.db.Query(`SELECT influencerFName FROM Followers WHERE followerFName = ? `, user.NickName)
+	rows, err := r.db.Query(`SELECT influencerUserName FROM Followers WHERE followerUserName = ? `, user.NickName)
 	if err != nil {
 		fmt.Println("FullChatUserList: query error", err)
 		return list

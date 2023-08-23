@@ -1,3 +1,4 @@
+-- notifications types: followingRequest, joinGroup, groupInvite, groupEvent
 CREATE TABLE IF NOT EXISTS "Notifications" ( 
 			"notificationID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 			"sender" TEXT,
