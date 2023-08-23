@@ -4,10 +4,7 @@ CREATE TABLE IF NOT EXISTS "Notifications" (
 			"recipient" TEXT,
 			"count" INTEGER,
 			"type"	TEXT,
-			"followingRequest" TEXT,
-			"joinGroupRequest" TEXT,
-			"groupInvite" TEXT,
-			"groupEvent" TEXT,
+			"request" TEXT,
 			FOREIGN KEY(sender)REFERENCES MessageHistory(sender),
 			FOREIGN KEY(recipient)REFERENCES MessageHistory(recipient)
 			);

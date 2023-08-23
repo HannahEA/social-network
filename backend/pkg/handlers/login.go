@@ -19,7 +19,7 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	service.repo.FillerFollowers()
 	// Validate the login credentials
 	valid, err := service.repo.ValidateLogin(data.Email, data.Password)
 	if err != nil {
@@ -92,13 +92,13 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 		}
 		userInfo := service.repo.GetUserByCookie(sessionToken)
 		value := *userInfo
-		 fmt.Println("the user info:", value)
+		fmt.Println("the user info:", value)
 
 		response := map[string]interface{}{
 			"message":    "Login successful",
 			"email":      data.Email,
 			"userAvatar": userAvatar,
-			"userInfo": value,
+			"userInfo":   value,
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -155,12 +155,6 @@ func (repo *dbStruct) AddLoggedInFlag(userID int, flag string) error {
 	return nil
 }
 
-
-
-
-
-
-
 func (repo *dbStruct) ValidateLogin(email, password string) (bool, error) {
 	var count int
 
@@ -214,7 +208,7 @@ func (repo *dbStruct) ReturnId(email string) (int, error) {
 	return id, nil
 }
 
-//Code to send avatar image back to the front end:
+// Code to send avatar image back to the front end:
 func (repo *dbStruct) getAvatar(email string) (string, error) {
 	// Retrieve the avatar image or URL from the database
 	query := "SELECT avatarURL, imageFile FROM Users WHERE email = ?"
@@ -229,15 +223,45 @@ func (repo *dbStruct) getAvatar(email string) (string, error) {
 	if avatarImage != "" {
 		// Set the response header for content type
 		// w.Header().Set("Content-Type", "image/jpeg")
-		
+
 		return avatarImage, nil
 	} else if avatarURL != "" {
-		
+
 		//Write the avatar URL to the response
 		return avatarURL, nil
 	} else {
 		//Alternatively, give user a default avatar
 		return "", err
 	}
+
+}
+
+func (r *dbStruct) FillerFollowers() {
+	names := []string{"jodie", "quinn", "landon", "morgen"}
+	fmt.Println("followers length", len(names))
+	
+			fmt.Println("first follow")
+			stmt, err := r.db.Prepare(`INSERT INTO Followers (followerFName, influencerFName, followerLName, influencerLName) VALUES (?,?, ?, ?)`)
+			if err != nil {
+				fmt.Println("filler followers error 1")
+			}
+			defer stmt.Close()
+			_, err2 := stmt.Exec(names[0], names[1], names[2], names[3])
+			if err2 != nil {
+				fmt.Println("filler followers error 2", err2)
+			}
+	
+			fmt.Println("second follow")
+			stmt2, err3 := r.db.Prepare(`INSERT INTO Followers (followerFName, influencerFName, followerLName, influencerLName) VALUES (?,?,?,?)`)
+			if err3 != nil {
+				fmt.Println("filler followers error 3")
+			}
+			defer stmt2.Close()
+			_, err4 := stmt2.Exec(names[1], names[0], names[3], names[2])
+			if err4 != nil {
+				fmt.Println("filler followers error 4", err2)
+			}
+		
+	
 
 }
