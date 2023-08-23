@@ -175,8 +175,6 @@ const handleShowUserInfo = () => {
     //this returns correct influencer info
     console.log("printing selectedUser to be sent via websocket", selectedUser)
 
-    //THE ERROR IS HERE. Below code returns: 
-    //Uncaught TypeError: Cannot read properties of null (reading 'send')
     websocketRef.current.send(
       JSON.stringify(followInfo)
     )
@@ -1505,7 +1503,7 @@ const handleShowUserInfo = () => {
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
              {/* Start of users Information modal */}
         {isModalVisible && (
-        <Modal onClose={handleCloseModal} onFollow={handleFollowUser}>
+        <Modal onClose={() => {handleCloseModal()}} onFollow={() => {handleFollowUser()}}>
           {selectedUser && (
             <Card
               name={selectedUser.username}

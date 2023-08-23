@@ -219,6 +219,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			uploadFollowInfo.UFollow = ""
 
 			if fInfo.InfluencerVisib == "public" {
+				fmt.Println("Checking if follow request goes to 'visibility public' branch")
 				//populate the db table 'followers'
 				err := service.repo.InsertFollowRequest(uploadFollowInfo)
 				if err != nil {
