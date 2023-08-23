@@ -17,7 +17,8 @@ type TypeCheck struct {
 
 // map of clients: key - webcoket connection value-username
 var Clients = make(map[*websocket.Conn]string)
-//stores the number of clients 
+
+//stores the number of clients
 var prevLen int = 0
 
 var upgrader = websocket.Upgrader{
@@ -25,7 +26,6 @@ var upgrader = websocket.Upgrader{
 		return true
 	},
 }
-
 
 func checkWebSocketConnections(client map[*websocket.Conn]string) int {
 	for conn := range client {
@@ -77,9 +77,9 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 		}
 		switch sm.Type {
 		case "connect":
-			
+
 			// Unmarshal full message as into WebsocketMessage struct as 'connect' messsage only contains the users cookie
-			
+
 			var msg WebsocketMessage
 
 			jsonErr := json.Unmarshal(b, &msg)
@@ -88,16 +88,16 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				fmt.Println("there is an error with json msg: Websocket")
 				break
 			}
-			//get username from cookie to send to other clients 
+			//get username from cookie to send to other clients
 			cookie := strings.Split(msg.Cookie, "=")[1]
 			user := service.repo.GetUserByCookie(cookie)
 			Clients[ws] = user.NickName
-			
+
 			// if the number of clients before the new connection was added is less than the number of clients after the conn was added (and closed connections were deleted) a new client is online
 			if newLen > prevLen {
-				
+
 				fmt.Println("new web connection - new client logged in")
-				
+
 				//create message in websocket message struct to send to clients following the newly logged in user
 				webMessage := WebsocketMessage{
 					Presences: Presences{
@@ -110,43 +110,42 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				// which clients, if any, are following this user? return map of clients
 				list := service.repo.ClientsFollowingUser(user)
 
-				//  if any clients are following the newly online user 
+				//  if any clients are following the newly online user
 				if len(list) > 0 {
 					// send  websocket message in a broadcast message truct to channel, with map of incluencer connections to send to
 					service.repo.BroadcastToChannel(BroadcastMessage{
-						WebMessage: webMessage, 
+						WebMessage:  webMessage,
 						Connections: list,
 					})
 				}
-				
+
 				//set prevLen to the current number of clients
 				prevLen = newLen
 			}
-			
-			// get full list of influencers with online/offline to send to the user with a new websocket connection 
+
+			// get full list of influencers with online/offline to send to the user with a new websocket connection
 			// return a Presence struct which contains an array of username and an array of online status (either yes or no)
 			presences := service.repo.FullChatUserList(user)
 
-			//make a map of only the user with a new websocket connection 
+			//make a map of only the user with a new websocket connection
 			reciever := make(map[*websocket.Conn]string)
 
-			//ws - new connection pointer 
+			//ws - new connection pointer
 			reciever[ws] = user.NickName
 
-			//message to send to user in websocket message struct 
-			webMessage:= WebsocketMessage{
-				Presences: presences, 
-				Type: "connect",
+			//message to send to user in websocket message struct
+			webMessage := WebsocketMessage{
+				Presences: presences,
+				Type:      "connect",
 			}
 
 			// send websocket message to channel in broadcast message  struct with the reciever map
-			if (len(presences.Clients) > 0 ){
+			if len(presences.Clients) > 0 {
 				service.repo.BroadcastToChannel(BroadcastMessage{
-					WebMessage: webMessage, 
+					WebMessage:  webMessage,
 					Connections: reciever,
 				})
 			}
-			
 
 			// less connections than before - logout
 			// which clients are following this user? return list of clients
@@ -161,7 +160,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				fmt.Println("there is an error with json msg: Websocket")
 				break
 			}
-			
+
 			//add chat to database
 			service.repo.AddChatToDatabase(chat)
 			//look for reciever in client list
@@ -179,8 +178,8 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			if online {
 				service.repo.BroadcastToChannel(BroadcastMessage{
 					WebMessage: WebsocketMessage{
-						Chat: chat, 
-						Type: "chat"}, 
+						Chat: chat,
+						Type: "chat"},
 					Connections: reciever,
 				})
 			} else {
@@ -286,7 +285,7 @@ func (r *dbStruct) ClientsFollowingUser(user *User) map[*websocket.Conn]string {
 	list := make(map[*websocket.Conn]string)
 	for conn, name := range Clients {
 		fmt.Println(" check if ", name, "follows ", user.NickName)
-		_, err := r.db.Query(`SELECT COUNT (*) FROM Followers WHERE (followerFName, influencerFName) = (?,?) `, name, user.NickName)
+		_, err := r.db.Query(`SELECT COUNT (*) FROM Followers WHERE (followerUserName, influencerUserName) = (?,?) `, name, user.NickName)
 		if err != nil {
 			fmt.Println("ClientsFollowingUser: client not following user, query error", err)
 			//client not following user
@@ -299,7 +298,7 @@ func (r *dbStruct) ClientsFollowingUser(user *User) map[*websocket.Conn]string {
 
 func (r *dbStruct) FullChatUserList(user *User) Presences {
 	var list Presences
-	rows, err := r.db.Query(`SELECT influencerFName FROM Followers WHERE followerFName = ? `, user.NickName)
+	rows, err := r.db.Query(`SELECT influencerUserName FROM Followers WHERE followerUserName = ? `, user.NickName)
 	if err != nil {
 		fmt.Println("FullChatUserList: query error", err)
 		return list

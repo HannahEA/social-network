@@ -74,7 +74,6 @@ type AllDbMethods interface {
 	CheckForNotification(chat Chat) (bool, int, error)
 	FullChatUserList(user *User) Presences
 	ClientsFollowingUser(user *User) map[*websocket.Conn]string
-	FillerFollowers()
 }
 
 // The dabataseStruct

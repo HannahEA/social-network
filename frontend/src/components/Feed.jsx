@@ -28,26 +28,26 @@ const Feed = () => {
   const allData = useRef({userInfo: {}, chats:[], presences:[]})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
-      if (websocketRef.current) {
-        websocketRef.current.onmessage = (e) => {
-          // Handle WebSocket messages here
-          let message = JSON.parse(e.data)
-          console.log(message)
-          if (message.type == "connect") {
-             // console.log(message)
-            allData.current.presences = message.presences.clients
-            // console.log("current presences", allData.current.presences)
-            //update chat user list
-            AddUserToChatList({allData: allData.current})
-          } else if (message.type == "chat") {
-            console.log("chat recieved", message)
-            // let chat = message.chat
-            PrintNewChat({chat: message.chat})
-          }
-         
-          
-      };
-    }
+    if (websocketRef.current) {
+      websocketRef.current.onmessage = (e) => {
+        // Handle WebSocket messages here
+        let message = JSON.parse(e.data)
+        console.log(message)
+        if (message.type == "connect") {
+           // console.log(message)
+          allData.current.presences = message.presences
+          // console.log("current presences", allData.current.presences)
+          //update chat user list
+          AddUserToChatList({allData: allData.current})
+        } else if (message.type == "chat") {
+          console.log("chat recieved", message)
+          // let chat = message.chat
+          PrintNewChat({chat: message.chat})
+        }
+       
+        
+    };
+  }
     if (isWebSocketConnected){
 
 }  
