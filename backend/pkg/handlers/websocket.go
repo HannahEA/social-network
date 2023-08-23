@@ -140,10 +140,13 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			}
 
 			// send websocket message to channel in broadcast message  struct with the reciever map
-			service.repo.BroadcastToChannel(BroadcastMessage{
-				WebMessage: webMessage, 
-				Connections: reciever,
-			})
+			if (len(presences.Clients) > 0 ){
+				service.repo.BroadcastToChannel(BroadcastMessage{
+					WebMessage: webMessage, 
+					Connections: reciever,
+				})
+			}
+			
 
 			// less connections than before - logout
 			// which clients are following this user? return list of clients

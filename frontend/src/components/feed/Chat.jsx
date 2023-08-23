@@ -60,19 +60,21 @@ const AddUserToChatList = ({presences, allData})=>  {
  }
 
   console.log(allData, "new user online")
-
-  allData.presences.clients.forEach((p)=> {
-    if (p != allData.userInfo.username) {
-      let users = document.getElementById('chatUsers')
-      let button = document.createElement('button')
-      button.addEventListener("click", () => {
-        GetConversation({reciever: p})
+  if (allData.presences.clients) {
+    allData.presences.clients.forEach((p)=> {
+      if (p != allData.userInfo.username) {
+        let users = document.getElementById('chatUsers')
+        let button = document.createElement('button')
+        button.addEventListener("click", () => {
+          GetConversation({reciever: p})
+        }
+        )
+        button.innerHTML = p
+        users.append(button)
       }
-      )
-      button.innerHTML = p
-      users.append(button)
-    }
-  } )
+    } )
+  }
+  
 
 
   }
