@@ -164,6 +164,18 @@ const handleShowUserInfo = () => {
       var influencerID = selectedUser.id;
       var influencerVisib = selectedUser.profVisib;
 
+      var btnLabel = document.getElementById("follow");
+      var fAction ;
+
+      if (btnLabel.innerHTML === "Follow"){
+        fAction = ""
+        btnLabel.innerHTML = "Un-follow"
+      }else if(btnLabel.innerHTML == "Un-follow"){
+        fAction = "Yes"
+        btnLabel.innerHTML = "Follow"
+      }
+
+
   // request info sent to the back end
     const followInfo = {
       "type": "followingRequest",
@@ -171,6 +183,7 @@ const handleShowUserInfo = () => {
       "influencerUN": influencerUN,
       "influencerID": influencerID,
       "influencerVisib": influencerVisib,
+      "unfollow": fAction,
     }
     //this returns correct influencer info
     console.log("printing selectedUser to be sent via websocket", selectedUser)

@@ -216,7 +216,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			uploadFollowInfo.InfluencerId = fInfo.InfluencerID
 			uploadFollowInfo.InfluencerUN = fInfo.InfliuencerUN
 			uploadFollowInfo.Accept = "Yes"
-			uploadFollowInfo.UFollow = ""
+			uploadFollowInfo.UFollow = fInfo.UnFollow
 
 			if fInfo.InfluencerVisib == "public" {
 				fmt.Println("Checking if follow request goes to 'visibility public' branch")
