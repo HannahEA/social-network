@@ -3,8 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
-
-	"github.com/gorilla/websocket"
 )
 
 // To group all backend handlers
@@ -72,9 +70,7 @@ type AllDbMethods interface {
 	AddChatToDatabase(chat Chat)
 	AddChatNotification(chat Chat, count int)
 	CheckForNotification(chat Chat) (bool, int, error)
-	FullChatUserList(user *User) Presences
-	ClientsFollowingUser(user *User) map[*websocket.Conn]string
-	// FillerFollowers()
+
 }
 
 // The dabataseStruct

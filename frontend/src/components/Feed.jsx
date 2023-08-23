@@ -35,7 +35,7 @@ const Feed = () => {
           console.log(message)
           if (message.type == "connect") {
              // console.log(message)
-            allData.current.presences = message.presences
+            allData.current.presences = message.presences.clients
             // console.log("current presences", allData.current.presences)
             //update chat user list
             AddUserToChatList({allData: allData.current})

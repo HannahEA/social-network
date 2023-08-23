@@ -6,7 +6,7 @@ import "notyf/notyf.min.css";
 const apiURL = process.env.REACT_APP_API_URL;
 
 const AddUserToChatList = ({presences, allData})=>  {
-  console.log("chat user list", allData.presences.clients)
+
   const GetConversation = ({reciever}) => {
     // const cookie = (document.cookie).split(":")
     let input = document.getElementById("chatInput")
@@ -59,9 +59,9 @@ const AddUserToChatList = ({presences, allData})=>  {
     
  }
 
-  console.log(allData, "new user online")
+  console.log(presences, "new user online")
 
-  allData.presences.clients.forEach((p)=> {
+  allData.presences.forEach((p)=> {
     if (p != allData.userInfo.username) {
       let users = document.getElementById('chatUsers')
       let button = document.createElement('button')
