@@ -156,10 +156,12 @@ type Follow struct {
 }
 
 type UploadFollow struct {
-	FollowerId   int
-	FollowerUN   string
-	InfluencerId int
-	InfluencerUN string
-	Accept       string
-	UFollow      string
+	FollowerId    int    `json:"followerID"`
+	FollowerUN    string `json:"followerUN"`
+	InfluencerId  int    `json:"influencerID"`
+	InfluencerUN  string `json:"influencerUN"`
+	InfluencerVis string `json:"influencerVisib"`
+	Accept        string `json:"accept"`
+	UFollow       string `json:"unfollow"`
+	NotifMsg      string `json:"notifMsg"`
 }

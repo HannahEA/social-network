@@ -24,7 +24,7 @@ func (service *AllDbMethodsWrapper) HandleGetAllUsers(w http.ResponseWriter, r *
 
 	//returns an array of all users except the logged-in user
 	theUsers, err2 := service.repo.GetUsersData(userEmail)
-	fmt.Println("All users in db:", theUsers)
+	//fmt.Println("All users in db:", theUsers)
 	//list of users not available error
 	if err2 != nil {
 		response := map[string]interface{}{
@@ -58,13 +58,13 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 		if err != nil {
 			return uData, fmt.Errorf("getuData rows.Scan error %+v", err)
 		}
-		fmt.Println("one user db query to be appended:", oneUser)
+		//fmt.Println("one user db query to be appended:", oneUser)
 		uData = append(uData, oneUser)
 	}
 	err = rows.Err()
 	if err != nil {
 		return uData, err
 	}
-	fmt.Println("all users slice from db query:", uData)
+	//fmt.Println("all users slice from db query:", uData)
 	return uData, nil
 }
