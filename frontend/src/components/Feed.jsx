@@ -124,6 +124,7 @@ const handleClickUsersList = () => {
       if (data.message === "All users retrieved ok") {
         console.log("the slice of users", data.allUsers);
         setUsersList(data.allUsers);
+        
         console.log("the usersList sent to front-end:", usersList);
       } else {
         console.log("could not retrieve all users", data);
@@ -1516,14 +1517,18 @@ const handleShowUserInfo = () => {
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
              {/* Start of users Information modal */}
         {isModalVisible && (
-        <Modal onClose={() => {handleCloseModal()}} onFollow={() => {handleFollowUser()}}>
+        <Modal 
+        onClose={() => {handleCloseModal()}} 
+        onFollow={() => {handleFollowUser()}}
+        influencer={parseInt(selectedUser.influencer, 10)} // Pass the influencer prop here
+>
           {selectedUser && (
             <Card
               name={selectedUser.username}
               avt={selectedUser.avatar}
               img={selectedUser.image}
               visib={selectedUser.profVisib}
-              logged={selectedUser.loggedIn}
+              influencer= {parseInt(selectedUser.influencer, 10)}
               about={selectedUser.aboutMe}
             />
           )}

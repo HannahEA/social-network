@@ -42,13 +42,14 @@ type ProfileVisibilityData struct {
 }
 
 type AllUsersData struct {
-	ID        int    `json:"id"`
-	NickName  string `json:"username"`
-	Avatar    string `json:"avatar"`
-	Image     string `json:"image"`
-	ProfVisib string `json:"profVisib"`
-	AboutMe   string `json:"aboutMe"`
-	LoggedIn  string `json:"loggedIn"`
+	ID         int    `json:"id"`
+	NickName   string `json:"username"`
+	Avatar     string `json:"avatar"`
+	Image      string `json:"image"`
+	ProfVisib  string `json:"profVisib"`
+	AboutMe    string `json:"aboutMe"`
+	LoggedIn   string `json:"loggedIn"`
+	Influencer int    `json:"influencer"`
 }
 
 type RegistrationData struct {
