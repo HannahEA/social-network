@@ -127,7 +127,10 @@ const Profile = () => {
         setAvatar(data.avatar);
         setFirstName(data.firstName);
         setLastName(data.lastName);
-        if (!data.image){
+        if (!data.image && !data.avatar){
+          setImage("https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj")
+        }
+        else if (!data.image){
           setImage(data.avatar)
         }else{
           setImage(data.image)

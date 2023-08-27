@@ -20,7 +20,7 @@ type User struct {
 	AboutMe    string `json:"aboutMe"`
 	ProfVisib  string `json:"profVisib"`
 	Created_At string `json:"created_at"`
-	LoggedIn   string   `json:"loggedIn"`
+	LoggedIn   string `json:"loggedIn"`
 }
 
 // each session contains the username of the user and the time at which it expires
@@ -42,13 +42,14 @@ type ProfileVisibilityData struct {
 }
 
 type AllUsersData struct {
-	ID        int    `json:"id"`
-	NickName  string `json:"username"`
-	Avatar    string `json:"avatar"`
-	Image     string `json:"image"`
-	ProfVisib string `json:"profVisib"`
-	AboutMe   string `json:"aboutMe"`
-	LoggedIn  string `json:"loggedIn"`
+	ID         int    `json:"id"`
+	NickName   string `json:"username"`
+	Avatar     string `json:"avatar"`
+	Image      string `json:"image"`
+	ProfVisib  string `json:"profVisib"`
+	AboutMe    string `json:"aboutMe"`
+	LoggedIn   string `json:"loggedIn"`
+	Influencer int    `json:"influencer"`
 }
 
 type RegistrationData struct {
@@ -122,7 +123,7 @@ type WebsocketMessage struct {
 
 type Presences struct {
 	//logged in users nicknames
-	Clients []string `json:"clients"`
+	Clients  []string `json:"clients"`
 	LoggedIn []string `json:"loggedIn"`
 }
 
@@ -152,13 +153,16 @@ type Follow struct {
 	InfliuencerUN   string `json:"influencerUN"`
 	InfluencerID    int    `json:"influencerID"`
 	InfluencerVisib string `json:"influencerVisib"`
+	UnFollow        string `json:"unfollow"`
 }
 
 type UploadFollow struct {
-	FollowerId   int
-	FollowerUN   string
-	InfluencerId int
-	InfluencerUN string
-	Accept       string
-	UFollow      string
+	FollowerId    int    `json:"followerID"`
+	FollowerUN    string `json:"followerUN"`
+	InfluencerId  int    `json:"influencerID"`
+	InfluencerUN  string `json:"influencerUN"`
+	InfluencerVis string `json:"influencerVisib"`
+	Accept        string `json:"accept"`
+	UFollow       string `json:"unfollow"`
+	NotifMsg      string `json:"notifMsg"`
 }
