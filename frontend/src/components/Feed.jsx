@@ -880,7 +880,7 @@ const handleShowUserInfo = () => {
             >
               <span className="sr-only">Open user menu</span>
               <img
-                className={`w-10 h-10 rounded-full border-2 border-solid border-[#3b82f6] dark:border-[#f8fafc]`}
+                className={`w-10 h-10 rounded-full border-2 border-solid border-[#b4e0a0] dark:border-[#f8fafc]`}
                 src={userAvatar}
                 alt="user photo"
               />
@@ -1043,13 +1043,13 @@ const handleShowUserInfo = () => {
               <a href="http://localhost:3000/profile">
                 <button
                   type="button"
-                  className="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  className="flex items-center p-2 w-full text-base font-medium text-white rounded-lg transition duration-75 group bg-[#b4e0a0] hover:bg-[#94b883] shadow-lg dark:text-white dark:hover:bg-[#94b883]"
                   aria-controls="dropdown-pages"
                   data-collapse-toggle="dropdown-pages"
                 >
                   <svg
                     aria-hidden="true"
-                    className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
+                    className="flex-shrink-0 w-6 h-6 text-white transition duration-75 group-hover:text-gray-900 dark:text-white dark:group-hover:text-white"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg"
@@ -1220,7 +1220,7 @@ const handleShowUserInfo = () => {
                   <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z" />
                   <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
                 </svg>
-                <span className="flex-1 ml-3 whitespace-nowrap">Messages</span>
+                <span className="flex-1 ml-3 whitespace-nowrap ">Messages</span>
                 <span className="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-primary-800 bg-primary-100 dark:bg-primary-200 dark:text-primary-800">
                   4
                 </span>
@@ -1248,15 +1248,15 @@ const handleShowUserInfo = () => {
             <button
             onClick={handleClickUsersList}
             type="button"
-              className="flex mx-3 text-sm bg-gray-300 rounded-lg md:mr-0 dark:bg-gray-500"
+              className="flex mx-3 text-sm bg-[#57aada] rounded-lg md:mr-0 dark:bg-[#57aada] shadow-lg"
                 id="show-users-button"
             >
               <a
-                className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
+                className="flex items-center p-2 text-base font-medium text-white rounded-lg transition duration-75 hover:bg-[#3e7a9d]  dark:hover:bg-[#3e7a9d] dark:text-white group"
               >
                 <svg
                   aria-hidden="true"
-                  className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                  className="flex-shrink-0 w-6 h-6 text-white transition duration-75 dark:text-white group-hover:text-white dark:group-hover:text-white"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -1503,7 +1503,7 @@ const handleShowUserInfo = () => {
           <div className="  dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img
               //className="w-16 h-16 mb-2 rounded-full border-2 border-solid border-white-500"
-              className={`w-16 h-16 rounded-full border-2 border-solid border-[#3b82f6] dark:border-[#f8fafc]`}
+              className={`w-16 h-16 rounded-full border-2 border-solid border-[#b4e0a0] dark:border-[#f8fafc]`}
               //src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
               src={userAvatar}
               alt="user photo"
@@ -1544,10 +1544,10 @@ const handleShowUserInfo = () => {
           className="bg-white border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 dark:bg-gray-800 mb-4"
         >
           <div className="  dark:bg-gray-800 dark:text-white flex justify-left items-left flex-col">
-            <h3 className="pl-5 mt-3 font-bold text-xl text-blue-500 ">Update Feed</h3>
+            <h3 className="pl-5 mt-3 font-bold text-xl text-[#5aadde]  ">Update Feed</h3>
             <form onSubmit={submitPost}>
               <span className="flex p-2.5 pl-5">
-                <p className="flex-row mr-5 font-bold">Title</p>
+                <p className="flex-row mr-5 font-bold text-[#5aadde]">Title</p>
                 <input
                   className="flex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
                   type="text"
@@ -1557,7 +1557,7 @@ const handleShowUserInfo = () => {
               </span>
 
               <span className="flex p-2.5 pl-5">
-                <p className="flex-row mr-5 font-bold">Tags</p>
+                <p className="flex-row mr-5 font-bold text-[#5aadde]">Tags</p>
                 <input
                   type="text"
                   id="postTags"
@@ -1567,14 +1567,14 @@ const handleShowUserInfo = () => {
                   onClick={addTag}
                   type="submit"
                   value="Add Tag"
-                  className="flex-row pl-2  pr-2 font-bold bg-blue-500 text-sm text-white rounded-md"
+                  className="flex-row pl-2  pr-2 font-bold bg-[#8cc0de] text-sm text-white rounded-md cursor-pointer hover:bg-[#76a1ba] shadow-lg"
                 >
                   Add Tag
                 </button>
               </span>
               <Tags tags={tag} />
               <div className="flex justify-right items-right flex-col">
-                <p className="p-2.5 pl-5 font-bold">Content</p>
+                <p className="p-2.5 pl-5 font-bold text-[#5aadde]">Content</p>
                 <textarea
                   className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none"
                   name="postContent"
@@ -1588,12 +1588,12 @@ const handleShowUserInfo = () => {
               </div>
 
               <select
-                className="ml-5 pl-5 font-bold focus:outline-none dark:bg-gray-800"
+                className="ml-5 pl-5 font-bold focus:outline-none dark:bg-gray-800 text-[#5aadde]"
                 name="Visibility"
                 id="Visibility"
                 onChange={handleVisibility}
               >
-                <option name="public" value={Visibility}>
+                <option name="public" value={Visibility} className="text-[#5aadde]">
                   Public
                 </option>
                 <option name="private" value={Visibility}>
@@ -1612,14 +1612,14 @@ const handleShowUserInfo = () => {
                 />
                 <label
                   htmlFor="imageFile"
-                  className="ml-5 m-2.5 pl-5 pr-5  items-center justify-center text-sm font-bold bg-blue-500 text-white border border-transparent rounded-lg cursor-pointer hover:bg-blue-700 focus:block outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  className="ml-5 m-2.5 pl-5 pr-5  items-center justify-center text-sm font-bold bg-[#8cc0de] text-white border border-transparent rounded-lg cursor-pointer hover:bg-[#76a1ba] shadow-lg"
                 >
                   Upload Image File
                 </label>
                 {/* <input type="file" name="imageFile" id="imageFile" accept="image/*" className="hidden" value={imageFile} onChange={handlePostImage} /> */}
                 <input type="file" name="mageFile" id="imageFile" accept="image/*" className="hidden" onChange={handlePostImage} />
               </div>
-              <button className="ml-5 m-2.5 pl-5 pr-5 font-bold bg-blue-500 text-white rounded-md" type="submit">
+              <button className="ml-5 m-2.5 pl-5 pr-5 font-bold bg-[#57aada] cursor-pointer hover:bg-[#3a7597] text-white rounded-md shadow-lg" type="submit ">
                 Post
               </button>
             </form>

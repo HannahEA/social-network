@@ -1,5 +1,4 @@
 ## To Do
-The 'un-follow' button lable to persist after module is closed
 The bell icon in 'feed' page to change colour when there are notifications pending
 When clicking on the bell a list will appear and each notification will show as:
 'notification type' '<accept btn>' '<decline btn>'

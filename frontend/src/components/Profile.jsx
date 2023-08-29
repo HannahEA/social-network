@@ -1183,12 +1183,12 @@ const Profile = () => {
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8">
           <div className="max-w-md mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-24 h-24 border-gradient border-4 border-[#00cec9] rounded-[50%] overflow-hidden">
+              <div className="w-24 h-24 border-gradient border-4 border-[#9ec38c] rounded-[50%] overflow-hidden">
                 <img className="w-full h-full object-cover" src={image} alt="" />
               </div>
             </div>
             <div className="text-center mb-4">
-              <h3 className="text-[#00cec9] text-2xl font-semibold">
+              <h3 className="text-[#9ec38c] text-2xl font-semibold">
                 <div>
                   <div className="flex items-center justify-center "></div>
                   {firstName} {lastName}{" "}
@@ -1196,20 +1196,20 @@ const Profile = () => {
               </h3>
               <div>
                   <span>
-                  <p className="text-gray-600 text-lg dark:text-gray-200 mb-0.5">This Profile is Curently {profileVisib}</p>
-                  <button onClick={changeProfileVisibility} className="bg-[#00cec9] text-md text-white px-4 rounded-md">Change Visibility </button>
+                  <p className="text-[#9ec38c] text-lg dark:text-gray-200 mb-0.5">This Profile is Curently <strong>{profileVisib}</strong></p>
+                  <button onClick={changeProfileVisibility} className="bg-[#9ec38c] hover:bg-[#77946a] text-md text-white px-4 rounded-md shadow-lg">Change Visibility </button>
                 </span>
                 
               </div>
               <p className="text-gray-600 text-lg dark:text-gray-200 mb-0.5">@{username}</p>
               <p className="mb-3 text-md text-gray-500 dark:text-gray-400">{aboutMe}</p>
               <div className="flex justify-center items-center gap-1">
-                <span className="py-1 px-2.5 bg-[#81ecec] text-md text-gray-500 dark:text-gray-40 text-center rounded-full">
+                <span className="py-1 px-2.5 bg-[#b4e0a0] text-md text-gray-500 dark:text-gray-40 text-center rounded-full">
                   age: {calculateAge(dateOfBirth)}
                 </span>
-                <span className="py-1 px-2.5 bg-[#81ecec] text-md text-gray-500 dark:text-gray-40 text-center rounded-full">gender: {gender}</span>
-                <span className="py-1 px-2.5 bg-[#81ecec] text-md text-gray-500 dark:text-gray-40 text-center rounded-full">followers: 1,000,000</span>
-                <span className="py-1 px-2.5 bg-[#81ecec] text-md text-gray-500 dark:text-gray-40 text-center rounded-full">following: 1</span>
+                <span className="py-1 px-2.5 bg-[#b4e0a0] text-md text-gray-500 dark:text-gray-40 text-center rounded-full">gender: {gender}</span>
+                <span className="py-1 px-2.5 bg-[#b4e0a0] text-md text-gray-500 dark:text-gray-40 text-center rounded-full">I follow: 1</span>
+                <span className="py-1 px-2.5 bg-[#b4e0a0] text-md text-gray-500 dark:text-gray-40 text-center rounded-full">follow me: 1</span>
               </div>
             </div>
           </div>
