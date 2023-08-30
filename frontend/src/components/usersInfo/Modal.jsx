@@ -11,7 +11,7 @@ function Modal({ children, onClose, onFollow, influencer}) {
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-content dark:bg-gray-600">
-        <button className="modal-close" onClick={() => {onClose()}} classn="ml-60  pl-5 pr-5 font-bold bg-[#00cec9] text-[#255f5a] rounded-md">
+        <button className="modal-close dark:text-white" onClick={() => {onClose()}} classn="ml-60  pl-5 pr-5 font-bold bg-[#00cec9] text-[#255f5a] rounded-md">
           Close
         </button>
         {children}

@@ -15,7 +15,7 @@ const Home = () => {
       <div className="call-to-action flex h-96 w-full items-center justify-center gap-28 px-10 overflow-clip">
         <img src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/desktop/image-hero-left.png" className="" alt="" />
         <div className="flex min-w-[360px] max-w-[560px] flex-col justify-center gap-6 px-12 sm:px-0">
-          <div className=" dark:bg-gray-900 dark:text-[#e7e7e7] title text-center text-4xl font-[800] leading-none text-[#F0997D] sm:text-5xl">
+          <div className=" dark:bg-gray-900 dark:text-[#e7e7e7] title text-center text-4xl font-[600] leading-none text-[#F0997D] sm:text-5xl">
             The New Way to Connect
           </div>
           <div className=" dark:bg-gray-900 dark:text-[#e7e7e7] desc text-center text-[#87879D]">

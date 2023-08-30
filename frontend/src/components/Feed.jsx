@@ -880,7 +880,7 @@ const handleShowUserInfo = () => {
             >
               <span className="sr-only">Open user menu</span>
               <img
-                className={`w-10 h-10 rounded-full border-2 border-solid border-[#b4e0a0] dark:border-[#f8fafc]`}
+                className={`w-10 h-10 rounded-full border-2 border-solid border-[#57aada] dark:border-white`}
                 src={userAvatar}
                 alt="user photo"
               />
@@ -1024,32 +1024,54 @@ const handleShowUserInfo = () => {
             <li>
               <a
                 href="http://localhost:3000/feed"
-                className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
-                <svg
-                  aria-hidden="true"
-                  className="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
-                  <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+              <button
+                  type="button"
+                  className="flex items-center p-2 w-full text-base font-medium text-white 
+                  rounded-lg transition duration-75 group bg-[#57aada] hover:bg-[#4488af] 
+                  shadow-lg dark:text-white dark:hover:bg-[#4488af]
+                  [box-shadow:0_3px_0_0_#407da1]
+                  border-b-[1px] border-blue-400"
+                  aria-controls="dropdown-pages"
+                  data-collapse-toggle="dropdown-pages"
+              >
+                  <svg
+                    aria-hidden="true"
+                    className="flex-shrink-0 w-6 h-6 text-white transition duration-75 group-hover:text-white dark:text-white dark:group-hover:text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                  <path 
+                  fillRule="evenodd" 
+                  d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" 
+                  clipRule="evenodd"
+                  />
+                  <path 
+                  fillRule="evenodd"  
+                  d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" 
+                  clipRule="evenodd"
+                  />
                 </svg>
-                <span className="ml-3">Feed</span>
+                <span className="flex-1 ml-3 text-left whitespace-nowrap">Feed</span>
+                </button>
               </a>
             </li>
             <li>
               <a href="http://localhost:3000/profile">
                 <button
                   type="button"
-                  className="flex items-center p-2 w-full text-base font-medium text-white rounded-lg transition duration-75 group bg-[#b4e0a0] hover:bg-[#94b883] shadow-lg dark:text-white dark:hover:bg-[#94b883]"
+                  className="flex items-center p-2 w-full text-base font-medium text-white 
+                  rounded-lg transition duration-75 group bg-[#57aada] hover:bg-[#4488af] 
+                  shadow-lg dark:text-white dark:hover:bg-[#4488af]
+                  [box-shadow:0_3px_0_0_#407da1]
+                  border-b-[1px] border-blue-400"
                   aria-controls="dropdown-pages"
                   data-collapse-toggle="dropdown-pages"
                 >
                   <svg
                     aria-hidden="true"
-                    className="flex-shrink-0 w-6 h-6 text-white transition duration-75 group-hover:text-gray-900 dark:text-white dark:group-hover:text-white"
+                    className="flex-shrink-0 w-6 h-6 text-white transition duration-75 group-hover:text-white dark:text-white dark:group-hover:text-white"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg"
@@ -1060,7 +1082,6 @@ const handleShowUserInfo = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-
                   <span className="flex-1 ml-3 text-left whitespace-nowrap">My Profile</span>
                 </button>
               </a>
@@ -1245,15 +1266,21 @@ const handleShowUserInfo = () => {
             </li>
             <li>
             {/* Start of the drop-down menu for All users except logged-in user */}
+          <a
+          >
             <button
             onClick={handleClickUsersList}
             type="button"
-              className="flex mx-3 text-sm bg-[#57aada] rounded-lg md:mr-0 dark:bg-[#57aada] shadow-lg"
-                id="show-users-button"
+            className="flex items-center p-2 w-full text-base font-medium text-white 
+            rounded-lg transition duration-75 group bg-[#57aada] hover:bg-[#4488af] 
+            shadow-lg dark:text-white dark:hover:bg-[#4488af]
+            [box-shadow:0_3px_0_0_#407da1]
+            border-b-[1px] border-blue-400"
+            aria-controls="dropdown-pages"
+            data-collapse-toggle="dropdown-pages"
+            id="show-users-button"
             >
-              <a
-                className="flex items-center p-2 text-base font-medium text-white rounded-lg transition duration-75 hover:bg-[#3e7a9d]  dark:hover:bg-[#3e7a9d] dark:text-white group"
-              >
+
                 <svg
                   aria-hidden="true"
                   className="flex-shrink-0 w-6 h-6 text-white transition duration-75 dark:text-white group-hover:text-white dark:group-hover:text-white"
@@ -1268,19 +1295,19 @@ const handleShowUserInfo = () => {
                   />
                 </svg>
                 <span className="ml-3" >See All Users</span>
-              </a>
               </button>
+            </a>
               {/* Dropdown menu */}
             <div
             // 'ref' makes a link to the element that contains the list of users.
             // Together with conditional css styling it ensures that the element is altered independently
             ref={usersListRef}
-              className={`users-list absolute top-[420px] right-0 z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 ${isUsersListVisible ? 'visible' : 'hidden'}`}
+              className={`users-list absolute top-[430px] right-4 z-50 my-4 w-56 text-base list-none bg-[#a5dcfc] rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 ${isUsersListVisible ? 'visible' : 'hidden'}`}
               id="dropdownUsers"
             >
-              <ul className="py-1 text-gray-700 dark:text-gray-200">
+              <ul className="py-0 text-gray-700 dark:text-gray-200">
                   <div
-                    className="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
+                    className="block py-2 px-4 text-sm hover:bg-[#7ca3ba] dark:hover:bg-[#7096ac] dark:text-gray-600 dark:hover:text-white dark:bg-[#a5dcfc]"
                   >
                     {usersList.map((u)=> (
                       <li key={u.id}>
@@ -1503,7 +1530,7 @@ const handleShowUserInfo = () => {
           <div className="  dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img
               //className="w-16 h-16 mb-2 rounded-full border-2 border-solid border-white-500"
-              className={`w-16 h-16 rounded-full border-2 border-solid border-[#b4e0a0] dark:border-[#f8fafc]`}
+              className={`w-16 h-16 rounded-full border-2 border-solid border-[#57aada] dark:border-[#f8fafc]`}
               //src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
               src={userAvatar}
               alt="user photo"
