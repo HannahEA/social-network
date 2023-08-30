@@ -1,3 +1,12 @@
+## To Do
+The 'un-follow' button lable to persist after module is closed
+The bell icon in 'feed' page to change colour when there are notifications pending
+When clicking on the bell a list will appear and each notification will show as:
+'notification type' '<accept btn>' '<decline btn>'
+
+## Hannah's fav colour palette: 
+https://colorhunt.co/palette/ffeeccffddccffccccfebbcc
+
 
 Modularization source by Ricky Adriell: https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html
 

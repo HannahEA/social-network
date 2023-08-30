@@ -42,13 +42,14 @@ type ProfileVisibilityData struct {
 }
 
 type AllUsersData struct {
-	ID        int    `json:"id"`
-	NickName  string `json:"username"`
-	Avatar    string `json:"avatar"`
-	Image     string `json:"image"`
-	ProfVisib string `json:"profVisib"`
-	AboutMe   string `json:"aboutMe"`
-	LoggedIn  string `json:"loggedIn"`
+	ID         int    `json:"id"`
+	NickName   string `json:"username"`
+	Avatar     string `json:"avatar"`
+	Image      string `json:"image"`
+	ProfVisib  string `json:"profVisib"`
+	AboutMe    string `json:"aboutMe"`
+	LoggedIn   string `json:"loggedIn"`
+	Influencer int    `json:"influencer"`
 }
 
 type RegistrationData struct {
@@ -153,13 +154,16 @@ type Follow struct {
 	InfliuencerUN   string `json:"influencerUN"`
 	InfluencerID    int    `json:"influencerID"`
 	InfluencerVisib string `json:"influencerVisib"`
+	UnFollow        string `json:"unfollow"`
 }
 
 type UploadFollow struct {
-	FollowerId   int
-	FollowerUN   string
-	InfluencerId int
-	InfluencerUN string
-	Accept       string
-	UFollow      string
+	FollowerId    int    `json:"followerID"`
+	FollowerUN    string `json:"followerUN"`
+	InfluencerId  int    `json:"influencerID"`
+	InfluencerUN  string `json:"influencerUN"`
+	InfluencerVis string `json:"influencerVisib"`
+	Accept        string `json:"accept"`
+	UFollow       string `json:"unfollow"`
+	NotifMsg      string `json:"notifMsg"`
 }

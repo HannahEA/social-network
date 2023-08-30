@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS "Followers" (
 						"influencerID" INTEGER NOT NULL,
 						"influencerUserName" TEXT NOT NULL,
 						"accepted" TEXT,
-						"unfollow" TEXT,
 						FOREIGN KEY(followerUserName)REFERENCES Users(nickName),
 						FOREIGN KEY(influencerUserName)REFERENCES Users(nickName)
 						);
