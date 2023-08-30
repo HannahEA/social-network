@@ -18,8 +18,8 @@ type TypeCheck struct {
 // map of clients: key - webcoket connection value-username
 var Clients = make(map[*websocket.Conn]string)
 
-//stores the number of clients
-var prevLen int = 0
+// stores the number of clients
+var PrevLen int = 0
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -52,10 +52,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 	fmt.Println("new websocket connection")
 	// ensure connection close when function returns
 	defer ws.Close()
-	// close any connctions ended on client side
-	// newLen stores the new number of clients after a new web connection has been added
-	newLen := checkWebSocketConnections(Clients)
-	fmt.Println("client list before", prevLen, "after", newLen)
 
 	// if it's zero, no messages were ever sent/saved
 	// STORE OLD MESSAGES
@@ -93,18 +89,25 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			user := service.repo.GetUserByCookie(cookie)
 			Clients[ws] = user.NickName
 
+			// close any connctions ended on client side
+			// newLen stores the new number of clients after a new web connection has been added
+			newLen := checkWebSocketConnections(Clients)
+			fmt.Println("client list before", PrevLen, "after", newLen)
+			fmt.Println("client list ", Clients)
+
 			// if the number of clients before the new connection was added is less than the number of clients after the conn was added (and closed connections were deleted) a new client is online
-			if newLen > prevLen {
+			if newLen > PrevLen {
 
 				fmt.Println("new web connection - new client logged in")
 
 				//create message in websocket message struct to send to clients following the newly logged in user
+				client := []string{user.NickName, "yes"}
 				webMessage := WebsocketMessage{
 					Presences: Presences{
-						Clients:  []string{user.NickName},
+						Clients:  [][]string{client},
 						LoggedIn: []string{"yes"},
 					},
-					Type: "connect",
+					Type: "user update",
 				}
 
 				// which clients, if any, are following this user? return map of clients
@@ -120,7 +123,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				}
 
 				//set prevLen to the current number of clients
-				prevLen = newLen
+				PrevLen = newLen
 			}
 
 			// get full list of influencers with online/offline to send to the user with a new websocket connection
@@ -151,6 +154,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			// which clients are following this user? return list of clients
 
 		case "chat":
+			fmt.Println("client list ", Clients)
 			var chat Chat
 			// Unmarshal full message as JSON and map it to a Message object
 			// err := ws.ReadJSON(&msg)
@@ -310,17 +314,22 @@ func (r *dbStruct) FullChatUserList(user *User) Presences {
 			fmt.Println("FullChatUserList: row scan error", err)
 			return list
 		}
-		list.Clients = append(list.Clients, influencer)
+		client := []string{}
+		client = append(client, influencer)
+		// list.Clients = append(list.Clients, influencer)
 		loggedIn := false
 		for _, name := range Clients {
 			if name == influencer {
-				list.LoggedIn = append(list.LoggedIn, "yes")
+				client = append(client, "yes")
+				// list.LoggedIn = append(list.LoggedIn, "yes")
 				loggedIn = true
 			}
 		}
 		if !loggedIn {
-			list.LoggedIn = append(list.LoggedIn, "no")
+			client = append(client, "no")
+			// list.LoggedIn = append(list.LoggedIn, "no")
 		}
+		list.Clients = append(list.Clients, client)
 	}
 	return list
 }

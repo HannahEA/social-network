@@ -60,14 +60,12 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 
 	// Get the cookie value
 	cookieValue := cookie.Value
+	//Set'loggedIn' field in 'Users' table to 'No'
 
-	//delete client from hub
-	var conn *websocket.Conn
 	//get username from cookie
 	user := service.repo.GetUserByCookie(cookieValue)
 	//get userId from cookie
 	var userId = user.id
-	//Set'loggedIn' field in 'Users' table to 'No'
 	var flag = "No"
 	err6 := service.repo.AddLoggedInFlag(userId, flag)
 	if err6 != nil {
@@ -76,27 +74,35 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 		return
 	}
 
+	//delete client from hub
+	var conn *websocket.Conn
+
 	for con, name := range Clients {
 		if name == user.NickName {
 			//get websocket connection from client hub
 			conn = con
 		}
 	}
-	//delete client
+	//delete client logging out from map
 	delete(Clients, conn)
 	fmt.Println("Clients", Clients)
-	//get usernames
-	var users []string
-			for _, name := range Clients {
-				users= append(users, name)
-			}
-			webMessage:= WebsocketMessage{
-				Presences: Presences {
-					Clients: users,
-				},
-			}
-	//send updated list to users
-	service.repo.BroadcastToChannel(BroadcastMessage{WebMessage:webMessage, Connections: Clients})
+	PrevLen = len(Clients)
+	//get clients following user logging out
+	recievers := service.repo.ClientsFollowingUser(user)
+
+	// send user info to clients following this user
+	client := []string{user.NickName, "no"}
+	webMessage := WebsocketMessage{
+		Presences: Presences{
+			Clients:  [][]string{client},
+			LoggedIn: []string{"no"},
+		},
+		Type: "user update",
+	}
+	service.repo.BroadcastToChannel(BroadcastMessage{
+		WebMessage:  webMessage,
+		Connections: recievers,
+	})
 
 	//=======> start of db query <============
 	rowsAffected, err := service.repo.DeleteCookieDB(cookieValue)
@@ -104,7 +110,6 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 		fmt.Print("Error deleting cookie in db", err)
 		return
 	}
-
 
 	//=======> end of db query <============
 
@@ -116,7 +121,7 @@ func (service *AllDbMethodsWrapper) DeleteCookie(w http.ResponseWriter, r *http.
 		// Cookie is not found or not deleted
 		fmt.Fprint(w, "Cookie is not found or not deleted")
 	}
-	
+
 }
 
 func (repo *dbStruct) DeleteCookieDB(cookieValue string) (int64, error) {
