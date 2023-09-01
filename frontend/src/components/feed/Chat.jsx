@@ -70,6 +70,7 @@ const AddUserToChatList = ({presences, allData})=>  {
         }
         )
         button.innerHTML = p
+        button.classList.add('dark:text-white')
         users.append(button)
       }
     } )
@@ -90,9 +91,9 @@ const PrintNewChat = ({chat}) => {
   if (chats.classList.contains('hidden') == false ) {
     let nameval = chat.username
     name.innerHTML = nameval
-    name.classList.add('font-bold', 'text-sm', 'ml-2')
+    name.classList.add('font-bold', 'text-sm', 'ml-2','dark:text-white')
     let message = document.createElement("p")
-    message.classList.add('text-sm', 'ml-4')
+    message.classList.add('text-sm', 'ml-4', 'dark:text-white')
     message.innerHTML = chat.message
     newChat.classList.add("flex", "flex-row")
     newChat.append(name)
@@ -161,16 +162,21 @@ const PrintNewChat = ({chat}) => {
  
 
  return (
-    <div>
-        <button onClick={handleOpenChat} className="fixed bg-gray-500 text-white font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2" > Messages</button>
-      <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 w-96 bg-white" id="chatOpen">
+    <div className= "bg-white dark:bg-gray-800">
+        <button onClick={handleOpenChat} 
+        className="fixed bg-[#ecbba3] hover:bg-[#e89870] text-base text-white 
+        font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2 shadow-lg 
+        [box-shadow:0_3px_0_0_#bd7c5b]
+        border-b-[1px] border-[#e89870]
+        transition duration-75 group" > Messages</button>
+      <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 w-96 bg-white dark:bg-gray-800" id="chatOpen">
         
         <div id = "chatContainer" className="flex flex-col justify-end align-center w-2/3 overflow-auto">
           
-          <div id="chats" name="chats" classList="flex flex-col "></div>
-          <input id="chatInput" type="text" onChange={handleChatMessage} value={chatMessage} className=" hidden bottom-4 bg-gray-300 border-none m-2 p-3 w-9/10 h-2" placeholder="Type message.." name="msg" required/>
+          <div className="bg:white dark:bg-gray-800" id="chats" name="chats" classList="flex flex-col "></div>
+          <input id="chatInput" type="text" onChange={handleChatMessage} value={chatMessage} className=" hidden bottom-4 bg-[#f7f0ec] dark:text-white border-none m-2 p-3 w-9/10 h-2" placeholder="Type message.." name="msg" required/>
 
-          <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden p-2  w-full">Send</button>
+          <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden mb-2 ml-20 w-1/3 bg-[#ecbba3] rounded-lg text-white shadow-md"><strong>Send</strong></button>
 
         </div>
         <aside className=" flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">

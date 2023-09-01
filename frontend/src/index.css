@@ -74,7 +74,7 @@ code {
     border-radius: 25px 25px 0 0;
     height: 100px;
     width: 100%;
-    background-color: #00cec9;
+    background-color: #86b5d1;
     position:absolute;
     top:0px;
     left:0;
@@ -92,7 +92,7 @@ code {
     border-radius: 25px;
     position: relative;
     padding: 25px 15px;
-    background-color: #81ecec;
+    background-color: #9dd6f7;
     margin: 25px 0;
     height: 200px;
     box-shadow: 0 2px 5px #ccc;
@@ -105,7 +105,7 @@ code {
   
   .name{
     font-size: 2em;
-    color:#2d3436;
+    color:white;
     display: flex;
     flex: 1;
     margin: 7% 20px 0;
@@ -124,7 +124,7 @@ code {
   
   .info{
     margin: 8px 0;
-    color: #1a7e76;
+    color: #4d595c;
   }
 
   /*to align lable and value in bottom section of card
@@ -136,3 +136,26 @@ code {
     /* ===> End of 'Card' component styling <==== */
   
   /* ====> End of User Info Modal stylng <=== */
+
+  /* ====> Start of notifications icon <====== */
+
+#notificationsBell{
+position: relative
+}
+.counter {
+  width: 16px;
+  height: 16px;
+  background-color: red;
+  border-radius: 50%;
+  padding: 0px;
+  font-size: 16px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 4px;
+  right: 4px
+}
+
+    /* ====> End of notification counter <====== */

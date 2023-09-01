@@ -12,6 +12,7 @@ import createCard from "./usersInfo/CreateCard.jsx";
 import Modal from "./usersInfo/Modal.jsx";
 import Avatar from "./usersInfo/Avatar.jsx";
 import Detail from "./usersInfo/Detail.jsx";
+import Alerts from "./notifications/countAlerts.jsx";
 import { Notyf } from "notyf";
 
 //Environment variable from the docker-compose.yml file.
@@ -25,7 +26,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[]})
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
     if (websocketRef.current) {
@@ -43,6 +44,11 @@ const Feed = () => {
           console.log("chat recieved", message)
           // let chat = message.chat
           PrintNewChat({chat: message.chat})
+        } else if (message.type == "followNotif"){
+          //send follow notification request to online user
+          console.log("follow notification:\n", message.followNotif.notifMsg)
+          allData.current.followNotif = message.followNotif
+          alert(allData.current.followNotif.notifMsg);
         }
        
         
@@ -75,6 +81,7 @@ const Feed = () => {
   const [avatar, setAvatar] = useState(null);
   const [imageURL, setImageURL] = useState(null);
   const [imageFile, setImageFile] = useState("");
+  const [followNotif, setFollowNotif] = useState("");
   const notyf = new Notyf();
 
   useEffect(() => {
@@ -192,6 +199,8 @@ const handleShowUserInfo = () => {
     websocketRef.current.send(
       JSON.stringify(followInfo)
     )
+
+
 
   // Make a POST request to store followInfo into db
   //and handle according to influencer's visibility
@@ -509,6 +518,7 @@ const handleShowUserInfo = () => {
               </svg>
             </button>
             {/* Notifications */}
+            <div id="notificationsBell">
             <button
               type="button"
               data-dropdown-toggle="notification-dropdown"
@@ -516,10 +526,20 @@ const handleShowUserInfo = () => {
             >
               <span className="sr-only">View notifications</span>
               {/* Bell icon */}
-              <svg aria-hidden="true" className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <svg aria-hidden="true" className="w-6 h-6" position="relative" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
             </button>
+            <div className="counter">
+                       {selectedUser && (
+                      <Alerts 
+                        countNotifications =  {parseInt(selectedUser.numNotifications, 10)} 
+                      />
+                      )}
+            </div> 
+         
+
+            </div>
             {/* Dropdown menu */}
             <div
               className="hidden overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700"
@@ -880,7 +900,7 @@ const handleShowUserInfo = () => {
             >
               <span className="sr-only">Open user menu</span>
               <img
-                className={`w-10 h-10 rounded-full border-2 border-solid border-[#3b82f6] dark:border-[#f8fafc]`}
+                className={`w-10 h-10 rounded-full border-2 border-solid border-[#57aada] dark:border-white`}
                 src={userAvatar}
                 alt="user photo"
               />
@@ -1024,32 +1044,54 @@ const handleShowUserInfo = () => {
             <li>
               <a
                 href="http://localhost:3000/feed"
-                className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
-                <svg
-                  aria-hidden="true"
-                  className="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
-                  <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+              <button
+                  type="button"
+                  className="flex items-center p-2 w-full text-base font-medium text-white 
+                  rounded-lg transition duration-75 group bg-[#57aada] hover:bg-[#4488af] 
+                  shadow-lg dark:text-white dark:hover:bg-[#4488af]
+                  [box-shadow:0_3px_0_0_#407da1]
+                  border-b-[1px] border-blue-400"
+                  aria-controls="dropdown-pages"
+                  data-collapse-toggle="dropdown-pages"
+              >
+                  <svg
+                    aria-hidden="true"
+                    className="flex-shrink-0 w-6 h-6 text-white transition duration-75 group-hover:text-white dark:text-white dark:group-hover:text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                  <path 
+                  fillRule="evenodd" 
+                  d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" 
+                  clipRule="evenodd"
+                  />
+                  <path 
+                  fillRule="evenodd"  
+                  d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" 
+                  clipRule="evenodd"
+                  />
                 </svg>
-                <span className="ml-3">Feed</span>
+                <span className="flex-1 ml-3 text-left whitespace-nowrap">Feed</span>
+                </button>
               </a>
             </li>
             <li>
               <a href="http://localhost:3000/profile">
                 <button
                   type="button"
-                  className="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  className="flex items-center p-2 w-full text-base font-medium text-white 
+                  rounded-lg transition duration-75 group bg-[#57aada] hover:bg-[#4488af] 
+                  shadow-lg dark:text-white dark:hover:bg-[#4488af]
+                  [box-shadow:0_3px_0_0_#407da1]
+                  border-b-[1px] border-blue-400"
                   aria-controls="dropdown-pages"
                   data-collapse-toggle="dropdown-pages"
                 >
                   <svg
                     aria-hidden="true"
-                    className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
+                    className="flex-shrink-0 w-6 h-6 text-white transition duration-75 group-hover:text-white dark:text-white dark:group-hover:text-white"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg"
@@ -1060,7 +1102,6 @@ const handleShowUserInfo = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-
                   <span className="flex-1 ml-3 text-left whitespace-nowrap">My Profile</span>
                 </button>
               </a>
@@ -1220,7 +1261,7 @@ const handleShowUserInfo = () => {
                   <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z" />
                   <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
                 </svg>
-                <span className="flex-1 ml-3 whitespace-nowrap">Messages</span>
+                <span className="flex-1 ml-3 whitespace-nowrap ">Messages</span>
                 <span className="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-primary-800 bg-primary-100 dark:bg-primary-200 dark:text-primary-800">
                   4
                 </span>
@@ -1245,18 +1286,24 @@ const handleShowUserInfo = () => {
             </li>
             <li>
             {/* Start of the drop-down menu for All users except logged-in user */}
+          <a
+          >
             <button
             onClick={handleClickUsersList}
             type="button"
-              className="flex mx-3 text-sm bg-gray-300 rounded-lg md:mr-0 dark:bg-gray-500"
-                id="show-users-button"
+            className="flex items-center p-2 w-full text-base font-medium text-white 
+            rounded-lg transition duration-75 group bg-[#57aada] hover:bg-[#4488af] 
+            shadow-lg dark:text-white dark:hover:bg-[#4488af]
+            [box-shadow:0_3px_0_0_#407da1]
+            border-b-[1px] border-blue-400"
+            aria-controls="dropdown-pages"
+            data-collapse-toggle="dropdown-pages"
+            id="show-users-button"
             >
-              <a
-                className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
-              >
+
                 <svg
                   aria-hidden="true"
-                  className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                  className="flex-shrink-0 w-6 h-6 text-white transition duration-75 dark:text-white group-hover:text-white dark:group-hover:text-white"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -1268,19 +1315,19 @@ const handleShowUserInfo = () => {
                   />
                 </svg>
                 <span className="ml-3" >See All Users</span>
-              </a>
               </button>
+            </a>
               {/* Dropdown menu */}
             <div
             // 'ref' makes a link to the element that contains the list of users.
             // Together with conditional css styling it ensures that the element is altered independently
             ref={usersListRef}
-              className={`users-list absolute top-[420px] right-0 z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 ${isUsersListVisible ? 'visible' : 'hidden'}`}
+              className={`users-list absolute top-[430px] right-4 z-50 my-4 w-56 text-base list-none bg-[#a5dcfc] rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 ${isUsersListVisible ? 'visible' : 'hidden'}`}
               id="dropdownUsers"
             >
-              <ul className="py-1 text-gray-700 dark:text-gray-200">
+              <ul className="py-0 text-gray-700 dark:text-gray-200">
                   <div
-                    className="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
+                    className="block py-2 px-4 text-sm hover:bg-[#7ca3ba] dark:hover:bg-[#7096ac] dark:text-gray-600 dark:hover:text-white dark:bg-[#a5dcfc]"
                   >
                     {usersList.map((u)=> (
                       <li key={u.id}>
@@ -1503,7 +1550,7 @@ const handleShowUserInfo = () => {
           <div className="  dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img
               //className="w-16 h-16 mb-2 rounded-full border-2 border-solid border-white-500"
-              className={`w-16 h-16 rounded-full border-2 border-solid border-[#3b82f6] dark:border-[#f8fafc]`}
+              className={`w-16 h-16 rounded-full border-2 border-solid border-[#57aada] dark:border-[#f8fafc]`}
               //src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
               src={userAvatar}
               alt="user photo"
@@ -1544,10 +1591,10 @@ const handleShowUserInfo = () => {
           className="bg-white border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 dark:bg-gray-800 mb-4"
         >
           <div className="  dark:bg-gray-800 dark:text-white flex justify-left items-left flex-col">
-            <h3 className="pl-5 mt-3 font-bold text-xl text-blue-500 ">Update Feed</h3>
+            <h3 className="pl-5 mt-3 font-bold text-xl text-[#5aadde]  ">Update Feed</h3>
             <form onSubmit={submitPost}>
               <span className="flex p-2.5 pl-5">
-                <p className="flex-row mr-5 font-bold">Title</p>
+                <p className="flex-row mr-5 font-bold text-[#5aadde]">Title</p>
                 <input
                   className="flex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
                   type="text"
@@ -1557,7 +1604,7 @@ const handleShowUserInfo = () => {
               </span>
 
               <span className="flex p-2.5 pl-5">
-                <p className="flex-row mr-5 font-bold">Tags</p>
+                <p className="flex-row mr-5 font-bold text-[#5aadde]">Tags</p>
                 <input
                   type="text"
                   id="postTags"
@@ -1567,14 +1614,14 @@ const handleShowUserInfo = () => {
                   onClick={addTag}
                   type="submit"
                   value="Add Tag"
-                  className="flex-row pl-2  pr-2 font-bold bg-blue-500 text-sm text-white rounded-md"
+                  className="flex-row pl-2  pr-2 font-bold bg-[#8cc0de] text-sm text-white rounded-md cursor-pointer hover:bg-[#76a1ba] shadow-lg"
                 >
                   Add Tag
                 </button>
               </span>
               <Tags tags={tag} />
               <div className="flex justify-right items-right flex-col">
-                <p className="p-2.5 pl-5 font-bold">Content</p>
+                <p className="p-2.5 pl-5 font-bold text-[#5aadde]">Content</p>
                 <textarea
                   className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none"
                   name="postContent"
@@ -1588,12 +1635,12 @@ const handleShowUserInfo = () => {
               </div>
 
               <select
-                className="ml-5 pl-5 font-bold focus:outline-none dark:bg-gray-800"
+                className="ml-5 pl-5 font-bold focus:outline-none dark:bg-gray-800 text-[#5aadde]"
                 name="Visibility"
                 id="Visibility"
                 onChange={handleVisibility}
               >
-                <option name="public" value={Visibility}>
+                <option name="public" value={Visibility} className="text-[#5aadde]">
                   Public
                 </option>
                 <option name="private" value={Visibility}>
@@ -1612,14 +1659,14 @@ const handleShowUserInfo = () => {
                 />
                 <label
                   htmlFor="imageFile"
-                  className="ml-5 m-2.5 pl-5 pr-5  items-center justify-center text-sm font-bold bg-blue-500 text-white border border-transparent rounded-lg cursor-pointer hover:bg-blue-700 focus:block outline-none focus:border-primary-700 focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  className="ml-5 m-2.5 pl-5 pr-5  items-center justify-center text-sm font-bold bg-[#8cc0de] text-white border border-transparent rounded-lg cursor-pointer hover:bg-[#76a1ba] shadow-lg"
                 >
                   Upload Image File
                 </label>
                 {/* <input type="file" name="imageFile" id="imageFile" accept="image/*" className="hidden" value={imageFile} onChange={handlePostImage} /> */}
                 <input type="file" name="mageFile" id="imageFile" accept="image/*" className="hidden" onChange={handlePostImage} />
               </div>
-              <button className="ml-5 m-2.5 pl-5 pr-5 font-bold bg-blue-500 text-white rounded-md" type="submit">
+              <button className="ml-5 m-2.5 pl-5 pr-5 font-bold bg-[#57aada] cursor-pointer hover:bg-[#3a7597] text-white rounded-md shadow-lg" type="submit ">
                 Post
               </button>
             </form>
