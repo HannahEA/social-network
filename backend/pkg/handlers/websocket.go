@@ -226,7 +226,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			//This is an un-follow request so will delete the record from 'Followers' table
 			uploadFollowInfo.UFollow = fInfo.UnFollow
 
-			fmt.Println("uploadFollowInfo", uploadFollowInfo)
+			fmt.Println("uploadFollowInfo to upload in db", uploadFollowInfo)
 
 			if uploadFollowInfo.InfluencerVis == "public" {
 				fmt.Println("Checking if follow request goes to 'visibility public' branch")
@@ -250,21 +250,27 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 				for conn, client := range Clients {
 					if client == uploadFollowInfo.InfluencerUN {
-						
-						fmt.Println("follow request receiver is online")
+
 						reciever[conn] = client
 						online = true
+						fmt.Printf("follow request client/ receiver %v %v is %v", client, reciever, online)
+						//instantiate the 'Notif' struct
+						var fNotification FollowNotif
+						//populate the Notif struct with the notification data
+						fNotification.NotifMsg = uploadFollowInfo.FollowerUN + " wishes to follow you. Do you accept, " + uploadFollowInfo.InfluencerUN + "?"
+						fNotification.Type = "FollowNotif"
+						fmt.Println("notification via ws: ", fNotification.NotifMsg, fNotification.Type)
+						//if online, send a notification to the owner of the private profile
+						service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{FollowNotif: fNotification, Type: "followNotif"}, Connections: reciever})
+					} else {
+						fmt.Println("Influencer is off-line. Has accept been put to pending for private profile?", uploadFollowInfo.Accept)
+						//db query to return the number of pending notifications
+
 					}
 				}
-				fmt.Println("is the influencer online?",online, reciever)
-				
-				uploadFollowInfo.NotifMsg = uploadFollowInfo.FollowerUN + " wishes to follow " + uploadFollowInfo.InfluencerUN + " do you accept? "
-				fmt.Println(uploadFollowInfo.NotifMsg)
-				//if online, send a notification to the owner of the private profile
-				service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{UploadFollow: uploadFollowInfo, Type: "FollowNotif"}, Connections: reciever})
 
 			} else {
-				fmt.Println("has accept been put to pending for private profile?", uploadFollowInfo.Accept)
+				//fmt.Println("has accept been put to pending for private profile?", uploadFollowInfo.Accept)
 				/*OR
 				//TO DO: check for uploadFollowInfo notif
 				oldChats, count, err := service.repo.CheckForNotification(uploadFollowInfo)
@@ -272,7 +278,8 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				if !olduploadFollowInfo || olduploadFollowInfo && err == nil {
 					service.repo.AddChatNotification(uploadFollowInfo, count)
 				}*/
-				fmt.Println("Influencer is not online, must send notification and store some details")
+				//fmt.Println("Influencer is not online, must send notification and store some details")
+				fmt.Println("What is this third option for?")
 			}
 		}
 

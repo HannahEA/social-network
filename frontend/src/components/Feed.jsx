@@ -12,6 +12,7 @@ import createCard from "./usersInfo/CreateCard.jsx";
 import Modal from "./usersInfo/Modal.jsx";
 import Avatar from "./usersInfo/Avatar.jsx";
 import Detail from "./usersInfo/Detail.jsx";
+import Alerts from "./notifications/countAlerts.jsx";
 import { Notyf } from "notyf";
 
 //Environment variable from the docker-compose.yml file.
@@ -25,7 +26,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[]})
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
     if (websocketRef.current) {
@@ -43,6 +44,11 @@ const Feed = () => {
           console.log("chat recieved", message)
           // let chat = message.chat
           PrintNewChat({chat: message.chat})
+        } else if (message.type == "followNotif"){
+          //send follow notification request to online user
+          console.log("follow notification:\n", message.followNotif.notifMsg)
+          allData.current.followNotif = message.followNotif
+          alert(allData.current.followNotif.notifMsg);
         }
        
         
@@ -75,6 +81,7 @@ const Feed = () => {
   const [avatar, setAvatar] = useState(null);
   const [imageURL, setImageURL] = useState(null);
   const [imageFile, setImageFile] = useState("");
+  const [followNotif, setFollowNotif] = useState("");
   const notyf = new Notyf();
 
   useEffect(() => {
@@ -192,6 +199,8 @@ const handleShowUserInfo = () => {
     websocketRef.current.send(
       JSON.stringify(followInfo)
     )
+
+
 
   // Make a POST request to store followInfo into db
   //and handle according to influencer's visibility
@@ -522,8 +531,14 @@ const handleShowUserInfo = () => {
               </svg>
             </button>
             <div className="counter">
-              2
-            </div>
+                       {selectedUser && (
+                      <Alerts 
+                        countNotifications =  {parseInt(selectedUser.numNotifications, 10)} 
+                      />
+                      )}
+            </div> 
+         
+
             </div>
             {/* Dropdown menu */}
             <div

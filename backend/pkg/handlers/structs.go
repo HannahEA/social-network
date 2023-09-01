@@ -118,6 +118,8 @@ type WebsocketMessage struct {
 
 	UploadFollow UploadFollow `json:"uploadFollow"`
 
+	FollowNotif FollowNotif `json:"followNotif"`
+
 	Type string `json:"type"`
 }
 
@@ -165,4 +167,10 @@ type UploadFollow struct {
 	Accept        string `json:"accept"`
 	UFollow       string `json:"unfollow"`
 	NotifMsg      string `json:"notifMsg"`
+}
+
+// follow request notification sent if private influencer is offline
+type FollowNotif struct {
+	NotifMsg string `json:"notifMsg"`
+	Type     string `json:"type"`
 }
