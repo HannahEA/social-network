@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -231,15 +232,15 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			if uploadFollowInfo.InfluencerVis == "public" {
 				fmt.Println("Checking if follow request goes to 'visibility public' branch")
 				//populate the db table 'followers'
-				err := service.repo.InsertFollowRequest(uploadFollowInfo)
+				_, err := service.repo.InsertFollowRequest(uploadFollowInfo)
 				if err != nil {
 					log.Fatalf(err.Error())
 				}
 
 			} else if uploadFollowInfo.InfluencerVis == "private" {
 				fmt.Println("Checking if follow request goes to 'visibility private' branch")
-				//populate the db table 'followers'
-				err := service.repo.InsertFollowRequest(uploadFollowInfo)
+				//populate the db table 'followers' and get the followID
+				followID, err := service.repo.InsertFollowRequest(uploadFollowInfo)
 				if err != nil {
 					log.Fatalf(err.Error())
 				}
@@ -250,16 +251,16 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 				for conn, client := range Clients {
 					if client == uploadFollowInfo.InfluencerUN {
-
 						reciever[conn] = client
 						online = true
 						fmt.Printf("follow request client/ receiver %v %v is %v", client, reciever, online)
 						//instantiate the 'Notif' struct
 						var fNotification FollowNotif
 						//populate the Notif struct with the notification data
-						fNotification.NotifMsg = uploadFollowInfo.FollowerUN + " wishes to follow you. Do you accept, " + uploadFollowInfo.InfluencerUN + "?"
+						fNotification.FollowID = strconv.Itoa(followID)
+						fNotification.NotifMsg = uploadFollowInfo.FollowerUN + " wishes to follow you. Do you accept?"
 						fNotification.Type = "FollowNotif"
-						fmt.Println("notification via ws: ", fNotification.NotifMsg, fNotification.Type)
+						fmt.Println("notification via ws: ", fNotification.FollowID, fNotification.NotifMsg, fNotification.Type)
 						//if online, send a notification to the owner of the private profile
 						service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{FollowNotif: fNotification, Type: "followNotif"}, Connections: reciever})
 					} else {
@@ -281,6 +282,20 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				//fmt.Println("Influencer is not online, must send notification and store some details")
 				fmt.Println("What is this third option for?")
 			}
+
+		case "followReply":
+			var fReply FollowReply
+			//populate the FollowReply struct
+			jsonErr := json.Unmarshal(b, &fReply)
+			fmt.Println("fInfo:", fReply)
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: Websocket")
+			}
+			//Update the 'accepted' field in 'Followers' table
+			err := service.repo.InsertFollowReply(fReply)
+			if err != nil {
+				fmt.Println("error inserting the follow reply", err)
+			}
 		}
 
 	}
@@ -295,7 +310,7 @@ func (r *dbStruct) BroadcastToChannel(msg BroadcastMessage) {
 	r.broadcaster <- msg
 }
 
-func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) error {
+func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) (int, error) {
 	//check if influencer is being un-followed
 	var uNfollow = uploadFollowRequest.UFollow
 	if uNfollow == "Yes" {
@@ -303,26 +318,50 @@ func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) erro
 		stmnt, err := repo.db.Prepare(`DELETE FROM Followers WHERE (followerUserName = ? AND influencerUserName = ?)`)
 		if err != nil {
 			fmt.Println("Error preparing delete stmt for un-follow request: ", err)
-			return err
+			return 0, err
 		}
 		_, err = stmnt.Exec(uploadFollowRequest.FollowerUN, uploadFollowRequest.InfluencerUN)
 		if err != nil {
 			fmt.Println("error deleting follow record", err)
-			return err
+			return 0, err
 		}
 	} else if uNfollow == "" {
 		//User wishes to follow the influencer so will create a new record in the db table 'followers'
 		stmnt, err := repo.db.Prepare("INSERT OR IGNORE INTO Followers (followerID, followerUserName, influencerID, influencerUserName, accepted) VALUES (?, ?, ?, ?, ?)")
 		if err != nil {
 			fmt.Println("Error preparing insert stmt for follow request into DB: ", err)
-			return err
+			return 0, err
 		}
 		_, err = stmnt.Exec(uploadFollowRequest.FollowerId, uploadFollowRequest.FollowerUN, uploadFollowRequest.InfluencerId, uploadFollowRequest.InfluencerUN, uploadFollowRequest.Accept)
 		if err != nil {
 			fmt.Println("Error inserting follow request into DB: ", err)
-			return err
+			return 0, err
 		}
 
+	}
+	//return the auto-generated 'followID'
+	var followID int
+	rows, err := repo.db.Query("SELECT seq FROM sqlite_sequence WHERE name = 'Followers'")
+	if err != nil {
+		fmt.Println("Error returning 'seq'", err)
+		return 0, err
+	}
+	for rows.Next() {
+		err := rows.Scan(&followID)
+		if err != nil {
+			fmt.Println("sqlite_sequence: row scan error", err)
+			return 0, err
+		}
+	}
+	return followID, nil
+}
+
+//uploads private user reply to follow request
+func (repo *dbStruct) InsertFollowReply(theReply FollowReply) error {
+	_, err := repo.db.Exec("UPDATE Followers SET accepted = ? WHERE follow = ?", theReply.FollowReply, theReply.FollowID)
+	if err != nil {
+		fmt.Println("error inserting follow reply", err)
+		return err
 	}
 	return nil
 }

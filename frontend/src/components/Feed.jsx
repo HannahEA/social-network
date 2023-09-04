@@ -14,12 +14,45 @@ import Avatar from "./usersInfo/Avatar.jsx";
 import Detail from "./usersInfo/Detail.jsx";
 import Alerts from "./notifications/countAlerts.jsx";
 import { Notyf } from "notyf";
+import { FunctionsRounded } from "@material-ui/icons";
 
 //Environment variable from the docker-compose.yml file.
 //This variable will contain the URL of the backend service,
 //allowing the frontend code to make requests to the correct endpoint.
 const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
+
+//below comment allows my code to use confirm()inside 'FollowYesNo'
+/* eslint-disable no-restricted-globals */
+function FollowYesNo(id, message) {
+  var reply;
+  if (typeof message !== 'undefined') {
+
+   
+    //send the message and collect user reply
+    let followYesNo = confirm(message);
+    //to prevent Chrome suppressing dialogs
+   // window.opener.confirm = window.confirm;
+    //user has clicked on 'OK'
+    if (followYesNo) {
+      // User has accepted, send data to the backend to change 'accepted' field in 'Followers' table to 'Yes'
+      reply = "Yes";
+    } else {
+      // User declined - change 'accepted' field in 'Followers' table to 'No'
+      reply = "No";
+    }
+  } else {
+    console.error("Message is undefined");
+  }
+  // Store user reply
+  var followReply = {
+    "followID": id,
+    "followReply": reply,
+    "type": "followReply",
+  };
+  return followReply;
+}
+
  
 
 const Feed = () => {
@@ -48,7 +81,15 @@ const Feed = () => {
           //send follow notification request to online user
           console.log("follow notification:\n", message.followNotif.notifMsg)
           allData.current.followNotif = message.followNotif
-          alert(allData.current.followNotif.notifMsg);
+
+          var followYesNo = FollowYesNo(allData.current.followNotif.followID, allData.current.followNotif.notifMsg)
+          console.log("the followYesNo:", followYesNo)
+          //send user reply to back end
+          websocketRef.current.send(
+            JSON.stringify(followYesNo)
+          )
+
+          
         }
        
         
@@ -81,7 +122,7 @@ const Feed = () => {
   const [avatar, setAvatar] = useState(null);
   const [imageURL, setImageURL] = useState(null);
   const [imageFile, setImageFile] = useState("");
-  const [followNotif, setFollowNotif] = useState("");
+  //const [followNotif, setFollowNotif] = useState("");
   const notyf = new Notyf();
 
   useEffect(() => {
@@ -1679,5 +1720,7 @@ const handleShowUserInfo = () => {
     </div>
   );
 };
+
+
 
 export default Feed;

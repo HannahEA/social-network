@@ -42,7 +42,8 @@ type AllDbMethods interface {
 	ValidateLogin(email, password string) (bool, error)
 	GetUserEmail(userId string) (string, error)
 	AddSession(w http.ResponseWriter, sessionName string, user *User)
-	InsertFollowRequest(uploadFollowRequest UploadFollow) error
+	InsertFollowRequest(uploadFollowRequest UploadFollow) (int, error)
+	InsertFollowReply(followData FollowReply) error
 	InsertSession(u *User, session *http.Cookie) *Session
 	IsUserAuthenticated(w http.ResponseWriter, u *User) error
 	//logout

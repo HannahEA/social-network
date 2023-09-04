@@ -120,6 +120,8 @@ type WebsocketMessage struct {
 
 	FollowNotif FollowNotif `json:"followNotif"`
 
+	FollowReply FollowReply `json:"followReply"`
+
 	Type string `json:"type"`
 }
 
@@ -169,8 +171,16 @@ type UploadFollow struct {
 	NotifMsg      string `json:"notifMsg"`
 }
 
-// follow request notification sent if private influencer is offline
+// follow request notification sent to private influencer
 type FollowNotif struct {
+	FollowID string `json:"followID"`
 	NotifMsg string `json:"notifMsg"`
 	Type     string `json:"type"`
+}
+
+// follow notification reply by private influencer
+type FollowReply struct {
+	FollowID    string `json:"followID"`
+	FollowReply string `json:"followReply"`
+	Type        string `json:"type"`
 }
