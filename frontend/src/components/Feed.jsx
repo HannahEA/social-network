@@ -9,10 +9,12 @@ import { useLocation } from "react-router-dom";
 // import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
 import Card from "./usersInfo/Card.jsx";
 import createCard from "./usersInfo/CreateCard.jsx";
+import createNotification from "./notifications/createNotification.jsx";
 import Modal from "./usersInfo/Modal.jsx";
 import Avatar from "./usersInfo/Avatar.jsx";
 import Detail from "./usersInfo/Detail.jsx";
 import Alerts from "./notifications/countAlerts.jsx";
+import Notification from "./notifications/notification.jsx";
 import { Notyf } from "notyf";
 import { FunctionsRounded } from "@material-ui/icons";
 
@@ -22,44 +24,13 @@ import { FunctionsRounded } from "@material-ui/icons";
 const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
 
-//below comment allows my code to use confirm()inside 'FollowYesNo'
-/* eslint-disable no-restricted-globals */
-function FollowYesNo(id, message) {
-  var reply;
-  if (typeof message !== 'undefined') {
-
-   
-    //send the message and collect user reply
-    let followYesNo = confirm(message);
-    //to prevent Chrome suppressing dialogs
-   // window.opener.confirm = window.confirm;
-    //user has clicked on 'OK'
-    if (followYesNo) {
-      // User has accepted, send data to the backend to change 'accepted' field in 'Followers' table to 'Yes'
-      reply = "Yes";
-    } else {
-      // User declined - change 'accepted' field in 'Followers' table to 'No'
-      reply = "No";
-    }
-  } else {
-    console.error("Message is undefined");
-  }
-  // Store user reply
-  var followReply = {
-    "followID": id,
-    "followReply": reply,
-    "type": "followReply",
-  };
-  return followReply;
-}
-
  
 
 const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}})
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
     if (websocketRef.current) {
@@ -81,18 +52,10 @@ const Feed = () => {
           //send follow notification request to online user
           console.log("follow notification:\n", message.followNotif.notifMsg)
           allData.current.followNotif = message.followNotif
+          setFollowNotif(allData.current.followNotif);
+          console.log("the followNotif value is:",followNotif)
 
-          var followYesNo = FollowYesNo(allData.current.followNotif.followID, allData.current.followNotif.notifMsg)
-          console.log("the followYesNo:", followYesNo)
-          //send user reply to back end
-          websocketRef.current.send(
-            JSON.stringify(followYesNo)
-          )
-
-          
         }
-       
-        
     };
   }
     if (isWebSocketConnected){
@@ -110,6 +73,7 @@ const Feed = () => {
   const usersListRef = useRef(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [followNotif, setFollowNotif] = useState(null);
   allData.current.userInfo = userInfo
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
  // POSTS VARIABLES
@@ -122,7 +86,6 @@ const Feed = () => {
   const [avatar, setAvatar] = useState(null);
   const [imageURL, setImageURL] = useState(null);
   const [imageFile, setImageFile] = useState("");
-  //const [followNotif, setFollowNotif] = useState("");
   const notyf = new Notyf();
 
   useEffect(() => {
@@ -240,6 +203,10 @@ const handleShowUserInfo = () => {
     websocketRef.current.send(
       JSON.stringify(followInfo)
     )
+
+    // const handleFollowNotif = (notif) => {
+    //   createFollowAlert(notif)
+    // };
 
 
 
@@ -1602,8 +1569,19 @@ const handleShowUserInfo = () => {
               <p>Email: {email}</p>
             </div>
           </div>
-          <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
-             {/* Start of users Information modal */}
+        {/* Start of follow notification */}
+          <div id="showNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+          {followNotif && (
+          <Notification>
+            message={followNotif.notifMsg}
+            id={followNotif.followID}
+            {/* Display the Notification component and send reply to back end */}
+            createNotification(followNotif.notifMsg, followNotif.followID)
+          </Notification>
+          )}
+        {/* End of follow notification */}
+
+        {/* Start of users Information modal */}
         {isModalVisible && (
         <Modal 
         onClose={() => {handleCloseModal()}} 
