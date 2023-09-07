@@ -3,10 +3,12 @@ import { useWebSocket } from "../WebSocketProvider.jsx";
 
 
 
-const Notification = ({ prop }) => {
+function Notification ( props ) {
     const { websocketRef, isWebSocketConnected} = useWebSocket();
-    console.log("show if the WS is connected: ",isWebSocketConnected)
+    console.log("show the props inside Notification: ",props)
+    console.log("show if the WS is connected inside Notification: ",isWebSocketConnected)
 
+    
     const handleAccept = () => {
     // Send a request to the backend with followID and the user's acceptance
     // You can use fetch or any other method for this purpose.
@@ -28,7 +30,7 @@ const Notification = ({ prop }) => {
     let reply = "Yes";
     // Make a reply object
     var YesNo = {
-        "followID": prop.ID,
+        "followID": props.ID,
         "followReply": reply,
         "type": "followReply",
     };
@@ -38,42 +40,47 @@ const Notification = ({ prop }) => {
     websocketRef.current.send(
       JSON.stringify(YesNo)
     )
-
+     
   };
 
-  const handleDecline = () => {
+  const handleNo = () => {
     //send to back end using the websocket:
     let reply = "No";
     // Make a reply object
     var YesNo = {
-        "followID": prop.ID,
+        "followID": props.ID,
         "followReply": reply,
         "type": "followReply",
     };
     console.log("the followReply sent to back end: ", YesNo)
-
     //send user reply to back end
     websocketRef.current.send(
       JSON.stringify(YesNo)
     )
   };
 
-
-    <div className="notification" style={{ backgroundColor: '#9dd6f7', fontWeight:'strong' }}>
-      <p>{prop.message}</p>
-      <button
+    return <>
+    <div className="notification-item" style={{ backgroundColor: '#9dd6f7', fontWeight:'strong', visibility:'visible'}}>
+      <p id="msg">{props.message}</p>
+      <span>
+      <button class="btnNotifOK" className="hover:bg-[#2f5d78] "
         onClick={handleAccept}
         style={{ backgroundColor: '#4488af' }}
       >
         Accept
       </button>
-      <button
-        onClick={handleDecline}
+      </span>
+      
+      <span>
+      <button class="btnNotifNO" className="hover:bg-[#2e5d78] "
+        onClick={handleNo}
         style={{ backgroundColor: '#4488af', fontWeight: 'strong' }}
       >
         Decline
       </button>
+      </span>
     </div>
+    </>
 
 };
 
