@@ -1,13 +1,24 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { useWebSocket } from "../WebSocketProvider.jsx";
 
 
 
 function Notification ( props ) {
     const { websocketRef, isWebSocketConnected} = useWebSocket();
+    // only working on the first 'click': Initialize visibility to true
+   // const [isVisible, setIsVisible] = useState(true);
+
     console.log("show the props inside Notification: ",props)
     console.log("show if the WS is connected inside Notification: ",isWebSocketConnected)
 
+    /*useEffect(() => {
+      // Reset visibility to true when the component unmounts
+      return () => {
+        setIsVisible(true);
+      };
+    }, []);*/ // Empty dependency array to run the cleanup function only once (on unmount)
+
+    //console.log("show the visibility of Notification: ", isVisible)
     
     const handleAccept = () => {
     // Send a request to the backend with followID and the user's acceptance
@@ -34,13 +45,16 @@ function Notification ( props ) {
         "followReply": reply,
         "type": "followReply",
     };
+
     console.log("the followReply sent to back end: ", YesNo)
 
     //send reply object to back end
     websocketRef.current.send(
       JSON.stringify(YesNo)
     )
-     
+    // After handling the action, hide the Notification
+    props.setIsVisible(false);
+
   };
 
   const handleNo = () => {
@@ -52,18 +66,23 @@ function Notification ( props ) {
         "followReply": reply,
         "type": "followReply",
     };
+
     console.log("the followReply sent to back end: ", YesNo)
     //send user reply to back end
     websocketRef.current.send(
       JSON.stringify(YesNo)
     )
+    // After handling the action, hide the Notification
+    props.setIsVisible(false);
+
   };
 
-    return <>
+    //return isVisible ? (
+    return (
     <div className="notification-item" style={{ backgroundColor: '#9dd6f7', fontWeight:'strong', visibility:'visible'}}>
       <p id="msg">{props.message}</p>
       <span>
-      <button class="btnNotifOK" className="hover:bg-[#2f5d78] "
+      <button id="btnNotifOK" className="hover:bg-[#2e5d78]"
         onClick={handleAccept}
         style={{ backgroundColor: '#4488af' }}
       >
@@ -72,7 +91,7 @@ function Notification ( props ) {
       </span>
       
       <span>
-      <button class="btnNotifNO" className="hover:bg-[#2e5d78] "
+      <button id="btnNotifNO" className="hover:bg-[#2e5d78]"
         onClick={handleNo}
         style={{ backgroundColor: '#4488af', fontWeight: 'strong' }}
       >
@@ -80,8 +99,7 @@ function Notification ( props ) {
       </button>
       </span>
     </div>
-    </>
-
+    ) //: null; // Render null when isVisible is false
 };
 
 export default Notification;

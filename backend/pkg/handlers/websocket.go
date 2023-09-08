@@ -218,14 +218,14 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			uploadFollowInfo.InfluencerUN = fInfo.InfliuencerUN
 			uploadFollowInfo.InfluencerVis = fInfo.InfluencerVisib
 			//Can follow public profile influencer straight away
-			if uploadFollowInfo.InfluencerVis == "public" && fInfo.UnFollow == "" {
+			if uploadFollowInfo.InfluencerVis == "public" && fInfo.FollowAction == "follow" {
 				uploadFollowInfo.Accept = "Yes"
 				//Private profile influencer needs to approve follow request
-			} else if uploadFollowInfo.InfluencerVis == "private" && fInfo.UnFollow == "" {
+			} else if uploadFollowInfo.InfluencerVis == "private" && fInfo.FollowAction == "follow" {
 				uploadFollowInfo.Accept = "Pending"
 			}
-			//This is an un-follow request so will delete the record from 'Followers' table
-			uploadFollowInfo.UFollow = fInfo.UnFollow
+			//either "follow" or "un-follow"
+			uploadFollowInfo.FollowAction = fInfo.FollowAction
 
 			fmt.Println("uploadFollowInfo to upload in db", uploadFollowInfo)
 
@@ -237,7 +237,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					log.Fatalf(err.Error())
 				}
 
-			} else if uploadFollowInfo.InfluencerVis == "private" {
+			} else if uploadFollowInfo.InfluencerVis == "private" && uploadFollowInfo.FollowAction == "follow"{
 				fmt.Println("Checking if follow request goes to 'visibility private' branch")
 				//populate the db table 'followers' and get the followID
 				followID, err := service.repo.InsertFollowRequest(uploadFollowInfo)
@@ -270,17 +270,12 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					}
 				}
 
-			} else {
-				//fmt.Println("has accept been put to pending for private profile?", uploadFollowInfo.Accept)
-				/*OR
-				//TO DO: check for uploadFollowInfo notif
-				oldChats, count, err := service.repo.CheckForNotification(uploadFollowInfo)
-				//add new notif to database or add 1 to count
-				if !olduploadFollowInfo || olduploadFollowInfo && err == nil {
-					service.repo.AddChatNotification(uploadFollowInfo, count)
-				}*/
-				//fmt.Println("Influencer is not online, must send notification and store some details")
-				fmt.Println("What is this third option for?")
+			} else if uploadFollowInfo.FollowAction == "un-follow"{
+				_, err := service.repo.InsertFollowRequest(uploadFollowInfo)
+				if err != nil {
+					log.Fatalf(err.Error())
+				}
+				fmt.Println("The follow record has been removed from the db")
 			}
 
 		case "followReply":
@@ -312,8 +307,8 @@ func (r *dbStruct) BroadcastToChannel(msg BroadcastMessage) {
 
 func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) (int, error) {
 	//check if influencer is being un-followed
-	var uNfollow = uploadFollowRequest.UFollow
-	if uNfollow == "Yes" {
+	var followAction = uploadFollowRequest.FollowAction
+	if followAction == "un-follow" {
 		//remove the original 'follow' record in 'Followers' table
 		stmnt, err := repo.db.Prepare(`DELETE FROM Followers WHERE (followerUserName = ? AND influencerUserName = ?)`)
 		if err != nil {
@@ -325,7 +320,7 @@ func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) (int
 			fmt.Println("error deleting follow record", err)
 			return 0, err
 		}
-	} else if uNfollow == "" {
+	} else if followAction == "follow" {
 		//User wishes to follow the influencer so will create a new record in the db table 'followers'
 		stmnt, err := repo.db.Prepare("INSERT OR IGNORE INTO Followers (followerID, followerUserName, influencerID, influencerUserName, accepted) VALUES (?, ?, ?, ?, ?)")
 		if err != nil {

@@ -157,7 +157,7 @@ type Follow struct {
 	InfliuencerUN   string `json:"influencerUN"`
 	InfluencerID    int    `json:"influencerID"`
 	InfluencerVisib string `json:"influencerVisib"`
-	UnFollow        string `json:"unfollow"`
+	FollowAction    string `json:"fAction"`
 }
 
 type UploadFollow struct {
@@ -167,7 +167,7 @@ type UploadFollow struct {
 	InfluencerUN  string `json:"influencerUN"`
 	InfluencerVis string `json:"influencerVisib"`
 	Accept        string `json:"accept"`
-	UFollow       string `json:"unfollow"`
+	FollowAction  string `json:"fAction"`
 	NotifMsg      string `json:"notifMsg"`
 }
 

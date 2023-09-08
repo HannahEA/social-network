@@ -191,23 +191,32 @@ position: relative
   left: 18px;
 }
 
-.btnNotifOK{
+#btnNotifOK{
   position: absolute;
   color: white;
   top: 150px;
   left: 35px;
   border-radius: 6px;
   width: 100px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
 }
-/* notworking */
 
-.btnNotifNO{
+#btnNotifOK:hover{
+  background-color: #2f5d78;
+  }
+
+#btnNotifNO{
   position: absolute;
   color: white;
   top: 150px;
   left: 160px;
   border-radius: 6px;
   width: 100px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+}
+
+#btnNotifNO:hover{
+background-color: #2f5d78;
 }
 
 

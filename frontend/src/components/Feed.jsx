@@ -85,29 +85,9 @@ const Feed = () => {
           //send follow notification request to online user
           console.log("follow notification:\n", message.followNotif)
           allData.current.followNotif = message.followNotif
-          //flag to render the follow notification
-          if (followNotif === false){
-            setFollowNotif(true);
-          } else{
-            setFollowNotif(true);
-          }
-
-          console.log("the setFollow notif flag is:", followNotif)
-          //update the value of FollowNotif
-
-          //console.log("the followNotif value is:",allData.current.followNotif)
-          //console.log("the followNotif value:", followNotif)
-
-          //to make the 'Notification' component
-          //const makeNotif = document.getElementById('showNotif');
-         // makeNotif.AddEventListener('click', CreateNotification(allData.current.followNotif.notifMsg, allData.current.followNotif.followID)());
-         // makeNotif.click();
-
-          //console.log("the followYesNo:", followYesNo)
-          //send user reply to back end
-          // websocketRef.current.send(
-          //   JSON.stringify(followYesNo)
-          // )
+          //update the value of isVisible to 'true'
+          showNotification();
+          console.log("the isVisible notif flag is:", isVisible)
           
 
         }
@@ -128,7 +108,7 @@ const Feed = () => {
   const usersListRef = useRef(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [followNotif, setFollowNotif] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   allData.current.userInfo = userInfo
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
  // POSTS VARIABLES
@@ -142,6 +122,11 @@ const Feed = () => {
   const [imageURL, setImageURL] = useState(null);
   const [imageFile, setImageFile] = useState("");
   const notyf = new Notyf();
+
+  // Function to show the Notification
+  const showNotification = () => {
+    setIsVisible(true);
+  };
 
   useEffect(() => {
     verifyCookie();
@@ -204,11 +189,11 @@ const handleClickUsersList = () => {
   }
 };
 
+//not used
+// const handleShowUserInfo = () => {
+//  // createCard()
 
-const handleShowUserInfo = () => {
- // createCard()
-
-}
+// }
 
   const handleUserClick = (user) => {
     setSelectedUser(user);
@@ -231,15 +216,18 @@ const handleShowUserInfo = () => {
       var influencerUN = selectedUser.username;
       var influencerID = selectedUser.id;
       var influencerVisib = selectedUser.profVisib;
-
+      var followAction
       var btnLabel = document.getElementById("follow");
-      var fAction ;
+
+      // var fAction ;
 
       if (btnLabel.innerHTML === "Follow"){
-        fAction = ""
+        followAction = "follow";
+        console.log("the followAction is:",followAction);
         btnLabel.innerHTML = "Un-follow"
       }else if(btnLabel.innerHTML == "Un-follow"){
-        fAction = "Yes"
+        followAction = "un-follow";
+        console.log("the followAction is:",followAction);
         btnLabel.innerHTML = "Follow"
       }
 
@@ -251,10 +239,10 @@ const handleShowUserInfo = () => {
       "influencerUN": influencerUN,
       "influencerID": influencerID,
       "influencerVisib": influencerVisib,
-      "unfollow": fAction,
+      "fAction": followAction,
     }
     //this returns correct influencer info
-    console.log("printing selectedUser to be sent via websocket", selectedUser)
+    console.log("printing selectedUser to be sent via websocket for followAction:", selectedUser, followAction)
 
     websocketRef.current.send(
       JSON.stringify(followInfo)
@@ -1628,8 +1616,9 @@ const handleShowUserInfo = () => {
         {/* Start of follow notification */}
           {/* removed, invoked in line 26: onClick={() => {CreateNotification(allData.current.followNotif.notifMsg, allData.current.followNotif.followID) ()}} */}
           <div id="showNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
-          {followNotif && (
+          {isVisible && (
           <Notification 
+            setIsVisible={setIsVisible}
             message={allData.current.followNotif.notifMsg}
             ID={allData.current.followNotif.followID}
           />

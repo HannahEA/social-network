@@ -9,7 +9,13 @@ and to not send notifications for un-follow.
 https://colorhunt.co/palette/ffeeccffddccffccccfebbcc
 
 
-Modularization source by Ricky Adriell: https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html
+# Modularization source by Ricky Adriell: 
+https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html
+
+# To create a React app from scratch in the current folder
+1. First, to check that node is installed, in VSC terminal type: node -v
+2. Then, in VSC terminal type: npx create-react-app .
+3. Make a jsx file and in the file type rfc to return a react boiler plate
 
 # Database migration
 Article explaining the install commands for golang migrate package: 
