@@ -174,7 +174,7 @@ const PrintNewChat = ({chat}) => {
         <div id = "chatContainer" className="flex flex-col justify-end align-center w-2/3 overflow-auto">
           
           <div className="bg:white dark:bg-gray-800" id="chats" name="chats" classList="flex flex-col "></div>
-          <input id="chatInput" type="text" onChange={handleChatMessage} value={chatMessage} className=" hidden bottom-4 bg-[#f7f0ec] dark:text-white border-none m-2 p-3 w-9/10 h-2" placeholder="Type message.." name="msg" required/>
+          <input id="chatInput" type="text" onChange={handleChatMessage} value={chatMessage} className=" hidden bottom-4 bg-[#90857d] dark:text-white border-none m-2 p-3 w-9/10 h-2" placeholder="Type message.." name="msg" required/>
 
           <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden mb-2 ml-20 w-1/3 bg-[#ecbba3] rounded-lg text-white shadow-md"><strong>Send</strong></button>
 

@@ -137,11 +137,26 @@ code {
   
   /* ====> End of User Info Modal stylng <=== */
 
+    /* ====> Start of notifications popup <====== */
+
+  #showNotif{
+    position: relative;
+  }
+
+  .notification{
+    position:absolute;
+    top: 5px;
+    left: 10px;
+  }
+
+    /* ====> End of notifications popup <====== */
+
   /* ====> Start of notifications icon <====== */
 
 #notificationsBell{
 position: relative
 }
+
 .counter {
   width: 16px;
   height: 16px;
@@ -157,5 +172,52 @@ position: relative
   top: 4px;
   right: 4px
 }
+
+/* to style the notification */
+.notification-item {
+  position: relative;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  width: 300px;
+  height: 200px;
+  visibility: hidden;
+}
+
+#msg{
+  position:absolute;
+  top: 35px;
+  left: 18px;
+}
+
+#btnNotifOK{
+  position: absolute;
+  color: white;
+  top: 150px;
+  left: 35px;
+  border-radius: 6px;
+  width: 100px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+}
+
+#btnNotifOK:hover{
+  background-color: #2f5d78;
+  }
+
+#btnNotifNO{
+  position: absolute;
+  color: white;
+  top: 150px;
+  left: 160px;
+  border-radius: 6px;
+  width: 100px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+}
+
+#btnNotifNO:hover{
+background-color: #2f5d78;
+}
+
 
     /* ====> End of notification counter <====== */
