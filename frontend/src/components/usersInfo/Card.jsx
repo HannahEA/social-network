@@ -5,6 +5,18 @@ import React from "react";
 
 
 function Card(props){
+
+    const checkFollow = () => {
+        if(props.influencer === 1 ){ 
+        return "Yes"
+        } else if (props.influencer === 2) { 
+        return `Awaiting ${props.name} reply`
+        } else {
+        return "No"
+        };
+    }
+    
+
 return(
 
     <div className="card" >
@@ -19,7 +31,7 @@ return(
             {/* <Detail detailInfo= {props.visib} /> */}
             {/* </div> */}
             {/* <div class="flexbox-container"> */}
-            <div className="info">Following:  {props.influencer === 1 ? "Yes": "No"} </div>
+            <div className="info">Following:  {checkFollow()}</div>
             {/* <Detail detailInfo= {props.logged} /> */}
             {/* </div> */}
             <div className="info">About me:  {props.about} </div>

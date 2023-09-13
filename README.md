@@ -1,9 +1,8 @@
 ## Helena To Do ##
 The bell icon in 'feed' page to show current number of pending notifications for logged-out private user
 When clicking on the bell a list will appear and each notification will show as:
-'notification type' '<accept btn>' '<decline btn>'
-change follow-notification for logged-in private user to have <accept><decline> buttons
-and to not send notifications for un-follow.
+'notification type' 'accept btn' 'decline btn'
+
 
 ## Hannah's fav colour palette: 
 https://colorhunt.co/palette/ffeeccffddccffccccfebbcc

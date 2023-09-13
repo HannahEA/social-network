@@ -237,7 +237,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					log.Fatalf(err.Error())
 				}
 
-			} else if uploadFollowInfo.InfluencerVis == "private" && uploadFollowInfo.FollowAction == "follow"{
+			} else if uploadFollowInfo.InfluencerVis == "private" && uploadFollowInfo.FollowAction == "follow" {
 				fmt.Println("Checking if follow request goes to 'visibility private' branch")
 				//populate the db table 'followers' and get the followID
 				followID, err := service.repo.InsertFollowRequest(uploadFollowInfo)
@@ -270,7 +270,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					}
 				}
 
-			} else if uploadFollowInfo.FollowAction == "un-follow"{
+			} else if uploadFollowInfo.FollowAction == "un-follow" {
 				_, err := service.repo.InsertFollowRequest(uploadFollowInfo)
 				if err != nil {
 					log.Fatalf(err.Error())
@@ -353,13 +353,31 @@ func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) (int
 
 //uploads private user reply to follow request
 func (repo *dbStruct) InsertFollowReply(theReply FollowReply) error {
-	_, err := repo.db.Exec("UPDATE Followers SET accepted = ? WHERE follow = ?", theReply.FollowReply, theReply.FollowID)
-	if err != nil {
-		fmt.Println("error inserting follow reply", err)
-		return err
+	var theAnswer = theReply.FollowReply
+
+	if theAnswer == "Yes" {
+		_, err := repo.db.Exec("UPDATE Followers SET accepted = ? WHERE follow = ?", theReply.FollowReply, theReply.FollowID)
+		if err != nil {
+			fmt.Println("error inserting follow reply", err)
+			return err
+		} 
+	} else if theAnswer == "No" {
+			fmt.Println("User has declined")
+			fmt.Println("before prepare delete request")
+			stmnt, err := repo.db.Prepare("DELETE FROM Followers WHERE follow = ?")
+			if err != nil {
+				fmt.Println("error preparing the delete statement to remove rejected follow request", err)
+				return err
+			}
+			fmt.Println("after prepare delete request")
+			_, err = stmnt.Exec(theReply.FollowID)
+			if err != nil {
+				fmt.Println("error deleting record of rejected follow request")
+				return err
+			}
+		}
+		return nil
 	}
-	return nil
-}
 
 func (r *dbStruct) ClientsFollowingUser(user *User) map[*websocket.Conn]string {
 
