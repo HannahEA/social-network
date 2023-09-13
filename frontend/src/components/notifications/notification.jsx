@@ -1,22 +1,16 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import { useWebSocket } from "../WebSocketProvider.jsx";
 
 
 
 function Notification ( props ) {
+
+
     const { websocketRef, isWebSocketConnected} = useWebSocket();
-    // only working on the first 'click': Initialize visibility to true
-   // const [isVisible, setIsVisible] = useState(true);
 
     console.log("show the props inside Notification: ",props)
     console.log("show if the WS is connected inside Notification: ",isWebSocketConnected)
 
-    /*useEffect(() => {
-      // Reset visibility to true when the component unmounts
-      return () => {
-        setIsVisible(true);
-      };
-    }, []);*/ // Empty dependency array to run the cleanup function only once (on unmount)
 
     //console.log("show the visibility of Notification: ", isVisible)
     
@@ -79,7 +73,7 @@ function Notification ( props ) {
 
     //return isVisible ? (
     return (
-    <div className="notification-item" style={{ backgroundColor: '#9dd6f7', fontWeight:'strong', visibility:'visible'}}>
+    <div className="notification-item" style={{ backgroundColor: '#9dd6f7', fontWeight:'strong', visibility:`${props.notifVisible ? 'visible' : 'hidden'}`}}>
       <p id="msg">{props.message}</p>
       <span>
       <button id="btnNotifOK" className="hover:bg-[#2e5d78]"

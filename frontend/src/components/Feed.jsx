@@ -174,6 +174,7 @@ const handleClickUsersList = () => {
     .then((response) => response.json())
     .then((data) => {
       if (data.message === "All users retrieved ok") {
+        console.log({data})
         console.log("the slice of users", data.allUsers);
         setUsersList(data.allUsers);
         
@@ -1619,6 +1620,7 @@ const handleClickUsersList = () => {
           {isVisible && (
           <Notification 
             setIsVisible={setIsVisible}
+            notifVisible={isVisible}
             message={allData.current.followNotif.notifMsg}
             ID={allData.current.followNotif.followID}
           />
