@@ -1,14 +1,20 @@
-## To Do
-The 'un-follow' button lable to persist after module is closed
-The bell icon in 'feed' page to change colour when there are notifications pending
+## Helena To Do ##
+The bell icon in 'feed' page to show current number of pending notifications for logged-out private user
 When clicking on the bell a list will appear and each notification will show as:
-'notification type' '<accept btn>' '<decline btn>'
+'notification type' 'accept btn' 'decline btn'
+
 
 ## Hannah's fav colour palette: 
 https://colorhunt.co/palette/ffeeccffddccffccccfebbcc
 
 
-Modularization source by Ricky Adriell: https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html
+# Modularization source by Ricky Adriell: 
+https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html
+
+# To create a React app from scratch in the current folder
+1. First, to check that node is installed, in VSC terminal type: node -v
+2. Then, in VSC terminal type: npx create-react-app .
+3. Make a jsx file and in the file type rfc to return a react boiler plate
 
 # Database migration
 Article explaining the install commands for golang migrate package: 

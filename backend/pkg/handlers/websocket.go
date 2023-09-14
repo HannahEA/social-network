@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -221,29 +222,29 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			uploadFollowInfo.InfluencerUN = fInfo.InfliuencerUN
 			uploadFollowInfo.InfluencerVis = fInfo.InfluencerVisib
 			//Can follow public profile influencer straight away
-			if uploadFollowInfo.InfluencerVis == "public" && fInfo.UnFollow == "" {
+			if uploadFollowInfo.InfluencerVis == "public" && fInfo.FollowAction == "follow" {
 				uploadFollowInfo.Accept = "Yes"
 				//Private profile influencer needs to approve follow request
-			} else if uploadFollowInfo.InfluencerVis == "private" && fInfo.UnFollow == "" {
+			} else if uploadFollowInfo.InfluencerVis == "private" && fInfo.FollowAction == "follow" {
 				uploadFollowInfo.Accept = "Pending"
 			}
-			//This is an un-follow request so will delete the record from 'Followers' table
-			uploadFollowInfo.UFollow = fInfo.UnFollow
+			//either "follow" or "un-follow"
+			uploadFollowInfo.FollowAction = fInfo.FollowAction
 
-			fmt.Println("uploadFollowInfo", uploadFollowInfo)
+			fmt.Println("uploadFollowInfo to upload in db", uploadFollowInfo)
 
 			if uploadFollowInfo.InfluencerVis == "public" {
 				fmt.Println("Checking if follow request goes to 'visibility public' branch")
 				//populate the db table 'followers'
-				err := service.repo.InsertFollowRequest(uploadFollowInfo)
+				_, err := service.repo.InsertFollowRequest(uploadFollowInfo)
 				if err != nil {
 					log.Fatalf(err.Error())
 				}
 
-			} else if uploadFollowInfo.InfluencerVis == "private" {
+			} else if uploadFollowInfo.InfluencerVis == "private" && uploadFollowInfo.FollowAction == "follow" {
 				fmt.Println("Checking if follow request goes to 'visibility private' branch")
-				//populate the db table 'followers'
-				err := service.repo.InsertFollowRequest(uploadFollowInfo)
+				//populate the db table 'followers' and get the followID
+				followID, err := service.repo.InsertFollowRequest(uploadFollowInfo)
 				if err != nil {
 					log.Fatalf(err.Error())
 				}
@@ -254,29 +255,45 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 				for conn, client := range Clients {
 					if client == uploadFollowInfo.InfluencerUN {
-						
-						fmt.Println("follow request receiver is online")
 						reciever[conn] = client
 						online = true
+						fmt.Printf("follow request client/ receiver %v %v is %v", client, reciever, online)
+						//instantiate the 'Notif' struct
+						var fNotification FollowNotif
+						//populate the Notif struct with the notification data
+						fNotification.FollowID = strconv.Itoa(followID)
+						fNotification.NotifMsg = uploadFollowInfo.FollowerUN + " wishes to follow you. Do you accept?"
+						fNotification.Type = "FollowNotif"
+						fmt.Println("notification via ws: ", fNotification.FollowID, fNotification.NotifMsg, fNotification.Type)
+						//if online, send a notification to the owner of the private profile
+						service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{FollowNotif: fNotification, Type: "followNotif"}, Connections: reciever})
+					} else {
+						fmt.Println("Influencer is off-line. Has accept been put to pending for private profile?", uploadFollowInfo.Accept)
+						//db query to return the number of pending notifications
+
 					}
 				}
-				fmt.Println("is the influencer online?",online, reciever)
-				
-				uploadFollowInfo.NotifMsg = uploadFollowInfo.FollowerUN + " wishes to follow " + uploadFollowInfo.InfluencerUN + " do you accept? "
-				fmt.Println(uploadFollowInfo.NotifMsg)
-				//if online, send a notification to the owner of the private profile
-				service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{UploadFollow: uploadFollowInfo, Type: "FollowNotif"}, Connections: reciever})
 
-			} else {
-				fmt.Println("has accept been put to pending for private profile?", uploadFollowInfo.Accept)
-				/*OR
-				//TO DO: check for uploadFollowInfo notif
-				oldChats, count, err := service.repo.CheckForNotification(uploadFollowInfo)
-				//add new notif to database or add 1 to count
-				if !olduploadFollowInfo || olduploadFollowInfo && err == nil {
-					service.repo.AddChatNotification(uploadFollowInfo, count)
-				}*/
-				fmt.Println("Influencer is not online, must send notification and store some details")
+			} else if uploadFollowInfo.FollowAction == "un-follow" {
+				_, err := service.repo.InsertFollowRequest(uploadFollowInfo)
+				if err != nil {
+					log.Fatalf(err.Error())
+				}
+				fmt.Println("The follow record has been removed from the db")
+			}
+
+		case "followReply":
+			var fReply FollowReply
+			//populate the FollowReply struct
+			jsonErr := json.Unmarshal(b, &fReply)
+			fmt.Println("fInfo:", fReply)
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: Websocket")
+			}
+			//Update the 'accepted' field in 'Followers' table
+			err := service.repo.InsertFollowReply(fReply)
+			if err != nil {
+				fmt.Println("error inserting the follow reply", err)
 			}
 		}
 
@@ -292,37 +309,79 @@ func (r *dbStruct) BroadcastToChannel(msg BroadcastMessage) {
 	r.broadcaster <- msg
 }
 
-func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) error {
+func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) (int, error) {
 	//check if influencer is being un-followed
-	var uNfollow = uploadFollowRequest.UFollow
-	if uNfollow == "Yes" {
+	var followAction = uploadFollowRequest.FollowAction
+	if followAction == "un-follow" {
 		//remove the original 'follow' record in 'Followers' table
 		stmnt, err := repo.db.Prepare(`DELETE FROM Followers WHERE (followerUserName = ? AND influencerUserName = ?)`)
 		if err != nil {
 			fmt.Println("Error preparing delete stmt for un-follow request: ", err)
-			return err
+			return 0, err
 		}
 		_, err = stmnt.Exec(uploadFollowRequest.FollowerUN, uploadFollowRequest.InfluencerUN)
 		if err != nil {
 			fmt.Println("error deleting follow record", err)
-			return err
+			return 0, err
 		}
-	} else if uNfollow == "" {
+	} else if followAction == "follow" {
 		//User wishes to follow the influencer so will create a new record in the db table 'followers'
 		stmnt, err := repo.db.Prepare("INSERT OR IGNORE INTO Followers (followerID, followerUserName, influencerID, influencerUserName, accepted) VALUES (?, ?, ?, ?, ?)")
 		if err != nil {
 			fmt.Println("Error preparing insert stmt for follow request into DB: ", err)
-			return err
+			return 0, err
 		}
 		_, err = stmnt.Exec(uploadFollowRequest.FollowerId, uploadFollowRequest.FollowerUN, uploadFollowRequest.InfluencerId, uploadFollowRequest.InfluencerUN, uploadFollowRequest.Accept)
 		if err != nil {
 			fmt.Println("Error inserting follow request into DB: ", err)
-			return err
+			return 0, err
 		}
 
 	}
-	return nil
+	//return the auto-generated 'followID'
+	var followID int
+	rows, err := repo.db.Query("SELECT seq FROM sqlite_sequence WHERE name = 'Followers'")
+	if err != nil {
+		fmt.Println("Error returning 'seq'", err)
+		return 0, err
+	}
+	for rows.Next() {
+		err := rows.Scan(&followID)
+		if err != nil {
+			fmt.Println("sqlite_sequence: row scan error", err)
+			return 0, err
+		}
+	}
+	return followID, nil
 }
+
+//uploads private user reply to follow request
+func (repo *dbStruct) InsertFollowReply(theReply FollowReply) error {
+	var theAnswer = theReply.FollowReply
+
+	if theAnswer == "Yes" {
+		_, err := repo.db.Exec("UPDATE Followers SET accepted = ? WHERE follow = ?", theReply.FollowReply, theReply.FollowID)
+		if err != nil {
+			fmt.Println("error inserting follow reply", err)
+			return err
+		} 
+	} else if theAnswer == "No" {
+			fmt.Println("User has declined")
+			fmt.Println("before prepare delete request")
+			stmnt, err := repo.db.Prepare("DELETE FROM Followers WHERE follow = ?")
+			if err != nil {
+				fmt.Println("error preparing the delete statement to remove rejected follow request", err)
+				return err
+			}
+			fmt.Println("after prepare delete request")
+			_, err = stmnt.Exec(theReply.FollowID)
+			if err != nil {
+				fmt.Println("error deleting record of rejected follow request")
+				return err
+			}
+		}
+		return nil
+	}
 
 func (r *dbStruct) ClientsFollowingUser(user *User) map[*websocket.Conn]string {
 

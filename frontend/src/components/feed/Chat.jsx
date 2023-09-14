@@ -143,9 +143,9 @@ const PrintNewChat = ({chat}) => {
   if (chats.classList.contains('hidden') == false ) {
     let nameval = chat.username
     name.innerHTML = nameval
-    name.classList.add('font-bold', 'text-sm', 'ml-2')
+    name.classList.add('font-bold', 'text-sm', 'ml-2','dark:text-white')
     let message = document.createElement("p")
-    message.classList.add('text-sm', 'ml-4')
+    message.classList.add('text-sm', 'ml-4', 'dark:text-white')
     message.innerHTML = chat.message
     newChat.classList.add("flex", "flex-row")
     newChat.append(name)
@@ -329,7 +329,7 @@ const ChangeChatNotification = ({chat, username}) => {
           </div>
           <input id="chatInput" type="text" onChange={handleChatMessage} value={chatMessage} className=" hidden bottom-4 bg-gray-300 border-none m-2 p-3 w-9/10 h-2" placeholder="Type message.." name="msg" required/>
 
-          <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden p-2  w-full">Send</button>
+          <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden mb-2 ml-20 w-1/3 bg-[#ecbba3] rounded-lg text-white shadow-md"><strong>Send</strong></button>
 
         </div>
         <aside className=" flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
