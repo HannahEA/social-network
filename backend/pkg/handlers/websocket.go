@@ -410,7 +410,7 @@ func (r *dbStruct) FullChatUserList(user *User) Presences {
 		var influencer string
 		err := rows.Scan(&influencer)
 		if err != nil {
-			fmt.Println("FullChatUserList: row scan error", err)
+			fmt.Println("FullChatUserList: follower row scan error", err)
 			return list
 		}
 		client := []string{}
@@ -429,12 +429,24 @@ func (r *dbStruct) FullChatUserList(user *User) Presences {
 			// list.LoggedIn = append(list.LoggedIn, "no")
 		}
 		//check notifictaion table for chat notifs from influencers (people you're following)
-		_, err2 := r.db.Query(`SELECT count (*) FROM Notifications WHERE (sender, recipient) = (?,?) `, influencer, user.NickName)
-		list.Clients = append(list.Clients, client)
-		if err != nil {
+		rows2, err2 := r.db.Query(`SELECT count FROM Notifications WHERE (sender, recipient) = (?,?) `, influencer, user.NickName)
+		
+		if err2 != nil {
 			fmt.Println("FullChatUserList: query error", err)
 			return list
 		}
-	}
+		var count int
+		for rows2.Next() {
+			err := rows2.Scan(&count)
+			if err != nil {
+			fmt.Println("FullChatUserList: notif row scan error", err)
+			return list
+			}
+		}
+		c:= strconv.Itoa(count)
+		client = append(client, c)
+		list.Clients = append(list.Clients, client)
+		
+	}	
 	return list
 }

@@ -9,7 +9,7 @@ https://colorhunt.co/palette/ffeeccffddccffccccfebbcc
 
 
 # Modularization source by Ricky Adriell: 
-https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html
+(https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html)
 
 # To create a React app from scratch in the current folder
 1. First, to check that node is installed, in VSC terminal type: node -v

@@ -15,7 +15,7 @@ const AddUserToChatList = ({type, allData})=>  {
     send.classList.remove("hidden")
     // remove notification icon
     // chat box is open, notif icon is present
-    ChangeChatNotification({username: reciever})
+    RemoveChatNotification({username: reciever})
     const sender = allData.userInfo.username
     console.log("conversation participants", allData.userInfo.username, reciever)
     const getConversation = {
@@ -178,42 +178,9 @@ const RequestChatNotification = ({chat}) => {
 
   } )
 }
-
-const ChangeChatNotification = ({chat, username}) => {
-  console.log("display icon")
+const ChangeMessageNotification = ({chat}) => {
   let Icon = document.getElementById("notifIcon")
-  let chatBox = document.getElementById("chatOpen")
-  // if the chat box is open
-   if (chatBox.style.display == "flex") {
-    console.log("chat box open")
-    //range through online users
-     let users = document.getElementById("online")
-     for(const child of users.children) {
-       console.log(child.innerHTML, username, child.children.length)
-       //if the button is for the reicipient of the chat message
-       if (child.innerHTML == username) {
-        // if the chat notif icon is already present and there is no new message
-        if (child.children.length == 1 && !chat) {
-          //remove the icon 
-          console.log('removing chat notif icon')
-          let dot = document.getElementById('red-dot')
-          dot.remove()
-        } else if (child.children.length == 0 && chat){
-          console.log("!chat icon: adding")
-          //if the chat notif icon is not present and theres a new chat
-          //add the chat notif icon
-          console.log('adding chat notif icon')
-          let dot = document.createElement("div")
-          dot.setAttribute("id", "red-dot")
-         dot.classList.add('w-3', 'h-3', 'top-1', 'right-2', 'rounded-xl', 'bg-red-200')
-         child.append(dot)
-         break
-        }
-         
-       }
-     }
-    
-   } else {
+  
     // if the chat box is not open
     console.log("chat box is not open", Icon.style.display)
     // and if the chat notif icon is not present and theres a new chat 
@@ -226,45 +193,69 @@ const ChangeChatNotification = ({chat, username}) => {
      Icon.style.display = "none"
 
    }
-   }
-   
+}
+
+
+const ChangeChatNotification = ({ usernames}) => {
+    console.log("chat box open")
+    //range through offline users
+    let users = document.getElementById("offline")
+    for (let i = 0; i<2 ; i++) {
+      for(const child of users.children) {
+        for(var j = 0; j < usernames.length; j++) {
+         console.log("usernames", usernames[j][0])
+           //if the button is for the reicipient of the chat message
+            if (child.children.length == 0 &&(usernames.length == 1 || usernames[j][2] != '0')){
+                //if you open the chat box for the first time add icon to all OR if the chatbox is open and a new chat is sent add icon 
+                console.log("!chat icon: adding")
+                //if the chat notif icon is not present and theres a new chat
+                //add the chat notif icon
+                let dot = document.createElement("div")
+                dot.setAttribute("id", "red-dot")
+                dot.classList.add('w-3', 'h-3', 'top-1', 'right-2', 'rounded-xl', 'bg-red-200')
+                child.append(dot)
+                break
+              }
+           
+         }
+      }
+      //repeat for online users
+      users = document.getElementById("online")
+    }  
+} 
+
+
+const RemoveChatNotification = ({username}) => {
+  let users = document.getElementById("offline")
+     for(const child of users.children) {
+         //if the button is the one you pressed on 
+          if ( child.innerHTML == username) {
+            // if the chat notif icon is already present 
+            if (child.children.length == 1) {
+              //remove the icon 
+              console.log('removing chat notif icon')
+              let dot = document.getElementById('red-dot')
+              dot.remove()
+            }
+          }
+        
+      }
+
 }
 
  const Chat = ({websocketRef, isWebSocketConnected, allData}) => {
      // ---------CHAT FUNCTIONS--------------------
  const [chatMessage, setChatMessage] = useState("")
-  let chat
- const getChatNotifications = ({}) => {
-  fetch(`${apiURL}/chat`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(chat),
-    credentials: 'include',
-  })
-  .then(response => response.json())
-  .then((data) => {
-    if (data.status == "notification added") {
-      console.log("Chat notification added to database")
-
-    } else{
-      console.log("server error: unable to add notification to database")
-    }
-
-  } )
- }
+ 
  const handleOpenChat = (e) => {
    let chat = document.getElementById("chatOpen")
    if (chat.style.display == "flex") {
     chat.style.display = "none"
    } else {
     //remove chat notif if its present 
-     ChangeChatNotification({})
+     ChangeMessageNotification({})
      chat.style.display = "flex"
-     //load all chat notifs //fetch
-    getChatNotifications({})
-     
+
    }
  }
 
@@ -346,4 +337,4 @@ const ChangeChatNotification = ({chat, username}) => {
  
  
  
- export {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification};
+ export {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification, ChangeMessageNotification};
