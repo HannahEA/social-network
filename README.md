@@ -2,6 +2,7 @@
 The bell icon in 'feed' page to show current number of pending notifications for logged-out private user
 When clicking on the bell a list will appear and each notification will show as:
 'notification type' 'accept btn' 'decline btn'
+The back end logic to determine which users are online needs correcting
 
 
 ## Hannah's fav colour palette: 

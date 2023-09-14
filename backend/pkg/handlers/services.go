@@ -43,6 +43,7 @@ type AllDbMethods interface {
 	GetUserEmail(userId string) (string, error)
 	AddSession(w http.ResponseWriter, sessionName string, user *User)
 	InsertFollowRequest(uploadFollowRequest UploadFollow) (int, error)
+	GetPendingFollowRequests(uploadFollowRequest UploadFollow) (int, []FollowNotifOffline) 
 	InsertFollowReply(followData FollowReply) error
 	InsertSession(u *User, session *http.Cookie) *Session
 	IsUserAuthenticated(w http.ResponseWriter, u *User) error

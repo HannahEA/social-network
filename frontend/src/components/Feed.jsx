@@ -25,7 +25,7 @@ const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
 
 //below comment allows my code to use confirm()inside 'FollowYesNo'
-//replaces the react 'Notification' component
+//but this was replaced with the react 'Notification' component.
 /* eslint-disable no-restricted-globals */
 /*function FollowYesNo(id, message) {
   var reply;
@@ -62,7 +62,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}})
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
   
@@ -88,7 +88,11 @@ const Feed = () => {
           //update the value of isVisible to 'true'
           showNotification();
           console.log("the isVisible notif flag is:", isVisible)
-          
+        } else if (message.type == "offlineFollowNotif"){
+          console.log("offlineFollowNotif: ",message.offlineFollowNotif)
+          //refresh the offlineFollowNotif handle
+          allData.current.offlineFollowNotif = message.offlineFollowNotif
+          showRedDot();
 
         }
     };
@@ -109,6 +113,7 @@ const Feed = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [redDotVisible, setRedDotVisible] = useState(false);
   allData.current.userInfo = userInfo
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
  // POSTS VARIABLES
@@ -127,6 +132,11 @@ const Feed = () => {
   const showNotification = () => {
     setIsVisible(true);
   };
+
+    // Function to show the Notification
+    const showRedDot = () => {
+      setRedDotVisible(true);
+    };
 
   useEffect(() => {
     verifyCookie();
@@ -584,9 +594,12 @@ const handleClickUsersList = () => {
               </svg>
             </button>
             <div className="counter">
-                       {selectedUser && (
+                       {redDotVisible && (
                       <Alerts 
-                        countNotifications =  {parseInt(selectedUser.numNotifications, 10)} 
+                        setDotVisible = {setRedDotVisible}
+                        dotVisible = {redDotVisible}
+                        countFollowNotifs =  {parseInt(allData.current.offlineFollowNotif.numPending, 10)} 
+                        pendingFolNotif = {allData.current.offlineFollowNotif.pendingFollows}
                       />
                       )}
             </div> 

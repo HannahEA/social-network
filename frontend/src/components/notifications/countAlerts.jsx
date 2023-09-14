@@ -1,8 +1,8 @@
 import React from "react";
 
 function Alerts (props){
-    <div className="counter">
-    {props.countNotifications}
+    <div className="counter" style={{visibility:`${props.dotVisible ? 'visible' : 'hidden'}`}}>
+    {props.countFollowNotifs}
   </div>
 }
 
