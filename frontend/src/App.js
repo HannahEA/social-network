@@ -8,6 +8,7 @@ import WebSocketProvider from "./components/WebSocketProvider";
 import Profile from "./components/Profile";
 import { TopNavigation, ThemeIcon } from "./components/TopNavigation";
 import Notification from "./components/notifications/notification.jsx";
+import Alerts from "./components/notifications/countAlerts.jsx";
 const apiURL = process.env.REACT_APP_API_URL;
 function App() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -33,6 +34,7 @@ function App() {
         <Route path="/feed" element={<WebSocketProvider>
       <Feed/>
       <Notification/>
+      <Alerts/>
     </WebSocketProvider>} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
