@@ -66,8 +66,8 @@ type AllDbMethods interface {
 	getAvatar(email string) (string, error)
 	checkCookieDB(cookieValue string) int
 	BroadcastToChannel(msg BroadcastMessage)
-	FindConversation(convo Conversation) Conversation
-	NewPrivateChatToDB(convo Conversation) Conversation
+	FindConversation(convo Chat) Conversation
+	NewPrivateChatToDB(convo Chat) 
 	GetChatHistory(convo Conversation) []Chat
 	AddChatToDatabase(chat Chat)
 	AddChatNotification(chat Chat, count int)

@@ -123,8 +123,9 @@ type WebsocketMessage struct {
 
 type Presences struct {
 	//logged in users nicknames
-	Clients  [][]string `json:"clients"`
-	LoggedIn []string   `json:"loggedIn"`
+	Clients           [][]string `json:"clients"`
+	LoggedIn          []string   `json:"loggedIn"`
+	NotificationCount []int      `json:"notifCount"`
 }
 
 type Conversation struct {

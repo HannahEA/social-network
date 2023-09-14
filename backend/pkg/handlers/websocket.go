@@ -369,7 +369,13 @@ func (r *dbStruct) FullChatUserList(user *User) Presences {
 			client = append(client, "no")
 			// list.LoggedIn = append(list.LoggedIn, "no")
 		}
+		//check notifictaion table for chat notifs from influencers (people you're following)
+		_, err2 := r.db.Query(`SELECT count (*) FROM Notifications WHERE (sender, recipient) = (?,?) `, influencer, user.NickName)
 		list.Clients = append(list.Clients, client)
+		if err != nil {
+			fmt.Println("FullChatUserList: query error", err)
+			return list
+		}
 	}
 	return list
 }

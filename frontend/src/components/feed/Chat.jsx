@@ -13,6 +13,9 @@ const AddUserToChatList = ({type, allData})=>  {
     let send = document.getElementById("sendButton")
     input.classList.remove("hidden")
     send.classList.remove("hidden")
+    // remove notification icon
+    // chat box is open, notif icon is present
+    ChangeChatNotification({username: reciever})
     const sender = allData.userInfo.username
     console.log("conversation participants", allData.userInfo.username, reciever)
     const getConversation = {
@@ -67,7 +70,7 @@ const AddUserToChatList = ({type, allData})=>  {
   }
   // create presence set css based on online offline
   let style = "flex items-center p-2 w-full text-base font-medium rounded-md transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" 
-  let icon = document.createElement("img")
+ 
   if (allData.presences.clients) {
     allData.presences.clients.forEach((p)=> {
       if (p[0] != allData.userInfo.username) {
@@ -81,9 +84,9 @@ const AddUserToChatList = ({type, allData})=>  {
           let online = document.getElementById('online') 
           //add styling to button
           button.className = style
-          icon.setAttribute("src", "https://icons8.com/icon/FkQHNSmqWQWH/green-circle")
+          
           button.classList.add("text-gray-900" )
-          button.append(icon)
+          
           button.innerHTML = p[0]
           online.append(button)
         } else {
@@ -91,8 +94,8 @@ const AddUserToChatList = ({type, allData})=>  {
           //add styling to button 
           button.className = style
           button.classList.add("text-gray-300")
-          icon.setAttribute("src", "/Users/admin/Desktop/Repos/social-network/frontend/src/components/feed/chatIcons/chatIcons/circle.png")
-          button.append(icon)
+          
+        
           button.innerHTML = p[0]
           offline.append(button)
         }
@@ -154,6 +157,7 @@ const PrintNewChat = ({chat}) => {
 }
 
 const RequestChatNotification = ({chat}) => {
+  console.log("adding chat Notification")
   chat.status = "delivered"
   fetch(`${apiURL}/chat`, {
     method: "POST",
@@ -165,24 +169,106 @@ const RequestChatNotification = ({chat}) => {
   })
   .then(response => response.json())
   .then((data) => {
-    console.log("Chat notification added to database")
+    if (data.status == "notification added") {
+      console.log("Chat notification added to database")
+
+    } else{
+      console.log("server error: unable to add notification to database")
+    }
 
   } )
+}
+
+const ChangeChatNotification = ({chat, username}) => {
+  console.log("display icon")
+  let Icon = document.getElementById("notifIcon")
+  let chatBox = document.getElementById("chatOpen")
+  // if the chat box is open
+   if (chatBox.style.display == "flex") {
+    console.log("chat box open")
+    //range through online users
+     let users = document.getElementById("online")
+     for(const child of users.children) {
+       console.log(child.innerHTML, username, child.children.length)
+       //if the button is for the reicipient of the chat message
+       if (child.innerHTML == username) {
+        // if the chat notif icon is already present and there is no new message
+        if (child.children.length == 1 && !chat) {
+          //remove the icon 
+          console.log('removing chat notif icon')
+          let dot = document.getElementById('red-dot')
+          dot.remove()
+        } else if (child.children.length == 0 && chat){
+          console.log("!chat icon: adding")
+          //if the chat notif icon is not present and theres a new chat
+          //add the chat notif icon
+          console.log('adding chat notif icon')
+          let dot = document.createElement("div")
+          dot.setAttribute("id", "red-dot")
+         dot.classList.add('w-3', 'h-3', 'top-1', 'right-2', 'rounded-xl', 'bg-red-200')
+         child.append(dot)
+         break
+        }
+         
+       }
+     }
+    
+   } else {
+    // if the chat box is not open
+    console.log("chat box is not open", Icon.style.display)
+    // and if the chat notif icon is not present and theres a new chat 
+    if (Icon.style.display != "flex" && chat) {
+      console.log("adding icon")
+    //add the chat notif icon
+    Icon.style.display = "flex"
+   } else if (Icon.style.display == "flex"){
+    // remove the chat notif icon
+     Icon.style.display = "none"
+
+   }
+   }
+   
 }
 
  const Chat = ({websocketRef, isWebSocketConnected, allData}) => {
      // ---------CHAT FUNCTIONS--------------------
  const [chatMessage, setChatMessage] = useState("")
+  let chat
+ const getChatNotifications = ({}) => {
+  fetch(`${apiURL}/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(chat),
+    credentials: 'include',
+  })
+  .then(response => response.json())
+  .then((data) => {
+    if (data.status == "notification added") {
+      console.log("Chat notification added to database")
 
+    } else{
+      console.log("server error: unable to add notification to database")
+    }
 
+  } )
+ }
  const handleOpenChat = (e) => {
    let chat = document.getElementById("chatOpen")
-   if (chat.style.display == "none") {
-     chat.style.display = "flex"
+   if (chat.style.display == "flex") {
+    chat.style.display = "none"
    } else {
-     chat.style.display = "none"
+    //remove chat notif if its present 
+     ChangeChatNotification({})
+     chat.style.display = "flex"
+     //load all chat notifs //fetch
+    getChatNotifications({})
+     
    }
  }
+
+ 
 
  const handleChatMessage = (event) => {
    
@@ -229,8 +315,12 @@ const RequestChatNotification = ({chat}) => {
 
  return (
     <div>
-        <button onClick={handleOpenChat} className="fixed bg-gray-500 text-white font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2" > Messages</button>
-      <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 w-96 bg-white" id="chatOpen">
+        <button onClick={handleOpenChat} id="messages" className="fixed bg-gray-500 text-white font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2" > Messages
+        <div className="hidden bg-red-300 rounded-lg absolute -top-4 right-2 w-8 h-8 " id="notifIcon">
+          <img src="https://www.svgrepo.com/show/533249/message-circle-notification.svg" alt=""  className=" w-5 absolute top-1 right-1"/>
+        </div>
+        </button>
+        <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 w-96 bg-white" id="chatOpen">
         
         <div id = "chatContainer" className="flex flex-col justify-end align-center w-2/3 overflow-scroll">
           
@@ -256,4 +346,4 @@ const RequestChatNotification = ({chat}) => {
  
  
  
- export {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification};
+ export {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification};

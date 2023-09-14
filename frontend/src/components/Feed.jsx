@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
-import {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification} from "./feed/Chat"
+import {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification} from "./feed/Chat"
 import handleLogout from "./feed/Logout";
 import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
@@ -49,7 +49,9 @@ const Feed = () => {
           } else {
             // post request- add chat notification to db server side
             RequestChatNotification({chat: message.chat})
-            // add notification to the relevant chat 
+            // add notification icon to the relevant chat or to the messages button
+            console.log("add notif icon")
+            ChangeChatNotification({chat:message.chat, username:message.chat.username})
           }
           
         }
