@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
-import {Chat, AddUserToChatList, PrintNewChat} from "./feed/Chat"
+import {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification} from "./feed/Chat"
 import handleLogout from "./feed/Logout";
 import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
@@ -70,15 +70,28 @@ const Feed = () => {
       websocketRef.current.onmessage = (e) => {
         // Handle WebSocket messages here
         let message = JSON.parse(e.data)
-        console.log(message)
-        if (message.type == "connect") {
+        console.log(message, "web message")
+        if (message.type == "connect" || message.type == "user update") {
            // console.log(message)
           allData.current.presences = message.presences
           // console.log("current presences", allData.current.presences)
           //update chat user list
-          AddUserToChatList({allData: allData.current})
+          AddUserToChatList({type: message.type, allData: allData.current})
         } else if (message.type == "chat") {
           console.log("chat recieved", message)
+          //check which chat is open in the chatbox by checking the chats div name which should be the converstion id
+          let chatId = document.getElementById('chats').getAttribute('name')
+          if (message.chat.chatID == chatId) {
+            // if the converstion id of the chat matches the open chat, then print the chat
+            PrintNewChat({chat: message.chat})
+          } else {
+            // post request- add chat notification to db server side
+            RequestChatNotification({chat: message.chat})
+            // add notification icon to the relevant chat or to the messages button
+            console.log("add notif icon")
+            ChangeChatNotification({chat:message.chat, username:message.chat.username})
+          }
+          
           // let chat = message.chat
           PrintNewChat({chat: message.chat})
         } else if (message.type == "followNotif"){

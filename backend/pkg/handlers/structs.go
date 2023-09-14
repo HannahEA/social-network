@@ -127,8 +127,9 @@ type WebsocketMessage struct {
 
 type Presences struct {
 	//logged in users nicknames
-	Clients  []string `json:"clients"`
-	LoggedIn []string `json:"loggedIn"`
+	Clients           [][]string `json:"clients"`
+	LoggedIn          []string   `json:"loggedIn"`
+	NotificationCount []int      `json:"notifCount"`
 }
 
 type Conversation struct {
@@ -149,6 +150,7 @@ type Chat struct {
 	Date           string `json:"date"`
 	ChatId         string `json:"chatID"`
 	ConversationId string `json:"convoID"`
+	Status         string `json:"status"`
 }
 
 type Follow struct {
