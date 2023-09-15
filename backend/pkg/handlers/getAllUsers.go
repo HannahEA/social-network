@@ -105,7 +105,6 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 	}
 
 	var oneUser AllUsersData
-	fmt.Println("#### 1 ### initializing the AllUsersData struct here")
 
 	for rows.Next() {
 		err := rows.Scan(&oneUser.ID, &oneUser.NickName, &oneUser.Avatar, &oneUser.Image, &oneUser.AboutMe, &oneUser.ProfVisib, &oneUser.LoggedIn, &oneUser.Influencer)
@@ -113,12 +112,6 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 			return uData, err
 		}
 
-		fmt.Println("#### 2 #### We are past the rows.Scan here")
-
-		//print scanned values
-		fmt.Println("#### 3 #### Scanned ID:", oneUser.ID, "Scanned influencer #:", oneUser.Influencer)
-
-		fmt.Println(" #### 4 #### All oneUser information: ", oneUser)
 		uData = append(uData, oneUser)
 	}
 
@@ -127,7 +120,6 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 		return uData, err
 	}
 
-	fmt.Println("the slice of all users inside the GetUsersData function: ", uData)
 	return uData, nil
 }
 

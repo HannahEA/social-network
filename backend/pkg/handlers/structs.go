@@ -160,6 +160,7 @@ type Follow struct {
 	InfluencerID    int    `json:"influencerID"`
 	InfluencerVisib string `json:"influencerVisib"`
 	FollowAction    string `json:"fAction"`
+	InfluLogged     string `json:"influLogged"`
 }
 
 type UploadFollow struct {
@@ -182,7 +183,7 @@ type FollowNotif struct {
 
 //single instance of f.r.n. sent to offline private influencer
 type FollowNotifOffline struct {
-	FollowID     int `json:"followID"`
+	FollowID     int    `json:"followID"`
 	FollowerUN   string `json:"followerUN"`
 	InfluencerUN string `json:"influencerUN"`
 }
