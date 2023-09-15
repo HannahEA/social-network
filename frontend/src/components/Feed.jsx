@@ -79,10 +79,12 @@ const Feed = () => {
           AddUserToChatList({type: message.type, allData: allData.current})
           //chat notifications 
           let chatBox = document.getElementById("chatOpen")
-          if (chatBox.display == "flex") {
-             ChangeChatNotification({ usernames:message.presences.clients})
-          } else {
-            ChangeMessageNotification({chat: message.chat})
+          for (const user in message.presences.clients) {
+            if (user[2] != '0') {
+              ChangeChatNotification({ usernames:message.presences.clients})
+              ChangeMessageNotification({chat: message.chat})
+              break
+            }
           }
          
         } else if (message.type == "chat") {
@@ -99,23 +101,11 @@ const Feed = () => {
             RequestChatNotification({chat: message.chat})
             // add notification icon to the relevant chat or to the messages button
             console.log("add notif icon")
-            let chatBox = document.getElementById("chatOpen")
-            if (chatBox.display == "flex") {
-              ChangeChatNotification({chat:message.chat, username:[[message.chat.username]]})
-            } else {
-              for (const user in message.presences.clients) {
-                if (user[2] != '0') {
-                  ChangeMessageNotification({chat: message.chat})
-                  break
-                }
-              }
-             
-            }
             
-          }
-          
-          
-        } else if (message.type == "followNotif"){
+              ChangeChatNotification({chat:message.chat, username:[[message.chat.username]]})
+              ChangeMessageNotification({chat: message.chat}) 
+            } 
+          } else if (message.type == "followNotif"){
           //send follow notification request to online user
           console.log("follow notification:\n", message.followNotif)
           allData.current.followNotif = message.followNotif
