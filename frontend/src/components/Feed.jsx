@@ -62,7 +62,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}})
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlFollowNotif:{}})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
   
@@ -72,11 +72,15 @@ const Feed = () => {
         let message = JSON.parse(e.data)
         console.log(message)
         if (message.type == "connect") {
-           // console.log(message)
-          allData.current.presences = message.presences
-          // console.log("current presences", allData.current.presences)
+
+          allData.current.presences = message.presences;
+          allData.current.offlFollowNotif = message.offlFollowNotif;
+          //update pending follow alerts
+          showRedDot();
           //update chat user list
-          AddUserToChatList({allData: allData.current})
+          AddUserToChatList({allData: allData.current});
+
+
         } else if (message.type == "chat") {
           console.log("chat recieved", message)
           // let chat = message.chat
@@ -88,12 +92,6 @@ const Feed = () => {
           //update the value of isVisible to 'true'
           showNotification();
           console.log("the isVisible notif flag is:", isVisible)
-        } else if (message.type == "offlineFollowNotif"){
-          console.log("offlineFollowNotif: ",message.offlineFollowNotif)
-          //refresh the offlineFollowNotif handle
-          allData.current.offlineFollowNotif = message.offlineFollowNotif
-          showRedDot();
-
         }
     };
   }
@@ -228,6 +226,7 @@ const handleClickUsersList = () => {
       var influencerID = selectedUser.id;
       var influencerVisib = selectedUser.profVisib;
       var followAction
+      var logged = selectedUser.loggedIn
       var btnLabel = document.getElementById("follow");
 
       // var fAction ;
@@ -243,7 +242,7 @@ const handleClickUsersList = () => {
       }
 
 
-  // request info sent to the back end
+  // request info is sent to the back end
     const followInfo = {
       "type": "followingRequest",
       "followerEmail": email,
@@ -251,6 +250,7 @@ const handleClickUsersList = () => {
       "influencerID": influencerID,
       "influencerVisib": influencerVisib,
       "fAction": followAction,
+      "influLogged": logged,
     }
     //this returns correct influencer info
     console.log("printing selectedUser to be sent via websocket for followAction:", selectedUser, followAction)
@@ -598,8 +598,8 @@ const handleClickUsersList = () => {
                       <Alerts 
                         setDotVisible = {setRedDotVisible}
                         dotVisible = {redDotVisible}
-                        countFollowNotifs =  {parseInt(allData.current.offlineFollowNotif.numPending, 10)} 
-                        pendingFolNotif = {allData.current.offlineFollowNotif.pendingFollows}
+                        countFollowNotifs =  {parseInt(allData.current.offlFollowNotif.numPending, 10)} 
+                        pendingFolNotif = {allData.current.offlFollowNotif.pendingFollows}
                       />
                       )}
             </div> 
