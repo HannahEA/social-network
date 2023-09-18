@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
-import {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification} from "./feed/Chat"
+import {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification, ChangeMessageNotification} from "./feed/Chat"
 import handleLogout from "./feed/Logout";
 import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-// import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
+
 import Card from "./usersInfo/Card.jsx";
 import createCard from "./usersInfo/CreateCard.jsx";
 import CreateNotification from "./notifications/createNotification.js";
@@ -16,7 +16,7 @@ import Detail from "./usersInfo/Detail.jsx";
 import Alerts from "./notifications/countAlerts.jsx";
 import Notification from "./notifications/notification.jsx";
 import { Notyf } from "notyf";
-import { FunctionsRounded } from "@material-ui/icons";
+// import { FunctionsRounded } from "@material-ui/icons";
 
 //Environment variable from the docker-compose.yml file.
 //This variable will contain the URL of the backend service,
@@ -77,11 +77,23 @@ const Feed = () => {
           // console.log("current presences", allData.current.presences)
           //update chat user list
           AddUserToChatList({type: message.type, allData: allData.current})
+          //chat notifications 
+          let chatBox = document.getElementById("chatOpen")
+          for (const user in message.presences.clients) {
+            if (user[2] != '0') {
+              ChangeChatNotification({ usernames:message.presences.clients})
+              ChangeMessageNotification({chat: message.chat})
+              break
+            }
+          }
+         
         } else if (message.type == "chat") {
           console.log("chat recieved", message)
           //check which chat is open in the chatbox by checking the chats div name which should be the converstion id
           let chatId = document.getElementById('chats').getAttribute('name')
+          console.log(chatId, " chatId")
           if (message.chat.chatID == chatId) {
+            console.log("printing chat")
             // if the converstion id of the chat matches the open chat, then print the chat
             PrintNewChat({chat: message.chat})
           } else {
@@ -89,12 +101,11 @@ const Feed = () => {
             RequestChatNotification({chat: message.chat})
             // add notification icon to the relevant chat or to the messages button
             console.log("add notif icon")
-            ChangeChatNotification({chat:message.chat, username:message.chat.username})
-          }
-          
-          // let chat = message.chat
-          PrintNewChat({chat: message.chat})
-        } else if (message.type == "followNotif"){
+            
+              ChangeChatNotification({chat:message.chat, username:[[message.chat.username]]})
+              ChangeMessageNotification({chat: message.chat}) 
+            } 
+          } else if (message.type == "followNotif"){
           //send follow notification request to online user
           console.log("follow notification:\n", message.followNotif)
           allData.current.followNotif = message.followNotif
