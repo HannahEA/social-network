@@ -23,38 +23,6 @@ import { FunctionsRounded } from "@material-ui/icons";
 //allowing the frontend code to make requests to the correct endpoint.
 const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
-
-//below comment allows my code to use confirm()inside 'FollowYesNo'
-//but this was replaced with the react 'Notification' component.
-/* eslint-disable no-restricted-globals */
-/*function FollowYesNo(id, message) {
-  var reply;
-  if (typeof message !== 'undefined') {
-    //send the message and collect user reply
-    //this code only works if developer tools window is docked to tab
-    let followYesNo = confirm(message);
-    //to prevent Chrome suppressing dialogs
-   // window.opener.confirm = window.confirm;
-    //user has clicked on 'OK'
-    if (followYesNo) {
-      // User has accepted, send data to the backend to change 'accepted' field in 'Followers' table to 'Yes'
-      reply = "Yes";
-    } else {
-      // User declined - change 'accepted' field in 'Followers' table to 'No'
-      reply = "No";
-    }
-  } else {
-    console.error("Message is undefined");
-  }
-  // Store user reply
-  var followReply = {
-    "followID": id,
-    "followReply": reply,
-    "type": "followReply",
-  };
-  return followReply;
-}
-*/
  
 
 
@@ -62,7 +30,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlFollowNotif:{}})
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
   
@@ -70,16 +38,22 @@ const Feed = () => {
       websocketRef.current.onmessage = (e) => {
         // Handle WebSocket messages here
         let message = JSON.parse(e.data)
-        console.log(message)
-        if (message.type == "connect") {
 
-          allData.current.presences = message.presences;
-          allData.current.offlFollowNotif = message.offlFollowNotif;
+        if (message.type == "connect") {
+          console.log("Entering the 'connect' branch of onmessage")
+          allData.current = message;
+          
+          // allData.current.presences = message.presences;
+          // allData.current.offlineFollowNotif = message.offlineFollowNotif;
           //update pending follow alerts
+          console.log("is r.d. visible before ---> ",redDotVisible)
           showRedDot();
+          console.log("is r.d. visible after ---> ",redDotVisible)
           //update chat user list
           AddUserToChatList({allData: allData.current});
-
+          console.log("the allData.current value is: ",allData.current)
+          console.log("the allData.current.presences value is: ",allData.current.presences)
+          console.log("the allData.current.offlineFollowNotif value is: ",allData.current.offlineFollowNotif)
 
         } else if (message.type == "chat") {
           console.log("chat recieved", message)
@@ -596,10 +570,10 @@ const handleClickUsersList = () => {
             <div className="counter">
                        {redDotVisible && (
                       <Alerts 
-                        setDotVisible = {setRedDotVisible}
-                        dotVisible = {redDotVisible}
-                        countFollowNotifs =  {parseInt(allData.current.offlFollowNotif.numPending, 10)} 
-                        pendingFolNotif = {allData.current.offlFollowNotif.pendingFollows}
+                        setDotVisible={setRedDotVisible}
+                        dotVisible={redDotVisible}
+                        countFollowNotifs={parseInt(allData.current.offlineFollowNotif.numPending, 10)} 
+                        pendingFolNotif={allData.current.offlineFollowNotif.pendingFollows}
                       />
                       )}
             </div> 
