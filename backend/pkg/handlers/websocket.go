@@ -100,12 +100,31 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 				fmt.Println("new web connection - new client logged in")
 
+				//====> Start of offline follow notification <======
+
+				//get user's pending follow requests
+				fmt.Println("The offline requests are for influencer: ", user.NickName)
+				countPending, slicePending := service.repo.GetPendingFollowRequests(user.NickName)
+
+				fmt.Println("The count of pending follow r. and the slice of Pending: ", countPending, slicePending)
+
+				//instantiate the OfflineFollowNotif struct to be sent via ws
+				var offlineFollowNotif = OfflineFollowNotif{
+					PendingFollows: slicePending,
+					NumPending:     strconv.Itoa(countPending),
+				}
+
+				fmt.Println("the OfflineFollowNotif struct sent to front end: ", offlineFollowNotif)
+
+				//=====> End of offline follow notification <======
+
 				//create message in websocket message struct to send to clients following the newly logged in user
 				webMessage := WebsocketMessage{
 					Presences: Presences{
 						Clients:  []string{user.NickName},
 						LoggedIn: []string{"yes"},
 					},
+					OfflineFollowNotif: offlineFollowNotif,
 					Type: "connect",
 				}
 
@@ -154,6 +173,8 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				OfflineFollowNotif: offlineFollowNotif,
 				Type:               "connect",
 			}
+
+			fmt.Println("the webMessage struct sent to f.e.: ", webMessage)
 
 			// send websocket message to channel in broadcast message  struct with the reciever map
 			if len(presences.Clients) > 0 {

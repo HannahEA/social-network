@@ -39,21 +39,20 @@ const Feed = () => {
         // Handle WebSocket messages here
         let message = JSON.parse(e.data)
 
-        if (message.type == "connect") {
+
+        if (message.type === "connect") {
           console.log("Entering the 'connect' branch of onmessage")
           allData.current = message;
           
           allData.current.presences = message.presences;
           allData.current.offlineFollowNotif = message.offlineFollowNotif;
           //update pending follow alerts
-          console.log("is r.d. visible before ---> ",redDotVisible)
+
           showRedDot();
-          console.log("is r.d. visible after ---> ",redDotVisible)
+
           //update chat user list
           AddUserToChatList({allData: allData.current});
-          console.log("the allData.current value is: ",allData.current)
-          console.log("the allData.current.presences value is: ",allData.current.presences)
-          console.log("the allData.current.offlineFollowNotif value is: ",allData.current.offlineFollowNotif)
+
 
         } else if (message.type == "chat") {
           console.log("chat recieved", message)
@@ -567,7 +566,7 @@ const handleClickUsersList = () => {
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
             </button>
-            <div className="counter">
+            <div className="counter" style={{visibility:`${allData.current.offlineFollowNotif.numPending > 0 ? 'visible' : 'hidden'}`}}>
                        {redDotVisible && (
                       <Alerts 
                         setDotVisible={setRedDotVisible}

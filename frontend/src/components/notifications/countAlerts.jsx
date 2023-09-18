@@ -5,11 +5,14 @@ import { useWebSocket } from "../WebSocketProvider.jsx";
 function Alerts (props){
     console.log("show the props inside Alerts: ", props);
 
-
-    <div className="counter" style={{visibility:`${props.dotVisible ? 'visible' : 'hidden'}`}}>
+return (
+  <div>
     
-    {props.countFollowNotifs}
-  </div>
+  {props.countFollowNotifs}
+  
+</div>
+)
+
 }
 
 export default Alerts
