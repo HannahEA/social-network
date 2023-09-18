@@ -43,8 +43,8 @@ const Feed = () => {
           console.log("Entering the 'connect' branch of onmessage")
           allData.current = message;
           
-          // allData.current.presences = message.presences;
-          // allData.current.offlineFollowNotif = message.offlineFollowNotif;
+          allData.current.presences = message.presences;
+          allData.current.offlineFollowNotif = message.offlineFollowNotif;
           //update pending follow alerts
           console.log("is r.d. visible before ---> ",redDotVisible)
           showRedDot();
