@@ -102,6 +102,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				fmt.Println("new web connection - new client logged in")
 
 				//create message in websocket message struct to send to clients following the newly logged in user
+
 				client := []string{user.NickName, "yes"}
 				webMessage := WebsocketMessage{
 					Presences: Presences{
@@ -355,7 +356,7 @@ func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) (int
 	return followID, nil
 }
 
-//uploads private user reply to follow request
+// uploads private user reply to follow request
 func (repo *dbStruct) InsertFollowReply(theReply FollowReply) error {
 	var theAnswer = theReply.FollowReply
 
@@ -364,37 +365,45 @@ func (repo *dbStruct) InsertFollowReply(theReply FollowReply) error {
 		if err != nil {
 			fmt.Println("error inserting follow reply", err)
 			return err
-		} 
-	} else if theAnswer == "No" {
-			fmt.Println("User has declined")
-			fmt.Println("before prepare delete request")
-			stmnt, err := repo.db.Prepare("DELETE FROM Followers WHERE follow = ?")
-			if err != nil {
-				fmt.Println("error preparing the delete statement to remove rejected follow request", err)
-				return err
-			}
-			fmt.Println("after prepare delete request")
-			_, err = stmnt.Exec(theReply.FollowID)
-			if err != nil {
-				fmt.Println("error deleting record of rejected follow request")
-				return err
-			}
 		}
-		return nil
+	} else if theAnswer == "No" {
+		fmt.Println("User has declined")
+		fmt.Println("before prepare delete request")
+		stmnt, err := repo.db.Prepare("DELETE FROM Followers WHERE follow = ?")
+		if err != nil {
+			fmt.Println("error preparing the delete statement to remove rejected follow request", err)
+			return err
+		}
+		fmt.Println("after prepare delete request")
+		_, err = stmnt.Exec(theReply.FollowID)
+		if err != nil {
+			fmt.Println("error deleting record of rejected follow request")
+			return err
+		}
 	}
+	return nil
+}
 
 func (r *dbStruct) ClientsFollowingUser(user *User) map[*websocket.Conn]string {
 
 	list := make(map[*websocket.Conn]string)
 	for conn, name := range Clients {
 		fmt.Println(" check if ", name, "follows ", user.NickName)
-		_, err := r.db.Query(`SELECT COUNT (*) FROM Followers WHERE (followerUserName, influencerUserName) = (?,?) `, name, user.NickName)
+		stmt, err := r.db.Prepare(`SELECT COUNT (*) FROM Followers WHERE (followerUserName, influencerUserName) = (?,?) `)
 		if err != nil {
-			fmt.Println("ClientsFollowingUser: client not following user, query error", err)
+			fmt.Println("ClientsFollowingUser:Prepare error", err)
 			//client not following user
 			continue
 		}
-		list[conn] = name
+		var count int
+		err = stmt.QueryRow(name, user.NickName).Scan(&count)
+		if err != nil {
+			fmt.Println("ClientsFollowingUser: client not following user, query error", err)
+			continue
+		}
+		if count > 0 {
+			list[conn] = name
+		}
 	}
 	return list
 }
@@ -403,7 +412,7 @@ func (r *dbStruct) FullChatUserList(user *User) Presences {
 	var list Presences
 	rows, err := r.db.Query(`SELECT influencerUserName FROM Followers WHERE followerUserName = ? `, user.NickName)
 	if err != nil {
-		fmt.Println("FullChatUserList: query error", err)
+		fmt.Println("FullChatUserList: query error", err, err)
 		return list
 	}
 	for rows.Next() {
@@ -428,25 +437,38 @@ func (r *dbStruct) FullChatUserList(user *User) Presences {
 			client = append(client, "no")
 			// list.LoggedIn = append(list.LoggedIn, "no")
 		}
-		//check notifictaion table for chat notifs from influencers (people you're following)
-		rows2, err2 := r.db.Query(`SELECT count FROM Notifications WHERE (sender, recipient) = (?,?) `, influencer, user.NickName)
-		
-		if err2 != nil {
-			fmt.Println("FullChatUserList: query error", err)
-			return list
+		chat := Chat{
+			Sender:   influencer,
+			Reciever: user.NickName,
 		}
-		var count int
-		for rows2.Next() {
-			err := rows2.Scan(&count)
-			if err != nil {
-			fmt.Println("FullChatUserList: notif row scan error", err)
-			return list
-			}
+		_, count, err3 := r.CheckForNotification(chat)
+		if err3 != nil {
+
 		}
-		c:= strconv.Itoa(count)
+		c := strconv.Itoa(count)
 		client = append(client, c)
 		list.Clients = append(list.Clients, client)
-		
-	}	
+
+		// //check notifictaion table for chat notifs from influencers (people you're following)
+		// rows2, err2 := r.db.Query(`SELECT count FROM Notifications WHERE (sender, recipient) = (?,?) `, influencer, user.NickName)
+		// count := 0
+		// if err2 != nil {
+		// 	fmt.Println("FullChatUserList: notification query error", err)
+
+		// } else {
+		// 	for rows2.Next() {
+		// 		err := rows2.Scan(&count)
+		// 		if err != nil {
+		// 			fmt.Println("FullChatUserList: notif row scan error", err)
+		// 			break
+		// 		}
+		// 	}
+		// }
+
+		// c := strconv.Itoa(count)
+		// client = append(client, c)
+		// list.Clients = append(list.Clients, client)
+
+	}
 	return list
 }

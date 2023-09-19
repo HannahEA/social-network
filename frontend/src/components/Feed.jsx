@@ -71,15 +71,17 @@ const Feed = () => {
         // Handle WebSocket messages here
         let message = JSON.parse(e.data)
         console.log(message, "web message")
-        if (message.type == "connect" || message.type == "user update") {
+        if (message.type == "connect") {
            // console.log(message)
           allData.current.presences = message.presences
           // console.log("current presences", allData.current.presences)
           //update chat user list
+          console.log("message type", message.type)
           AddUserToChatList({type: message.type, allData: allData.current})
           //chat notifications 
-          let chatBox = document.getElementById("chatOpen")
-          for (const user in message.presences.clients) {
+         
+          for (const user of message.presences.clients) {
+            console.log("no. of chats", user)
             if (user[2] != '0') {
               ChangeChatNotification({ usernames:message.presences.clients})
               ChangeMessageNotification({chat: message.chat})
@@ -87,7 +89,11 @@ const Feed = () => {
             }
           }
          
-        } else if (message.type == "chat") {
+        } else if (message.type == "user update") {
+          console.log("message type", message.type)
+          allData.current.presences = message.presences
+          AddUserToChatList({type: message.type, allData: allData.current})
+        }else if (message.type == "chat") {
           console.log("chat recieved", message)
           //check which chat is open in the chatbox by checking the chats div name which should be the converstion id
           let chatId = document.getElementById('chats').getAttribute('name')
@@ -101,9 +107,12 @@ const Feed = () => {
             RequestChatNotification({chat: message.chat})
             // add notification icon to the relevant chat or to the messages button
             console.log("add notif icon")
-            
-              ChangeChatNotification({chat:message.chat, username:[[message.chat.username]]})
+            let chatBox = document.getElementById("chatOpen")
+            if (chatBox.style.display != "flex") {
+              console.log("chat box is not open", chatBox.display)
               ChangeMessageNotification({chat: message.chat}) 
+            }
+              ChangeChatNotification({usernames:[[message.chat.username]]})
             } 
           } else if (message.type == "followNotif"){
           //send follow notification request to online user
