@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
-import {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification, ChangeMessageNotification} from "./feed/Chat"
+import {Chat, AddUserToChatList, PrintNewChat} from "./feed/Chat"
 import handleLogout from "./feed/Logout";
 import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-
+// import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
 import Card from "./usersInfo/Card.jsx";
 import createCard from "./usersInfo/CreateCard.jsx";
 import CreateNotification from "./notifications/createNotification.js";
@@ -16,7 +16,9 @@ import Detail from "./usersInfo/Detail.jsx";
 import Alerts from "./notifications/countAlerts.jsx";
 import Notification from "./notifications/notification.jsx";
 import { Notyf } from "notyf";
-// import { FunctionsRounded } from "@material-ui/icons";
+import { FunctionsRounded } from "@material-ui/icons";
+
+
 
 //Environment variable from the docker-compose.yml file.
 //This variable will contain the URL of the backend service,
@@ -30,7 +32,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}})
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{} })
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
   
@@ -38,42 +40,26 @@ const Feed = () => {
       websocketRef.current.onmessage = (e) => {
         // Handle WebSocket messages here
         let message = JSON.parse(e.data)
-        console.log(message, "web message")
-        if (message.type == "connect" || message.type == "user update") {
-           // console.log(message)
-          allData.current.presences = message.presences
-          // console.log("current presences", allData.current.presences)
+        
+        if (message.type === "connect") {
+          console.log("Entering the 'connect' branch of onmessage")
+           allData.current = message;
+
+           allData.current.presences = message.presences;
+          // allData.current.offlineFollowNotif = message.offlineFollowNotif;
+          //update pending follow alerts
+
+          //showRedDot();
+
           //update chat user list
-          AddUserToChatList({type: message.type, allData: allData.current})
-          //chat notifications 
-          let chatBox = document.getElementById("chatOpen")
-          for (const user in message.presences.clients) {
-            if (user[2] != '0') {
-              ChangeChatNotification({ usernames:message.presences.clients})
-              ChangeMessageNotification({chat: message.chat})
-              break
-            }
-          }
-         
+          // AddUserToChatList({allData: allData.current});
+
+
         } else if (message.type == "chat") {
           console.log("chat recieved", message)
-          //check which chat is open in the chatbox by checking the chats div name which should be the converstion id
-          let chatId = document.getElementById('chats').getAttribute('name')
-          console.log(chatId, " chatId")
-          if (message.chat.chatID == chatId) {
-            console.log("printing chat")
-            // if the converstion id of the chat matches the open chat, then print the chat
-            PrintNewChat({chat: message.chat})
-          } else {
-            // post request- add chat notification to db server side
-            RequestChatNotification({chat: message.chat})
-            // add notification icon to the relevant chat or to the messages button
-            console.log("add notif icon")
-            
-              ChangeChatNotification({chat:message.chat, username:[[message.chat.username]]})
-              ChangeMessageNotification({chat: message.chat}) 
-            } 
-          } else if (message.type == "followNotif"){
+          // let chat = message.chat
+          PrintNewChat({chat: message.chat})
+        } else if (message.type == "followNotif"){
           //send follow notification request to online user
           console.log("follow notification:\n", message.followNotif)
           allData.current.followNotif = message.followNotif
@@ -93,14 +79,16 @@ const Feed = () => {
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
   const userInfo = location.state?.userInfo || {}
+  const offlineFollowNotif = location.state?.offlineFollowNotif || {}
   const [usersList, setUsersList] = useState([]);
   const [isUsersListVisible, setIsUsersListVisible] = useState(false);
   const usersListRef = useRef(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [redDotVisible, setRedDotVisible] = useState(false);
+  const [redDotVisible, setRedDotVisible] = useState(true);
   allData.current.userInfo = userInfo
+  allData.current.offlineFollowNotif = offlineFollowNotif
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
  // POSTS VARIABLES
   const [Title, setTitle] = useState("");
@@ -581,15 +569,17 @@ const handleClickUsersList = () => {
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
             </button>
-            <div className="counter" style={{visibility:`${allData.current.offlineFollowNotif.numPending > 0 ? 'visible' : 'hidden'}`}}>
+            {console.log("the numPending :====>",allData)}
+            <div className="counter" style={{visibility:`${parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0 ? 'visible' : 'hidden'}`}}>
                        {redDotVisible && (
                       <Alerts 
                         setDotVisible={setRedDotVisible}
                         dotVisible={redDotVisible}
-                        countFollowNotifs={parseInt(allData.current.offlineFollowNotif.numPending, 10)} 
+                        countFollowNotifs={allData.current.offlineFollowNotif.numPending} 
                         pendingFolNotif={allData.current.offlineFollowNotif.pendingFollows}
                       />
                       )}
+            {console.log("inside alerts div",parseInt(allData.current.offlineFollowNotif.numPending, 10))}
             </div> 
          
 

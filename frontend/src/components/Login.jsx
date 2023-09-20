@@ -80,6 +80,7 @@ const LoginPage = () => {
          const dataObj = await data
            
            checkCookie(dataObj);
+
        })()
   };
 
@@ -93,11 +94,14 @@ const LoginPage = () => {
       // Redirect to the feed page if the cookie is found
       if (data.message === "Cookie is found") {
         console.log("Cookie is found, redirecting to feed");
-       
+
+
+        console.log("from inside /checkCookie dataObj:===>",dataObj.offlineFollowNotif)
+    
 
           
        
-        navigate(`/feed`, { state: { email: email, avatar:dataObj.userAvatar, userInfo: dataObj.userInfo} });
+        navigate(`/feed`, { state: { email: email, avatar:dataObj.userAvatar, userInfo: dataObj.userInfo, offlineFollowNotif: dataObj.offlineFollowNotif} });
         
       
       } else {

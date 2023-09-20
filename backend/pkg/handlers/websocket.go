@@ -19,8 +19,8 @@ type TypeCheck struct {
 // map of clients: key - webcoket connection value-username
 var Clients = make(map[*websocket.Conn]string)
 
-// stores the number of clients
-var PrevLen int = 0
+//stores the number of clients
+var prevLen int = 0
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -54,6 +54,10 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 	fmt.Println("new websocket connection")
 	// ensure connection close when function returns
 	defer ws.Close()
+	// close any connctions ended on client side
+	// newLen stores the new number of clients after a new web connection has been added
+	newLen := checkWebSocketConnections(Clients)
+	fmt.Println("client list before", prevLen, "after", newLen)
 
 	// if it's zero, no messages were ever sent/saved
 	// STORE OLD MESSAGES
@@ -91,21 +95,15 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			user := service.repo.GetUserByCookie(cookie)
 			Clients[ws] = user.NickName
 
-			// close any connctions ended on client side
-			// newLen stores the new number of clients after a new web connection has been added
-			newLen := checkWebSocketConnections(Clients)
-			fmt.Println("client list before", PrevLen, "after", newLen)
-			fmt.Println("client list ", Clients)
-
 			// if the number of clients before the new connection was added is less than the number of clients after the conn was added (and closed connections were deleted) a new client is online
-			if newLen > PrevLen {
+			if newLen > prevLen {
 
 				fmt.Println("new web connection - new client logged in")
 
 				//====> Start of offline follow notification <======
 
 				//get user's pending follow requests
-				fmt.Println("The offline requests are for influencer: ", user.NickName)
+				/*fmt.Println("The offline requests are for influencer: ", user.NickName)
 				countPending, slicePending := service.repo.GetPendingFollowRequests(user.NickName)
 
 				fmt.Println("The count of pending follow r. and the slice of Pending: ", countPending, slicePending)
@@ -116,18 +114,18 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					NumPending:     strconv.Itoa(countPending),
 				}
 
-				fmt.Println("the OfflineFollowNotif struct sent to front end: ", offlineFollowNotif)
+				fmt.Println("the OfflineFollowNotif struct sent to front end: ", offlineFollowNotif)*/
 
 				//=====> End of offline follow notification <======
 
 				//create message in websocket message struct to send to clients following the newly logged in user
-				client := []string{user.NickName, "yes"}
 				webMessage := WebsocketMessage{
 					Presences: Presences{
-						Clients:  [][]string{client},
+						Clients:  []string{user.NickName},
 						LoggedIn: []string{"yes"},
 					},
-					Type: "user update",
+					//OfflineFollowNotif: offlineFollowNotif,
+					Type: "connect",
 				}
 
 				// which clients, if any, are following this user? return map of clients
@@ -143,7 +141,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				}
 
 				//set prevLen to the current number of clients
-				PrevLen = newLen
+				prevLen = newLen
 			}
 
 			// get full list of influencers with online/offline to send to the user with a new websocket connection
@@ -156,24 +154,26 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			//ws - new connection pointer
 			reciever[ws] = user.NickName
 
-			//get user's pending follow requests
-			fmt.Println("The offline requests are for influencer: ", user.NickName)
-			countPending, slicePending := service.repo.GetPendingFollowRequests(user.NickName)
+			//pending follow requests moved to login.go
 
-			fmt.Println("The count of pending follow r. and the slice of Pending: ", countPending, slicePending)
+			// //get user's pending follow requests
+			// fmt.Println("The offline requests are for influencer: ", user.NickName)
+			// countPending, slicePending := service.repo.GetPendingFollowRequests(user.NickName)
 
-			//instantiate the OfflineFollowNotif struct to be sent via ws
-			var offlineFollowNotif = OfflineFollowNotif{
-				PendingFollows: slicePending,
-				NumPending:     strconv.Itoa(countPending),
-			}
+			// fmt.Println("The count of pending follow r. and the slice of Pending: ", countPending, slicePending)
 
-			fmt.Println("the OfflineFollowNotif struct sent to front end: ", offlineFollowNotif)
+			// //instantiate the OfflineFollowNotif struct to be sent via ws
+			// var offlineFollowNotif = OfflineFollowNotif{
+			// 	PendingFollows: slicePending,
+			// 	NumPending:     strconv.Itoa(countPending),
+			// }
+
+			// fmt.Println("the OfflineFollowNotif struct sent to front end: ", offlineFollowNotif)
 
 			webMessage := WebsocketMessage{
-				Presences:          presences,
-				OfflineFollowNotif: offlineFollowNotif,
-				Type:               "connect",
+				Presences: presences,
+				// OfflineFollowNotif: offlineFollowNotif,
+				Type: "connect",
 			}
 
 			fmt.Println("the webMessage struct sent to f.e.: ", webMessage)
@@ -190,7 +190,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			// which clients are following this user? return list of clients
 
 		case "chat":
-			fmt.Println("client list ", Clients)
 			var chat Chat
 			// Unmarshal full message as JSON and map it to a Message object
 			// err := ws.ReadJSON(&msg)
@@ -512,43 +511,20 @@ func (r *dbStruct) FullChatUserList(user *User) Presences {
 		var influencer string
 		err := rows.Scan(&influencer)
 		if err != nil {
-			fmt.Println("FullChatUserList: follower row scan error", err)
+			fmt.Println("FullChatUserList: row scan error", err)
 			return list
 		}
-		client := []string{}
-		client = append(client, influencer)
-		// list.Clients = append(list.Clients, influencer)
+		list.Clients = append(list.Clients, influencer)
 		loggedIn := false
 		for _, name := range Clients {
 			if name == influencer {
-				client = append(client, "yes")
-				// list.LoggedIn = append(list.LoggedIn, "yes")
+				list.LoggedIn = append(list.LoggedIn, "yes")
 				loggedIn = true
 			}
 		}
 		if !loggedIn {
-			client = append(client, "no")
-			// list.LoggedIn = append(list.LoggedIn, "no")
+			list.LoggedIn = append(list.LoggedIn, "no")
 		}
-		//check notifictaion table for chat notifs from influencers (people you're following)
-		rows2, err2 := r.db.Query(`SELECT count FROM Notifications WHERE (sender, recipient) = (?,?) `, influencer, user.NickName)
-		
-		if err2 != nil {
-			fmt.Println("FullChatUserList: query error", err)
-			return list
-		}
-		var count int
-		for rows2.Next() {
-			err := rows2.Scan(&count)
-			if err != nil {
-			fmt.Println("FullChatUserList: notif row scan error", err)
-			return list
-			}
-		}
-		c:= strconv.Itoa(count)
-		client = append(client, c)
-		list.Clients = append(list.Clients, client)
-		
-	}	
+	}
 	return list
 }

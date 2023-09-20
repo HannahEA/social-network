@@ -9,80 +9,57 @@ import (
 )
 
 func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r *http.Request) {
-	
-	var chat Chat
-	err := json.NewDecoder(r.Body).Decode(&chat)
+	//check if its a chat notification
+	var conversation Conversation
+	err := json.NewDecoder(r.Body).Decode(&conversation)
 	if err != nil {
 		fmt.Println("handleConversation: jsonDecoder failed")
-		fmt.Print("Conversation data:", chat)
+		fmt.Print("Conversation data:", conversation)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	response := make(map[string]interface{})
-
-	// check if it it a request to add a chat notification
-	if chat.Status == "delivered" {
-		fmt.Println("new chat notification")
-		// add chat notification to database 
-		oldChats, count, err := service.repo.CheckForNotification(chat)
-		//add new notif to database or add 1 to count
-		if !oldChats || oldChats && err == nil {
-			fmt.Println("succesfully checked for notification")
-			fmt.Println("notif added")
-			service.repo.AddChatNotification(chat, count)
-			response["status"] = "notification added"
-			response["notifCount"] = count + 1
-		} else{
-
-			response["status"] = "notification error"
-		}
-
-	} else {
-		// new chat box has been opened get convoersation id 
-		// delete any notifs for this chat from notif table
-		fmt.Println("converation", chat)
-		conversation := service.repo.FindConversation(chat)
-		//get chat history 
-		chats:= service.repo.GetChatHistory(conversation)
-		response["conversation"] = conversation
-		response["chats"] = chats
+	fmt.Println("converation", conversation)
+	conversation = service.repo.FindConversation(conversation)
+	//get chat history 
+	chats:= service.repo.GetChatHistory(conversation)
+	response := map[string]interface{}{
+		"conversation": conversation,
+		"chats": chats,
 	}
-		w.Header().Set("Content-Type", "application/json")
-		jsonErr := json.NewEncoder(w).Encode(response)
-		if jsonErr != nil {
-			log.Println(err)
-			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-			return
-		}
 
-
-	
+	w.Header().Set("Content-Type", "application/json")
+	jsonErr := json.NewEncoder(w).Encode(response)
+	if jsonErr != nil {
+		log.Println(err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 
 }
 
-func (repo *dbStruct) FindConversation(chat Chat) Conversation {
+func (repo *dbStruct) FindConversation(convo Conversation) Conversation {
 	query := `SELECT COUNT (*) FROM PrivateChat WHERE participant1 = ? AND participant2 = ? OR participant1 = ? AND participant2 = ?`
 	stmt, err := repo.db.Prepare(query)
 	if err != nil {
-		fmt.Println("FindConversation: db Prepare Error", err, chat)
+		fmt.Println("FindConversation: db Prepare Error", err, convo)
 	}
 
 	var count int
-	err2 := stmt.QueryRow(chat.Sender, chat.Reciever, chat.Reciever, chat.Sender).Scan(&count)
+	err2 := stmt.QueryRow(convo.Participant1, convo.Participant2, convo.Participant2, convo.Participant1).Scan(&count)
 	if err2 != nil {
-		fmt.Println("FindConversation: QueryRow Error", err2, chat)
+		fmt.Println("FindConversation: QueryRow Error", err2, convo)
 	}
 
 	if count == 0 {
 		fmt.Println("conversationID not found")
 		//add conversation to db
-		repo.NewPrivateChatToDB(chat)
+		convo = repo.NewPrivateChatToDB(convo)
 	}
 	fmt.Println("getting conversation id")
 	query2 := `SELECT conversationID FROM PrivateChat WHERE participant1 IN (?, ?) AND participant2 IN (?,?)`
-	row, err3 := repo.db.Query(query2, chat.Sender, chat.Reciever, chat.Sender, chat.Reciever)
+	row, err3 := repo.db.Query(query2, convo.Participant1, convo.Participant2, convo.Participant1, convo.Participant2)
 	if err3 != nil {
-		fmt.Println("FindConversation: convoID Query Error", err3, chat)
+		fmt.Println("FindConversation: convoID Query Error", err3, convo)
 	}
 
 	fmt.Println("conversationID found")
@@ -90,24 +67,20 @@ func (repo *dbStruct) FindConversation(chat Chat) Conversation {
 	for row.Next() {
 		err := row.Scan(&conversationId)
 		if err != nil {
-			fmt.Println("FindConversation: Scan Error", err, chat)
+			fmt.Println("FindConversation: Scan Error", err, convo)
 		}
 	}
-	convo:= Conversation{
-		Participant1: chat.Sender,
-		Participant2: chat.Reciever,
-		ConversationId: conversationId,
-	}
+	convo.ConversationId = conversationId
 
 	return convo
 }
 
-func (repo *dbStruct) NewPrivateChatToDB(chat Chat)  {
+func (repo *dbStruct) NewPrivateChatToDB(convo Conversation) Conversation {
 	query1 := ` INSERT INTO PrivateChat (participant1, participant2) VALUES (?, ?)`
-	_, err := repo.db.Exec(query1, chat.Sender, chat.Reciever)
+	_, err := repo.db.Exec(query1, convo.Participant1, convo.Participant2)
 	if err != nil {
-		fmt.Println("NewPrivateChatToDB: Exec Error", err, chat)
-		
+		fmt.Println("NewPrivateChatToDB: Exec Error", err, convo)
+		return convo
 	}
 	// result, err2 := repo.db.Exec(`SELECT SCOPE_IDENTITY()`)
 	// // query2:= `SELECT conversationID FROM PrivateChat WHERE participant1 = ? AND participant2 = ?`
@@ -117,7 +90,7 @@ func (repo *dbStruct) NewPrivateChatToDB(chat Chat)  {
 	// }
 	// fmt.Println(result)
 
-	
+	return convo
 }
 
 func (r *dbStruct) GetChatHistory(convo Conversation) []Chat{

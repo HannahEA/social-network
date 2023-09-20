@@ -5,19 +5,16 @@ import "notyf/notyf.min.css";
 
 const apiURL = process.env.REACT_APP_API_URL;
 
-const AddUserToChatList = ({type, allData})=>  {
+const AddUserToChatList = ({presences, allData})=>  {
 
-  const GetConversation = ({reciever, name}) => {
+  const GetConversation = ({reciever}) => {
     // const cookie = (document.cookie).split(":")
-    
     let input = document.getElementById("chatInput")
     let send = document.getElementById("sendButton")
     input.classList.remove("hidden")
     send.classList.remove("hidden")
-    // remove notification icon
-    // chat box is open, notif icon is present
-    RemoveChatNotification({username: reciever, name:name})
     const sender = allData.userInfo.username
+    console.log("conversation participants", allData.userInfo.username, reciever)
     const getConversation = {
         reciever: reciever,
         username: sender,
@@ -40,6 +37,7 @@ const AddUserToChatList = ({type, allData})=>  {
     } )
     let awaitConvo = async(data) =>  {
       let convo = await data
+      console.log(convo, "convo")
       // revive converstion object with sender, reciever and conversation id
         //id should be attached to all chats
       let chat = document.getElementById("chats")
@@ -61,74 +59,27 @@ const AddUserToChatList = ({type, allData})=>  {
     
  }
 
-  if (type == "user update" ) {
-    //update not full list 
-    EditToUserList({allData: allData}) 
-  }
-  // create presence set css based on online offline
-  let style = "flex items-center p-2 w-full text-base font-medium rounded-md transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" 
- 
+  console.log(allData, "new user online")
   if (allData.presences.clients) {
     allData.presences.clients.forEach((p)=> {
-      if (p[0] != allData.userInfo.username) {
+      if (p != allData.userInfo.username) {
+        let users = document.getElementById('chatUsers')
         let button = document.createElement('button')
         button.addEventListener("click", () => {
-          GetConversation({reciever: p[0], name: allData.conversation.username})
+          GetConversation({reciever: p})
         }
         )
-        
-        if (p[1] == "yes") {
-          let online = document.getElementById('online') 
-          //add styling to button
-          button.className = style
-          
-          button.classList.add("text-gray-900" )
-          
-          button.innerHTML = p[0]
-          online.append(button)
-        } else {
-          let offline = document.getElementById('offline')
-          //add styling to button 
-          button.className = style
-          button.classList.add("text-gray-300")
-          
-        
-          button.innerHTML = p[0]
-          offline.append(button)
-        }
-        
+        button.innerHTML = p
+        button.classList.add('dark:text-white')
+        users.append(button)
       }
     } )
   }
   
-  }
 
-const EditToUserList = ({allData}) => {
-  let toDelete 
-  if(allData.presences.clients[0][1] == "yes") {
-    let offline = document.getElementById('offline')
-    for (const child of offline.childNodes) {
-      if (allData.presences.clients[0][0] == child.innerHTML) {
-        //remove button from offline list 
-        toDelete = child
-        break
-      }
-    }
-    offline.removeChild(toDelete)
-  } else {
-      let online = document.getElementById('online')
-      for (const child of online.childNodes) {
-        if (allData.presences.clients[0][0] == child.innerHTML) {
-          //remove button from online list
-          toDelete = child
-          break
-        }
-      }
-      online.removeChild(toDelete)
-  }
 
+  }
   
-}
   
  
 
@@ -153,136 +104,19 @@ const PrintNewChat = ({chat}) => {
   
 }
 
-const RequestChatNotification = ({chat}) => {
-  console.log("adding chat Notification")
-  chat.status = "delivered"
-  fetch(`${apiURL}/chat`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(chat),
-    credentials: 'include',
-  })
-  .then(response => response.json())
-  .then((data) => {
-    if (data.status == "notification added") {
-      console.log("Chat notification added to database")
-
-    } else{
-      console.log("server error: unable to add notification to database")
-    }
-
-  } )
-}
-const ChangeMessageNotification = ({chat}) => {
-  let Icon = document.getElementById("notifIcon")
-    // if the chat box is not open
-    // and if the chat notif icon is not present and theres a new chat 
-    if (Icon.style.display != "flex" && chat) {
-      console.log("adding icon")
-      //add the chat notif icon
-      Icon.style.display = "flex"
-    } else if (Icon.style.display == "flex"){
-      // remove the chat notif icon
-      Icon.style.display = "none"
-    }
-}
-
-
-const ChangeChatNotification = ({ usernames}) => {
-    //range through offline users
-    let users = document.getElementById("offline")
-    for (let i = 0; i<2 ; i++) {
-      for(const child of users.children) {
-        for(var j = 0; j < usernames.length; j++) {
-           //if the button is for the reicipient of the chat message
-           if ( child.innerHTML == usernames[j][0]) {
-            if (child.children.length == 0 &&(usernames.length == 1 ||   usernames[j][2] != '0')){
-                //if you open the chat box for the first time add icon to all OR if the chatbox is open and a new chat is sent add icon 
-                console.log("!chat icon: adding")
-                //if the chat notif icon is not present and theres a new chat
-                //add the chat notif icon
-                let dot = document.createElement("div")
-                dot.setAttribute("id", "red-dot")
-                dot.classList.add('w-3', 'h-3', 'top-1', 'right-2', 'rounded-xl', 'bg-red-200')
-                child.append(dot)
-                break
-              }
-            }
-         }
-      }
-      //repeat for online users
-      users = document.getElementById("online")
-    }  
-} 
-
-
-const RemoveChatNotification = ({username, name}) => {
-  
-  let users = document.getElementById("offline")
-  for (let i = 0; i<2 ; i++) {
-     for(const child of users.children) {
-        //if the button is the one you pressed on 
-        let name = child.innerHTML
-        if (child.innerHTML.includes("<")) {
-          const split = child.innerHTML.split("<")
-          name = split[0]
-        }
-        if ( name == username) {
-          // if the chat notif icon is already present 
-          if (child.children.length == 1) {
-            //remove the icon 
-            console.log('removing chat notif icon')
-            child.children[0].remove()
-          }
-        }
-        
-      }
-      users = document.getElementById("online")
-  }
-  let chat = {
-    username: username,
-    reciever: name,
-    status: "seen"
-  }
-  fetch(`${apiURL}/chat`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(chat),
-    credentials: 'include',
-  })
-  .then(response => response.json())
-  .then((data) => {
-    if (data.status == "notification removed") {
-      console.log("Chat notification removed from database")
-
-    } else{
-      console.log("server error: unable to remove notification to database")
-    }
-
-  } )
-}
-
  const Chat = ({websocketRef, isWebSocketConnected, allData}) => {
      // ---------CHAT FUNCTIONS--------------------
  const [chatMessage, setChatMessage] = useState("")
- 
+
+
  const handleOpenChat = (e) => {
    let chat = document.getElementById("chatOpen")
-   if (chat.style.display == "flex") {
-    chat.style.display = "none"
-   } else {
-    //remove chat notif if its present 
-     ChangeMessageNotification({})
+   if (chat.style.display == "none") {
      chat.style.display = "flex"
-
+   } else {
+     chat.style.display = "none"
    }
  }
-
- 
 
  const handleChatMessage = (event) => {
    
@@ -319,7 +153,7 @@ const RemoveChatNotification = ({username, name}) => {
        chat.append(name)
        chat.append(message)
        chats.append(chat)
-       setChatMessage("")
+       
  
    } 
   
@@ -328,27 +162,28 @@ const RemoveChatNotification = ({username, name}) => {
  
 
  return (
-    <div>
-        <button onClick={handleOpenChat} id="messages" className="fixed bg-gray-500 text-white font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2" > Messages
-        <div className="hidden bg-red-300 rounded-lg absolute -top-4 right-2 w-8 h-8 " id="notifIcon">
-          <img src="https://www.svgrepo.com/show/533249/message-circle-notification.svg" alt=""  className=" w-5 absolute top-1 right-1"/>
-        </div>
-        </button>
-        <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 w-96 bg-white" id="chatOpen">
+    <div className= "bg-white dark:bg-gray-800">
+        <button onClick={handleOpenChat} 
+        className="fixed bg-[#ecbba3] hover:bg-[#e89870] text-base text-white 
+        font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2 shadow-lg 
+        [box-shadow:0_3px_0_0_#bd7c5b]
+        border-b-[1px] border-[#e89870]
+        transition duration-75 group" > Messages</button>
+      <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 w-96 bg-white dark:bg-gray-800" id="chatOpen">
         
-        <div id = "chatContainer" className="flex flex-col justify-end align-center w-2/3 overflow-scroll">
+        <div id = "chatContainer" className="flex flex-col justify-end align-center w-2/3 overflow-auto">
           
-          <div id="chats" name="chats" className="flex flex-col overflow-scroll">
-          
-          </div>
-          <input id="chatInput" type="text" onChange={handleChatMessage} value={chatMessage} className=" hidden bottom-4 bg-gray-300 border-none m-2 p-3 w-9/10 h-2" placeholder="Type message.." name="msg" required/>
+          <div className="bg:white dark:bg-gray-800" id="chats" name="chats" classList="flex flex-col "></div>
+          <input id="chatInput" type="text" onChange={handleChatMessage} value={chatMessage} className=" hidden bottom-4 bg-[#f9e7d9] dark:text-white dark:bg-[#998d84] border-none m-2 p-3 w-9/10 h-2" placeholder="Type message.." name="msg" required/>
 
           <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden mb-2 ml-20 w-1/3 bg-[#ecbba3] rounded-lg text-white shadow-md"><strong>Send</strong></button>
 
         </div>
         <aside className=" flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
-        <div id="online"></div>
-        <div id= "offline"></div>
+          {/* {allData.current.presences && allData.current.presences.map(presence => 
+            <button onClick = {()=> GetConversation({reciever:presence})}> {presence} </button>
+          )
+          } */}
         </aside>
       </div>
     </div>
@@ -360,4 +195,4 @@ const RemoveChatNotification = ({username, name}) => {
  
  
  
- export {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification, ChangeMessageNotification};
+ export {Chat, AddUserToChatList, PrintNewChat};
