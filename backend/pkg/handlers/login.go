@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
@@ -95,30 +94,12 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 		value := *userInfo
 		fmt.Println("the user info:", value)
 
-		//===> Start of Pending follow notifications <=====
-
-		//get user's pending follow requests
-		fmt.Println("The offline requests are for influencer: ", value.NickName)
-		countPending, slicePending := service.repo.GetPendingFollowRequests(value.NickName)
-
-		fmt.Println("The count of pending follow r. and the slice of Pending: ", countPending, slicePending)
-
-		//instantiate the OfflineFollowNotif struct to be sent via ws
-		var offlineFollowNotif = OfflineFollowNotif{
-			PendingFollows: slicePending,
-			NumPending:     strconv.Itoa(countPending),
-		}
-
-		fmt.Println("the OfflineFollowNotif struct sent to front end: ", offlineFollowNotif)
-
-		//===> End of Pending follow notifications <=====
 
 		response := map[string]interface{}{
-			"message":            "Login successful",
-			"email":              data.Email,
-			"userAvatar":         userAvatar,
-			"userInfo":           value,
-			"offlineFollowNotif": offlineFollowNotif,
+			"message":    "Login successful",
+			"email":      data.Email,
+			"userAvatar": userAvatar,
+			"userInfo":   value,
 		}
 
 		w.Header().Set("Content-Type", "application/json")

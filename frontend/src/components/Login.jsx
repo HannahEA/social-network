@@ -101,7 +101,7 @@ const LoginPage = () => {
 
           
        
-        navigate(`/feed`, { state: { email: email, avatar:dataObj.userAvatar, userInfo: dataObj.userInfo, offlineFollowNotif: dataObj.offlineFollowNotif} });
+        navigate(`/feed`, { state: { email: email, avatar:dataObj.userAvatar, userInfo: dataObj.userInfo} });
         
       
       } else {

@@ -42,14 +42,14 @@ const Feed = () => {
         let message = JSON.parse(e.data)
         
         if (message.type === "connect") {
-          console.log("Entering the 'connect' branch of onmessage")
+          console.log("Entering the 'connect' branch of onmessage", message)
            allData.current = message;
 
            allData.current.presences = message.presences;
           // allData.current.offlineFollowNotif = message.offlineFollowNotif;
           //update pending follow alerts
 
-          //showRedDot();
+          showRedDot();
 
           //update chat user list
           // AddUserToChatList({allData: allData.current});
@@ -79,7 +79,7 @@ const Feed = () => {
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
   const userInfo = location.state?.userInfo || {}
-  const offlineFollowNotif = location.state?.offlineFollowNotif || {}
+  // const offlineFollowNotif = location.state?.offlineFollowNotif || {}
   const [usersList, setUsersList] = useState([]);
   const [isUsersListVisible, setIsUsersListVisible] = useState(false);
   const usersListRef = useRef(null);
@@ -88,7 +88,7 @@ const Feed = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [redDotVisible, setRedDotVisible] = useState(true);
   allData.current.userInfo = userInfo
-  allData.current.offlineFollowNotif = offlineFollowNotif
+  // allData.current.offlineFollowNotif = offlineFollowNotif
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
  // POSTS VARIABLES
   const [Title, setTitle] = useState("");
