@@ -73,7 +73,7 @@ const AddUserToChatList = ({type, allData})=>  {
       if (p[0] != allData.userInfo.username) {
         let button = document.createElement('button')
         button.addEventListener("click", () => {
-          GetConversation({reciever: p[0], name: allData.conversation.username})
+          GetConversation({reciever: p[0], name: allData.userInfo.username})
         }
         )
         
@@ -110,21 +110,24 @@ const EditToUserList = ({allData}) => {
     for (const child of offline.childNodes) {
       if (allData.presences.clients[0][0] == child.innerHTML) {
         //remove button from offline list 
+        console.log("user button children", child.childNodes)
         toDelete = child
+        offline.removeChild(toDelete)
         break
       }
     }
-    offline.removeChild(toDelete)
+    
   } else {
       let online = document.getElementById('online')
       for (const child of online.childNodes) {
         if (allData.presences.clients[0][0] == child.innerHTML) {
           //remove button from online list
           toDelete = child
+          online.removeChild(toDelete)
           break
         }
       }
-      online.removeChild(toDelete)
+      
   }
 
   
@@ -190,7 +193,7 @@ const ChangeMessageNotification = ({chat}) => {
 }
 
 
-const ChangeChatNotification = ({ usernames}) => {
+const ChangeChatNotification = ({usernames}) => {
     //range through offline users
     let users = document.getElementById("offline")
     for (let i = 0; i<2 ; i++) {
@@ -224,12 +227,12 @@ const RemoveChatNotification = ({username, name}) => {
   for (let i = 0; i<2 ; i++) {
      for(const child of users.children) {
         //if the button is the one you pressed on 
-        let name = child.innerHTML
+        let user = child.innerHTML
         if (child.innerHTML.includes("<")) {
           const split = child.innerHTML.split("<")
-          name = split[0]
+          user = split[0]
         }
-        if ( name == username) {
+        if ( user == username) {
           // if the chat notif icon is already present 
           if (child.children.length == 1) {
             //remove the icon 
@@ -241,6 +244,7 @@ const RemoveChatNotification = ({username, name}) => {
       }
       users = document.getElementById("online")
   }
+  console.log("delete notif from ", username, " to ", name)
   let chat = {
     username: username,
     reciever: name,

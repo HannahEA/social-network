@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS "Notifications" (
             "message" TEXT,
             "type"    TEXT,
             "status" TEXT,
+            "count" INTEGER,
             "created_at" TEXT DEFAULT (datetime('now', 'localtime')),
             FOREIGN KEY(sender)REFERENCES Users(nickName),
             FOREIGN KEY(recipient)REFERENCES Users(nickName),

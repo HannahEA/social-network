@@ -73,6 +73,7 @@ type AllDbMethods interface {
 	AddChatToDatabase(chat Chat)
 	AddChatNotification(chat Chat, count int)
 	CheckForNotification(chat Chat) (bool, int, error)
+	DeleteChatNotifDB(chat Chat) (int64, error)
 	FullChatUserList(user *User) Presences
 	ClientsFollowingUser(user *User) map[*websocket.Conn]string
 }
