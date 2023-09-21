@@ -100,16 +100,16 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 				fmt.Println("new web connection - new client logged in")
 
-
 				//create message in websocket message struct to send to clients following the newly logged in user
+
+				client := []string{user.NickName, "yes"}
 				webMessage := WebsocketMessage{
 					Presences: Presences{
-						Clients:  []string{user.NickName},
+						Clients:  [][]string{client},
 						LoggedIn: []string{"yes"},
 					},
-					Type: "connect",
+					Type: "user update",
 				}
-
 				// which clients, if any, are following this user? return map of clients
 				list := service.repo.ClientsFollowingUser(user)
 
@@ -296,7 +296,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					log.Fatalf(err.Error())
 				}
 
-				//changed andmoved inside 'connect' event line 138
+
 				//get user's pending follow requests
 				/*countPending, slicePending := service.repo.GetPendingFollowRequests(uploadFollowInfo)
 
@@ -406,39 +406,7 @@ func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) (int
 	return followID, nil
 }
 
-//
-func (repo *dbStruct) GetPendingFollowRequests(nickname string) (int, []FollowNotifOffline) {
-	var fPending []FollowNotifOffline
-	var fCount int
-
-	fmt.Println("From inside GetPendingFollowRequests, the influencer name is: ", nickname)
-
-	query := `SELECT follow, followerUserName, influencerUserName FROM Followers WHERE influencerUserName = ? AND accepted = ?`
-	row, err := repo.db.Query(query, nickname, "Pending")
-	if err != nil {
-		fmt.Println("GetPendingFollowRequests query Error", err, fPending)
-		return 0, fPending
-	}
-
-	var oneFollowPending FollowNotifOffline
-
-	for row.Next() {
-		err := row.Scan(&oneFollowPending.FollowID, &oneFollowPending.FollowerUN, &oneFollowPending.InfluencerUN)
-		if err != nil {
-			fmt.Println("GetPendingFollowRequests scan Error", err, fPending)
-			return 0, fPending
-		}
-		fPending = append(fPending, oneFollowPending)
-		oneFollowPending = FollowNotifOffline{}
-
-	}
-
-	fCount = len(fPending)
-
-	return fCount, fPending
-}
-
-//uploads private user reply to follow request
+// uploads private user reply to follow request
 func (repo *dbStruct) InsertFollowReply(theReply FollowReply) error {
 	var theAnswer = theReply.FollowReply
 
@@ -471,13 +439,21 @@ func (r *dbStruct) ClientsFollowingUser(user *User) map[*websocket.Conn]string {
 	list := make(map[*websocket.Conn]string)
 	for conn, name := range Clients {
 		fmt.Println(" check if ", name, "follows ", user.NickName)
-		_, err := r.db.Query(`SELECT COUNT (*) FROM Followers WHERE (followerUserName, influencerUserName) = (?,?) `, name, user.NickName)
+		stmt, err := r.db.Prepare(`SELECT COUNT (*) FROM Followers WHERE (followerUserName, influencerUserName) = (?,?) `)
 		if err != nil {
-			fmt.Println("ClientsFollowingUser: client not following user, query error", err)
+			fmt.Println("ClientsFollowingUser:Prepare error", err)
 			//client not following user
 			continue
 		}
-		list[conn] = name
+		var count int
+		err = stmt.QueryRow(name, user.NickName).Scan(&count)
+		if err != nil {
+			fmt.Println("ClientsFollowingUser: client not following user, query error", err)
+			continue
+		}
+		if count > 0 {
+			list[conn] = name
+		}
 	}
 	return list
 }
@@ -486,27 +462,95 @@ func (r *dbStruct) FullChatUserList(user *User) Presences {
 	var list Presences
 	rows, err := r.db.Query(`SELECT influencerUserName FROM Followers WHERE followerUserName = ? `, user.NickName)
 	if err != nil {
-		fmt.Println("FullChatUserList: query error", err)
+		fmt.Println("FullChatUserList: query error", err, err)
 		return list
 	}
 	for rows.Next() {
 		var influencer string
 		err := rows.Scan(&influencer)
 		if err != nil {
-			fmt.Println("FullChatUserList: row scan error", err)
+			fmt.Println("FullChatUserList: follower row scan error", err)
 			return list
 		}
-		list.Clients = append(list.Clients, influencer)
+		client := []string{}
+		client = append(client, influencer)
+		// list.Clients = append(list.Clients, influencer)
 		loggedIn := false
 		for _, name := range Clients {
 			if name == influencer {
-				list.LoggedIn = append(list.LoggedIn, "yes")
+				client = append(client, "yes")
+				// list.LoggedIn = append(list.LoggedIn, "yes")
 				loggedIn = true
 			}
 		}
 		if !loggedIn {
-			list.LoggedIn = append(list.LoggedIn, "no")
+			client = append(client, "no")
+			// list.LoggedIn = append(list.LoggedIn, "no")
 		}
+		chat := Chat{
+			Sender:   influencer,
+			Reciever: user.NickName,
+		}
+		_, count, err3 := r.CheckForNotification(chat)
+		if err3 != nil {
+
+		}
+		c := strconv.Itoa(count)
+		client = append(client, c)
+		list.Clients = append(list.Clients, client)
+
+		// //check notifictaion table for chat notifs from influencers (people you're following)
+		// rows2, err2 := r.db.Query(`SELECT count FROM Notifications WHERE (sender, recipient) = (?,?) `, influencer, user.NickName)
+		// count := 0
+		// if err2 != nil {
+		// 	fmt.Println("FullChatUserList: notification query error", err)
+
+		// } else {
+		// 	for rows2.Next() {
+		// 		err := rows2.Scan(&count)
+		// 		if err != nil {
+		// 			fmt.Println("FullChatUserList: notif row scan error", err)
+		// 			break
+		// 		}
+		// 	}
+		// }
+
+		// c := strconv.Itoa(count)
+		// client = append(client, c)
+		// list.Clients = append(list.Clients, client)
+
 	}
 	return list
 }
+
+func (repo *dbStruct) GetPendingFollowRequests(nickname string) (int, []FollowNotifOffline) {
+	var fPending []FollowNotifOffline
+	var fCount int
+
+	fmt.Println("From inside GetPendingFollowRequests, the influencer name is: ", nickname)
+
+	query := `SELECT follow, followerUserName, influencerUserName FROM Followers WHERE influencerUserName = ? AND accepted = ?`
+	row, err := repo.db.Query(query, nickname, "Pending")
+	if err != nil {
+		fmt.Println("GetPendingFollowRequests query Error", err, fPending)
+		return 0, fPending
+	}
+
+	var oneFollowPending FollowNotifOffline
+
+	for row.Next() {
+		err := row.Scan(&oneFollowPending.FollowID, &oneFollowPending.FollowerUN, &oneFollowPending.InfluencerUN)
+		if err != nil {
+			fmt.Println("GetPendingFollowRequests scan Error", err, fPending)
+			return 0, fPending
+		}
+		fPending = append(fPending, oneFollowPending)
+		oneFollowPending = FollowNotifOffline{}
+
+	}
+
+	fCount = len(fPending)
+
+	return fCount, fPending
+}
+

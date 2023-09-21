@@ -43,7 +43,7 @@ type AllDbMethods interface {
 	GetUserEmail(userId string) (string, error)
 	AddSession(w http.ResponseWriter, sessionName string, user *User)
 	InsertFollowRequest(uploadFollowRequest UploadFollow) (int, error)
-	GetPendingFollowRequests(nickname string) (int, []FollowNotifOffline) 
+	GetPendingFollowRequests(nickname string) (int, []FollowNotifOffline)
 	InsertFollowReply(followData FollowReply) error
 	InsertSession(u *User, session *http.Cookie) *Session
 	IsUserAuthenticated(w http.ResponseWriter, u *User) error
@@ -68,12 +68,13 @@ type AllDbMethods interface {
 	getAvatar(email string) (string, error)
 	checkCookieDB(cookieValue string) int
 	BroadcastToChannel(msg BroadcastMessage)
-	FindConversation(convo Conversation) Conversation
-	NewPrivateChatToDB(convo Conversation) Conversation
+	FindConversation(convo Chat) Conversation
+	NewPrivateChatToDB(convo Chat) 
 	GetChatHistory(convo Conversation) []Chat
 	AddChatToDatabase(chat Chat)
 	AddChatNotification(chat Chat, count int)
 	CheckForNotification(chat Chat) (bool, int, error)
+	DeleteChatNotifDB(chat Chat) (int64, error)
 	FullChatUserList(user *User) Presences
 	ClientsFollowingUser(user *User) map[*websocket.Conn]string
 }

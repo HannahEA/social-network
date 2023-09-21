@@ -40,26 +40,53 @@ const Feed = () => {
       websocketRef.current.onmessage = (e) => {
         // Handle WebSocket messages here
         let message = JSON.parse(e.data)
-        
-        if (message.type === "connect") {
-          console.log("Entering the 'connect' branch of onmessage", message)
-           allData.current = message;
-
-           allData.current.presences = message.presences;
-          // allData.current.offlineFollowNotif = message.offlineFollowNotif;
-          //update pending follow alerts
-
+        console.log(message, "web message")
+        if (message.type == "connect") {
+           // console.log(message)
+          allData.current.presences = message.presences
+          // console.log("current presences", allData.current.presences)
+          //shows pending follow requests
           showRedDot();
-
           //update chat user list
-          // AddUserToChatList({allData: allData.current});
-
-
-        } else if (message.type == "chat") {
+          console.log("message type", message.type)
+          AddUserToChatList({type: message.type, allData: allData.current})
+          //chat notifications 
+         
+          for (const user of message.presences.clients) {
+            console.log("no. of chats", user)
+            if (user[2] != '0') {
+              ChangeChatNotification({ usernames:message.presences.clients})
+              ChangeMessageNotification({chat: message.chat})
+              break
+            }
+          }
+         
+        } else if (message.type == "user update") {
+          console.log("message type", message.type)
+          allData.current.presences = message.presences
+          AddUserToChatList({type: message.type, allData: allData.current})
+        }else if (message.type == "chat") {
           console.log("chat recieved", message)
-          // let chat = message.chat
-          PrintNewChat({chat: message.chat})
-        } else if (message.type == "followNotif"){
+          //check which chat is open in the chatbox by checking the chats div name which should be the converstion id
+          let chatId = document.getElementById('chats').getAttribute('name')
+          console.log(chatId, " chatId")
+          if (message.chat.chatID == chatId) {
+            console.log("printing chat")
+            // if the converstion id of the chat matches the open chat, then print the chat
+            PrintNewChat({chat: message.chat})
+          } else {
+            // post request- add chat notification to db server side
+            RequestChatNotification({chat: message.chat})
+            // add notification icon to the relevant chat or to the messages button
+            console.log("add notif icon")
+            let chatBox = document.getElementById("chatOpen")
+            if (chatBox.style.display != "flex") {
+              console.log("chat box is not open", chatBox.display)
+              ChangeMessageNotification({chat: message.chat}) 
+            }
+              ChangeChatNotification({usernames:[[message.chat.username]]})
+            } 
+          } else if (message.type == "followNotif"){
           //send follow notification request to online user
           console.log("follow notification:\n", message.followNotif)
           allData.current.followNotif = message.followNotif

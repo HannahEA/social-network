@@ -9,24 +9,54 @@ import (
 )
 
 func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r *http.Request) {
-	//check if its a chat notification
-	var conversation Conversation
-	err := json.NewDecoder(r.Body).Decode(&conversation)
+
+	var chat Chat
+	err := json.NewDecoder(r.Body).Decode(&chat)
 	if err != nil {
 		fmt.Println("handleConversation: jsonDecoder failed")
-		fmt.Print("Conversation data:", conversation)
+		fmt.Print("Conversation data:", chat)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	fmt.Println("converation", conversation)
-	conversation = service.repo.FindConversation(conversation)
-	//get chat history 
-	chats:= service.repo.GetChatHistory(conversation)
-	response := map[string]interface{}{
-		"conversation": conversation,
-		"chats": chats,
-	}
+	response := make(map[string]interface{})
 
+	// check if it it a request to add a chat notification
+	if chat.Status == "delivered" {
+		fmt.Println("new chat notification")
+		// add chat notification to database
+		oldChats, count, err := service.repo.CheckForNotification(chat)
+		//add new notif to database or add 1 to count
+		if !oldChats || oldChats && err == nil {
+			fmt.Println("succesfully checked for notification")
+			fmt.Println("notif added")
+			service.repo.AddChatNotification(chat, count)
+			response["status"] = "notification added"
+			response["notifCount"] = count + 1
+		} else {
+
+			response["status"] = "notification error"
+		}
+
+	} else if chat.Status == "seen" {
+		// check notification table for chat notif with the sender and receiver sent from the backend and delete it
+		rowsAffected, err := service.repo.DeleteChatNotifDB(chat)
+		// send response chat notif delted to client side
+		if rowsAffected == 1 && err == nil {
+			response["status"] = "notification removed"
+		} else {
+			response["status"] = "error removing notification"
+		}
+
+	} else {
+		// new chat box has been opened get convoersation id
+		// delete any notifs for this chat from notif table
+		fmt.Println("converation", chat)
+		conversation := service.repo.FindConversation(chat)
+		//get chat history
+		chats := service.repo.GetChatHistory(conversation)
+		response["conversation"] = conversation
+		response["chats"] = chats
+	}
 	w.Header().Set("Content-Type", "application/json")
 	jsonErr := json.NewEncoder(w).Encode(response)
 	if jsonErr != nil {
@@ -37,29 +67,29 @@ func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r
 
 }
 
-func (repo *dbStruct) FindConversation(convo Conversation) Conversation {
+func (repo *dbStruct) FindConversation(chat Chat) Conversation {
 	query := `SELECT COUNT (*) FROM PrivateChat WHERE participant1 = ? AND participant2 = ? OR participant1 = ? AND participant2 = ?`
 	stmt, err := repo.db.Prepare(query)
 	if err != nil {
-		fmt.Println("FindConversation: db Prepare Error", err, convo)
+		fmt.Println("FindConversation: db Prepare Error", err, chat)
 	}
 
 	var count int
-	err2 := stmt.QueryRow(convo.Participant1, convo.Participant2, convo.Participant2, convo.Participant1).Scan(&count)
+	err2 := stmt.QueryRow(chat.Sender, chat.Reciever, chat.Reciever, chat.Sender).Scan(&count)
 	if err2 != nil {
-		fmt.Println("FindConversation: QueryRow Error", err2, convo)
+		fmt.Println("FindConversation: QueryRow Error", err2, chat)
 	}
 
 	if count == 0 {
 		fmt.Println("conversationID not found")
 		//add conversation to db
-		convo = repo.NewPrivateChatToDB(convo)
+		repo.NewPrivateChatToDB(chat)
 	}
 	fmt.Println("getting conversation id")
 	query2 := `SELECT conversationID FROM PrivateChat WHERE participant1 IN (?, ?) AND participant2 IN (?,?)`
-	row, err3 := repo.db.Query(query2, convo.Participant1, convo.Participant2, convo.Participant1, convo.Participant2)
+	row, err3 := repo.db.Query(query2, chat.Sender, chat.Reciever, chat.Sender, chat.Reciever)
 	if err3 != nil {
-		fmt.Println("FindConversation: convoID Query Error", err3, convo)
+		fmt.Println("FindConversation: convoID Query Error", err3, chat)
 	}
 
 	fmt.Println("conversationID found")
@@ -67,20 +97,24 @@ func (repo *dbStruct) FindConversation(convo Conversation) Conversation {
 	for row.Next() {
 		err := row.Scan(&conversationId)
 		if err != nil {
-			fmt.Println("FindConversation: Scan Error", err, convo)
+			fmt.Println("FindConversation: Scan Error", err, chat)
 		}
 	}
-	convo.ConversationId = conversationId
+	convo := Conversation{
+		Participant1:   chat.Sender,
+		Participant2:   chat.Reciever,
+		ConversationId: conversationId,
+	}
 
 	return convo
 }
 
-func (repo *dbStruct) NewPrivateChatToDB(convo Conversation) Conversation {
+func (repo *dbStruct) NewPrivateChatToDB(chat Chat) {
 	query1 := ` INSERT INTO PrivateChat (participant1, participant2) VALUES (?, ?)`
-	_, err := repo.db.Exec(query1, convo.Participant1, convo.Participant2)
+	_, err := repo.db.Exec(query1, chat.Sender, chat.Reciever)
 	if err != nil {
-		fmt.Println("NewPrivateChatToDB: Exec Error", err, convo)
-		return convo
+		fmt.Println("NewPrivateChatToDB: Exec Error", err, chat)
+
 	}
 	// result, err2 := repo.db.Exec(`SELECT SCOPE_IDENTITY()`)
 	// // query2:= `SELECT conversationID FROM PrivateChat WHERE participant1 = ? AND participant2 = ?`
@@ -90,16 +124,15 @@ func (repo *dbStruct) NewPrivateChatToDB(convo Conversation) Conversation {
 	// }
 	// fmt.Println(result)
 
-	return convo
 }
 
-func (r *dbStruct) GetChatHistory(convo Conversation) []Chat{
+func (r *dbStruct) GetChatHistory(convo Conversation) []Chat {
 	var chats []Chat
 	query := `SELECT chatID, chatMessage, sender, creationDate FROM MessageHistory WHERE sender IN (?, ?) AND recipient IN (?,?)`
 	row, err := r.db.Query(query, convo.Participant1, convo.Participant2, convo.Participant1, convo.Participant2)
 	if err != nil {
 		fmt.Println("GetChatHistory: Query Error", err, convo)
-		return chats 
+		return chats
 	}
 
 	fmt.Println("chat messages found")
@@ -108,14 +141,14 @@ func (r *dbStruct) GetChatHistory(convo Conversation) []Chat{
 		err := row.Scan(&chat.ConversationId, &chat.Message, &chat.Sender, &chat.Date)
 		if err != nil {
 			fmt.Println("FindConversation: Scan Error", err, convo)
-			return chats 
+			return chats
 		}
 		chats = append(chats, chat)
 		chat = Chat{}
 
 	}
 
- 	return chats
+	return chats
 }
 
 func (r *dbStruct) AddChatToDatabase(chat Chat) {
@@ -168,5 +201,29 @@ func (r *dbStruct) AddChatNotification(chat Chat, count int) {
 			fmt.Println("failed to change count of  Notification in Database")
 		}
 	}
+
+}
+
+func (repo *dbStruct) DeleteChatNotifDB(chat Chat) (int64, error) {
+	// Prepare the SQL statement to delete the cookie value from the Sessions table
+	stmt, err := repo.db.Prepare("DELETE FROM Notifications WHERE type = ? AND sender = ? AND recipient = ?")
+	if err != nil {
+		fmt.Println("err with deleting cookie from db:", err)
+		return 0, err
+	}
+
+	// Execute the SQL statement to delete the cookie value
+	result, err := stmt.Exec("chat", chat.Sender, chat.Reciever)
+	if err != nil {
+		log.Fatal(err)
+		return 0, err
+	}
+	// Check the affected rows count
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+		return 0, err
+	}
+	return rowsAffected, err
 
 }
