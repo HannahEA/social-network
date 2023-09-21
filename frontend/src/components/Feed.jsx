@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
-import {Chat, AddUserToChatList, PrintNewChat} from "./feed/Chat"
+import {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification, ChangeMessageNotification} from "./feed/Chat"
 import handleLogout from "./feed/Logout";
 import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
@@ -44,9 +44,19 @@ const Feed = () => {
         if (message.type == "connect") {
            // console.log(message)
           allData.current.presences = message.presences
+          allData.current.offlineFollowNotif = message.offlineFollowNotif
           // console.log("current presences", allData.current.presences)
           //shows pending follow requests
-          showRedDot();
+          console.log(allData.current.offlineFollowNotif.numPending)
+          if (parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0) {
+            console.log("greater")
+            showRedDot();
+          }else{
+           console.log("numPending is zero");
+           let aDiv = document.querySelector("#aCounter");
+           aDiv.style.visibility = "hidden";
+          }
+          
           //update chat user list
           console.log("message type", message.type)
           AddUserToChatList({type: message.type, allData: allData.current})
@@ -113,7 +123,7 @@ const Feed = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [redDotVisible, setRedDotVisible] = useState(true);
+  const [redDotVisible, setRedDotVisible] = useState(false);
   allData.current.userInfo = userInfo
   // allData.current.offlineFollowNotif = offlineFollowNotif
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
@@ -597,7 +607,8 @@ const handleClickUsersList = () => {
               </svg>
             </button>
             {console.log("the numPending :====>",allData)}
-            <div className="counter" style={{visibility:`${parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0 ? 'visible' : 'hidden'}`}}>
+            {/* <div className="counter" style={{visibility:`${parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0 ? 'visible' : 'hidden'}`}}> */}
+            <div className="counter" id="aCounter">
                        {redDotVisible && (
                       <Alerts 
                         setDotVisible={setRedDotVisible}
@@ -606,7 +617,7 @@ const handleClickUsersList = () => {
                         pendingFolNotif={allData.current.offlineFollowNotif.pendingFollows}
                       />
                       )}
-            {console.log("inside alerts div",parseInt(allData.current.offlineFollowNotif.numPending, 10))}
+            {console.log("inside alerts div",allData.current.offlineFollowNotif.numPending)}
             </div> 
          
 
