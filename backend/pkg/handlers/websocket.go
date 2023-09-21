@@ -20,7 +20,7 @@ type TypeCheck struct {
 var Clients = make(map[*websocket.Conn]string)
 
 //stores the number of clients
-var prevLen int = 0
+var PrevLen int = 0
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -57,7 +57,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 	// close any connctions ended on client side
 	// newLen stores the new number of clients after a new web connection has been added
 	newLen := checkWebSocketConnections(Clients)
-	fmt.Println("client list before", prevLen, "after", newLen)
+	fmt.Println("client list before", PrevLen, "after", newLen)
 
 	// if it's zero, no messages were ever sent/saved
 	// STORE OLD MESSAGES
@@ -96,7 +96,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			Clients[ws] = user.NickName
 
 			// if the number of clients before the new connection was added is less than the number of clients after the conn was added (and closed connections were deleted) a new client is online
-			if newLen > prevLen {
+			if newLen > PrevLen {
 
 				fmt.Println("new web connection - new client logged in")
 
@@ -123,7 +123,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				}
 
 				//set prevLen to the current number of clients
-				prevLen = newLen
+				PrevLen = newLen
 			}
 
 			// get full list of influencers with online/offline to send to the user with a new websocket connection
