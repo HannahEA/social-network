@@ -19,7 +19,7 @@ type TypeCheck struct {
 // map of clients: key - webcoket connection value-username
 var Clients = make(map[*websocket.Conn]string)
 
-// stores the number of clients
+//stores the number of clients
 var PrevLen int = 0
 
 var upgrader = websocket.Upgrader{
@@ -44,6 +44,7 @@ func checkWebSocketConnections(client map[*websocket.Conn]string) int {
 func UnsafeError(err error) bool {
 	return !websocket.IsCloseError(err, websocket.CloseGoingAway) && err != io.EOF
 }
+
 func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *http.Request) {
 	//create websocket connection
 	ws, err := upgrader.Upgrade(w, r, nil)
@@ -53,6 +54,10 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 	fmt.Println("new websocket connection")
 	// ensure connection close when function returns
 	defer ws.Close()
+	// close any connctions ended on client side
+	// newLen stores the new number of clients after a new web connection has been added
+	newLen := checkWebSocketConnections(Clients)
+	fmt.Println("client list before", PrevLen, "after", newLen)
 
 	// if it's zero, no messages were ever sent/saved
 	// STORE OLD MESSAGES
@@ -90,12 +95,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			user := service.repo.GetUserByCookie(cookie)
 			Clients[ws] = user.NickName
 
-			// close any connctions ended on client side
-			// newLen stores the new number of clients after a new web connection has been added
-			newLen := checkWebSocketConnections(Clients)
-			fmt.Println("client list before", PrevLen, "after", newLen)
-			fmt.Println("client list ", Clients)
-
 			// if the number of clients before the new connection was added is less than the number of clients after the conn was added (and closed connections were deleted) a new client is online
 			if newLen > PrevLen {
 
@@ -111,7 +110,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					},
 					Type: "user update",
 				}
-
 				// which clients, if any, are following this user? return map of clients
 				list := service.repo.ClientsFollowingUser(user)
 
@@ -138,11 +136,29 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			//ws - new connection pointer
 			reciever[ws] = user.NickName
 
-			//message to send to user in websocket message struct
-			webMessage := WebsocketMessage{
-				Presences: presences,
-				Type:      "connect",
+			//pending follow requests moved to login.go
+
+			// //get user's pending follow requests
+			// fmt.Println("The offline requests are for influencer: ", user.NickName)
+			countPending, slicePending := service.repo.GetPendingFollowRequests(user.NickName)
+
+			// fmt.Println("The count of pending follow r. and the slice of Pending: ", countPending, slicePending)
+
+			// //instantiate the OfflineFollowNotif struct to be sent via ws
+			var offlineFollowNotif = OfflineFollowNotif{
+				PendingFollows: slicePending,
+				NumPending:     strconv.Itoa(countPending),
 			}
+
+			fmt.Println("the OfflineFollowNotif struct sent to front end: ", offlineFollowNotif)
+
+			webMessage := WebsocketMessage{
+				Presences:          presences,
+				OfflineFollowNotif: offlineFollowNotif,
+				Type:               "connect",
+			}
+
+			fmt.Println("the webMessage struct sent to f.e.: ", webMessage)
 
 			// send websocket message to channel in broadcast message  struct with the reciever map
 			if len(presences.Clients) > 0 {
@@ -156,7 +172,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			// which clients are following this user? return list of clients
 
 		case "chat":
-			fmt.Println("client list ", Clients)
 			var chat Chat
 			// Unmarshal full message as JSON and map it to a Message object
 			// err := ws.ReadJSON(&msg)
@@ -231,7 +246,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			}
 			//either "follow" or "un-follow"
 			uploadFollowInfo.FollowAction = fInfo.FollowAction
-
+			fmt.Println("the follow info received: ", fInfo)
 			fmt.Println("uploadFollowInfo to upload in db", uploadFollowInfo)
 
 			if uploadFollowInfo.InfluencerVis == "public" {
@@ -242,22 +257,23 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					log.Fatalf(err.Error())
 				}
 
-			} else if uploadFollowInfo.InfluencerVis == "private" && uploadFollowInfo.FollowAction == "follow" {
-				fmt.Println("Checking if follow request goes to 'visibility private' branch")
+			} else if uploadFollowInfo.InfluencerVis == "private" && uploadFollowInfo.FollowAction == "follow" && fInfo.InfluLogged == "Yes" {
+				//private influencer is logged in
 				//populate the db table 'followers' and get the followID
 				followID, err := service.repo.InsertFollowRequest(uploadFollowInfo)
 				if err != nil {
 					log.Fatalf(err.Error())
 				}
-				//check if the private user is online
+				//send request notification through influencer's channel
 				online := false
 				fmt.Println("Printing to get rid of the error", online)
 				reciever := make(map[*websocket.Conn]string)
-
+				//find influencer's channel
 				for conn, client := range Clients {
 					if client == uploadFollowInfo.InfluencerUN {
 						reciever[conn] = client
 						online = true
+
 						fmt.Printf("follow request client/ receiver %v %v is %v", client, reciever, online)
 						//instantiate the 'Notif' struct
 						var fNotification FollowNotif
@@ -268,14 +284,47 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 						fmt.Println("notification via ws: ", fNotification.FollowID, fNotification.NotifMsg, fNotification.Type)
 						//if online, send a notification to the owner of the private profile
 						service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{FollowNotif: fNotification, Type: "followNotif"}, Connections: reciever})
-					} else {
-						fmt.Println("Influencer is off-line. Has accept been put to pending for private profile?", uploadFollowInfo.Accept)
-						//db query to return the number of pending notifications
-
 					}
 				}
 
+			} else if uploadFollowInfo.InfluencerVis == "private" && uploadFollowInfo.FollowAction == "follow" && fInfo.InfluLogged == "No" {
+				fmt.Println("Entering the influencer offline branch. uploadfollowinfo: ", uploadFollowInfo)
+				//influencer is off-line, populate the 'followers' table
+				//offline countAlerts are sent from case: "connect"
+				_, err := service.repo.InsertFollowRequest(uploadFollowInfo)
+				if err != nil {
+					log.Fatalf(err.Error())
+				}
+
+
+				//get user's pending follow requests
+				/*countPending, slicePending := service.repo.GetPendingFollowRequests(uploadFollowInfo)
+
+						fmt.Println("The count of pending follow r. and the lice of Pending: ", countPending, slicePending)
+						//instantiate the OfflineFollowNotif struct to be sent via ws
+						var offlFollowNotif = OfflineFollowNotif{
+							PendingFollows: slicePending,
+							NumPending:     strconv.Itoa(countPending),
+							Type:           "OfflineFollowNotif",
+						}
+
+						fmt.Println("the OfflineFollowNotif struct sent to front end: ", offlFollowNotif)
+
+						online := false
+						fmt.Println("Printing to get rid of the error", online)
+						reciever := make(map[*websocket.Conn]string)
+
+						for conn, client := range Clients {
+							if client == uploadFollowInfo.InfluencerUN {
+								reciever[conn] = client
+								online = true
+						//ws sends pending requests stored in offlFollowNotif to influencer's channel
+						service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{OfflineFollowNotif: offlFollowNotif, Type: "offlineFollowNotif"}, Connections: reciever})
+					}
+				}*/
+
 			} else if uploadFollowInfo.FollowAction == "un-follow" {
+				//delete record from Followers table
 				_, err := service.repo.InsertFollowRequest(uploadFollowInfo)
 				if err != nil {
 					log.Fatalf(err.Error())
@@ -313,6 +362,7 @@ func (r *dbStruct) BroadcastToChannel(msg BroadcastMessage) {
 func (repo *dbStruct) InsertFollowRequest(uploadFollowRequest UploadFollow) (int, error) {
 	//check if influencer is being un-followed
 	var followAction = uploadFollowRequest.FollowAction
+	fmt.Println("inside the InsertFollowRequest, followAction is: ", followAction)
 	if followAction == "un-follow" {
 		//remove the original 'follow' record in 'Followers' table
 		stmnt, err := repo.db.Prepare(`DELETE FROM Followers WHERE (followerUserName = ? AND influencerUserName = ?)`)
@@ -472,3 +522,35 @@ func (r *dbStruct) FullChatUserList(user *User) Presences {
 	}
 	return list
 }
+
+func (repo *dbStruct) GetPendingFollowRequests(nickname string) (int, []FollowNotifOffline) {
+	var fPending []FollowNotifOffline
+	var fCount int
+
+	fmt.Println("From inside GetPendingFollowRequests, the influencer name is: ", nickname)
+
+	query := `SELECT follow, followerUserName, influencerUserName FROM Followers WHERE influencerUserName = ? AND accepted = ?`
+	row, err := repo.db.Query(query, nickname, "Pending")
+	if err != nil {
+		fmt.Println("GetPendingFollowRequests query Error", err, fPending)
+		return 0, fPending
+	}
+
+	var oneFollowPending FollowNotifOffline
+
+	for row.Next() {
+		err := row.Scan(&oneFollowPending.FollowID, &oneFollowPending.FollowerUN, &oneFollowPending.InfluencerUN)
+		if err != nil {
+			fmt.Println("GetPendingFollowRequests scan Error", err, fPending)
+			return 0, fPending
+		}
+		fPending = append(fPending, oneFollowPending)
+		oneFollowPending = FollowNotifOffline{}
+
+	}
+
+	fCount = len(fPending)
+
+	return fCount, fPending
+}
+

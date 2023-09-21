@@ -6,7 +6,7 @@ import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-
+// import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
 import Card from "./usersInfo/Card.jsx";
 import createCard from "./usersInfo/CreateCard.jsx";
 import CreateNotification from "./notifications/createNotification.js";
@@ -16,45 +16,15 @@ import Detail from "./usersInfo/Detail.jsx";
 import Alerts from "./notifications/countAlerts.jsx";
 import Notification from "./notifications/notification.jsx";
 import { Notyf } from "notyf";
-// import { FunctionsRounded } from "@material-ui/icons";
+import { FunctionsRounded } from "@material-ui/icons";
+
+
 
 //Environment variable from the docker-compose.yml file.
 //This variable will contain the URL of the backend service,
 //allowing the frontend code to make requests to the correct endpoint.
 const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
-
-//below comment allows my code to use confirm()inside 'FollowYesNo'
-//replaces the react 'Notification' component
-/* eslint-disable no-restricted-globals */
-/*function FollowYesNo(id, message) {
-  var reply;
-  if (typeof message !== 'undefined') {
-    //send the message and collect user reply
-    //this code only works if developer tools window is docked to tab
-    let followYesNo = confirm(message);
-    //to prevent Chrome suppressing dialogs
-   // window.opener.confirm = window.confirm;
-    //user has clicked on 'OK'
-    if (followYesNo) {
-      // User has accepted, send data to the backend to change 'accepted' field in 'Followers' table to 'Yes'
-      reply = "Yes";
-    } else {
-      // User declined - change 'accepted' field in 'Followers' table to 'No'
-      reply = "No";
-    }
-  } else {
-    console.error("Message is undefined");
-  }
-  // Store user reply
-  var followReply = {
-    "followID": id,
-    "followReply": reply,
-    "type": "followReply",
-  };
-  return followReply;
-}
-*/
  
 
 
@@ -62,7 +32,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}})
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{} })
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
   
@@ -74,7 +44,19 @@ const Feed = () => {
         if (message.type == "connect") {
            // console.log(message)
           allData.current.presences = message.presences
+          allData.current.offlineFollowNotif = message.offlineFollowNotif
           // console.log("current presences", allData.current.presences)
+          //shows pending follow requests
+          console.log(allData.current.offlineFollowNotif.numPending)
+          if (parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0) {
+            console.log("greater")
+            showRedDot();
+          }else{
+           console.log("numPending is zero");
+           let aDiv = document.querySelector("#aCounter");
+           aDiv.style.visibility = "hidden";
+          }
+          
           //update chat user list
           console.log("message type", message.type)
           AddUserToChatList({type: message.type, allData: allData.current})
@@ -121,8 +103,6 @@ const Feed = () => {
           //update the value of isVisible to 'true'
           showNotification();
           console.log("the isVisible notif flag is:", isVisible)
-          
-
         }
     };
   }
@@ -136,13 +116,16 @@ const Feed = () => {
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
   const userInfo = location.state?.userInfo || {}
+  // const offlineFollowNotif = location.state?.offlineFollowNotif || {}
   const [usersList, setUsersList] = useState([]);
   const [isUsersListVisible, setIsUsersListVisible] = useState(false);
   const usersListRef = useRef(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [redDotVisible, setRedDotVisible] = useState(false);
   allData.current.userInfo = userInfo
+  // allData.current.offlineFollowNotif = offlineFollowNotif
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
  // POSTS VARIABLES
   const [Title, setTitle] = useState("");
@@ -160,6 +143,11 @@ const Feed = () => {
   const showNotification = () => {
     setIsVisible(true);
   };
+
+    // Function to show the Notification
+    const showRedDot = () => {
+      setRedDotVisible(true);
+    };
 
   useEffect(() => {
     verifyCookie();
@@ -251,6 +239,7 @@ const handleClickUsersList = () => {
       var influencerID = selectedUser.id;
       var influencerVisib = selectedUser.profVisib;
       var followAction
+      var logged = selectedUser.loggedIn
       var btnLabel = document.getElementById("follow");
 
       // var fAction ;
@@ -266,7 +255,7 @@ const handleClickUsersList = () => {
       }
 
 
-  // request info sent to the back end
+  // request info is sent to the back end
     const followInfo = {
       "type": "followingRequest",
       "followerEmail": email,
@@ -274,6 +263,7 @@ const handleClickUsersList = () => {
       "influencerID": influencerID,
       "influencerVisib": influencerVisib,
       "fAction": followAction,
+      "influLogged": logged,
     }
     //this returns correct influencer info
     console.log("printing selectedUser to be sent via websocket for followAction:", selectedUser, followAction)
@@ -616,12 +606,18 @@ const handleClickUsersList = () => {
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
             </button>
-            <div className="counter">
-                       {selectedUser && (
+            {console.log("the numPending :====>",allData)}
+            {/* <div className="counter" style={{visibility:`${parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0 ? 'visible' : 'hidden'}`}}> */}
+            <div className="counter" id="aCounter">
+                       {redDotVisible && (
                       <Alerts 
-                        countNotifications =  {parseInt(selectedUser.numNotifications, 10)} 
+                        setDotVisible={setRedDotVisible}
+                        dotVisible={redDotVisible}
+                        countFollowNotifs={allData.current.offlineFollowNotif.numPending} 
+                        pendingFolNotif={allData.current.offlineFollowNotif.pendingFollows}
                       />
                       )}
+            {console.log("inside alerts div",allData.current.offlineFollowNotif.numPending)}
             </div> 
          
 

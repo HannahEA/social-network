@@ -11,6 +11,8 @@ import "./index.css"; // Import tailwind CSS file
 //   document.getElementById("root")
 // );
 
+//ro stop react rendering multiple times
+//to disable: Remove <React.StrictMode> or <StrictMode>
 
 const root = createRoot(document.getElementById("root"))
 root.render(

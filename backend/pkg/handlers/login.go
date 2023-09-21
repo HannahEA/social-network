@@ -94,6 +94,7 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 		value := *userInfo
 		fmt.Println("the user info:", value)
 
+
 		response := map[string]interface{}{
 			"message":    "Login successful",
 			"email":      data.Email,
@@ -248,4 +249,3 @@ func (repo *dbStruct) getAvatar(email string) (string, error) {
 	}
 
 }
-

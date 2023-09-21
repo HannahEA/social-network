@@ -1,3 +1,10 @@
+#URL for more information about the robots.txt file and its usage:
 # https://www.robotstxt.org/robotstxt.html
+#the following rules apply to all web robots:
 User-agent: *
-Disallow:
+#This directive tells the web robots that they are allowed to access and crawl 
+#only the home page part of the website:
+Disallow: /feed
+Disallow: /register
+Disallow: /login
+Allow: /$

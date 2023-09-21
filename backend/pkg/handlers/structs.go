@@ -120,6 +120,8 @@ type WebsocketMessage struct {
 
 	FollowNotif FollowNotif `json:"followNotif"`
 
+	OfflineFollowNotif OfflineFollowNotif `json:"offlineFollowNotif"`
+
 	FollowReply FollowReply `json:"followReply"`
 
 	Type string `json:"type"`
@@ -127,9 +129,8 @@ type WebsocketMessage struct {
 
 type Presences struct {
 	//logged in users nicknames
-	Clients           [][]string `json:"clients"`
-	LoggedIn          []string   `json:"loggedIn"`
-	NotificationCount []int      `json:"notifCount"`
+	Clients  [][]string `json:"clients"`
+	LoggedIn []string `json:"loggedIn"`
 }
 
 type Conversation struct {
@@ -160,6 +161,7 @@ type Follow struct {
 	InfluencerID    int    `json:"influencerID"`
 	InfluencerVisib string `json:"influencerVisib"`
 	FollowAction    string `json:"fAction"`
+	InfluLogged     string `json:"influLogged"`
 }
 
 type UploadFollow struct {
@@ -173,11 +175,24 @@ type UploadFollow struct {
 	NotifMsg      string `json:"notifMsg"`
 }
 
-// follow request notification sent to private influencer
+// follow request notification sent to online private influencer
 type FollowNotif struct {
 	FollowID string `json:"followID"`
 	NotifMsg string `json:"notifMsg"`
 	Type     string `json:"type"`
+}
+
+//single instance of f.r.n. sent to offline private influencer
+type FollowNotifOffline struct {
+	FollowID     int    `json:"followID"`
+	FollowerUN   string `json:"followerUN"`
+	InfluencerUN string `json:"influencerUN"`
+}
+
+// all follow request notifications (f.r.n.) sent to offline private influencer
+type OfflineFollowNotif struct {
+	PendingFollows []FollowNotifOffline `json:"pendingFollows"`
+	NumPending     string               `json:"numPending"`
 }
 
 // follow notification reply by private influencer

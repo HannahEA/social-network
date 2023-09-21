@@ -2,6 +2,7 @@
 The bell icon in 'feed' page to show current number of pending notifications for logged-out private user
 When clicking on the bell a list will appear and each notification will show as:
 'notification type' 'accept btn' 'decline btn'
+The back end logic to determine which users are online needs correcting
 
 
 ## Hannah's fav colour palette: 
@@ -9,7 +10,7 @@ https://colorhunt.co/palette/ffeeccffddccffccccfebbcc
 
 
 # Modularization source by Ricky Adriell: 
-(https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html)
+https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html
 
 # To create a React app from scratch in the current folder
 1. First, to check that node is installed, in VSC terminal type: node -v
@@ -72,7 +73,7 @@ In VSC terminal
 
 1. git checkout master
 2. git add . (Necessary if you need to commit changes in your branch first)
-3. git commiit -m "your comment here"
+3. git commit -m "your comment here"
 4. git checkout master
 5. git pull
 6. git checkout "your branch name here" (Accept or reject the incoming code)

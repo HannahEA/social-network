@@ -80,6 +80,7 @@ const LoginPage = () => {
          const dataObj = await data
            
            checkCookie(dataObj);
+
        })()
   };
 
@@ -93,7 +94,10 @@ const LoginPage = () => {
       // Redirect to the feed page if the cookie is found
       if (data.message === "Cookie is found") {
         console.log("Cookie is found, redirecting to feed");
-       
+
+
+        console.log("from inside /checkCookie dataObj:===>",dataObj.offlineFollowNotif)
+    
 
           
        

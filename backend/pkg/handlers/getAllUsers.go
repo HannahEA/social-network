@@ -16,7 +16,7 @@ func check(err error) {
 }
 
 func (service *AllDbMethodsWrapper) HandleGetAllUsers(w http.ResponseWriter, r *http.Request) {
-	//retrieve the cookie from 'r'
+	//retrieve the email from 'r'
 	var userEmail string
 	err := json.NewDecoder(r.Body).Decode(&userEmail)
 	check(err)
@@ -82,14 +82,6 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 	var nickName1 = userData.NickName
 	fmt.Println("The follower nickname is:", nickName1)
 
-	//replaced by query below as this one did not distinguish between 'Yes' and 'Pending' in 'accepted' field of 'Followers' table
-	/*query := `
-	    SELECT U.id, U.nickName, U.avatarURL, U.imageFile, U.aboutMe, U.profileVisibility, U.loggedIn,
-	    CASE WHEN F.followerUserName = ? AND F.accepted = Yes THEN 1 ELSE 0 END AS influencer
-	    FROM Users U
-	    LEFT JOIN Followers F ON U.nickName = F.influencerUserName AND F.followerUserName = ?
-	    WHERE U.nickName != ?
-	`*/
 	//This query returns a list of users with the 'influencer' flag
 	//that equals 1 if follow request has been accepted, 2 if is pending, 0 if user is not being followed
 
@@ -113,7 +105,6 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 	}
 
 	var oneUser AllUsersData
-	fmt.Println("#### 1 ### initializing the AllUsersData struct here")
 
 	for rows.Next() {
 		err := rows.Scan(&oneUser.ID, &oneUser.NickName, &oneUser.Avatar, &oneUser.Image, &oneUser.AboutMe, &oneUser.ProfVisib, &oneUser.LoggedIn, &oneUser.Influencer)
@@ -121,12 +112,6 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 			return uData, err
 		}
 
-		fmt.Println("#### 2 #### We are past the rows.Scan here")
-
-		//print scanned values
-		fmt.Println("#### 3 #### Scanned ID:", oneUser.ID, "Scanned influencer #:", oneUser.Influencer)
-
-		fmt.Println(" #### 4 #### All oneUser information: ", oneUser)
 		uData = append(uData, oneUser)
 	}
 
@@ -135,7 +120,6 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 		return uData, err
 	}
 
-	fmt.Println("the slice of all users inside the GetUsersData function: ", uData)
 	return uData, nil
 }
 
