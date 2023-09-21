@@ -100,6 +100,7 @@ func messageClients(msg handlers.BroadcastMessage) {
 
 func messageClient(client *websocket.Conn, msg handlers.BroadcastMessage) {
 	send := &msg.WebMessage
+	//turn WebsocketMessage struct into json and send to the client
 	err := client.WriteJSON(&send)
 	fmt.Println("handled message", msg.WebMessage)
 	if err != nil && handlers.UnsafeError(err) {

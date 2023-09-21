@@ -42,17 +42,18 @@ const Feed = () => {
         let message = JSON.parse(e.data)
         console.log(message, "web message")
         if (message.type == "connect") {
-           // console.log(message)
+           console.log("the entire message is: ", message)
           allData.current.presences = message.presences
           allData.current.offlineFollowNotif = message.offlineFollowNotif
           // console.log("current presences", allData.current.presences)
           //shows pending follow requests
           console.log(allData.current.offlineFollowNotif.numPending)
           if (parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0) {
-            console.log("greater")
+            console.log("greater than 0 ", allData.current.offlineFollowNotif.numPending)
             showRedDot();
           }else{
-           console.log("numPending is zero");
+           console.log("numPending is zero, Nan or undefined", allData.current.offlineFollowNotif.numPending);
+           hideRedDot();
            let aDiv = document.querySelector("#aCounter");
            aDiv.style.visibility = "hidden";
           }
@@ -61,7 +62,7 @@ const Feed = () => {
           console.log("message type", message.type)
           AddUserToChatList({type: message.type, allData: allData.current})
           //chat notifications 
-         
+         if (message.presences.clients){
           for (const user of message.presences.clients) {
             console.log("no. of chats", user)
             if (user[2] != '0') {
@@ -70,6 +71,8 @@ const Feed = () => {
               break
             }
           }
+         }
+          
          
         } else if (message.type == "user update") {
           console.log("message type", message.type)
@@ -147,6 +150,11 @@ const Feed = () => {
     // Function to show the Notification
     const showRedDot = () => {
       setRedDotVisible(true);
+    };
+
+    // Function to show the Notification
+    const hideRedDot = () => {
+        setRedDotVisible(false);
     };
 
   useEffect(() => {

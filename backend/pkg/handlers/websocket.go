@@ -161,12 +161,11 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			fmt.Println("the webMessage struct sent to f.e.: ", webMessage)
 
 			// send websocket message to channel in broadcast message  struct with the reciever map
-			if len(presences.Clients) > 0 {
-				service.repo.BroadcastToChannel(BroadcastMessage{
-					WebMessage:  webMessage,
-					Connections: reciever,
-				})
-			}
+
+			service.repo.BroadcastToChannel(BroadcastMessage{
+				WebMessage:  webMessage,
+				Connections: reciever,
+			})
 
 			// less connections than before - logout
 			// which clients are following this user? return list of clients
@@ -295,7 +294,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				if err != nil {
 					log.Fatalf(err.Error())
 				}
-
 
 				//get user's pending follow requests
 				/*countPending, slicePending := service.repo.GetPendingFollowRequests(uploadFollowInfo)
@@ -553,4 +551,3 @@ func (repo *dbStruct) GetPendingFollowRequests(nickname string) (int, []FollowNo
 
 	return fCount, fPending
 }
-
