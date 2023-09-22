@@ -1,15 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
 import {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification, ChangeMessageNotification} from "./feed/Chat"
-import handleLogout from "./feed/Logout";
 import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 // import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
 import Card from "./usersInfo/Card.jsx";
-import createCard from "./usersInfo/CreateCard.jsx";
-import CreateNotification from "./notifications/createNotification.js";
 import Modal from "./usersInfo/Modal.jsx";
 import Avatar from "./usersInfo/Avatar.jsx";
 import Detail from "./usersInfo/Detail.jsx";
@@ -130,7 +127,6 @@ const Feed = () => {
   const [redDotVisible, setRedDotVisible] = useState(false);
   const[isPendingListVisible, setIsPendingListVisible] = useState(false);
   const[pendingNotif, setPendingNotif] = useState([]);
-  const pendingNotifRef = useRef(null);
   allData.current.userInfo = userInfo
   // allData.current.offlineFollowNotif = offlineFollowNotif
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
@@ -168,10 +164,41 @@ const togglePendingListVisible = () => {
 
 const handleOfflFollowAccept = (f) => {
   console.log("Offline user", f.influencerUN ,"has accepted follow request from", f.followerUN,". The follow ID is: ",f.followID)
+  let ID = f.followID.toString();
+  let reply = "Yes";
+  // Make a reply object
+  var YesNo = {
+      "followID": ID,
+      "followReply": reply,
+      "type": "followReply",
+  };
+
+  console.log("the followReply sent to back end: ", YesNo)
+
+  //send reply object to back end
+  websocketRef.current.send(
+    JSON.stringify(YesNo)
+  )
 }
 
 const handleOfflFollowDecline = (f) => {
   console.log("Offline user", f.influencerUN ,"has declined follow request from", f.followerUN,". The follow ID is: ",f.followID)
+  let ID = f.followID.toString();
+  let reply = "No";
+    // Make a reply object
+    var YesNo = {
+        "followID": ID,
+        "followReply": reply,
+        "type": "followReply",
+    };
+
+    console.log("the followReply sent to back end: ", YesNo)
+
+    //send reply object to back end
+    websocketRef.current.send(
+      JSON.stringify(YesNo)
+    )
+
 }
 
   useEffect(() => {
@@ -651,6 +678,7 @@ const handleClickUsersList = () => {
             {/* Start of offline Notifications Dropdown menu */}
             <div
               className={`overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700 ${isPendingListVisible ? 'visible' : 'hidden'}`}
+                
               id="notification-dropdown"
             >
     {/* Start of follow notifs offline */}
