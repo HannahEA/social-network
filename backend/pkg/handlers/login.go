@@ -147,9 +147,9 @@ func (repo *dbStruct) AddLoggedInFlag(userID int, flag string) error {
 
 	defer updateLoggedInStmt.Close()
 	// Execute the SQL statement to update the 'loggedIn' flag for the given user ID
-	_, err5 = updateLoggedInStmt.Exec(LoggedIn, userID)
+theResult, err5 := updateLoggedInStmt.Exec(LoggedIn, userID)
 	if err5 != nil {
-		fmt.Println("Error updating 'loggedIn' flag:", err5)
+		fmt.Println("Error updating 'loggedIn' flag:", err5, "the sql result is: ",theResult)
 		return err5
 	}
 
@@ -200,6 +200,7 @@ func (repo *dbStruct) ReturnId(email string) (int, error) {
 	id := 0
 	theID := "SELECT id FROM Users WHERE email = ?"
 	rowCurrentUser := repo.db.QueryRow(theID, email)
+
 	// Writing user id into User.id struct field
 	err3 := rowCurrentUser.Scan(&id)
 	if err3 != nil {

@@ -130,7 +130,7 @@ type WebsocketMessage struct {
 type Presences struct {
 	//logged in users nicknames
 	Clients  [][]string `json:"clients"`
-	LoggedIn []string `json:"loggedIn"`
+	LoggedIn []string   `json:"loggedIn"`
 }
 
 type Conversation struct {
@@ -184,9 +184,11 @@ type FollowNotif struct {
 
 //single instance of f.r.n. sent to offline private influencer
 type FollowNotifOffline struct {
-	FollowID     int    `json:"followID"`
-	FollowerUN   string `json:"followerUN"`
-	InfluencerUN string `json:"influencerUN"`
+	FollowID      string    `json:"followID"`
+	FollowerUN    string `json:"followerUN"`
+	InfluencerUN  string `json:"influencerUN"`
+	FollowerURL   string `json:"followerURL"`
+	FollowerImage string `json:"followerImage"`
 }
 
 // all follow request notifications (f.r.n.) sent to offline private influencer

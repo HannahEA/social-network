@@ -96,6 +96,7 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 		FROM Users U
 		LEFT JOIN Followers F ON U.nickName = F.influencerUserName AND F.followerUserName = ?
 		WHERE U.nickName != ?
+		
 	`
 
 	rows, err := repo.db.Query(query, nickName1, nickName1, nickName1, nickName1, nickName1)
@@ -112,7 +113,11 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 			return uData, err
 		}
 
+		fmt.Println("getAllUsers one slice item: ",oneUser)
+
 		uData = append(uData, oneUser)
+
+		fmt.Println("getAllUsers complete slice of users: ", uData)
 	}
 
 	err = rows.Err()

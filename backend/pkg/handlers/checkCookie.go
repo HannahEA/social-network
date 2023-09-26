@@ -34,6 +34,8 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 
 	count := service.repo.checkCookieDB(cookieValue)
 
+	fmt.Println("the number of users logged in is? Here the db gets locked: ",count)
+
 	//browser to show logged in user info
 	//if browser window was previously closed down without logging out
 	loggedInUser := service.repo.GetUserByCookie(cookieValue)

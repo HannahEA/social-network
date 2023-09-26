@@ -527,7 +527,34 @@ func (repo *dbStruct) GetPendingFollowRequests(nickname string) (int, []FollowNo
 
 	fmt.Println("From inside GetPendingFollowRequests, the influencer name is: ", nickname)
 
-	query := `SELECT follow, followerUserName, influencerUserName FROM Followers WHERE influencerUserName = ? AND accepted = ?`
+	//get data from 'Users' and 'Followers' tables for followers with status 'pending'
+	//Abandoned as it caused the sqllite db to be locked
+	/*query := `
+		SELECT U.avatarURL, U.imageFile, F.follow, F.followerUserName, F.influencerUserName,
+	    CASE
+			WHEN F.influencerUserName = ? AND F.accepted = 'Pending' THEN 1
+			ELSE 0
+		END AS follower
+	    FROM Users U
+	    LEFT JOIN Followers F ON U.nickName = F.followerUserName AND  F.influencerUserName  = ?
+	    WHERE U.nickName != ?
+	`
+
+	row, err := repo.db.Query(query, nickname, nickname, nickname)
+	if err != nil {
+		fmt.Println("GetPendingFollowRequest query error", err, fPending)
+		return 0, fPending
+	}
+	for row.Next() {
+	//err := row.Scan(&oneFollowPending.FollowerURL, &oneFollowPending.FollowerImage, &oneFollowPending.FollowID, &oneFollowPending.FollowerUN, &oneFollowPending.InfluencerUN, &oneFollowPending.Follower)
+			if err != nil {
+			fmt.Println("GetPendingFollowRequests scan Error", err, fPending)
+			return 0, fPending
+		}
+	*/
+
+	//The original query that is working but doesn't include follower avatar
+	/*query := `SELECT follow, followerUserName, influencerUserName FROM Followers WHERE influencerUserName = ? AND accepted = ?`
 	row, err := repo.db.Query(query, nickname, "Pending")
 	if err != nil {
 		fmt.Println("GetPendingFollowRequests query Error", err, fPending)
@@ -537,14 +564,49 @@ func (repo *dbStruct) GetPendingFollowRequests(nickname string) (int, []FollowNo
 	var oneFollowPending FollowNotifOffline
 
 	for row.Next() {
+
 		err := row.Scan(&oneFollowPending.FollowID, &oneFollowPending.FollowerUN, &oneFollowPending.InfluencerUN)
 		if err != nil {
 			fmt.Println("GetPendingFollowRequests scan Error", err, fPending)
 			return 0, fPending
+		}*/
+
+	var oneFollowPending FollowNotifOffline
+	//returns avatar from 'Users' and info from 'Followers' table
+	query := `
+			SELECT U.avatarURL, U.imageFile, F.follow, F.followerUserName, F.influencerUserName
+			FROM Users U
+			INNER JOIN Followers F ON U.nickName = F.followerUserName
+			WHERE F.influencerUserName = ? AND F.accepted = 'Pending' AND U.nickName != F.influencerUserName
+		`
+	rows, err := repo.db.Query(query, nickname)
+	if err != nil {
+		fmt.Println("error querying pending follow requests for offline user", err)
+		return 0, fPending
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+
+		err := rows.Scan(&oneFollowPending.FollowerURL, &oneFollowPending.FollowerImage, &oneFollowPending.FollowID, &oneFollowPending.FollowerUN, &oneFollowPending.InfluencerUN)
+		if err != nil {
+			fmt.Println("GetPendingFollowRequests for offline user scan Error", err, oneFollowPending)
+			return 0, fPending
 		}
+
+		fmt.Println("One pending follower data for offline user: ", oneFollowPending)
+
 		fPending = append(fPending, oneFollowPending)
+
+		fmt.Println("Slice of pending followers for offline user", fPending)
 		oneFollowPending = FollowNotifOffline{}
 
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return 0, fPending
 	}
 
 	fCount = len(fPending)
