@@ -224,16 +224,19 @@ background-color: #2f5d78;
 
     /* ====> Start of offline notifications */
 
+    #notification-dropdown {
+      z-index: 999;
+      position: fixed;
+      top: 50px;
+      right: 0px;
+    }
+
 
 
     #offlineNotifBtn{
       position:absolute;
     }
 
-    #notification-dropdown{
-      position:relative;
-      top: 10px;
-    }
 
     .offlineAccept{
       margin-left: 150px;
