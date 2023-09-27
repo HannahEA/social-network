@@ -333,9 +333,9 @@ const RemoveChatNotification = ({username, name}) => {
  return (
     <div>
         <button onClick={handleOpenChat} id="messages" className="fixed items-center text-base
-        transition duration-75 group bg-[#c69d88] hover:bg-[#b68b76] 
+        transition duration-75 group bg-[#f4b08e] hover:bg-[#f4a279] 
         shadow-lg dark:text-white dark:hover:bg-[#b68b76] 
-        first-letter:[box-shadow:0_3px_0_0_#b68b76] 
+        first-letter:[box-shadow:0_3px_0_0_#f4a279] 
         [box-shadow:0_3px_0_0_#b68b76]
          text-white font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2" > Messages
         <div className="hidden bg-red-300 rounded-lg absolute -top-4 right-2 w-8 h-8 " id="notifIcon">

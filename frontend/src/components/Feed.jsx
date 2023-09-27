@@ -179,6 +179,9 @@ const handleOfflFollowAccept = (f) => {
   websocketRef.current.send(
     JSON.stringify(YesNo)
   )
+
+  //remove the offline follow request item from drop-down list
+  document.getElementById(ID).innerHTML = '';
 }
 
 const handleOfflFollowDecline = (f) => {
@@ -199,7 +202,10 @@ const handleOfflFollowDecline = (f) => {
       JSON.stringify(YesNo)
     )
 
+  //remove the offline follow request item from drop-down list
+  document.getElementById(ID).innerHTML = '';
 }
+
 
   useEffect(() => {
     verifyCookie();
@@ -565,7 +571,7 @@ const handleClickUsersList = () => {
 
   return (
     <div className="antialiased bg-gray-50 dark:bg-gray-900">
-      <div className="relative content-container">{/* <TopNavigation /> */}</div>
+      <div className="content-container">{/* <TopNavigation /> */}</div>
       <ThemeIcon isDarkTheme={isDarkTheme} setDarkTheme={setDarkTheme} />
       <nav className="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
         <div className="flex flex-wrap justify-between items-center">
@@ -645,7 +651,7 @@ const handleClickUsersList = () => {
               </svg>
             </button>
             {/* Notifications */}
-            <div >
+            <div id="notificationsBell">
             <button
               type="button"
               data-dropdown-toggle="notification-dropdown"
@@ -653,7 +659,7 @@ const handleClickUsersList = () => {
             >
               <span className="sr-only">View notifications</span>
               {/* Bell icon */}
-              <svg aria-hidden="true" className="w-6 h-6" position="relative" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <svg aria-hidden="true" className="w-6 h-6" position="absolute" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
             </button>
@@ -690,7 +696,7 @@ const handleClickUsersList = () => {
                     className="block py-2 px-4 text-sm hover:bg-[#7ca3ba] dark:hover:bg-[#7096ac] dark:text-gray-600 dark:hover:text-white dark:bg-[#a5dcfc]"
                   >
                     {pendingNotif.map((f)=> (
-                      <li key={f.followID}>
+                      <li key={f.followID} id={f.followID} >
                        <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
                       <div className="flex-shrink-0">
                       <img

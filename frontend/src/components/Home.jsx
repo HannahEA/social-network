@@ -22,10 +22,10 @@ const Home = () => {
             Connect with friends and build relationships with Social-Network. Join our vibrant community and stay connected virtually.
           </div>
           <div className="btn-wrap flex w-full items-center justify-center gap-3 font-bold text-[#87879D]">
-            <Link to="/register" className="rounded-3xl bg-[#FFDDCC] px-4 py-2.5 sm:px-6 sm:py-3.5 text-sm sm:text-md shadow-lg">
+            <Link to="/register" className="rounded-3xl bg-[#f8b99a] hover:bg-red-400 px-4 py-2.5 sm:px-6 sm:py-3.5 text-sm sm:text-md shadow-lg">
               Get Started
             </Link>
-            <button className="rounded-3xl bg-[#FFEECC] px-4 py-2.5 sm:px-6 sm:py-3.5 text-sm sm:text-md shadow-lg">Learn More</button>
+            <button className="rounded-3xl bg-[#FFEECC] hover:bg-[#f8d897] px-4 py-2.5 sm:px-6 sm:py-3.5 text-sm sm:text-md shadow-lg">Learn More</button>
           </div>
         </div>
         <img src="https://jguleserian.github.io/FMC-MeetLandingPage/assets/desktop/image-hero-right.png" className="" alt="" />
