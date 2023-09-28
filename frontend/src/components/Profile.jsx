@@ -1211,8 +1211,8 @@ const Profile = () => {
                 <strong>age: {calculateAge(dateOfBirth)}</strong>
                 </span>
                 <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"><strong>gender: {gender}</strong></span>
-                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"><strong>I follow: 1</strong></span>
-                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"><strong>follow me: 1</strong></span>
+                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"><strong>following: 1</strong></span>
+                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"><strong>follow: 1</strong></span>
               </div>
             </div>
           </div>

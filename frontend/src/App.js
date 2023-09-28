@@ -9,6 +9,7 @@ import Profile from "./components/Profile";
 import { TopNavigation, ThemeIcon } from "./components/TopNavigation";
 import Notification from "./components/notifications/notification.jsx";
 import Alerts from "./components/notifications/countAlerts.jsx";
+import GroupsModal from "./components/groups/groupsModal.jsx";
 const apiURL = process.env.REACT_APP_API_URL;
 function App() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -35,6 +36,7 @@ function App() {
       <Feed/>
       <Notification/>
       <Alerts/>
+      <groupsModal/>
     </WebSocketProvider>} />
         <Route path="/profile" element={<Profile />} />
       </Routes>

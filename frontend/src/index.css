@@ -127,15 +127,29 @@ code {
     color: #4d595c;
   }
 
-  /*to align lable and value in bottom section of card
-  /* .flexbox-container{
-    display: flex;
-    flex-direction: row;
-  } */
 
     /* ===> End of 'Card' component styling <==== */
   
   /* ====> End of User Info Modal stylng <=== */
+
+  /* Start of 'groupsModal' */
+/* add dots to separate group participants from grp name/desc */
+hr.dottedL{
+  border-top: 5px dotted #aebfc4;
+  background-image: linear-gradient(to right, white 200%, rgba(white, 0) 0%);
+}
+
+#newGpBtn{
+  top:250px;
+  left:115px;
+}
+
+.addToGroup{
+  color:rgb(37 99 235);
+  font-weight: 500;
+}
+
+  /* End of groupsModal */
 
     /* ====> Start of notifications popup <====== */
 
@@ -241,6 +255,7 @@ background-color: #2f5d78;
     .offlineAccept{
       margin-left: 150px;
       margin-right: 20px;
+      font: primary-600;
     }
 
     .offlineDecline{
