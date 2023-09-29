@@ -83,6 +83,7 @@ type Post struct {
 	Visibility string    `json:"visibility"`
 	Cookie     string    `json:"cookie"`
 	PostType   string    `json:"type"`
+	Page       string    `json:"page"`
 	Comments   []Comment `json:"comments"`
 }
 

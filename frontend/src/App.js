@@ -36,7 +36,7 @@ function App() {
       <Notification/>
       <Alerts/>
     </WebSocketProvider>} />
-        <Route path="/profile" element={<Profile />} />
+        {/* <Route path="/profile" element={<Profile />} /> */}
       </Routes>
     </Router>
   );
