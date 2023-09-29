@@ -38,6 +38,7 @@ func (service *AllDbMethodsWrapper) HandleChangeProfileVisibility(w http.Respons
 
 }
 
+
 func (repo *dbStruct) UploadVisibilityValue(data ProfileVisibilityData) (string, error) {
 
 	res, err := repo.db.Exec("UPDATE Users SET profileVisibility = ? WHERE nickName = ?", data.ProfVisib, data.NickName)
@@ -55,3 +56,4 @@ if err != nil {
 	fmt.Printf("new user visibility is: %v, the rows affected are: %v", data.ProfVisib, rowsAffected)
 	return data.ProfVisib, nil
 }
+

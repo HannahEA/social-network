@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
 import {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification, ChangeMessageNotification} from "./feed/Chat"
-import handleLogout from "./feed/Logout";
 import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import  Profile  from "./Profile.jsx"
@@ -9,8 +8,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 // import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
 import Card from "./usersInfo/Card.jsx";
-import createCard from "./usersInfo/CreateCard.jsx";
-import CreateNotification from "./notifications/createNotification.js";
 import Modal from "./usersInfo/Modal.jsx";
 import Avatar from "./usersInfo/Avatar.jsx";
 import Detail from "./usersInfo/Detail.jsx";
@@ -43,17 +40,19 @@ const Feed = () => {
         let message = JSON.parse(e.data)
         console.log(message, "web message")
         if (message.type == "connect") {
-           // console.log(message)
+           console.log("the entire message is: ", message)
           allData.current.presences = message.presences
           allData.current.offlineFollowNotif = message.offlineFollowNotif
           // console.log("current presences", allData.current.presences)
           //shows pending follow requests
           console.log(allData.current.offlineFollowNotif.numPending)
           if (parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0) {
-            console.log("greater")
+            console.log("greater than 0 ", allData.current.offlineFollowNotif.numPending)
             showRedDot();
+            setPendingNotif(allData.current.offlineFollowNotif.pendingFollows)
           }else{
-           console.log("numPending is zero");
+           console.log("numPending is zero, Nan or undefined", allData.current.offlineFollowNotif.numPending);
+           hideRedDot();
            let aDiv = document.querySelector("#aCounter");
            hideRedDot()
            aDiv.style.visibility = "hidden";
@@ -116,9 +115,9 @@ const Feed = () => {
 }  
 })
 
-const hideRedDot = () => {
-  setRedDotVisible(false)
-}
+// const hideRedDot = () => {
+//   setRedDotVisible(false)
+// }
   const location = useLocation();
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
@@ -131,6 +130,8 @@ const hideRedDot = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [redDotVisible, setRedDotVisible] = useState(false);
+  const[isPendingListVisible, setIsPendingListVisible] = useState(false);
+  const[pendingNotif, setPendingNotif] = useState([]);
   allData.current.userInfo = userInfo
   // allData.current.offlineFollowNotif = offlineFollowNotif
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
@@ -155,6 +156,61 @@ const hideRedDot = () => {
     const showRedDot = () => {
       setRedDotVisible(true);
     };
+
+    // Function to show the Notification
+    const hideRedDot = () => {
+        setRedDotVisible(false);
+    };
+
+    //Toggle visibility of the list of pending notifications
+const togglePendingListVisible = () => {
+  setIsPendingListVisible(!isPendingListVisible);
+}
+
+const handleOfflFollowAccept = (f) => {
+  console.log("Offline user", f.influencerUN ,"has accepted follow request from", f.followerUN,". The follow ID is: ",f.followID)
+  let ID = f.followID.toString();
+  let reply = "Yes";
+  // Make a reply object
+  var YesNo = {
+      "followID": ID,
+      "followReply": reply,
+      "type": "followReply",
+  };
+
+  console.log("the followReply sent to back end: ", YesNo)
+
+  //send reply object to back end
+  websocketRef.current.send(
+    JSON.stringify(YesNo)
+  )
+
+  //remove the offline follow request item from drop-down list
+  document.getElementById(ID).innerHTML = '';
+}
+
+const handleOfflFollowDecline = (f) => {
+  console.log("Offline user", f.influencerUN ,"has declined follow request from", f.followerUN,". The follow ID is: ",f.followID)
+  let ID = f.followID.toString();
+  let reply = "No";
+    // Make a reply object
+    var YesNo = {
+        "followID": ID,
+        "followReply": reply,
+        "type": "followReply",
+    };
+
+    console.log("the followReply sent to back end: ", YesNo)
+
+    //send reply object to back end
+    websocketRef.current.send(
+      JSON.stringify(YesNo)
+    )
+
+  //remove the offline follow request item from drop-down list
+  document.getElementById(ID).innerHTML = '';
+}
+
 
   useEffect(() => {
     verifyCookie();
@@ -241,7 +297,6 @@ const handleClickUsersList = () => {
 
       const handleFollowUser = () => {
     if (isWebSocketConnected) {
-
       var influencerUN = selectedUser.username;
       var influencerID = selectedUser.id;
       var influencerVisib = selectedUser.profVisib;
@@ -498,7 +553,7 @@ const [viewProfile, setViewProfile] = useState(false)
       <div className="content-container">{/* <TopNavigation /> */}</div>
       <ThemeIcon isDarkTheme={isDarkTheme} setDarkTheme={setDarkTheme} />
       <nav className="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
-        <div className="flex flex-wrap justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center" id="bellDotsAvatar">
           <div className="flex justify-start items-center">
             <button
               data-drawer-target="drawer-navigation"
@@ -534,7 +589,7 @@ const [viewProfile, setViewProfile] = useState(false)
                 Search
               </label>
               <div className="relative md:w-64">
-                <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
+                <div className="flex items-center pl-3 pointer-events-none">
                   <svg
                     className="w-5 h-5 text-gray-500 dark:text-gray-400"
                     fill="currentColor"
@@ -558,7 +613,7 @@ const [viewProfile, setViewProfile] = useState(false)
               </div>
             </form>
           </div>
-          <div className="flex items-center lg:order-2">
+          <div className="flex items-center static lg:order-2">
             <button
               type="button"
               data-drawer-toggle="drawer-navigation"
@@ -583,210 +638,30 @@ const [viewProfile, setViewProfile] = useState(false)
             >
               <span className="sr-only">View notifications</span>
               {/* Bell icon */}
-              <svg aria-hidden="true" className="w-6 h-6" position="relative" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <svg aria-hidden="true" className="w-6 h-6" position="absolute" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
             </button>
             {/* {console.log("the numPending :====>",allData)} */}
             {/* <div className="counter" style={{visibility:`${parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0 ? 'visible' : 'hidden'}`}}> */}
             <div className="counter" id="aCounter">
+            <button onClick={togglePendingListVisible} id="offlineNotifBtn">
                        {redDotVisible && (
                       <Alerts 
                         setDotVisible={setRedDotVisible}
                         dotVisible={redDotVisible}
-                        countFollowNotifs={allData.current.offlineFollowNotif.numPending} 
+                        countFollowNotifs={parseInt(allData.current.offlineFollowNotif.numPending, 10)} 
                         pendingFolNotif={allData.current.offlineFollowNotif.pendingFollows}
                       />
                       )}
-            {/* {console.log("inside alerts div",allData.current.offlineFollowNotif.numPending)} */}
+            {console.log("inside alerts div",allData.current.offlineFollowNotif.numPending)}
+            </button>
             </div> 
          
 
             </div>
-            {/* Dropdown menu */}
-            <div
-              className="hidden overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700"
-              id="notification-dropdown"
-            >
-              <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300">
-                Notifications
-              </div>
-              <div>
-                <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
-                  <div className="flex-shrink-0">
-                    <img
-                      className="w-11 h-11 rounded-full"
-                      src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/bonnie-green.png"
-                      alt="Bonnie Green avatar"
-                    />
-                    <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 rounded-full border border-white bg-primary-700 dark:border-gray-700">
-                      <svg
-                        aria-hidden="true"
-                        className="w-3 h-3 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z" />
-                        <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="pl-3 w-full">
-                    <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
-                      New message from
-                      <span className="font-semibold text-gray-900 dark:text-white">Bonnie Green</span>: "Hey, what's up? All set for the
-                      presentation?"
-                    </div>
-                    <div className="text-xs font-medium text-primary-600 dark:text-primary-500">a few moments ago</div>
-                  </div>
-                </a>
-                <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
-                  <div className="flex-shrink-0">
-                    <img
-                      className="w-11 h-11 rounded-full"
-                      src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png"
-                      alt="Jese Leos avatar"
-                    />
-                    <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 bg-gray-900 rounded-full border border-white dark:border-gray-700">
-                      <svg
-                        aria-hidden="true"
-                        className="w-3 h-3 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="pl-3 w-full">
-                    <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">Jese leos</span>
-                      and
-                      <span className="font-medium text-gray-900 dark:text-white">5 others</span>
-                      started following you.
-                    </div>
-                    <div className="text-xs font-medium text-primary-600 dark:text-primary-500">10 minutes ago</div>
-                  </div>
-                </a>
-                <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
-                  <div className="flex-shrink-0">
-                    <img
-                      className="w-11 h-11 rounded-full"
-                      src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/joseph-mcfall.png"
-                      alt="Joseph McFall avatar"
-                    />
-                    <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 bg-red-600 rounded-full border border-white dark:border-gray-700">
-                      <svg
-                        aria-hidden="true"
-                        className="w-3 h-3 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="pl-3 w-full">
-                    <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">Joseph Mcfall</span>
-                      and
-                      <span className="font-medium text-gray-900 dark:text-white">141 others</span>
-                      love your story. See it and view more stories.
-                    </div>
-                    <div className="text-xs font-medium text-primary-600 dark:text-primary-500">44 minutes ago</div>
-                  </div>
-                </a>
-                <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
-                  <div className="flex-shrink-0">
-                    <img
-                      className="w-11 h-11 rounded-full"
-                      src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/roberta-casas.png"
-                      alt="Roberta Casas image"
-                    />
-                    <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 bg-green-400 rounded-full border border-white dark:border-gray-700">
-                      <svg
-                        aria-hidden="true"
-                        className="w-3 h-3 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="pl-3 w-full">
-                    <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">Leslie Livingston</span>
-                      mentioned you in a comment:
-                      <span className="font-medium text-primary-600 dark:text-primary-500">@bonnie.green</span>
-                      what do you say?
-                    </div>
-                    <div className="text-xs font-medium text-primary-600 dark:text-primary-500">1 hour ago</div>
-                  </div>
-                </a>
-                <a href="#" className="flex py-3 px-4 hover:bg-gray-100 dark:hover:bg-gray-600">
-                  <div className="flex-shrink-0">
-                    <img
-                      className="w-11 h-11 rounded-full"
-                      src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/robert-brown.png"
-                      alt="Robert image"
-                    />
-                    <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 bg-purple-500 rounded-full border border-white dark:border-gray-700">
-                      <svg
-                        aria-hidden="true"
-                        className="w-3 h-3 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="pl-3 w-full">
-                    <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">Robert Brown</span>
-                      posted a new video: Glassmorphism - learn how to implement the new design trend.
-                    </div>
-                    <div className="text-xs font-medium text-primary-600 dark:text-primary-500">3 hours ago</div>
-                  </div>
-                </a>
-              </div>
-              <a
-                href="#"
-                className="block py-2 text-md font-medium text-center text-gray-900 bg-gray-50 hover:bg-gray-100 dark:bg-gray-600 dark:text-white dark:hover:underline"
-              >
-                <div className="inline-flex items-center">
-                  <svg
-                    aria-hidden="true"
-                    className="mr-2 w-4 h-4 text-gray-500 dark:text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                    <path
-                      fillRule="evenodd"
-                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  View all
-                </div>
-              </a>
-            </div>
+          {/* offline dropdown list moved to id="offlineNotif" */}
+
             {/* Apps */}
             <button
               type="button"
@@ -1351,8 +1226,7 @@ const [viewProfile, setViewProfile] = useState(false)
             </li>
             <li>
             {/* Start of the drop-down menu for All users except logged-in user */}
-          <a
-          >
+          <a>
             <button
             onClick={handleClickUsersList}
             type="button"
@@ -1665,13 +1539,166 @@ const [viewProfile, setViewProfile] = useState(false)
         {/* End of users Information modal */}
           
           <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
-          <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
+          {/* Start of offline follow/group/event notifications */}
+          <div className="relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" id="offlineNotif">
+              {/*Start of offline Notifications Dropdown menu */}
+              <div
+              className={`top-10 overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700 ${isPendingListVisible ? 'visible' : 'hidden'}`}
+                
+              id="notification-dropdown"
+            >
+    {/* Start of follow notifs offline */}
+    <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300" id="offlineFollowsTitle">
+                Follow Requests
+    </div>
+              <ul className="py-0 text-gray-700 dark:text-gray-200" id="offlineFollowsUL">
+                  <div
+                    className="block py-2 px-4 text-sm hover:bg-[#7ca3ba] dark:hover:bg-[#7096ac] dark:text-gray-600 dark:hover:text-white dark:bg-[#a5dcfc]"
+                  >
+                    {pendingNotif.map((f)=> (
+                      <li key={f.followID} id={f.followID} >
+                       <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
+                      <div className="flex-shrink-0">
+                      <img
+                        className="w-11 h-11 rounded-full"
+                        // src={(f.followerURL).substring(0,3)==="" && (f.followerImage).substring(0.3)==="" ? "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj" :(f.followerURL).substring(0,3)==="htt" ? f.followerURL : f.followerImage}
+                        src={f.followerURL || f.followerImage || "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"}
+                        alt="follower"
+                      />
+                      <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 bg-gray-900 rounded-full border border-white dark:border-gray-700">
+                        <svg
+                          aria-hidden="true"
+                          className="w-3 h-3 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+                        </svg>
+                      </div>
+                      </div>
+                      <div className="pl-3 w-full">
+                      <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
+                        <span className="font-semibold text-gray-900 dark:text-white">{f.followerUN} </span>
+                          started following you.
+                      </div>
+                      </div>
+                    </a>
+                    <div className="text-xs font-medium text-primary-600 dark:text-primary-500">                  
+                        <a onClick={()=>(handleOfflFollowAccept(f))} style={{cursor: 'pointer'}} class="offlineAccept">Accept</a>
+                        <a onClick={()=>(handleOfflFollowDecline(f))} style={{cursor: 'pointer'}} class="offineDecline"> Decline</a>
+                    </div>
+                    </li>
+                    ))}
+                  </div>
+              </ul>
+    {/* End of offline follow notifs */}
+
+    {/* Start of group invites offline notif */}
+    <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300" id="offlGroupInvitesTitle">
+                Group Invites
+    </div>
+    <ul className="py-0 text-gray-700 dark:text-gray-200" id="offlineFollowsUL">
+                  <div
+                    className="block py-2 px-4 text-sm hover:bg-[#7ca3ba] dark:hover:bg-[#7096ac] dark:text-gray-600 dark:hover:text-white dark:bg-[#a5dcfc]"
+                  >
+                    {pendingNotif.map((f)=> (
+                      <li key={f.followID}>
+                       <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
+                      <div className="flex-shrink-0">
+                      <img
+                        className="w-11 h-11 rounded-full"
+                        // src={(f.followerURL).substring(0,3)==="" && (f.followerImage).substring(0.3)==="" ? "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj" :(f.followerURL).substring(0,3)==="htt" ? f.followerURL : f.followerImage}
+                        src={f.followerURL || f.followerImage || "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"}
+                        alt="groupInvite"
+                      />
+                      <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 bg-gray-900 rounded-full border border-white dark:border-gray-700">
+                        <svg
+                          aria-hidden="true"
+                          className="w-3 h-3 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 19"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                        <path d="M14.5 0A3.987 3.987 0 0 0 11 2.1a4.977 4.977 0 0 1 3.9 5.858A3.989 3.989 0 0 0 14.5 0ZM9 13h2a4 4 0 0 1 4 4v2H5v-2a4 4 0 0 1 4-4Z" />
+                        <path d="M5 19h10v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2ZM5 7a5.008 5.008 0 0 1 4-4.9 3.988 3.988 0 1 0-3.9 5.859A4.974 4.974 0 0 1 5 7Zm5 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm5-1h-.424a5.016 5.016 0 0 1-1.942 2.232A6.007 6.007 0 0 1 17 17h2a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5ZM5.424 9H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h2a6.007 6.007 0 0 1 4.366-5.768A5.016 5.016 0 0 1 5.424 9Z"/>
+                        </svg>
+                      </div>
+                      </div>
+                      <div className="pl-3 w-full">
+                      <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
+                        <span className="font-semibold text-gray-900 dark:text-white">{f.followerUN} </span>
+                          has invited you to join the {f.influencerUN} group
+                      </div>
+                      </div>
+                    </a>
+                    <div className="text-xs font-medium text-primary-600 dark:text-primary-500">                  
+                        <a onClick={()=>(handleOfflFollowAccept(f))} style={{cursor: 'pointer'}} class="offlineAccept">Accept</a>
+                        <a onClick={()=>(handleOfflFollowDecline(f))} style={{cursor: 'pointer'}} class="offineDecline"> Decline</a>
+                    </div>
+                    </li>
+                    ))}
+                  </div>
+              </ul>
+              {/* End of group invites offline notif */}
+
+              {/* Start of events invites offline notif */}
+              <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300" id="offlEventsTitle">
+                Events
+              </div>
+              <ul className="py-0 text-gray-700 dark:text-gray-200" id="offlineFollowsUL">
+                  <div
+                    className="block py-2 px-4 text-sm hover:bg-[#7ca3ba] dark:hover:bg-[#7096ac] dark:text-gray-600 dark:hover:text-white dark:bg-[#a5dcfc]"
+                  >
+                    {pendingNotif.map((f)=> (
+                      <li key={f.followID}>
+                       <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
+                      <div className="flex-shrink-0">
+                      <img
+                        className="w-11 h-11 rounded-full"
+                        //src={(f.followerURL).substring(0,3)==="" && (f.followerImage).substring(0.3)==="" ? "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj" :(f.followerURL).substring(0,3)==="htt" ? f.followerURL : f.followerImage}
+                        src={f.followerURL || f.followerImage || "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"}
+                      alt="eventInvite"
+                      />
+                      <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 bg-gray-900 rounded-full border border-white dark:border-gray-700">
+                        <svg
+                          aria-hidden="true"
+                          className="w-3 h-3 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M6 1a1 1 0 0 0-2 0h2ZM4 4a1 1 0 0 0 2 0H4Zm7-3a1 1 0 1 0-2 0h2ZM9 4a1 1 0 1 0 2 0H9Zm7-3a1 1 0 1 0-2 0h2Zm-2 3a1 1 0 1 0 2 0h-2ZM1 6a1 1 0 0 0 0 2V6Zm18 2a1 1 0 1 0 0-2v2ZM5 11v-1H4v1h1Zm0 .01H4v1h1v-1Zm.01 0v1h1v-1h-1Zm0-.01h1v-1h-1v1ZM10 11v-1H9v1h1Zm0 .01H9v1h1v-1Zm.01 0v1h1v-1h-1Zm0-.01h1v-1h-1v1ZM10 15v-1H9v1h1Zm0 .01H9v1h1v-1Zm.01 0v1h1v-1h-1Zm0-.01h1v-1h-1v1ZM15 15v-1h-1v1h1Zm0 .01h-1v1h1v-1Zm.01 0v1h1v-1h-1Zm0-.01h1v-1h-1v1ZM15 11v-1h-1v1h1Zm0 .01h-1v1h1v-1Zm.01 0v1h1v-1h-1Zm0-.01h1v-1h-1v1ZM5 15v-1H4v1h1Zm0 .01H4v1h1v-1Zm.01 0v1h1v-1h-1Zm0-.01h1v-1h-1v1ZM2 4h16V2H2v2Zm16 0h2a2 2 0 0 0-2-2v2Zm0 0v14h2V4h-2Zm0 14v2a2 2 0 0 0 2-2h-2Zm0 0H2v2h16v-2ZM2 18H0a2 2 0 0 0 2 2v-2Zm0 0V4H0v14h2ZM2 4V2a2 2 0 0 0-2 2h2Zm2-3v3h2V1H4Zm5 0v3h2V1H9Zm5 0v3h2V1h-2ZM1 8h18V6H1v2Zm3 3v.01h2V11H4Zm1 1.01h.01v-2H5v2Zm1.01-1V11h-2v.01h2Zm-1-1.01H5v2h.01v-2ZM9 11v.01h2V11H9Zm1 1.01h.01v-2H10v2Zm1.01-1V11h-2v.01h2Zm-1-1.01H10v2h.01v-2ZM9 15v.01h2V15H9Zm1 1.01h.01v-2H10v2Zm1.01-1V15h-2v.01h2Zm-1-1.01H10v2h.01v-2ZM14 15v.01h2V15h-2Zm1 1.01h.01v-2H15v2Zm1.01-1V15h-2v.01h2Zm-1-1.01H15v2h.01v-2ZM14 11v.01h2V11h-2Zm1 1.01h.01v-2H15v2Zm1.01-1V11h-2v.01h2Zm-1-1.01H15v2h.01v-2ZM4 15v.01h2V15H4Zm1 1.01h.01v-2H5v2Zm1.01-1V15h-2v.01h2Zm-1-1.01H5v2h.01v-2Z"/>
+                        </svg>
+                      </div>
+                      </div>
+                      <div className="pl-3 w-full">
+                      <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
+                        <span className="font-semibold text-gray-900 dark:text-white">{f.followerUN} </span>
+                          has invited you to event {f.influencerUN}
+                      </div>
+                      </div>
+                    </a>
+                    <div className="text-xs font-medium text-primary-600 dark:text-primary-500">                  
+                        <a onClick={()=>(handleOfflFollowAccept(f))} style={{cursor: 'pointer'}} class="offlineAccept">Accept</a>
+                        <a onClick={()=>(handleOfflFollowDecline(f))} style={{cursor: 'pointer'}} class="offineDecline"> Decline</a>
+                    </div>
+                    </li>
+                    ))}
+                  </div>
+              </ul>
+              {/* End of events invites offline notif*/}
+
+            </div>
+             {/* End of offline Notifications Dropdown menu */}
+          </div>
+          {/* End of offline follow/group/event notifications */}
         </div>
         <div
           id="submitPosts"
           className="bg-white border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 dark:bg-gray-800 mb-4"
         >
-          <div className="  dark:bg-gray-800 dark:text-white flex justify-left items-left flex-col">
+          <div className="  dark:bg-gray-800 dark:text-white flex justify-left items-left flex-col" id="addPost">
             <h3 className="pl-5 mt-3 font-bold text-xl text-[#5aadde]  ">Update Feed</h3>
             <form onSubmit={submitPost}>
               <span className="flex p-2.5 pl-5">

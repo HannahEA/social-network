@@ -221,3 +221,31 @@ background-color: #2f5d78;
 
 
     /* ====> End of notification counter <====== */
+
+    /* ====> Start of offline notifications */
+
+    #notification-dropdown {
+      z-index: 999;
+      position: fixed;
+      top: 50px;
+      right: 0px;
+    }
+
+
+
+    #offlineNotifBtn{
+      position:absolute;
+    }
+
+
+    .offlineAccept{
+      margin-left: 150px;
+      margin-right: 20px;
+    }
+
+    .offlineDecline{
+      margin-left: 200px;
+    }
+
+    
+    /* ====> End of offline notifications */
