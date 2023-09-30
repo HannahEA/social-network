@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,31 +10,121 @@ import (
 	"time"
 )
 
-func (repo *dbStruct) AddPostToDB(post Post) error {
-	// time
-	date := time.Now()
-	//cookie
-	cookieArr := strings.Split(post.Cookie, "=")
-	cookieID := cookieArr[1]
-	//user info
-	user := repo.GetUserByCookie(cookieID)
-	//category
-	categories := strings.Join(post.Category, ",")
-	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
+func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.Request) {
+	var data Post
+	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		log.Println(err)
-		return fmt.Errorf("failed to add Post to Database")
+		fmt.Println("postHandler: jsonDecoder failed")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
-	return nil
+	//We get the cookie
+	c, err := r.Cookie("user_session")
+	if err != nil {
+		fmt.Println("Cookie is empty", err)
+		return
+	}
+
+	data.Cookie = c.String()
+	cookieArr := strings.Split(data.Cookie, "=")
+	cookieID := cookieArr[1]
+	user := service.repo.GetUserByCookie(cookieID)
+	if data.PostType == "newPost" {
+		err := service.repo.AddPostToDB(data)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to add new post", http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("getting Public posts")
+		posts, err := service.repo.GetPublicPosts(user)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("getting comments for latest post")
+
+		comments, err := service.repo.GetComments(posts[0])
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to get comments", http.StatusInternalServerError)
+			return
+		}
+		posts[0].Comments = comments
+
+		fmt.Println("successfully retrieved comments")
+		fmt.Println("Sending latest post")
+		json.NewEncoder(w).Encode(posts[0])
+
+	} else if data.PostType == "getPosts" {
+		posts := []Post{}
+		//use cookie to get user
+
+		if data.Page == "profile" {
+			//profile page
+			// query database for all posts by this user
+			userPosts, err := service.repo.GetAllUserPosts(user)
+			fmt.Println("how many posts does this user have?", len(userPosts), userPosts)
+			posts = userPosts
+			if err != nil {
+				fmt.Println("Post Handler: GetAllUserPosts error: ", err)
+			}
+		} else {
+			//feed page
+			fmt.Println("getting Public posts")
+			publicPosts, err := service.repo.GetPublicPosts(user)
+			posts = publicPosts
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to get public post", http.StatusInternalServerError)
+				return
+			}
+			fmt.Println("getting Private posts")
+			privatePosts, err2 := service.repo.GetPrivatePosts(user)
+			if err2 != nil {
+				log.Println(err2)
+				http.Error(w, "Failed to get public post", http.StatusInternalServerError)
+				return
+			}
+			posts = append(posts, privatePosts...)
+
+		}
+		fmt.Println("getting comments for posts")
+		for i, p := range posts {
+			comments, err := service.repo.GetComments(p)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to get comments", http.StatusInternalServerError)
+				return
+			}
+			posts[i].Comments = comments
+		}
+		fmt.Println("successfully retrieved comments")
+		json.NewEncoder(w).Encode(posts)
+	} else if data.PostType == "getComments" {
+		comments, err := service.repo.GetComments(data)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(comments)
+	} else if data.PostType == "newComment" {
+		err := service.repo.AddCommentToDB(data)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to add new comment", http.StatusInternalServerError)
+			return
+		}
+
+	}
+
 }
 
-func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
-
-	posts := []Post{}
-	rows, err := repo.db.Query(`SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM posts WHERE postVisibility = 'Public' `)
-	if err != nil {
-		return posts, fmt.Errorf("GetPosts DB Query error: %+v\n", err)
-	}
+func ScanPosts(rows *sql.Rows) ([]Post, error) {
+	var posts []Post
 	var postID int
 	var postDate string
 	var author string
@@ -78,96 +169,121 @@ func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 			Date:      postDate,
 		}}, posts...)
 	}
-	err = rows.Err()
+	err := rows.Err()
 	if err != nil {
 		return posts, err
 	}
 	return posts, nil
 }
 
-func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.Request) {
-	var data Post
-	err := json.NewDecoder(r.Body).Decode(&data)
+func (repo *dbStruct) GetPublicPosts(user *User) ([]Post, error) {
+	posts := []Post{}
+	rows, err := repo.db.Query(`SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM posts WHERE postVisibility = 'Public' OR postVisibility = 'Private' AND Author = ?`, user.NickName)
 	if err != nil {
-		fmt.Println("postHandler: jsonDecoder failed")
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return posts, fmt.Errorf("DB Query error: %+v\n", err)
 	}
-	//We get the cookie
-	c, err := r.Cookie("user_session")
+
+	posts, err2 := ScanPosts(rows)
+	if err2 != nil {
+		return posts, err2
+	}
+
+	return posts, nil
+}
+
+func (repo *dbStruct) GetAlmostPrivatePosts(user *User) ([]Post, error) {
+	posts := []Post{}
+	query := `SELECT Posts * FROM Posts JOIN PrivateViewers ON Possts.postId = PrivateViewers.postId WHERE PrivateViewers.username = ?`
+
+	rows, err := repo.db.Query(query, user.NickName)
 	if err != nil {
-		fmt.Println("Cookie is empty", err)
-		return
+		return posts, err
+	}
+	posts, err2 := ScanPosts(rows)
+	if err2 != nil {
+		return posts, err2
 	}
 
-	data.Cookie = c.String()
-	if data.PostType == "newPost" {
-		err := service.repo.AddPostToDB(data)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "Failed to add new post", http.StatusInternalServerError)
-			return
-		}
-		fmt.Println("getting Public posts")
-		posts, err := service.repo.GetPublicPosts()
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
-			return
-		}
-		fmt.Println("getting comments for latest post")
+	return posts, nil
 
-		comments, err := service.repo.GetComments(posts[0])
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "Failed to get comments", http.StatusInternalServerError)
-			return
-		}
-		posts[0].Comments = comments
+}
 
-		fmt.Println("successfully retrieved comments")
-		fmt.Println("Sending latest post")
-		json.NewEncoder(w).Encode(posts[0])
-
-	} else if data.PostType == "getPosts" {
-		fmt.Println("getting Public posts")
-		posts, err := service.repo.GetPublicPosts()
+func (repo *dbStruct) GetFollowing(user *User) ([]any, error) {
+	var followers []any
+	rows, err2 := repo.db.Query(`SELECT  influencerUserName FROM  Followers WHERE followerUserName = ? `, user.NickName)
+	if err2 != nil {
+		fmt.Println("FullChatUserList: query error", err2)
+		return followers, err2
+	}
+	for rows.Next() {
+		var follower string
+		err := rows.Scan(&follower)
 		if err != nil {
-			log.Println(err)
-			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
-			return
+			fmt.Println("GetFollowers: row scan error:", err)
+			continue
 		}
-		fmt.Println("getting comments for posts")
-		for i, p := range posts {
-			comments, err := service.repo.GetComments(p)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Failed to get comments", http.StatusInternalServerError)
-				return
-			}
-			posts[i].Comments = comments
-		}
-		fmt.Println("successfully retrieved comments")
-		json.NewEncoder(w).Encode(posts)
-	} else if data.PostType == "getComments" {
-		comments, err := service.repo.GetComments(data)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
-			return
-		}
+		followers = append(followers, follower)
+	}
+	return followers, nil
+}
 
-		json.NewEncoder(w).Encode(comments)
-	} else if data.PostType == "newComment" {
-		err := service.repo.AddCommentToDB(data)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "Failed to add new comment", http.StatusInternalServerError)
-			return
-		}
+func (repo *dbStruct) GetPrivatePosts(user *User) ([]Post, error) {
+	posts := []Post{}
+	// Generate placeholders for the IN clause
+	followers, err := repo.GetFollowing(user)
+	fmt.Println("who user follows this user?", followers)
+	placeholders := make([]string, len(followers))
+	for i := range followers {
+		placeholders[i] = "?"
+	}
+	placeholderString := "(" + strings.Join(placeholders, ", ") + ")"
 
+	query := "SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM Posts WHERE Author IN " + placeholderString + " AND postVisibility = 'Private' "
+
+	rows, err := repo.db.Query(query, followers...)
+	if err != nil {
+		return posts, err
+	}
+	posts, err2 := ScanPosts(rows)
+	if err2 != nil {
+		return posts, err2
 	}
 
+	return posts, nil
+}
+func (repo *dbStruct) GetAllUserPosts(user *User) ([]Post, error) {
+	posts:= []Post{}
+	query := `SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM Posts WHERE author = ?`
+	rows, err := repo.db.Query(query, user.NickName)
+
+	if err != nil {
+		return posts, fmt.Errorf("DB Query error: %+v\n", err)
+	}
+
+	posts, err2 := ScanPosts(rows)
+	if err2 != nil {
+		return posts, err2
+	}
+
+	return posts, nil
+}
+
+func (repo *dbStruct) AddPostToDB(post Post) error {
+	// time
+	date := time.Now()
+	//cookie
+	cookieArr := strings.Split(post.Cookie, "=")
+	cookieID := cookieArr[1]
+	//user info
+	user := repo.GetUserByCookie(cookieID)
+	//category
+	categories := strings.Join(post.Category, ",")
+	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf("failed to add Post to Database")
+	}
+	return nil
 }
 
 func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {

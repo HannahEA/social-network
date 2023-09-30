@@ -51,12 +51,13 @@ const SubmitPost = ({title, content, visibility, url, file, category}) => {
     
 }
 
-const Posts = ({sPost}) => {
+const Posts = ({sPost, page}) => {
   const [pData, setpData] = useState([])
   
   let getPosts = {
     cookie: document.cookie, 
-    type: "getPosts"
+    type: "getPosts",
+    page: page,
   }
 
   const fetchPosts = () => {
@@ -71,6 +72,7 @@ const Posts = ({sPost}) => {
       .then((response) => response.json())
       .then((data) => {
         // if (Object.keys(sPost).length === 0) {
+          console.log("post data", data)
           setpData(data)
         
           
@@ -113,11 +115,11 @@ const Posts = ({sPost}) => {
   }
     return (
       <div className="">
-        {pData.length > 0 && (
+        {pData ? 
           <div className="">
             <div id="odd" className="float-left w-1/2">
-            {pData.map(post => 
-              (post.postId%2 > 0 && post != {} &&
+            {pData.map((post, index) => 
+              (index%2 > 0 && post != {} &&
                 <div key={post.postId} className="m-2  ">
                   <div className=" border-solid rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
                   <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
@@ -168,7 +170,7 @@ const Posts = ({sPost}) => {
             </div>
             <div id="even" className="float-left w-1/2">
               
-                {pData.map(post => (post.postId%2 == 0 && post != {} && (
+                {pData.map((post, index) => (index%2 == 0 && post != {} && (
               
               <div key={post.postId} className="m-2  ">
                 <div>
@@ -225,7 +227,7 @@ const Posts = ({sPost}) => {
             </div>
           </div>
               
-      )}
+      : null}
       </div>
     );
  }

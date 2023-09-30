@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -19,7 +20,7 @@ type TypeCheck struct {
 // map of clients: key - webcoket connection value-username
 var Clients = make(map[*websocket.Conn]string)
 
-//stores the number of clients
+// stores the number of clients
 var PrevLen int = 0
 
 var upgrader = websocket.Upgrader{
@@ -161,11 +162,14 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			fmt.Println("the webMessage struct sent to f.e.: ", webMessage)
 
 			// send websocket message to channel in broadcast message  struct with the reciever map
+			// if len(presences.Clients) > 0 {
+			fmt.Println("sending connect message")
 
 			service.repo.BroadcastToChannel(BroadcastMessage{
 				WebMessage:  webMessage,
 				Connections: reciever,
 			})
+			// }
 
 			// less connections than before - logout
 			// which clients are following this user? return list of clients
@@ -463,6 +467,20 @@ func (r *dbStruct) FullChatUserList(user *User) Presences {
 		fmt.Println("FullChatUserList: query error", err, err)
 		return list
 	}
+	rows2, err2 := r.db.Query(`SELECT followerUserName  FROM Followers WHERE influencerUserName = ? `, user.NickName)
+	if err2 != nil {
+		fmt.Println("FullChatUserList: query error", err, err)
+		return list
+	}
+	following:= r.IsClientOnline(rows, user)
+	followers:= r.IsClientOnline(rows2, user)
+	list.Clients = append(list.Clients, following...)
+	list.Clients= append(list.Clients, followers...)
+	return list
+}
+
+func (r *dbStruct) IsClientOnline(rows *sql.Rows, user *User) [][]string {
+	var list [][]string
 	for rows.Next() {
 		var influencer string
 		err := rows.Scan(&influencer)
@@ -495,30 +513,11 @@ func (r *dbStruct) FullChatUserList(user *User) Presences {
 		}
 		c := strconv.Itoa(count)
 		client = append(client, c)
-		list.Clients = append(list.Clients, client)
-
-		// //check notifictaion table for chat notifs from influencers (people you're following)
-		// rows2, err2 := r.db.Query(`SELECT count FROM Notifications WHERE (sender, recipient) = (?,?) `, influencer, user.NickName)
-		// count := 0
-		// if err2 != nil {
-		// 	fmt.Println("FullChatUserList: notification query error", err)
-
-		// } else {
-		// 	for rows2.Next() {
-		// 		err := rows2.Scan(&count)
-		// 		if err != nil {
-		// 			fmt.Println("FullChatUserList: notif row scan error", err)
-		// 			break
-		// 		}
-		// 	}
-		// }
-
-		// c := strconv.Itoa(count)
-		// client = append(client, c)
-		// list.Clients = append(list.Clients, client)
+		list = append(list, client)
 
 	}
 	return list
+
 }
 
 func (repo *dbStruct) GetPendingFollowRequests(nickname string) (int, []FollowNotifOffline) {

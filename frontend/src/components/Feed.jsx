@@ -3,6 +3,7 @@ import { SubmitPost, Tags, Posts } from "./feed/Posts";
 import {Chat, AddUserToChatList, PrintNewChat, RequestChatNotification, ChangeChatNotification, ChangeMessageNotification} from "./feed/Chat"
 import { useWebSocket } from "./WebSocketProvider.jsx";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
+import  Profile  from "./Profile.jsx"
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 // import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
@@ -13,7 +14,7 @@ import Detail from "./usersInfo/Detail.jsx";
 import Alerts from "./notifications/countAlerts.jsx";
 import Notification from "./notifications/notification.jsx";
 import { Notyf } from "notyf";
-import { FunctionsRounded } from "@material-ui/icons";
+// import { FunctionsRounded } from "@material-ui/icons";
 
 
 
@@ -53,14 +54,16 @@ const Feed = () => {
            console.log("numPending is zero, Nan or undefined", allData.current.offlineFollowNotif.numPending);
            hideRedDot();
            let aDiv = document.querySelector("#aCounter");
+           hideRedDot()
            aDiv.style.visibility = "hidden";
           }
+          
           
           //update chat user list
           console.log("message type", message.type)
           AddUserToChatList({type: message.type, allData: allData.current})
           //chat notifications 
-         if (message.presences.clients){
+         if (message.presences.clients) {
           for (const user of message.presences.clients) {
             console.log("no. of chats", user)
             if (user[2] != '0') {
@@ -112,7 +115,9 @@ const Feed = () => {
 }  
 })
 
-  
+// const hideRedDot = () => {
+//   setRedDotVisible(false)
+// }
   const location = useLocation();
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
@@ -358,60 +363,34 @@ const handleClickUsersList = () => {
   
 
 
+// OPEN PROFILE
 
+const [viewProfile, setViewProfile] = useState(false)
+  const openProfile = () => {
+   
 
-// ----------------------HANDLE WEBSOCKETS---------------------- 
- 
-    // const [isWebSocketConnected, setWebSocketConnected] = useState(false);
-    // const websocketRef = useRef(null);
-    // const allData = useRef({userInfo: userInfo, chats:[], presences:[]})
-    
-    // useEffect(() => {
-    //   console.log("websocket connected", websocketRef.current)
-    //   if (!websocketRef.current) {
-    //     websocketRef.current = new WebSocket("ws://localhost:8000/websocket");
-  
-    //     websocketRef.current.onopen = (e) => {
-    //       console.log("WebSocket Connection Successfully Opened");
-    //       setWebSocketConnected(true);
-    //       websocketRef.current.send(
+    setViewProfile(true) 
+    let main = document.querySelector('main')
+    let length = main.children.length
 
-    //         })
-    //       );
-    //     };
-  
-    //     websocketRef.current.onmessage = (e) => {
-    //       let message = JSON.parse(e.data)
-    //       console.log(message)
-    //       allData.current.presences = message.presences.clients
-    //       console.log(allData.current.prRequest with GET/HEAD method cannot have body.esences)
+    console.log("main child", main.children)
+    for (let i = 0; i<length; i++) {
+      console.log(i)
+      if (i>1){
+        console.log("what i'm removing", main.children[2] )
+        let child = main.childNodes[2]
+        child.remove()
+      } 
+    }
+  }
 
-    //     };
-
-    //     websocketRef.current.onclose = () => {
-    //     console.log("websocket connection ended");
-    //     setWebSocketConnected(false); // Update the state when the connection is closed
-    //     websocketRef.current = null; // Request with GET/HEAD method cannot have body.Reset the ref to null
-    //   };
-    //   }
-  
-    //   // return () => {
-    //   //   // Close the WebSocket connection only if it was connected
-    //   //   if (isWebSocketConnected) {
-    //   //     console.log("Websocket connection ended");
-    //   //     websocketRef.current.close();
-    //   //   }
-    //   // };
-      
-    // }, []);
-  
-    // Rest of your component code
 
 
 //--------------UPLOAD AVATAR----------------------
   const handleAvatarChange = (event) => {
     setAvatar(event.target.files[0]);
   };
+  
 
   const uploadAvatar = (event) => {
     event.preventDefault();
@@ -663,7 +642,7 @@ const handleClickUsersList = () => {
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
             </button>
-            {console.log("the numPending :====>",allData)}
+            {/* {console.log("the numPending :====>",allData)} */}
             {/* <div className="counter" style={{visibility:`${parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0 ? 'visible' : 'hidden'}`}}> */}
             <div className="counter" id="aCounter">
             <button onClick={togglePendingListVisible} id="offlineNotifBtn">
@@ -1037,7 +1016,8 @@ const handleClickUsersList = () => {
               </a>
             </li>
             <li>
-              <a href="http://localhost:3000/profile">
+              {/* <a href="http://localhost:3000/profile"> */}
+              <a href="#">
                 <button
                   type="button"
                   className="flex items-center p-2 w-full text-base font-medium text-white 
@@ -1047,6 +1027,7 @@ const handleClickUsersList = () => {
                   border-b-[1px] border-blue-400"
                   aria-controls="dropdown-pages"
                   data-collapse-toggle="dropdown-pages"
+                  onClick = {openProfile}
                 >
                   <svg
                     aria-hidden="true"
@@ -1496,6 +1477,8 @@ const handleClickUsersList = () => {
       </aside>
       <main className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
         <Chat websocketRef={websocketRef} isWebSocketConnected={ isWebSocketConnected} allData={allData}/>
+        {viewProfile&& <Profile/>}
+        <div></div>
         <h1 className="text-black dark:text-white" >Profile Picture Upload</h1>
         <form className="text-black dark:text-white" id="uploadForm" encType="multipart/form-data">
           <input type="file" accept="image/*" onChange={handleAvatarChange} />
@@ -1798,7 +1781,7 @@ const handleClickUsersList = () => {
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800">
-          <Posts sPost={sPost} />
+          <Posts sPost={sPost} page={"feed"}/>
         </div>
       </main>
     </div>
