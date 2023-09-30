@@ -1,12 +1,33 @@
 import React from "react";
+import { useState } from 'react';
 
 
 function GroupsModal({closeGroups}){
+  // to close the groups modal
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
           closeGroups();
         }
       };
+
+    //store new group form inputs
+    const [newGroupInputs, setNewGroupInputs] = useState({});
+    //collect new group form's info
+    const handleChange = (event) => {
+      const {name, value} = event.target;
+      setNewGroupInputs({...newGroupInputs, [name]: value})
+
+    }
+  
+    //process user inputs for new group
+    const handleSubmit = (event) => {
+      event.preventDefault();
+      document.getElementById("grpName").value = ""; // Clear the input value
+      document.getElementById("grpDescr").value = ""; // Clear the input value
+      alert(JSON.stringify(newGroupInputs, null, 2)); // Convert to JSON string for display; the second argument null is for replacer function, and the third argument 2 is for indentation
+
+    };
+    
 
       
       return (
@@ -18,47 +39,41 @@ function GroupsModal({closeGroups}){
             {/* {children} */}
             <div id="makeNewGroupModal" className="absolute top-6 pb-4 pt-4">
               <div id="newGroupForm">
-              <form>
+              <form onSubmit={handleSubmit}>
                 <label className="text-[#717575] dark:text-white">Group name:
-                <input id="name" type="text" placeholder="Enter group name" className="mb-6 ml-6 bg-gray-100 w-[calc(50%-1rem)] rounded-md"/>
+                <input type="text" name="grpName" value={newGroupInputs.grpName || ""} onChange={handleChange} placeholder="Enter group name" className="mb-6 ml-6 bg-gray-100 w-[calc(50%-1rem)] rounded-md" id="grpName"/>
                 </label><br></br>
                 <label className="text-[#717575] dark:text-white">Description:
-                <input id="descr" type="text" placeholder="Enter description" className="mb-6 ml-6 bg-gray-100 w-[calc(70%-1rem)] rounded-md"/>
+                <input type="text" name="grpDescr" value={newGroupInputs.grpDescr || ""} onChange={handleChange} placeholder="Enter description" className="mb-6 ml-6 bg-gray-100 w-[calc(70%-1rem)] rounded-md" id="grpDescr"/>
                 </label>
-              </form>
-              </div>
-              <hr class="dottedL"></hr>
-              <div id="addFollowersToGroup" className="text-sm font-sm text-[#717575] dark:text-primary-500">
-              <br></br>
-                <p>Invite group members:</p>
-                <br></br>
+                <p className="text-[#717575] dark:text-white">Invite group members</p>
+
                 <ul>
                   <li >Jackie Bouvier <a style={{cursor: 'pointer'}} class="addToGroup">Invite</a></li>
                   <li>Lee Bouvier <a style={{cursor: 'pointer'}} class="addToGroup">Invite</a></li>
                   <li>Arabella Bouvier <a style={{cursor: 'pointer'}} class="addToGroup">Invite</a></li>
                 </ul>
+                <div id="addFollowersToGroup" className="text-sm font-sm text-[#717575] dark:text-primary-500">
+                </div>
+                <input type="submit" id="newGpSubmit"
+                  className="absolute justify-center flex items-center p-2 w-[calc(40%-1rem)] text-base font-medium text-white 
+                  rounded-lg transition duration-75 group bg-[#57aada] hover:bg-[#4488af] 
+                  shadow-lg dark:text-white dark:hover:bg-[#4488af]
+                  [box-shadow:0_3px_0_0_#407da1]"
+                />
+              </form>
               </div>
-              <button id="newGpBtn"
-                className="absolute justify-center flex items-center p-2 w-[calc(40%-1rem)] text-base font-medium text-white 
-                rounded-lg transition duration-75 group bg-[#57aada] hover:bg-[#4488af] 
-                shadow-lg dark:text-white dark:hover:bg-[#4488af]
-                [box-shadow:0_3px_0_0_#407da1]"
-            // onClick={()=> {onFollow()}} 
-            // className={`"ml-5 m-2.5 pl-5 pr-5 font-bold rounded-lg shadow-lg" ${
-              //   influencer === 1 ? "bg-[#6f97af] text-white" : "bg-[#96ccec] text-white"
-              // }`}
-              >
-                Create group
-              {/* {influencer === 1 ? "Un-follow" : "Follow"} */}
-              </button>
-              
+              <br></br>
+              <br></br>
+              <br></br>
+              <br></br>
+              <hr class="dottedL"></hr>
+              <br></br>
+              <p className="text-[#717575] dark:text-white">Groups</p>
             </div>
-            
           </div>
-          
         </div>
       );
-
 }
 
 export default GroupsModal;

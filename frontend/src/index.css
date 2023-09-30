@@ -139,7 +139,7 @@ hr.dottedL{
   background-image: linear-gradient(to right, white 200%, rgba(white, 0) 0%);
 }
 
-#newGpBtn{
+#newGpSubmit{
   top:250px;
   left:115px;
 }
