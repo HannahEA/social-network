@@ -12,10 +12,12 @@ function GroupsModal({closeGroups}){
 
     //store new group form inputs
     const [newGroupInputs, setNewGroupInputs] = useState({});
+    const [isChecked, setIsChecked] = useState(false);
     //collect new group form's info
     const handleChange = (event) => {
       const {name, value} = event.target;
       setNewGroupInputs({...newGroupInputs, [name]: value})
+
 
     }
   
@@ -24,6 +26,10 @@ function GroupsModal({closeGroups}){
       event.preventDefault();
       document.getElementById("grpName").value = ""; // Clear the input value
       document.getElementById("grpDescr").value = ""; // Clear the input value
+      let theChks = document.querySelectorAll(".chk"); 
+      for (let i=0; i<theChks.length; i++){
+        theChks[i].value = setIsChecked(false); //clear the check boxes next to group invitees
+      }
       alert(JSON.stringify(newGroupInputs, null, 2)); // Convert to JSON string for display; the second argument null is for replacer function, and the third argument 2 is for indentation
 
     };
@@ -43,24 +49,24 @@ function GroupsModal({closeGroups}){
               <form onSubmit={handleSubmit} className="bg-[#a8daf7]">
                 <br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Group name:
-                <input type="text" name="grpName" value={newGroupInputs.grpName || ""} onChange={handleChange} placeholder="Enter group name" className="mb-6 ml-6 bg-[#c7e6f8] w-[calc(50%-1rem)] rounded-md" id="grpName"/>
+                <input type="text" name="grpName" value={newGroupInputs.grpName || ""} onChange={handleChange} placeholder="Enter group name" className="border-hidden mb-6 ml-6 bg-[#c7e6f8] w-[calc(50%-1rem)] rounded-md" id="grpName"/>
                 </label><br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Description:
-                <input type="text" name="grpDescr" value={newGroupInputs.grpDescr || ""} onChange={handleChange} placeholder="Enter description" className="mb-6 ml-6 bg-[#c7e6f8] w-[calc(70%-1rem)] rounded-md" id="grpDescr"/>
+                <input type="text" name="grpDescr" value={newGroupInputs.grpDescr || ""} onChange={handleChange} placeholder="Enter description" className="border-hidden mb-6 ml-6 bg-[#c7e6f8] w-[calc(70%-1rem)] rounded-md" id="grpDescr"/>
                 </label>
                 <p className="ml-2 text-[#717575] dark:text-white">Invite group members:</p>
                   <br></br>
                 <ul className="flex space-x-4">
                   <li>
-                    <input type="checkbox" background-color="white" className="h-4 w-4 ml-1 cursor-pointer accent-[#57aada]"/>
+                    <input class="chk" name="Jackie" type="checkbox" defaultChecked={isChecked} onChange={handleChange} border="hidden" background-color="white" className="rounded-sm h-4 w-4 ml-1 cursor-pointer accent-[#57aada]"/>
                     <label class="addToGroup">Jackie</label>
                   </li>
                   <li>
-                    <input type="checkbox" background-color="white" className="h-4 w-4 ml-1 cursor-pointer accent-[#57aada] "/>
+                    <input class="chk" name="Arabella"  type="checkbox" defaultChecked={isChecked} onChange={handleChange} border="hidden" background-color="white" className="h-4 w-4 ml-1 cursor-pointer accent-[#57aada] "/>
                     <label class="addToGroup">Arabella</label>
                   </li>
                   <li>
-                    <input type="checkbox" className="h-4 w-4 bg-white ml-1 cursor-pointer accent-[#57aada] "/>
+                    <input class="chk" name="Lee"  type="checkbox" defaultChecked={isChecked} onChange={handleChange} border="hidden" className="h-4 w-4 bg-white ml-1 cursor-pointer accent-[#57aada] "/>
                     <label class="addToGroup">Lee</label>
                   </li>
                 </ul>
