@@ -181,7 +181,7 @@ const handleOfflFollowAccept = (f) => {
   websocketRef.current.send(
     JSON.stringify(YesNo)
   )
-
+  
   //remove the offline follow request item from drop-down list
   document.getElementById(ID).innerHTML = '';
 }
@@ -451,6 +451,8 @@ const handleClickUsersList = () => {
 
       const dataObj = JSON.parse(data);
       console.log("user avatar and email", dataObj);
+      allData.current.followers = dataObj.followers
+      allData.current.following = dataObj.following
       // Redirect user to login page if cookie not found
       if (dataObj.message !== "Cookie is found") {
         console.log(data);

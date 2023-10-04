@@ -32,7 +32,7 @@ func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
 	posts := []Post{}
 	rows, err := repo.db.Query(`SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM posts WHERE postVisibility = 'Public' `)
 	if err != nil {
-		return posts, fmt.Errorf("GetPosts DB Query error: %+v\n", err)
+		return posts, fmt.Errorf("GetPosts DB Query error: %+v", err)
 	}
 	var postID int
 	var postDate string

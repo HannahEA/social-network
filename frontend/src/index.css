@@ -153,8 +153,14 @@ hr.dottedL{
   background-image: linear-gradient(to right, white 200px, rgba(white, 0) 0%);
 }
 
+/* align buttons */
 #newGpSubmit{
   top:250px;
+  left:115px;
+}
+
+#joinGpSubmit{
+  top: 490px;
   left:115px;
 }
 
