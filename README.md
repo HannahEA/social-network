@@ -1,5 +1,5 @@
 ## Helena To Do ##
-new group component to include add group members
+group component check boxes to have group name/follower name as value rather than 'on'
 
 
 ## Hannah's fav colour palette: 
