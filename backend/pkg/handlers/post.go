@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,82 +9,6 @@ import (
 	"strings"
 	"time"
 )
-
-func (repo *dbStruct) AddPostToDB(post Post) error {
-	// time
-	date := time.Now()
-	//cookie
-	cookieArr := strings.Split(post.Cookie, "=")
-	cookieID := cookieArr[1]
-	//user info
-	user := repo.GetUserByCookie(cookieID)
-	//category
-	categories := strings.Join(post.Category, ",")
-	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
-	if err != nil {
-		log.Println(err)
-		return fmt.Errorf("failed to add Post to Database")
-	}
-	return nil
-}
-
-func (repo *dbStruct) GetPublicPosts() ([]Post, error) {
-
-	posts := []Post{}
-	rows, err := repo.db.Query(`SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM posts WHERE postVisibility = 'Public' `)
-	if err != nil {
-		return posts, fmt.Errorf("GetPosts DB Query error: %+v", err)
-	}
-	var postID int
-	var postDate string
-	var author string
-	var title string
-	var category string
-	var imageURL string
-	var imageFile string
-	var postcontent string
-	for rows.Next() {
-		err := rows.Scan(&postID, &author, &title, &postcontent, &category, &imageURL, &imageFile, &postDate)
-		if err != nil {
-			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v\n", err)
-		}
-		postTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", postDate)
-
-		if parseError != nil {
-			log.Fatal("getPublicPosts: parse creationDate Error")
-		}
-		//get the current date
-		currTime := time.Now()
-		currDate := currTime.Format("2006-01-02")
-		//get the date the post was created
-		postDate = postTime.Format("2006-01-02")
-		//if the post was created today
-		if currDate == postDate {
-			//send the time insted of the date
-
-			postDate = postTime.Format("3:04PM")
-
-		}
-
-		//tags
-		tags := strings.Split(category, ",")
-		posts = append([]Post{{
-			PostID:    postID,
-			Author:    author,
-			Title:     title,
-			Category:  tags,
-			Content:   postcontent,
-			ImageFile: imageFile,
-			ImageURL:  imageURL,
-			Date:      postDate,
-		}}, posts...)
-	}
-	err = rows.Err()
-	if err != nil {
-		return posts, err
-	}
-	return posts, nil
-}
 
 func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.Request) {
 	var data Post
@@ -101,6 +26,9 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 	}
 
 	data.Cookie = c.String()
+	cookieArr := strings.Split(data.Cookie, "=")
+	cookieID := cookieArr[1]
+	user := service.repo.GetUserByCookie(cookieID)
 	if data.PostType == "newPost" {
 		err := service.repo.AddPostToDB(data)
 		if err != nil {
@@ -109,7 +37,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			return
 		}
 		fmt.Println("getting Public posts")
-		posts, err := service.repo.GetPublicPosts()
+		posts, err := service.repo.GetPublicPosts(user)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
@@ -130,12 +58,37 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 		json.NewEncoder(w).Encode(posts[0])
 
 	} else if data.PostType == "getPosts" {
-		fmt.Println("getting Public posts")
-		posts, err := service.repo.GetPublicPosts()
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
-			return
+		posts := []Post{}
+		//use cookie to get user
+
+		if data.Page == "profile" {
+			//profile page
+			// query database for all posts by this user
+			userPosts, err := service.repo.GetAllUserPosts(user)
+			fmt.Println("how many posts does this user have?", len(userPosts), userPosts)
+			posts = userPosts
+			if err != nil {
+				fmt.Println("Post Handler: GetAllUserPosts error: ", err)
+			}
+		} else {
+			//feed page
+			fmt.Println("getting Public posts")
+			publicPosts, err := service.repo.GetPublicPosts(user)
+			posts = publicPosts
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to get public post", http.StatusInternalServerError)
+				return
+			}
+			fmt.Println("getting Private posts")
+			privatePosts, err2 := service.repo.GetPrivatePosts(user)
+			if err2 != nil {
+				log.Println(err2)
+				http.Error(w, "Failed to get public post", http.StatusInternalServerError)
+				return
+			}
+			posts = append(posts, privatePosts...)
+
 		}
 		fmt.Println("getting comments for posts")
 		for i, p := range posts {
@@ -168,6 +121,170 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 
 	}
 
+}
+
+func ScanPosts(rows *sql.Rows) ([]Post, error) {
+	var posts []Post
+	var postID int
+	var postDate string
+	var author string
+	var title string
+	var category string
+	var imageURL string
+	var imageFile string
+	var postcontent string
+	for rows.Next() {
+		err := rows.Scan(&postID, &author, &title, &postcontent, &category, &imageURL, &imageFile, &postDate)
+		if err != nil {
+			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v", err)
+		}
+		postTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", postDate)
+
+		if parseError != nil {
+			log.Fatal("getPublicPosts: parse creationDate Error")
+		}
+		//get the current date
+		currTime := time.Now()
+		currDate := currTime.Format("2006-01-02")
+		//get the date the post was created
+		postDate = postTime.Format("2006-01-02")
+		//if the post was created today
+		if currDate == postDate {
+			//send the time insted of the date
+
+			postDate = postTime.Format("3:04PM")
+
+		}
+
+		//tags
+		tags := strings.Split(category, ",")
+		posts = append([]Post{{
+			PostID:    postID,
+			Author:    author,
+			Title:     title,
+			Category:  tags,
+			Content:   postcontent,
+			ImageFile: imageFile,
+			ImageURL:  imageURL,
+			Date:      postDate,
+		}}, posts...)
+	}
+	err := rows.Err()
+	if err != nil {
+		return posts, err
+	}
+	return posts, nil
+}
+
+func (repo *dbStruct) GetPublicPosts(user *User) ([]Post, error) {
+	posts := []Post{}
+	rows, err := repo.db.Query(`SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM posts WHERE postVisibility = 'Public' OR postVisibility = 'Private' AND Author = ?`, user.NickName)
+	if err != nil {
+		return posts, fmt.Errorf("DB Query error: %+v", err)
+	}
+
+	posts, err2 := ScanPosts(rows)
+	if err2 != nil {
+		return posts, err2
+	}
+
+	return posts, nil
+}
+
+func (repo *dbStruct) GetAlmostPrivatePosts(user *User) ([]Post, error) {
+	posts := []Post{}
+	query := `SELECT Posts * FROM Posts JOIN PrivateViewers ON Possts.postId = PrivateViewers.postId WHERE PrivateViewers.username = ?`
+
+	rows, err := repo.db.Query(query, user.NickName)
+	if err != nil {
+		return posts, err
+	}
+	posts, err2 := ScanPosts(rows)
+	if err2 != nil {
+		return posts, err2
+	}
+
+	return posts, nil
+
+}
+
+func (repo *dbStruct) GetFollowing(user *User) ([]any, error) {
+	var followers []any
+	rows, err2 := repo.db.Query(`SELECT  influencerUserName FROM  Followers WHERE followerUserName = ? `, user.NickName)
+	if err2 != nil {
+		fmt.Println("FullChatUserList: query error", err2)
+		return followers, err2
+	}
+	for rows.Next() {
+		var follower string
+		err := rows.Scan(&follower)
+		if err != nil {
+			fmt.Println("GetFollowers: row scan error:", err)
+			continue
+		}
+		followers = append(followers, follower)
+	}
+	return followers, nil
+}
+
+func (repo *dbStruct) GetPrivatePosts(user *User) ([]Post, error) {
+	posts := []Post{}
+	// Generate placeholders for the IN clause
+	followers, err := repo.GetFollowing(user)
+	
+	fmt.Println("who user follows this user?", followers)
+	placeholders := make([]string, len(followers))
+	for i := range followers {
+		placeholders[i] = "?"
+	}
+	placeholderString := "(" + strings.Join(placeholders, ", ") + ")"
+
+	query := "SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM Posts WHERE Author IN " + placeholderString + " AND postVisibility = 'Private' "
+
+	rows, err := repo.db.Query(query, followers...)
+	if err != nil {
+		return posts, err
+	}
+	posts, err2 := ScanPosts(rows)
+	if err2 != nil {
+		return posts, err2
+	}
+
+	return posts, nil
+}
+func (repo *dbStruct) GetAllUserPosts(user *User) ([]Post, error) {
+	posts:= []Post{}
+	query := `SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM Posts WHERE author = ?`
+	rows, err := repo.db.Query(query, user.NickName)
+
+	if err != nil {
+		return posts, fmt.Errorf("DB Query error: %+v\n", err)
+	}
+
+	posts, err2 := ScanPosts(rows)
+	if err2 != nil {
+		return posts, err2
+	}
+
+	return posts, nil
+}
+
+func (repo *dbStruct) AddPostToDB(post Post) error {
+	// time
+	date := time.Now()
+	//cookie
+	cookieArr := strings.Split(post.Cookie, "=")
+	cookieID := cookieArr[1]
+	//user info
+	user := repo.GetUserByCookie(cookieID)
+	//category
+	categories := strings.Join(post.Category, ",")
+	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf("failed to add Post to Database")
+	}
+	return nil
 }
 
 func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {

@@ -59,9 +59,12 @@ type AllDbMethods interface {
 	DeleteCookieDB(cookieValue string) (int64, error)
 	//post database queries
 	AddPostToDB(data Post) error
-	GetPublicPosts() ([]Post, error)
+	GetPublicPosts(user *User) ([]Post, error)
 	UploadVisibilityValue(data ProfileVisibilityData) (string, error)
 	GetUsersData(email string) ([]AllUsersData, error)
+	GetAlmostPrivatePosts(user *User) ([]Post, error)
+	GetPrivatePosts(user *User) ([]Post, error)
+	GetFollowing(user *User) ([]any, error)
 	//comment database queries
 	AddCommentToDB(data Post) error
 	GetComments(data Post) ([]Comment, error)
@@ -69,7 +72,7 @@ type AllDbMethods interface {
 	checkCookieDB(cookieValue string) int
 	BroadcastToChannel(msg BroadcastMessage)
 	FindConversation(convo Chat) Conversation
-	NewPrivateChatToDB(convo Chat) 
+	NewPrivateChatToDB(convo Chat)
 	GetChatHistory(convo Conversation) []Chat
 	AddChatToDatabase(chat Chat)
 	AddChatNotification(chat Chat, count int)
@@ -77,6 +80,8 @@ type AllDbMethods interface {
 	DeleteChatNotifDB(chat Chat) (int64, error)
 	FullChatUserList(user *User) Presences
 	ClientsFollowingUser(user *User) map[*websocket.Conn]string
+	IsClientOnline(rows *sql.Rows, user *User) [][]string
+	GetAllUserPosts(user *User) ([]Post, error)
 }
 
 // The dabataseStruct
