@@ -344,7 +344,7 @@ const RemoveChatNotification = ({username, name}) => {
         </button>
         <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 w-96 bg-white dark:bg-gray-300" id="chatOpen">
         
-        <div id = "chatContainer" className="flex flex-col justify-end align-center w-2/3 overflow-scroll">
+        <div id = "chatContainer" className="flex flex-col justify-end align-center w-2/3 overflow-scroll dark:bg-gray-400 ">
           
           <div id="chats" name="chats" className="flex flex-col overflow-scroll">
           
@@ -354,7 +354,7 @@ const RemoveChatNotification = ({username, name}) => {
           <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden mb-2 ml-20 w-1/3 bg-[#ecbba3] rounded-lg text-white shadow-md"><strong>Send</strong></button>
 
         </div>
-        <aside className=" flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
+        <aside className="dark:bg-gray-400 flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
         <div id="online"></div>
         <div id= "offline"></div>
         </aside>

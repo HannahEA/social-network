@@ -16,7 +16,7 @@ function GroupsModal({closeGroups, followers}){
       };
 
     //store new group form inputs
-    const [newGroupInputs, setNewGroupInputs] = useState({});
+    const [newGroupInputs, setNewGroupInputs] = useState({["type"]: "newGroup"});
     const[joinGroup, setJoinGroup] = useState({});
 
     //collect new group form's info
@@ -39,14 +39,21 @@ function GroupsModal({closeGroups, followers}){
       for (let i = 0; i < grpMembers.length; i++){
         grpMembers[i].checked = false; //un-tick check boxes
       }
-
+      //setNewGroupInputs({...newGroupInputs, ["type"]: "newGroup"});
       alert(JSON.stringify(newGroupInputs, null, 2)); // Convert to JSON string for display; the second argument null is for replacer function, and the third argument 2 is for indentation
       //send reply object to back end
-        setNewGroupInputs({...newGroupInputs, ["type"]: "newGroup"});
-        console.log("new group sent to b.e.:", newGroupInputs);
+
+        // var sendNewGP = {
+        //   newGroupInputs,
+        //   type: "newGroup"
+        // }
+
+        //console.log("new group sent to b.e.:", sendNewGP);
+        console.log("new group inputs sent to b.e.:", newGroupInputs);
 
         websocketRef.current.send(
         JSON.stringify(newGroupInputs)
+        //JSON.stringify(sendNewGP)
 
         
     )
@@ -106,18 +113,12 @@ function GroupsModal({closeGroups, followers}){
                 <p className="ml-2 text-[#717575] dark:text-white">Invite group members:</p>
                   <br></br>
                 <ul className="flex space-x-4">
+                {followers.map((follw)=> (
                   <li>
-                    <input class="chk" name="Jackie" type="checkbox" onChange={handleNewGP} border="hidden" background-color="white" className="rounded-sm h-4 w-4 ml-1 cursor-pointer accent-[#57aada]"/>
-                    <label class="addToGroup dark:text-[#3f82a9]">Jackie</label>
+                    <input class="chk" name={follw} type="checkbox" onChange={handleNewGP} border="hidden" background-color="white" className="rounded-sm h-4 w-4 ml-1 cursor-pointer accent-[#57aada]"/>
+                    <label class="addToGroup dark:text-[#3f82a9]">{follw}</label>
                   </li>
-                  <li>
-                    <input class="chk" name="Arabella"  type="checkbox" onChange={handleNewGP} border="hidden" background-color="white" className="h-4 w-4 ml-1 cursor-pointer accent-[#57aada] "/>
-                    <label class="addToGroup dark:text-[#3f82a9]">Arabella</label>
-                  </li>
-                  <li>
-                    <input class="chk" name="Lee"  type="checkbox" onChange={handleNewGP} border="hidden" className="h-4 w-4 bg-white ml-1 cursor-pointer accent-[#57aada] "/>
-                    <label class="addToGroup dark:text-[#3f82a9]">Lee</label>
-                  </li>
+                ))}
                 </ul>
                 <div id="addFollowersToGroup" className="text-sm font-sm text-[#717575] dark:text-primary-500">
                
