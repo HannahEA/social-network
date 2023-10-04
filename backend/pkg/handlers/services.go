@@ -56,6 +56,7 @@ type AllDbMethods interface {
 	AddLoggedInFlag(userID int, flag string) error
 	ReturnId(email string) (int, error)
 	GetUserByEmail(email string) (User, error)
+	FindByUsername(name string) *User
 	DeleteCookieDB(cookieValue string) (int64, error)
 	//post database queries
 	AddPostToDB(data Post) error
@@ -65,6 +66,7 @@ type AllDbMethods interface {
 	GetAlmostPrivatePosts(user *User) ([]Post, error)
 	GetPrivatePosts(user *User) ([]Post, error)
 	GetFollowing(user *User) ([]any, error)
+	GetFollowers(user *User) ([]any, error)
 	//comment database queries
 	AddCommentToDB(data Post) error
 	GetComments(data Post) ([]Comment, error)

@@ -40,7 +40,17 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 	//if browser window was previously closed down without logging out
 	loggedInUser := service.repo.GetUserByCookie(cookieValue)
 	var image string = string(loggedInUser.Image)
-	
+
+	//get followers
+	followers, errf1:= service.repo.GetFollowers(loggedInUser)
+	if errf1 != nil {
+
+	}
+	//get following
+	following, errf2:= service.repo.GetFollowing(loggedInUser)
+	if errf2 != nil {
+
+	}
 	loggedUserInfoFound := map[string]interface{}{
 		"message": "Cookie is found",
 		"email":   loggedInUser.Email,
@@ -54,6 +64,8 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 		"image":   image,
 		"profVisib": loggedInUser.ProfVisib,
 		"created_at": loggedInUser.Created_At,
+		"followers": followers,
+		"following": following,
 	}
 
 	loggedUserInfoNotFound := map[string]interface{}{
@@ -111,4 +123,41 @@ func (repo *dbStruct) checkCookieDB(cookieValue string) int {
 	}
 	return count
 
+}
+
+func (repo *dbStruct) GetFollowing(user *User) ([]any, error) {
+	var followers []any
+	rows, err2 := repo.db.Query(`SELECT influencerUserName FROM Followers WHERE followerUserName = ? AND accepted = 'Yes'`, user.NickName)
+	if err2 != nil {
+		fmt.Println("FullChatUserList: query error", err2)
+		return followers, err2
+	}
+	for rows.Next() {
+		var follower string
+		err := rows.Scan(&follower)
+		if err != nil {
+			fmt.Println("GetFollowers: row scan error:", err)
+			continue
+		}
+		followers = append(followers, follower)
+	}
+	return followers, nil
+}
+func (repo *dbStruct) GetFollowers(user *User) ([]any, error) {
+	var followers []any
+	rows, err2 := repo.db.Query(`SELECT followerUserName FROM Followers WHERE influencerUserName  = ? AND accepted = 'Yes'`, user.NickName)
+	if err2 != nil {
+		fmt.Println("FullChatUserList: query error", err2)
+		return followers, err2
+	}
+	for rows.Next() {
+		var follower string
+		err := rows.Scan(&follower)
+		if err != nil {
+			fmt.Println("GetFollowers: row scan error:", err)
+			continue
+		}
+		followers = append(followers, follower)
+	}
+	return followers, nil
 }

@@ -1025,7 +1025,7 @@ const [viewProfile, setViewProfile] = useState(false)
             </li>
             <li>
               {/* <a href="http://localhost:3000/profile"> */}
-              <a href="#">
+              <a href="javascript:;">
                 <button
                   type="button"
                   className="flex items-center p-2 w-full text-base font-medium text-white 
@@ -1535,6 +1535,7 @@ const [viewProfile, setViewProfile] = useState(false)
         onClose={() => {handleCloseModal()}} 
         onFollow={() => {handleFollowUser()}}
         influencer={parseInt(selectedUser.influencer, 10)} // Pass the influencer prop here
+        name={selectedUser.username}
         >
           {selectedUser && (
             <Card

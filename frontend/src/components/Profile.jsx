@@ -13,35 +13,35 @@ const apiURL = process.env.REACT_APP_API_URL;
 
 
 
-const deleteCookie = () => {
-  fetch(`${apiURL}/deleteCookie`, { credentials: "include" })
-    .then((response) => response.text())
-    .then((data) => {
-      // Handle the response from the server
-      console.log("Sending cookie to be deleted:", data);
+// const deleteCookie = () => {
+//   fetch(`${apiURL}/deleteCookie`, { credentials: "include" })
+//     .then((response) => response.text())
+//     .then((data) => {
+//       // Handle the response from the server
+//       console.log("Sending cookie to be deleted:", data);
 
-      // Redirect to the feed page if the cookie is found
-      if (data === "Cookie is deleted") {
-        console.log("Cookie is deleted from server");
+//       // Redirect to the feed page if the cookie is found
+//       if (data === "Cookie is deleted") {
+//         console.log("Cookie is deleted from server");
 
-        // Remove the cookie from the client-side
-        document.cookie = "user_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+//         // Remove the cookie from the client-side
+//         document.cookie = "user_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
-        // Notify the user
-        notyf.success("Logout successful.");
+//         // Notify the user
+//         notyf.success("Logout successful.");
 
-        // Redirect to the welcome page
-        const navigate = useNavigate();
-        navigate("/");
-      } else {
-        console.log("Cookie is not deleted");
-      }
-    })
-    .catch((error) => {
-      // Handle any errors
-      console.error("Error:", error);
-    });
-};
+//         // Redirect to the welcome page
+//         const navigate = useNavigate();
+//         navigate("/");
+//       } else {
+//         console.log("Cookie is not deleted");
+//       }
+//     })
+//     .catch((error) => {
+//       // Handle any errors
+//       console.error("Error:", error);
+//     });
+// };
 
 const Profile = () => {
   const [username, setUsername] = useState("");
@@ -53,6 +53,8 @@ const Profile = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [gender, setGender] = useState("");
+  const [followers, setFollowers] = useState([])
+  const [following, setFollowing] = useState([])
   const [profileVisib, setProfileVisib] = useState("public");
   const [isDarkTheme, setDarkTheme] = useState(false);
   const [sPost, setSpost] = useState("");
@@ -121,7 +123,7 @@ const Profile = () => {
       .then((response) => response.json())
       .then((data) => {
         // Handle the response from the server
-        console.log("Data:", data);
+        console.log("Profile Data:", data);
         setEmail(data.email);
         setUsername(data.username);
         setAboutMe(data.aboutMe);
@@ -129,6 +131,8 @@ const Profile = () => {
         setAvatar(data.avatar);
         setFirstName(data.firstName);
         setLastName(data.lastName);
+        setFollowers(data.followers)
+        setFollowing(data.following)
         if (!data.image && !data.avatar){
           setImage("https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj")
         }
@@ -150,7 +154,7 @@ const Profile = () => {
     checkCookie();
   }, []);
 
-  console.log("email:", email);
+  
   return (
 
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8">
@@ -181,16 +185,16 @@ const Profile = () => {
               <p className="mb-3 text-md text-gray-500 dark:text-gray-400">{aboutMe}</p>
               <div className="flex justify-center items-center gap-1">
                 <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full">
-                <strong>age: {calculateAge(dateOfBirth)}</strong>
+                <strong>{calculateAge(dateOfBirth)}</strong>
                 </span>
-                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"><strong>gender: {gender}</strong></span>
-                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"><strong>following: 1</strong></span>
-                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"><strong>follow: 1</strong></span>
+                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"><strong>{gender}</strong></span>
+                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"> <strong>{following? (following.length): 0} following</strong></span>
+                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"> <strong>{followers? (followers.length): 0} followers</strong></span>
               </div>
             </div>
             
           </div>
-          <Posts page={"profile"}/>
+          <Posts page={"myProfile"}/>
         </div>
      
   );

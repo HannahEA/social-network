@@ -462,20 +462,31 @@ func (r *dbStruct) ClientsFollowingUser(user *User) map[*websocket.Conn]string {
 
 func (r *dbStruct) FullChatUserList(user *User) Presences {
 	var list Presences
-	rows, err := r.db.Query(`SELECT influencerUserName FROM Followers WHERE followerUserName = ? `, user.NickName)
+	rows, err := r.db.Query(`SELECT influencerUserName FROM Followers WHERE followerUserName = ? AND accepted = 'Yes'`, user.NickName)
 	if err != nil {
-		fmt.Println("FullChatUserList: query error", err, err)
+		fmt.Println("FullChatUserList: query error", err)
 		return list
 	}
-	rows2, err2 := r.db.Query(`SELECT followerUserName  FROM Followers WHERE influencerUserName = ? `, user.NickName)
+	rows2, err2 := r.db.Query(`SELECT followerUserName  FROM Followers WHERE influencerUserName = ? AND accepted = 'Yes'`, user.NickName)
 	if err2 != nil {
-		fmt.Println("FullChatUserList: query error", err, err)
+		fmt.Println("FullChatUserList: query error", err2)
 		return list
 	}
-	following:= r.IsClientOnline(rows, user)
-	followers:= r.IsClientOnline(rows2, user)
+	following := r.IsClientOnline(rows, user)
+	followers := r.IsClientOnline(rows2, user)
 	list.Clients = append(list.Clients, following...)
-	list.Clients= append(list.Clients, followers...)
+	list.Clients = append(list.Clients, followers...)
+	bucket := make(map[string]bool)
+	var result [][]string
+	for _, str := range list.Clients {
+		name := str[0]
+		fmt.Println("the user you are following:", name)
+		if _, ok := bucket[name]; !ok {
+			bucket[name] = true
+			result = append(result, str)
+		}
+	}
+	list.Clients = result
 	return list
 }
 
