@@ -23,7 +23,7 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 	// Validate the login credentials
 	valid, err := service.repo.ValidateLogin(data.Email, data.Password)
 	if err != nil {
-		log.Println(err)
+		log.Println("validdate login error:", err)
 		response := map[string]interface{}{
 			"message": "Login unsuccessful",
 		}
@@ -94,7 +94,6 @@ func (service *AllDbMethodsWrapper) HandleLogin(w http.ResponseWriter, r *http.R
 		value := *userInfo
 		fmt.Println("the user info:", value)
 
-
 		response := map[string]interface{}{
 			"message":    "Login successful",
 			"email":      data.Email,
@@ -147,9 +146,9 @@ func (repo *dbStruct) AddLoggedInFlag(userID int, flag string) error {
 
 	defer updateLoggedInStmt.Close()
 	// Execute the SQL statement to update the 'loggedIn' flag for the given user ID
-theResult, err5 := updateLoggedInStmt.Exec(LoggedIn, userID)
+	theResult, err5 := updateLoggedInStmt.Exec(LoggedIn, userID)
 	if err5 != nil {
-		fmt.Println("Error updating 'loggedIn' flag:", err5, "the sql result is: ",theResult)
+		fmt.Println("Error updating 'loggedIn' flag:", err5, "the sql result is: ", theResult)
 		return err5
 	}
 
@@ -223,7 +222,7 @@ func (repo *dbStruct) GetUserByEmail(email string) (User, error) {
 	return userInfo, nil
 }
 
-//Code to send avatar image back to the front end:
+// Code to send avatar image back to the front end:
 func (repo *dbStruct) getAvatar(email string) (string, error) {
 	// Retrieve the avatar image or URL from the database
 	query := "SELECT avatarURL, imageFile FROM Users WHERE email = ?"

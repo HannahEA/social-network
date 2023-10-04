@@ -51,11 +51,11 @@ const SubmitPost = ({title, content, visibility, url, file, category}) => {
     
 }
 
-const Posts = ({sPost, page}) => {
+const Posts = ({sPost, page, username}) => {
   const [pData, setpData] = useState([])
   
   let getPosts = {
-    cookie: document.cookie, 
+    cookie: username, 
     type: "getPosts",
     page: page,
   }
@@ -120,7 +120,7 @@ const Posts = ({sPost, page}) => {
             <div id="odd" className="float-left w-1/2">
             {pData.map((post, index) => 
               (index%2 > 0 && post != {} &&
-                <div key={post.postId} className="m-2  ">
+                <div key={post.postId} className="m-2 ">
                   <div className=" border-solid rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
                   <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
                   <h2 className="text-l text-left dark:text-white m-6">{post.author}</h2>  

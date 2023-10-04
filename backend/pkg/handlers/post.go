@@ -24,11 +24,17 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 		fmt.Println("Cookie is empty", err)
 		return
 	}
+	var user *User
+	if data.Cookie != "" {
+		fmt.Println("username sent with post data form frontend", data.Cookie)
+		user = service.repo.FindByUsername(data.Cookie)
+	} else {
+		fmt.Println("no username sent with post data form frontend")
+		cookieArr := strings.Split(c.String(), "=")
+		cookieID := cookieArr[1]
+		user = service.repo.GetUserByCookie(cookieID)
+	}
 
-	data.Cookie = c.String()
-	cookieArr := strings.Split(data.Cookie, "=")
-	cookieID := cookieArr[1]
-	user := service.repo.GetUserByCookie(cookieID)
 	if data.PostType == "newPost" {
 		err := service.repo.AddPostToDB(data)
 		if err != nil {
@@ -61,7 +67,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 		posts := []Post{}
 		//use cookie to get user
 
-		if data.Page == "profile" {
+		if data.Page == "myProfile" {
 			//profile page
 			// query database for all posts by this user
 			userPosts, err := service.repo.GetAllUserPosts(user)
@@ -208,29 +214,10 @@ func (repo *dbStruct) GetAlmostPrivatePosts(user *User) ([]Post, error) {
 
 }
 
-func (repo *dbStruct) GetFollowing(user *User) ([]any, error) {
-	var followers []any
-	rows, err2 := repo.db.Query(`SELECT  influencerUserName FROM  Followers WHERE followerUserName = ? `, user.NickName)
-	if err2 != nil {
-		fmt.Println("FullChatUserList: query error", err2)
-		return followers, err2
-	}
-	for rows.Next() {
-		var follower string
-		err := rows.Scan(&follower)
-		if err != nil {
-			fmt.Println("GetFollowers: row scan error:", err)
-			continue
-		}
-		followers = append(followers, follower)
-	}
-	return followers, nil
-}
-
 func (repo *dbStruct) GetPrivatePosts(user *User) ([]Post, error) {
 	posts := []Post{}
 	// Generate placeholders for the IN clause
-	followers, err := repo.GetFollowing(user)
+	followers, err := repo.GetFollowers(user)
 	fmt.Println("who user follows this user?", followers)
 	placeholders := make([]string, len(followers))
 	for i := range followers {
@@ -252,7 +239,7 @@ func (repo *dbStruct) GetPrivatePosts(user *User) ([]Post, error) {
 	return posts, nil
 }
 func (repo *dbStruct) GetAllUserPosts(user *User) ([]Post, error) {
-	posts:= []Post{}
+	posts := []Post{}
 	query := `SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM Posts WHERE author = ?`
 	rows, err := repo.db.Query(query, user.NickName)
 
