@@ -432,6 +432,7 @@ const [viewProfile, setViewProfile] = useState(false)
       console.log("user avatar and email", dataObj);
       allData.current.followers = dataObj.followers
       allData.current.following = dataObj.following
+      console.log("allDAta", allData)
       // Redirect user to login page if cookie not found
       if (dataObj.message !== "Cookie is found") {
         console.log(data);
@@ -1558,6 +1559,7 @@ const [viewProfile, setViewProfile] = useState(false)
       {groupsModalVisible && (
         <GroupsModal 
         closeGroups={() => {handleGroupsClose()}} 
+        followers={allData.current.followers}
         // onFollow={() => {handleFollowUser()}}
         // influencer={parseInt(selectedUser.influencer, 10)} // Pass the influencer prop here
         >

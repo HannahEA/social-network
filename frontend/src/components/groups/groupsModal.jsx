@@ -4,7 +4,7 @@ import { useWebSocket } from "../WebSocketProvider.jsx";
 
 
 
-function GroupsModal({closeGroups}){
+function GroupsModal({closeGroups, followers}){
 
   const { websocketRef, isWebSocketConnected} = useWebSocket();
 
