@@ -3,7 +3,7 @@ import Card from "./Card.jsx";
 
 
 
-function createCard(u){
+function createCard(){
       
     return(
 

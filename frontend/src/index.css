@@ -62,7 +62,6 @@ code {
     position: absolute;
     top: 8px;
     right: 8px;
-    background: none;
     border: none;
     cursor: pointer;
     color: #666;
@@ -125,17 +124,53 @@ code {
   .info{
     margin: 8px 0;
     color: #4d595c;
+
   }
 
-  /*to align lable and value in bottom section of card
-  /* .flexbox-container{
-    display: flex;
-    flex-direction: row;
-  } */
 
     /* ===> End of 'Card' component styling <==== */
   
   /* ====> End of User Info Modal stylng <=== */
+
+  
+  /* Start of 'groupsModal' */
+
+  .gpsModal-content {
+    width: 400px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    position: relative;
+    max-width: 80%; /* Adjust the max-width as needed */
+    max-height: 80%; /* Adjust the max-height as needed */
+    overflow: auto; /* Enable scrolling if the content is too large */
+  }
+
+
+/* add dots to separate group participants from grp name/desc */
+hr.dottedL{
+  border-top: 5px dotted #e1eef1;
+  background-image: linear-gradient(to right, white 200px, rgba(white, 0) 0%);
+}
+
+/* align buttons */
+#newGpSubmit{
+  top:250px;
+  left:115px;
+}
+
+#joinGpSubmit{
+  top: 490px;
+  left:115px;
+}
+
+.addToGroup{
+  color:#4b93bd;
+  font-weight: 500;
+  margin-left: 5px;
+}
+
+  /* End of groupsModal */
 
     /* ====> Start of notifications popup <====== */
 
@@ -241,6 +276,7 @@ background-color: #2f5d78;
     .offlineAccept{
       margin-left: 150px;
       margin-right: 20px;
+      font: primary-600;
     }
 
     .offlineDecline{

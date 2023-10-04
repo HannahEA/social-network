@@ -164,7 +164,7 @@ func (r *dbStruct) AddChatToDatabase(chat Chat) {
 
 func (r *dbStruct) CheckForNotification(chat Chat) (bool, int, error) {
 	count := 0
-	fmt.Println("checking for notifictations")
+	fmt.Println("checking for notifictations");
 	rows, err := r.db.Query(`SELECT count FROM Notifications WHERE (sender, recipient, type) = (?,?,?) `, chat.Sender, chat.Reciever, "chat")
 	if err != nil {
 		log.Println(err)

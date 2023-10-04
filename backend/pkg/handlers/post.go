@@ -142,7 +142,7 @@ func ScanPosts(rows *sql.Rows) ([]Post, error) {
 	for rows.Next() {
 		err := rows.Scan(&postID, &author, &title, &postcontent, &category, &imageURL, &imageFile, &postDate)
 		if err != nil {
-			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v\n", err)
+			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v", err)
 		}
 		postTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", postDate)
 
@@ -186,7 +186,7 @@ func (repo *dbStruct) GetPublicPosts(user *User) ([]Post, error) {
 	posts := []Post{}
 	rows, err := repo.db.Query(`SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM posts WHERE postVisibility = 'Public' OR postVisibility = 'Private' AND Author = ?`, user.NickName)
 	if err != nil {
-		return posts, fmt.Errorf("DB Query error: %+v\n", err)
+		return posts, fmt.Errorf("DB Query error: %+v", err)
 	}
 
 	posts, err2 := ScanPosts(rows)
@@ -244,7 +244,7 @@ func (repo *dbStruct) GetAllUserPosts(user *User) ([]Post, error) {
 	rows, err := repo.db.Query(query, user.NickName)
 
 	if err != nil {
-		return posts, fmt.Errorf("DB Query error: %+v\n", err)
+		return posts, fmt.Errorf("DB Query error: %+v", err)
 	}
 
 	posts, err2 := ScanPosts(rows)

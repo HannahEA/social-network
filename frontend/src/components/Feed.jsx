@@ -7,6 +7,7 @@ import  Profile  from "./Profile.jsx"
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 // import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
+import GroupsModal from "./groups/groupsModal.jsx";
 import Card from "./usersInfo/Card.jsx";
 import Modal from "./usersInfo/Modal.jsx";
 import Avatar from "./usersInfo/Avatar.jsx";
@@ -128,6 +129,7 @@ const Feed = () => {
   const usersListRef = useRef(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [groupsModalVisible, setGroupsModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [redDotVisible, setRedDotVisible] = useState(false);
   const[isPendingListVisible, setIsPendingListVisible] = useState(false);
@@ -184,7 +186,7 @@ const handleOfflFollowAccept = (f) => {
   websocketRef.current.send(
     JSON.stringify(YesNo)
   )
-
+  
   //remove the offline follow request item from drop-down list
   document.getElementById(ID).innerHTML = '';
 }
@@ -274,16 +276,20 @@ const handleClickUsersList = () => {
   }
 };
 
-//not used
-// const handleShowUserInfo = () => {
-//  // createCard()
+//display the groups modal
+ const handleGroupsClick = () => {
+      setGroupsModalVisible(true);
 
-// }
+ }
+
+ //hide the groups modal
+ const handleGroupsClose = () => {
+      setGroupsModalVisible(false);
+ }
 
   const handleUserClick = (user) => {
     setSelectedUser(user);
     setIsModalVisible(true);
-   // createCard(selectedUser)
   };
 
 
@@ -424,6 +430,9 @@ const [viewProfile, setViewProfile] = useState(false)
 
       const dataObj = JSON.parse(data);
       console.log("user avatar and email", dataObj);
+      allData.current.followers = dataObj.followers
+      allData.current.following = dataObj.following
+      console.log("allDAta", allData)
       // Redirect user to login page if cookie not found
       if (dataObj.message !== "Cookie is found") {
         console.log(data);
@@ -552,7 +561,7 @@ const [viewProfile, setViewProfile] = useState(false)
     <div className="antialiased bg-gray-50 dark:bg-gray-900">
       <div className="content-container">{/* <TopNavigation /> */}</div>
       <ThemeIcon isDarkTheme={isDarkTheme} setDarkTheme={setDarkTheme} />
-      <nav className="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
+      <nav className="bg-white border-b border-gray-200 px-4 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
         <div className="flex flex-wrap justify-between items-center" id="bellDotsAvatar">
           <div className="flex justify-start items-center">
             <button
@@ -1208,13 +1217,18 @@ const [viewProfile, setViewProfile] = useState(false)
               </a>
             </li>
             <li>
-              <a
-                href="javascript:void(0)"
-                className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
-              >
+              <a>
+              <button
+                onClick={()=>(handleGroupsClick())}
+                className="flex items-center p-2 w-full text-base font-medium text-white 
+                rounded-lg transition duration-75 group bg-[#57aada] hover:bg-[#4488af] 
+                shadow-lg dark:text-white dark:hover:bg-[#4488af]
+                [box-shadow:0_3px_0_0_#407da1]
+                border-b-[1px] border-blue-400"
+                id="show-groups-button">
                 <svg
                   aria-hidden="true"
-                  className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                  className="flex-shrink-0 w-6 h-6 text-white transition duration-75 dark:text-white group-hover:text-white dark:group-hover:text-white"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -1222,11 +1236,12 @@ const [viewProfile, setViewProfile] = useState(false)
                   <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
                 </svg>
                 <span className="ml-3">Groups</span>
+                </button>
               </a>
             </li>
             <li>
             {/* Start of the drop-down menu for All users except logged-in user */}
-          <a>
+            <a>
             <button
             onClick={handleClickUsersList}
             type="button"
@@ -1279,7 +1294,7 @@ const [viewProfile, setViewProfile] = useState(false)
             {/* End of the drop-down menu for All users */}
 
             </li>
-                  {/*Start of Modal to display a user's info  */}
+      {/*Start of Modal to display a user's info  */}
      
       {/*End of Modal to display a user's info  */}
           </ul>
@@ -1503,7 +1518,6 @@ const [viewProfile, setViewProfile] = useState(false)
             </div>
           </div>
         {/* Start of follow notification */}
-          {/* removed, invoked in line 26: onClick={() => {CreateNotification(allData.current.followNotif.notifMsg, allData.current.followNotif.followID) ()}} */}
           <div id="showNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
           {isVisible && (
           <Notification 
@@ -1538,15 +1552,41 @@ const [viewProfile, setViewProfile] = useState(false)
       )}
       </div>
         {/* End of users Information modal */}
+
+        {/* Start of show groupsModal*/}
           
-          <div className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" />
-          {/* Start of offline follow/group/event notifications */}
-          <div className="relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" id="offlineNotif">
+      <div id="showGroups" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+      {groupsModalVisible && (
+        <GroupsModal 
+        closeGroups={() => {handleGroupsClose()}} 
+        followers={allData.current.followers}
+        // onFollow={() => {handleFollowUser()}}
+        // influencer={parseInt(selectedUser.influencer, 10)} // Pass the influencer prop here
+        >
+          {/* {selectedUser && (
+            <Card
+              name={selectedUser.username}
+              avt={selectedUser.avatar}
+              img={selectedUser.image}
+              visib={selectedUser.profVisib}
+              influencer= {parseInt(selectedUser.influencer, 10)}
+              about={selectedUser.aboutMe}
+            />
+          )} */}
+        </GroupsModal>
+      )}
+
+
+
+      </div>
+      {/* End of show groupsModal */}
+          
+      <div className="relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" id="offlineNotif">
               {/*Start of offline Notifications Dropdown menu */}
-              <div
-              className={`top-10 overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700 ${isPendingListVisible ? 'visible' : 'hidden'}`}
+      <div
+          className={`top-10 overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700 ${isPendingListVisible ? 'visible' : 'hidden'}`}
                 
-              id="notification-dropdown"
+          id="notification-dropdown"
             >
     {/* Start of follow notifs offline */}
     <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300" id="offlineFollowsTitle">
@@ -1643,7 +1683,7 @@ const [viewProfile, setViewProfile] = useState(false)
               </ul>
               {/* End of group invites offline notif */}
 
-              {/* Start of events invites offline notif */}
+              {/* Start of event invite offline notif */}
               <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300" id="offlEventsTitle">
                 Events
               </div>
@@ -1688,12 +1728,12 @@ const [viewProfile, setViewProfile] = useState(false)
                     ))}
                   </div>
               </ul>
-              {/* End of events invites offline notif*/}
+              {/* End of event invite offline notif*/}
 
             </div>
              {/* End of offline Notifications Dropdown menu */}
           </div>
-          {/* End of offline follow/group/event notifications */}
+          
         </div>
         <div
           id="submitPosts"
