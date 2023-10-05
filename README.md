@@ -1,5 +1,5 @@
 ## Helena To Do ##
-group component check boxes to have group name/follower name as value rather than 'on'
+group members to be stored in GroupMembers table
 
 
 ## Hannah's fav colour palette: 
