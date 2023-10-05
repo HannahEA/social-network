@@ -1560,6 +1560,7 @@ const [viewProfile, setViewProfile] = useState(false)
         <GroupsModal 
         closeGroups={() => {handleGroupsClose()}} 
         followers={allData.current.followers}
+        creator={email}
         // onFollow={() => {handleFollowUser()}}
         // influencer={parseInt(selectedUser.influencer, 10)} // Pass the influencer prop here
         >

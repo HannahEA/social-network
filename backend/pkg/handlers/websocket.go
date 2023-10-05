@@ -299,32 +299,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					log.Fatalf(err.Error())
 				}
 
-				//get user's pending follow requests
-				/*countPending, slicePending := service.repo.GetPendingFollowRequests(uploadFollowInfo)
-
-						fmt.Println("The count of pending follow r. and the lice of Pending: ", countPending, slicePending)
-						//instantiate the OfflineFollowNotif struct to be sent via ws
-						var offlFollowNotif = OfflineFollowNotif{
-							PendingFollows: slicePending,
-							NumPending:     strconv.Itoa(countPending),
-							Type:           "OfflineFollowNotif",
-						}
-
-						fmt.Println("the OfflineFollowNotif struct sent to front end: ", offlFollowNotif)
-
-						online := false
-						fmt.Println("Printing to get rid of the error", online)
-						reciever := make(map[*websocket.Conn]string)
-
-						for conn, client := range Clients {
-							if client == uploadFollowInfo.InfluencerUN {
-								reciever[conn] = client
-								online = true
-						//ws sends pending requests stored in offlFollowNotif to influencer's channel
-						service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{OfflineFollowNotif: offlFollowNotif, Type: "offlineFollowNotif"}, Connections: reciever})
-					}
-				}*/
-
 			} else if uploadFollowInfo.FollowAction == "un-follow" {
 				//delete record from Followers table
 				_, err := service.repo.InsertFollowRequest(uploadFollowInfo)
@@ -340,12 +314,28 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			jsonErr := json.Unmarshal(b, &fReply)
 			fmt.Println("fInfo:", fReply)
 			if jsonErr != nil {
-				fmt.Println("there is an error with json msg: Websocket")
+				fmt.Println("there is an error with json msg: followReply")
 			}
 			//Update the 'accepted' field in 'Followers' table
 			err := service.repo.InsertFollowReply(fReply)
 			if err != nil {
 				fmt.Println("error inserting the follow reply", err)
+			}
+
+		case "newGroup":
+			var newGp NewGroup
+
+			//populate the NewGroup struct
+			jsonErr := json.Unmarshal(b, &newGp)
+			fmt.Println("newGp:", newGp)
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: newGp")
+			}
+			//insert new group data in the 'Groups' table
+			_, err := service.repo.InsertNewGroup(newGp)
+			if err != nil {
+				fmt.Println("error inserting new gp data", err)
+
 			}
 		}
 
@@ -622,4 +612,43 @@ func (repo *dbStruct) GetPendingFollowRequests(nickname string) (int, []FollowNo
 	fCount = len(fPending)
 
 	return fCount, fPending
+}
+
+//populate the Groups table
+func (repo *dbStruct) InsertNewGroup(g NewGroup) (string, error) {
+	//retrieve creator's user name
+	creatorUN, err := repo.GetUserByEmail(g.Creator)
+	if err != nil {
+		fmt.Println("error retrieving group creator data", err)
+		return "", err
+	}
+
+	//populate the db table 'Groups'
+	stmnt, err := repo.db.Prepare("INSERT OR IGNORE INTO Groups (creator, title, description) VALUES (?, ?, ?)")
+	if err != nil {
+		fmt.Println("Error preparing insert stmt for follow request into DB: ", err)
+		return "", err
+	}
+	_, err = stmnt.Exec(creatorUN.NickName, g.GrpName, g.GrpDescr)
+	if err != nil {
+		fmt.Println("Error inserting new group into DB: ", err)
+		return "", err
+	}
+
+	//return the auto-generated 'groupID'
+
+	rows, err := repo.db.Query("SELECT seq FROM sqlite_sequence WHERE name = 'Groups'")
+	if err != nil {
+		fmt.Println("Error returning 'new group id'", err)
+		return "", err
+	}
+	for rows.Next() {
+		err := rows.Scan(&g.ID)
+		if err != nil {
+			fmt.Println("group ID sqlite_sequence: row scan error", err)
+			return "", err
+		}
+	}
+	return g.ID, nil
+
 }

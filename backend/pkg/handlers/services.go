@@ -84,6 +84,8 @@ type AllDbMethods interface {
 	ClientsFollowingUser(user *User) map[*websocket.Conn]string
 	IsClientOnline(rows *sql.Rows, user *User) [][]string
 	GetAllUserPosts(user *User) ([]Post, error)
+	//Groups
+	InsertNewGroup(g NewGroup)(string, error)
 }
 
 // The dabataseStruct

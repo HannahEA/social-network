@@ -2,8 +2,10 @@
 CREATE TABLE IF NOT EXISTS "GroupMembers" ( 
             "membershipID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             "groupID" INTEGER,
-            "memberID" INTEGER,
+            "creator"  TEXT,
+            "member" TEXT,
             "status" TEXT,
            FOREIGN KEY(groupID)REFERENCES Groups(groupID),
-           FOREIGN KEY(memberID)REFERENCES Users(id)
+           FOREIGN KEY(creator)REFERENCES Users(nickName),
+           FOREIGN KEY(member)REFERENCES Users(nickName)
 );

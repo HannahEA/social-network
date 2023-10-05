@@ -185,7 +185,7 @@ type FollowNotif struct {
 
 //single instance of f.r.n. sent to offline private influencer
 type FollowNotifOffline struct {
-	FollowID      string    `json:"followID"`
+	FollowID      string `json:"followID"`
 	FollowerUN    string `json:"followerUN"`
 	InfluencerUN  string `json:"influencerUN"`
 	FollowerURL   string `json:"followerURL"`
@@ -203,4 +203,21 @@ type FollowReply struct {
 	FollowID    string `json:"followID"`
 	FollowReply string `json:"followReply"`
 	Type        string `json:"type"`
+}
+
+//new group information
+type NewGroup struct {
+	ID        string   `json:"id"`
+	Creator   string   `json:"creator"`
+	GpMembers []string `json:"gpMembers"`
+	GrpDescr  string   `json:"grpDescr"`
+	GrpName   string   `json:"grpName"`
+	Type      string   `json:"type"`
+}
+
+//join group request
+type JoinGroup struct {
+	GpList    []string `json:"gpList"`
+	Requestor string   `json:"requestor"`
+	Type      string   `json:"type"`
 }
