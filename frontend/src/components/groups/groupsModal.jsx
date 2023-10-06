@@ -140,14 +140,15 @@ function GroupsModal({closeGroups, followers, creator}){
                 </label>
                 <p className="ml-2 text-[#717575] dark:text-white">Invite group members:</p>
                   <br></br>
-                <ul className="flex space-x-4">
-                {followers.map((follw)=> (
-                  <li>
+                  <ul className="flex space-x-4"> 
+                    {followers == null ? <label class="addToGroup dark:text-[#3f82a9]">Group membership is restricted to followers </label> : followers.map((follw) => (
+                  <li key={follw}>
                     <input class="chk" name={follw} type="checkbox" onChange={handleNewGP} border="hidden" background-color="white" className="rounded-sm h-4 w-4 ml-1 cursor-pointer accent-[#57aada]"/>
                     <label class="addToGroup dark:text-[#3f82a9]">{follw}</label>
                   </li>
+                  
                 ))}
-                </ul>
+                  </ul>
                 <div id="addFollowersToGroup" className="text-sm font-sm text-[#717575] dark:text-primary-500">
                
                 </div>

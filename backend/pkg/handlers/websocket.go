@@ -324,6 +324,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 		case "newGroup":
 			var newGp NewGroup
+			status := "memberPending"
 
 			//populate the NewGroup struct
 			jsonErr := json.Unmarshal(b, &newGp)
@@ -332,10 +333,17 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				fmt.Println("there is an error with json msg: newGp")
 			}
 			//insert new group data in the 'Groups' table
-			_, err := service.repo.InsertNewGroup(newGp)
+			newGp.ID, err = service.repo.InsertNewGroup(newGp)
 			if err != nil {
 				fmt.Println("error inserting new gp data", err)
+			}
 
+			//insert group members into the GroupMembers table
+			for i := 0; i < len(newGp.GpMembers); i++ {
+				err = service.repo.InsertGrpMember(newGp, i, status)
+				if err != nil {
+					fmt.Println("error inserting grpMember: ", newGp.GpMembers[i])
+				}
 			}
 		}
 
@@ -615,24 +623,24 @@ func (repo *dbStruct) GetPendingFollowRequests(nickname string) (int, []FollowNo
 }
 
 //populate the Groups table
-func (repo *dbStruct) InsertNewGroup(g NewGroup) (string, error) {
+func (repo *dbStruct) InsertNewGroup(g NewGroup) (int, error) {
 	//retrieve creator's user name
-	creatorUN, err := repo.GetUserByEmail(g.Creator)
+	creator, err := repo.GetUserByEmail(g.Creator)
 	if err != nil {
 		fmt.Println("error retrieving group creator data", err)
-		return "", err
+		return 0, err
 	}
 
 	//populate the db table 'Groups'
 	stmnt, err := repo.db.Prepare("INSERT OR IGNORE INTO Groups (creator, title, description) VALUES (?, ?, ?)")
 	if err != nil {
 		fmt.Println("Error preparing insert stmt for follow request into DB: ", err)
-		return "", err
+		return 0, err
 	}
-	_, err = stmnt.Exec(creatorUN.NickName, g.GrpName, g.GrpDescr)
+	_, err = stmnt.Exec(creator.NickName, g.GrpName, g.GrpDescr)
 	if err != nil {
 		fmt.Println("Error inserting new group into DB: ", err)
-		return "", err
+		return 0, err
 	}
 
 	//return the auto-generated 'groupID'
@@ -640,15 +648,47 @@ func (repo *dbStruct) InsertNewGroup(g NewGroup) (string, error) {
 	rows, err := repo.db.Query("SELECT seq FROM sqlite_sequence WHERE name = 'Groups'")
 	if err != nil {
 		fmt.Println("Error returning 'new group id'", err)
-		return "", err
+		return 0, err
 	}
 	for rows.Next() {
 		err := rows.Scan(&g.ID)
 		if err != nil {
 			fmt.Println("group ID sqlite_sequence: row scan error", err)
-			return "", err
+			return 0, err
 		}
 	}
 	return g.ID, nil
 
+}
+
+//Populate the GroupMembers table
+func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int, status string) error {
+	//retrieve creator's user name
+	creator, err := repo.GetUserByEmail(newGp.Creator)
+	if err != nil {
+		fmt.Println("error retrieving group creator data", err)
+		return err
+	}
+
+	creatorUN := creator.NickName
+
+	//prepare the query
+	stmt, err := repo.db.Prepare("INSERT OR IGNORE into GroupMembers (grpID, creator, member, status) values(?, ?, ?, ?)")
+	if err != nil {
+		fmt.Println("error preparing statement to insert group members", err)
+		return err
+	}
+
+	//Id := newGp.ID
+	//gpCreator := newGp.Creator
+	//oneMember := newGp.GpMembers[i]
+	//memberStatus := "memberPending"
+
+	_, err = stmt.Exec(newGp.ID, creatorUN, newGp.GpMembers[i], status)
+	if err != nil {
+		fmt.Println("error inserting group member", err)
+		return err
+	}
+
+	return nil
 }

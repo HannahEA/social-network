@@ -1,5 +1,6 @@
 ## Helena To Do ##
-group members to be stored in GroupMembers table
+dq query returns all data from 'Groups' table and sends to f.e. 
+to populate the 'Groups' section of groupModal.jsx
 
 
 ## Hannah's fav colour palette: 

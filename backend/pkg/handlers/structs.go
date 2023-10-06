@@ -207,7 +207,7 @@ type FollowReply struct {
 
 //new group information
 type NewGroup struct {
-	ID        string   `json:"id"`
+	ID        int   `json:"id"`
 	Creator   string   `json:"creator"`
 	GpMembers []string `json:"gpMembers"`
 	GrpDescr  string   `json:"grpDescr"`

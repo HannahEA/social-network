@@ -85,7 +85,8 @@ type AllDbMethods interface {
 	IsClientOnline(rows *sql.Rows, user *User) [][]string
 	GetAllUserPosts(user *User) ([]Post, error)
 	//Groups
-	InsertNewGroup(g NewGroup)(string, error)
+	InsertNewGroup(g NewGroup)(int, error)
+	InsertGrpMember(newGp NewGroup, i int, status string) error
 }
 
 // The dabataseStruct
