@@ -143,20 +143,28 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			// fmt.Println("The offline requests are for influencer: ", user.NickName)
 			countPending, slicePending := service.repo.GetPendingFollowRequests(user.NickName)
 
-			// fmt.Println("The count of pending follow r. and the slice of Pending: ", countPending, slicePending)
-
-			// //instantiate the OfflineFollowNotif struct to be sent via ws
+			//instantiate the OfflineFollowNotif struct to be sent via ws
 			var offlineFollowNotif = OfflineFollowNotif{
-				PendingFollows: slicePending,
-				NumPending:     strconv.Itoa(countPending),
+				PendingFollows:   slicePending,
+				NumFollowPending: strconv.Itoa(countPending),
 			}
 
 			fmt.Println("the OfflineFollowNotif struct sent to front end: ", offlineFollowNotif)
 
+			//get user's pending group invites
+			countGroupInvites, sliceGroups := service.repo.GetPendingGroupInvites(user.NickName)
+
+			//instantiate the OfflineFollowNotif struct to be sent via ws
+			var offlineGroupInvites = OfflineGroupInvites{
+				PendingGroupInvites: sliceGroups,
+				NumGrpsPending:      strconv.Itoa(countGroupInvites),
+			}
+
 			webMessage := WebsocketMessage{
-				Presences:          presences,
-				OfflineFollowNotif: offlineFollowNotif,
-				Type:               "connect",
+				Presences:           presences,
+				OfflineFollowNotif:  offlineFollowNotif,
+				OfflineGroupInvites: offlineGroupInvites,
+				Type:                "connect",
 			}
 
 			fmt.Println("the webMessage struct sent to f.e.: ", webMessage)
@@ -340,10 +348,40 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 			//insert group members into the GroupMembers table
 			for i := 0; i < len(newGp.GpMembers); i++ {
+
 				err = service.repo.InsertGrpMember(newGp, i, status)
 				if err != nil {
 					fmt.Println("error inserting grpMember: ", newGp.GpMembers[i])
 				}
+
+				//return new group notification information
+				newGpNotif, err1 := service.repo.CheckUserOnline(newGp.GrpName, newGp.GrpDescr, newGp.ID, newGp.GpMembers[i], newGp.Creator)
+				if err1 != nil {
+					fmt.Println("error returning newGpNotif data: ", err1)
+				}
+				//check if the group member is online and send notification
+				if newGpNotif.MemberStatus == "memberPending" && newGpNotif.MemberLogged == "Yes" {
+					//send new group notification to member
+					online := false
+					fmt.Println("Printing to get rid of the error", online)
+					reciever := make(map[*websocket.Conn]string)
+					//find member's channel
+					for conn, client := range Clients {
+						if client == newGpNotif.Member {
+							reciever[conn] = client
+							online = true
+
+							fmt.Printf("follow request client/ receiver %v %v is %v", client, reciever, online)
+							fmt.Println("new group notification via ws: ", newGpNotif)
+							service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{NewGroupNotif: newGpNotif, Type: newGpNotif.Type}, Connections: reciever})
+						}
+					}
+				} else if newGpNotif.MemberStatus == "memberPending" && newGpNotif.MemberLogged == "No" {
+					fmt.Println("Entering the new group offline branch")
+					//new group member is off-line
+					//offline countAlerts are sent from case: "connect"
+				}
+
 			}
 		}
 
@@ -529,6 +567,7 @@ func (r *dbStruct) IsClientOnline(rows *sql.Rows, user *User) [][]string {
 
 }
 
+//follow alerts sent to offline influencer
 func (repo *dbStruct) GetPendingFollowRequests(nickname string) (int, []FollowNotifOffline) {
 	var fPending []FollowNotifOffline
 	var fCount int
@@ -644,7 +683,6 @@ func (repo *dbStruct) InsertNewGroup(g NewGroup) (int, error) {
 	}
 
 	//return the auto-generated 'groupID'
-
 	rows, err := repo.db.Query("SELECT seq FROM sqlite_sequence WHERE name = 'Groups'")
 	if err != nil {
 		fmt.Println("Error returning 'new group id'", err)
@@ -679,11 +717,6 @@ func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int, status string) erro
 		return err
 	}
 
-	//Id := newGp.ID
-	//gpCreator := newGp.Creator
-	//oneMember := newGp.GpMembers[i]
-	//memberStatus := "memberPending"
-
 	_, err = stmt.Exec(newGp.ID, creatorUN, newGp.GpMembers[i], status)
 	if err != nil {
 		fmt.Println("error inserting group member", err)
@@ -691,4 +724,101 @@ func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int, status string) erro
 	}
 
 	return nil
+}
+
+//check if a user is online or offline,
+//used for group and event notifications
+func (repo *dbStruct) CheckUserOnline(grNm string, grDescr string, grId int, user string, creator string) (NewGroupNotif, error) {
+	//instantiate the NewGroupNotif struct
+	var newGpNotif NewGroupNotif
+
+	//return 'loggedIn' value for member and for creator
+	err1 := repo.db.QueryRow("SELECT loggedIn from Users where nickName = ?", user).Scan(&newGpNotif.MemberLogged)
+	if err1 != nil {
+		fmt.Println("error returning loggedIn data", err1)
+		return newGpNotif, err1
+	}
+
+	//return 'member status' value for member
+	err2 := repo.db.QueryRow("SELECT status from GroupMembers where member = ?", user).Scan(&newGpNotif.MemberStatus)
+	if err2 != nil {
+		fmt.Println("error returning member status data", err2)
+		return newGpNotif, err2
+	}
+
+	//return avatar URL and image for creator
+	err3 := repo.db.QueryRow("SELECT avatarURL, imageFile, nickName, loggedIn from Users where email = ?", creator).Scan(&newGpNotif.CreatorURL, &newGpNotif.CreatorImage, &newGpNotif.Creator, &newGpNotif.CreatorLogged)
+	if err3 != nil {
+		fmt.Println("error returning URL and image: ", err3)
+		return newGpNotif, err3
+	}
+
+	newGpNotif.Member = user
+	newGpNotif.GrpName = grNm
+	newGpNotif.GrpDescr = grDescr
+	newGpNotif.GrpID = grId
+	newGpNotif.Type = "newGroupNotif"
+
+	return newGpNotif, nil
+
+}
+
+//group invites sent to offline users
+func (repo *dbStruct) GetPendingGroupInvites(member string) (int, []NewGroupNotif) {
+	var gPending []NewGroupNotif
+	var gCount int
+
+	fmt.Println("From inside GetPendingGroupInvites, the user name is: ", member)
+
+	var oneGroupPending NewGroupNotif
+	//returns avatar from 'Users' and info from 'Followers' table
+	query := `
+			SELECT U.avatarURL, U.imageFile, G.grpID, G.creator, G.member, G.status
+			FROM Users U
+			INNER JOIN GroupMembers G ON U.nickName = G.creator
+			WHERE G.member = ? AND G.status = 'memberPending' AND U.nickName != G.member
+		`
+	rows, err := repo.db.Query(query, member)
+	if err != nil {
+		fmt.Println("error querying pending group invites for offline user", err)
+		return 0, gPending
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+
+		err := rows.Scan(&oneGroupPending.CreatorURL, &oneGroupPending.CreatorImage, &oneGroupPending.GrpID, &oneGroupPending.Creator, &oneGroupPending.Member, &oneGroupPending.MemberStatus)
+		if err != nil {
+			fmt.Println("GetPendingFollowRequests for offline user scan Error", err, oneGroupPending)
+			return 0, gPending
+		}
+
+		//get group name and description
+		err3 := repo.db.QueryRow("SELECT title, description from Groups where groupID = ?", oneGroupPending.GrpID).Scan(&oneGroupPending.GrpName, &oneGroupPending.GrpDescr)
+		if err3 != nil {
+			fmt.Println("error returning group name and description: ", err3)
+			return 0, gPending
+		}
+
+		oneGroupPending.MemberLogged = "No"
+		oneGroupPending.Type = "connect"
+
+		fmt.Println("One pending new group for offline user: ", oneGroupPending)
+
+		gPending = append(gPending, oneGroupPending)
+
+		fmt.Println("Slice of pending group invites for offline user", gPending)
+		oneGroupPending = NewGroupNotif{}
+
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return 0, gPending
+	}
+
+	gCount = len(gPending)
+
+	return gCount, gPending
 }

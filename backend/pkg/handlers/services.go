@@ -87,6 +87,8 @@ type AllDbMethods interface {
 	//Groups
 	InsertNewGroup(g NewGroup)(int, error)
 	InsertGrpMember(newGp NewGroup, i int, status string) error
+	CheckUserOnline(grpName string, grpDescr string, grpID int, user string, creator string)(NewGroupNotif, error)
+	GetPendingGroupInvites(member string) (int, []NewGroupNotif)
 }
 
 // The dabataseStruct

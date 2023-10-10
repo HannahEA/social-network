@@ -178,6 +178,10 @@ hr.dottedL{
     position: relative;
   }
 
+  #showGroupNotif{
+    position: relative;
+  }
+
   .notification{
     position:absolute;
     top: 5px;

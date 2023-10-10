@@ -4,14 +4,16 @@ import { useWebSocket } from "../WebSocketProvider.jsx";
 
 
 
-function GroupsModal({closeGroups, followers, creator}){
+function GroupsModal({onClose, followers, creator}){
+
+  
 
   const { websocketRef, isWebSocketConnected} = useWebSocket();
 
   // to close the groups modal
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
-          closeGroups();
+          onClose();
         }
       };
 
@@ -123,7 +125,7 @@ function GroupsModal({closeGroups, followers, creator}){
       return (
         <div id="modalOverly" className="modal-overlay" onClick={handleOverlayClick}>
           <div id="modalContainer" className="bg-[#a8daf7] relative top-1 x-3 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(60%-1rem)] gpsModal-content dark:bg-[#81b7d7]">
-            <button className="hover:bg-[#7acaf8] hover:text-gray-200 hover:shadow-gray-400 dark:hover:bg-[#65c3f9] shadow-md z-50 pb-3 pt-3 modal-close dark:text-white ml-60 pr-3 pl-3 font-bold bg-[#c7e6f8] dark:bg-[#57aada]  text-[#57aada] rounded-md" onClick={() => {closeGroups()}}>
+            <button className="hover:bg-[#7acaf8] hover:text-gray-200 hover:shadow-gray-400 dark:hover:bg-[#65c3f9] shadow-md z-50 pb-3 pt-3 modal-close dark:text-white ml-60 pr-3 pl-3 font-bold bg-[#c7e6f8] dark:bg-[#57aada]  text-[#57aada] rounded-md" onClick={() => {onClose()}}>
               Close
             </button>
             {/* {children} */}
@@ -140,6 +142,7 @@ function GroupsModal({closeGroups, followers, creator}){
                 </label>
                 <p className="ml-2 text-[#717575] dark:text-white">Invite group members:</p>
                   <br></br>
+                  {console.log("followers inside the GroupsModal component: ",followers)}
                   <ul className="flex space-x-4"> 
                     {followers == null ? <label class="addToGroup dark:text-[#3f82a9]">Group membership is restricted to followers </label> : followers.map((follw) => (
                   <li key={follw}>

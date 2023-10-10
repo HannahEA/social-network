@@ -1,5 +1,6 @@
 ## Helena To Do ##
-dq query returns all data from 'Groups' table and sends to f.e. 
+Send new group notifications to onlilne & offline group members
+db query returns all data from 'Groups' table and sends to f.e. 
 to populate the 'Groups' section of groupModal.jsx
 
 

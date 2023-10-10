@@ -44,12 +44,14 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 	//get followers
 	followers, errf1:= service.repo.GetFollowers(loggedInUser)
 	if errf1 != nil {
-
+		fmt.Println("error with GetFollowers: ",errf1)
+			return
 	}
 	//get following
 	following, errf2:= service.repo.GetFollowing(loggedInUser)
 	if errf2 != nil {
-
+		fmt.Println("error with GetFollowing: ",errf2)
+			return
 	}
 	loggedUserInfoFound := map[string]interface{}{
 		"message": "Cookie is found",
