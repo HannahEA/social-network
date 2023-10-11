@@ -882,61 +882,79 @@ func (repo *dbStruct) InsertGroupMemberReply(joinGrpReply JoinGroupReply) error 
 
 //get data for existing groups
 //group invites sent to offline users
-/*func (repo *dbStruct) GetExistingGroups(member string) (int, []NewGroup) {
+func (repo *dbStruct) GetExistingGroups(member string) (int, []NewGroup) {
 	var allGroups []NewGroup
+	var gpMembers []string
+	var aMember string
 	var gCount int
 
 	fmt.Println("From inside GetExistingGroups, the user name is: ", member)
 
 	var oneGr NewGroup
-	//returns array of group members from 'GroupMembers' and all info from 'Groups' table
-	query := `
-			SELECT U.avatarURL, U.imageFile, G.grpID, G.creator, G.member, G.status
-			FROM Users U
-			INNER JOIN GroupMembers GM ON G.nickName = G.creator
-			WHERE G.member = ? AND G.status = 'memberPending' AND U.nickName != G.member
+	//return all group info from 'Groups' table
+	query1 := `
+			SELECT groupID, creator, title, description FROM Groups
 		`
-	rows, err := repo.db.Query(query, member)
-	if err != nil {
-		fmt.Println("error querying pending group invites for offline user", err)
-		return 0, gPending
+	rows1, err1 := repo.db.Query(query1)
+	if err1 != nil {
+		fmt.Println("error querying all group data", err1)
+		return 0, allGroups
 	}
 
-	defer rows.Close()
+	defer rows1.Close()
 
-	for rows.Next() {
+	for rows1.Next() {
 
-		err := rows.Scan(&oneGroupPending.CreatorURL, &oneGroupPending.CreatorImage, &oneGroupPending.GrpID, &oneGroupPending.Creator, &oneGroupPending.Member, &oneGroupPending.MemberStatus)
+		err := rows1.Scan(&oneGr.ID, &oneGr.Creator, &oneGr.GrpName, &oneGr.GrpDescr)
 		if err != nil {
-			fmt.Println("GetPendingFollowRequests for offline user scan Error", err, oneGroupPending)
-			return 0, gPending
+			fmt.Println("GetExistingGroups scan Error", err, oneGr)
+			return 0, allGroups
 		}
 
-		//get group name and description
-		err3 := repo.db.QueryRow("SELECT title, description from Groups where groupID = ?", oneGroupPending.GrpID).Scan(&oneGroupPending.GrpName, &oneGroupPending.GrpDescr)
-		if err3 != nil {
-			fmt.Println("error returning group name and description: ", err3)
-			return 0, gPending
+		oneGr.Type = "arrayOfGroups"
+
+		//for each group, returns array of group members from the 'GroupMembers' table
+		query2 := `
+				SELECT member FROM GroupMembers WHERE grpID = ?
+		`
+		rows2, err2 := repo.db.Query(query2, oneGr.ID)
+			if err2 != nil {
+				fmt.Println("error querying the list of group members: ",err2)
+				return 0, allGroups
+			}
+
+		defer rows2.Close()
+
+		for rows2.Next() {
+			err3 := rows2.Scan(&aMember)
+			if err3 != nil{
+				fmt.Println("Error scanning one group member: ",err3)
+				return 0, allGroups
+			}
+
+			gpMembers = append(gpMembers, aMember)
 		}
+		//populate the oneGr struct with the slice of gp members
+		oneGr.GpMembers = gpMembers
+		fmt.Print("One group data: ", oneGr)
+		//add the group to allGroups slice
+		allGroups = append(allGroups, oneGr)
+		fmt.Println("Slice of all existing groups: ===>", allGroups)
 
-		oneGroupPending.MemberLogged = "No"
-		oneGroupPending.Type = "connect"
+		//clear member variable
+		aMember = ""
+		
+		//clear slice of gp members
+		gpMembers = []string{""}
 
-		fmt.Println("One pending new group for offline user: ", oneGroupPending)
-
-		gPending = append(gPending, oneGroupPending)
-
-		fmt.Println("Slice of pending group invites for offline user", gPending)
-		oneGroupPending = NewGroupNotif{}
+		//clear data from oneGr
+		oneGr = NewGroup{}
 
 	}
 
-	err = rows.Err()
-	if err != nil {
-		return 0, gPending
-	}
 
-	gCount = len(gPending)
+	gCount = len(allGroups)
 
-	return gCount, gPending
-}*/
+	return gCount, allGroups
+}
+

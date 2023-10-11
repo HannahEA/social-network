@@ -90,6 +90,7 @@ type AllDbMethods interface {
 	CheckUserOnline(grpName string, grpDescr string, grpID int, user string, creator string) (NewGroupNotif, error)
 	GetPendingGroupInvites(member string) (int, []NewGroupNotif)
 	InsertGroupMemberReply(joinGrpReply JoinGroupReply) error
+	GetExistingGroups(member string) (int, []NewGroup)
 }
 
 // The dabataseStruct

@@ -354,6 +354,7 @@ const handleClickUsersList = () => {
 //display the groups modal
  const handleGroupsClick = () => {
       setGroupsModalVisible(true);
+      //send message to b.e. to get back data from GetExistingGroups(member string) (int, []NewGroup)
 
  }
 
