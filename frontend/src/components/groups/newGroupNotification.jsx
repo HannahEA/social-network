@@ -16,9 +16,10 @@ function NewGroupNotification ( props ) {
     let reply = "Yes";
     // Make a reply object
     var YesNo = {
-        "newGroupInfo": props.groupData,
+        "groupId": (props.groupData.grpID).toString(),
+        "groupMember": (props.groupData.member),
         "followReply": reply,
-        "type": "newGroupReply",
+        "type": "joinGroupReply",
     };
 
     console.log("the followReply sent to back end: ", YesNo)
@@ -37,9 +38,10 @@ function NewGroupNotification ( props ) {
     let reply = "No";
     // Make a reply object
     var YesNo = {
-        "newGroupInfo": props.groupData,
+        "groupId": (props.groupData.grpID).toString(),
+        "groupMember": (props.groupData.member),
         "followReply": reply,
-        "type": "newGroupReply",
+        "type": "joinGroupReply",
     };
 
     console.log("the followReply sent to back end: ", YesNo)
@@ -54,23 +56,27 @@ function NewGroupNotification ( props ) {
 
     //return isVisible ? (
     return (
-    <div className="notification-item" style={{ backgroundColor: '#7ca8c2', fontWeight:'strong', visibility:`${props.grNotifVisible ? 'visible' : 'hidden'}`}}>
-      <p id="msg">{props.groupData.creator} has invited you to join his new group: </p>
-      <p >Group name: {props.groupData.grpName}</p>
-      <p >Group description: {props.groupData.grpDescr}</p>
+    <div className="z-999 notification-item text-gray-600 font-normal text-sm mb-1.5 dark:text-gray-400 bg-[#9dd6f7]" style={{visibility:`${props.grNotifVisible ? 'visible' : 'hidden'}`}}>
+      <p id="msg"><span className="font-semibold text-gray-700 dark:text-white">{props.groupData.creator} </span>has invited you to join the group: </p>
+      <br></br>
+      <br></br>
+      <br></br>
+      <p id="grpN">Group name: <span className="font-semibold text-gray-700 dark:text-white">{props.groupData.grpName}</span></p>
+      <br></br>
+      <p id="grpD">Group description: <span className="font-semibold text-gray-700 dark:text-white">{props.groupData.grpDescr}</span></p>
       <span>
-      <button id="btnNotifOK" className="hover:bg-[#2e5d78]"
+      <button id="btnNotifOK"
         onClick={handleAccept}
-        style={{ backgroundColor: '#4488af' }}
+        style={{  hover:'#4488af',  backgroundColor: '#4488af' }}
       >
         Accept
       </button>
       </span>
       
       <span>
-      <button id="btnNotifNO" className="hover:bg-[#2e5d78]"
+      <button id="btnNotifNO"
         onClick={handleNo}
-        style={{ backgroundColor: '#4488af', fontWeight: 'strong' }}
+        style={{ hover:'#4488af', backgroundColor: '#4488af', fontWeight: 'strong' }}
       >
         Decline
       </button>

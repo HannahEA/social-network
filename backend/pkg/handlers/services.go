@@ -85,10 +85,11 @@ type AllDbMethods interface {
 	IsClientOnline(rows *sql.Rows, user *User) [][]string
 	GetAllUserPosts(user *User) ([]Post, error)
 	//Groups
-	InsertNewGroup(g NewGroup)(int, error)
+	InsertNewGroup(g NewGroup) (int, error)
 	InsertGrpMember(newGp NewGroup, i int, status string) error
-	CheckUserOnline(grpName string, grpDescr string, grpID int, user string, creator string)(NewGroupNotif, error)
+	CheckUserOnline(grpName string, grpDescr string, grpID int, user string, creator string) (NewGroupNotif, error)
 	GetPendingGroupInvites(member string) (int, []NewGroupNotif)
+	InsertGroupMemberReply(joinGrpReply JoinGroupReply) error
 }
 
 // The dabataseStruct

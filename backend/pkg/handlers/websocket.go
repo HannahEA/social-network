@@ -382,6 +382,23 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					//offline countAlerts are sent from case: "connect"
 				}
 
+			} //end of inserting new group members in the GroupMembers table
+
+		case "joinGroupReply":
+
+			var joinGrpReply JoinGroupReply
+
+			//populate the JoinGroupReply struct
+			jsonErr := json.Unmarshal(b, &joinGrpReply)
+			fmt.Println("JoinGroupReply data:", joinGrpReply)
+			if jsonErr != nil {
+				fmt.Println("error unmarshalling joinGroupReply msg: ", jsonErr)
+			}
+
+			//insert new group data in the 'Groups' table
+			err = service.repo.InsertGroupMemberReply(joinGrpReply)
+			if err != nil {
+				fmt.Println("error inserting gp member reply into GroupMembers table", err)
 			}
 		}
 
@@ -822,3 +839,104 @@ func (repo *dbStruct) GetPendingGroupInvites(member string) (int, []NewGroupNoti
 
 	return gCount, gPending
 }
+
+func (repo *dbStruct) InsertGroupMemberReply(joinGrpReply JoinGroupReply) error {
+	fmt.Println("the joinGrpReply data received from f.e.: ", joinGrpReply.GroupID, joinGrpReply.JoinGroupReply, joinGrpReply.Member, joinGrpReply.Type)
+	//turn groupID into integer so it can be used in db query
+	gID := joinGrpReply.GroupID
+	gpID, err1 := strconv.Atoi(gID)
+	if err1 != nil {
+		fmt.Println("error converting GroupID struct field into integer ", err1)
+		return err1
+	}
+
+	//if member wishes to join turn status field in GroupMembers table into "Yes"
+	//If member does not wish to join delete his record from GroupMembers table
+
+	var theAnswer = joinGrpReply.JoinGroupReply
+	var member = joinGrpReply.Member
+
+	if theAnswer == "Yes" {
+		_, err := repo.db.Exec("UPDATE GroupMembers SET status = ? WHERE grpID = ? AND member = ?", theAnswer, gpID, member)
+		if err != nil {
+			fmt.Println("error inserting join group reply", err)
+			return err
+		}
+	} else if theAnswer == "No" {
+		fmt.Println("Member declined")
+		stmnt, err := repo.db.Prepare("DELETE FROM GroupMembers WHERE grpID = ? AND member = ?")
+		if err != nil {
+			fmt.Println("error preparing the delete statement to remove member that declined to join", err)
+			return err
+		}
+		fmt.Println("after prepare delete request")
+		_, err = stmnt.Exec(gID, member)
+		if err != nil {
+			fmt.Println("error deleting record from GroupMembers")
+			return err
+		}
+	}
+	return nil
+
+}
+
+//get data for existing groups
+//group invites sent to offline users
+/*func (repo *dbStruct) GetExistingGroups(member string) (int, []NewGroup) {
+	var allGroups []NewGroup
+	var gCount int
+
+	fmt.Println("From inside GetExistingGroups, the user name is: ", member)
+
+	var oneGr NewGroup
+	//returns array of group members from 'GroupMembers' and all info from 'Groups' table
+	query := `
+			SELECT U.avatarURL, U.imageFile, G.grpID, G.creator, G.member, G.status
+			FROM Users U
+			INNER JOIN GroupMembers GM ON G.nickName = G.creator
+			WHERE G.member = ? AND G.status = 'memberPending' AND U.nickName != G.member
+		`
+	rows, err := repo.db.Query(query, member)
+	if err != nil {
+		fmt.Println("error querying pending group invites for offline user", err)
+		return 0, gPending
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+
+		err := rows.Scan(&oneGroupPending.CreatorURL, &oneGroupPending.CreatorImage, &oneGroupPending.GrpID, &oneGroupPending.Creator, &oneGroupPending.Member, &oneGroupPending.MemberStatus)
+		if err != nil {
+			fmt.Println("GetPendingFollowRequests for offline user scan Error", err, oneGroupPending)
+			return 0, gPending
+		}
+
+		//get group name and description
+		err3 := repo.db.QueryRow("SELECT title, description from Groups where groupID = ?", oneGroupPending.GrpID).Scan(&oneGroupPending.GrpName, &oneGroupPending.GrpDescr)
+		if err3 != nil {
+			fmt.Println("error returning group name and description: ", err3)
+			return 0, gPending
+		}
+
+		oneGroupPending.MemberLogged = "No"
+		oneGroupPending.Type = "connect"
+
+		fmt.Println("One pending new group for offline user: ", oneGroupPending)
+
+		gPending = append(gPending, oneGroupPending)
+
+		fmt.Println("Slice of pending group invites for offline user", gPending)
+		oneGroupPending = NewGroupNotif{}
+
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return 0, gPending
+	}
+
+	gCount = len(gPending)
+
+	return gCount, gPending
+}*/

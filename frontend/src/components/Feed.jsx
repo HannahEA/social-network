@@ -46,11 +46,14 @@ const Feed = () => {
           allData.current.presences = message.presences
           allData.current.offlineFollowNotif = message.offlineFollowNotif
           allData.current.offlineGroupInvites = message.offlineGroupInvites
-          // console.log("current presences", allData.current.presences)
+
+          //to prevent getting 'undefined' when there are no notifications
           let numFollowPending = parseInt(allData.current.offlineFollowNotif.numFollowPending, 10) || 0;
           let numGroupPending =  parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10) || 0;
+          let allNotifications = numFollowPending + numGroupPending
+          console.log("all notifications are: ", allNotifications)
           //check if there are pending follow notifs or group invites
-          if (numFollowPending + numGroupPending > 0) {
+          if (allNotifications > 0) {
             console.log("notifications count: ", allData.current.offlineFollowNotif.numFollowPending)
             console.log("new groups count: ", allData.current.offlineGroupInvites.numGrpsPending)
             //if yes, display the red alert
@@ -245,6 +248,7 @@ const handleOfflGroupAccept = (g) => {
   // Make a reply object
   var YesNo = {
       "grpID": ID,
+      "groupMember": g.member,
       "joinReply": reply,
       "type": "joinGroupReply",
   };
@@ -268,6 +272,7 @@ const handleOfflGroupDecline = (g) => {
   // Make a reply object
   var YesNo = {
       "grpID": ID,
+      "groupMember": g.member,
       "joinReply": reply,
       "type": "joinGroupReply",
   };
@@ -711,6 +716,7 @@ const [viewProfile, setViewProfile] = useState(false)
             {/* Notifications */}
             <div id="notificationsBell">
             <button
+              onCick={togglePendingListVisible}
               type="button"
               data-dropdown-toggle="notification-dropdown"
               className="p-2 mr-1 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
