@@ -128,6 +128,19 @@ const Feed = () => {
           allData.current.newGroupNotif = message.newGroupNotif
           showGroupInvites();
           console.log("newGroupNotif received by member: ", allData.current.newGroupNotif)
+        } else if (message.type == sendAllGroups){
+
+            allData.current.sendAllGroups = message.sendAllGroups
+          //update the state variable 'setGroupsList'
+            setGroupsList((prevState) => ({
+              ...prevState,
+              requestor: allData.current.sendAllGroups.requestor,
+              nbGroups: allData.current.sendAllGroups.nbGroups,
+              sliceOfGroups: allData.current.sendAllGroups.sliceOfGroups,
+              type: allData.current.sendAllGroups.type
+            }
+            )
+          ) 
         }
     };
   }
@@ -156,6 +169,12 @@ const Feed = () => {
   const[isPendingListVisible, setIsPendingListVisible] = useState(false);
   const[pendingNotif, setPendingNotif] = useState([]);
   const[pendingGroups, setPendingGroups] = useState([]);
+  const[groupsList, setGroupsList] = useState({
+    requestor: "",
+    nbGroups: "",
+    sliceOfGroups: [],
+    type: ""
+  })
   allData.current.userInfo = userInfo
   // allData.current.offlineFollowNotif = offlineFollowNotif
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
@@ -1658,11 +1677,12 @@ const [viewProfile, setViewProfile] = useState(false)
           
       <div id="showGroups" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
     {groupsModalVisible && (console.log("the followers in feed: ", allData.current))}
-      {groupsModalVisible && (
+      {(groupsModalVisible && groupsList) && (
         <GroupsModal 
         onClose={() => {handleGroupsClose()}} 
         followers={allData.current.followers}
         creator={email}
+        allGroups={groupsList}
         >
         </GroupsModal>
       )}

@@ -4,7 +4,7 @@ import { useWebSocket } from "../WebSocketProvider.jsx";
 
 
 
-function GroupsModal({onClose, followers, creator}){
+function GroupsModal({onClose, followers, creator, allGroups}){
 
   
 
@@ -177,8 +177,15 @@ function GroupsModal({onClose, followers, creator}){
                 <br></br>
                 <div >
                 <form id="joinGP" onSubmit={handleSubmitJoinGP}>
+                {console.log("allGroups inside the GroupsModal component: ", allGroups)}
                   <ul>
+                  {(parseInt(allGroups.nbGroups, 10) || 0) > 0 ? <label class="addToGroup dark:text-[#3f82a9]">Group membership is restricted to followers </label> : followers.map((follw) => 
                   <span>
+
+                  {/* requestor: "",
+                    nbGroups: "",
+                    sliceOfGroups: [],
+                    type: "" */}
                   
                   <li className="py-2 px-2 text-ml hover:bg-[#c7e6f8] dark:hover:bg-[#5a9fc6] dark:hover:text-[#2f627f] flex space-x-4">
                   <input class="chkJoin" name="Friends"  type="checkbox" onChange={handleSelectGP} border="hidden" className="h-4 w-4 bg-white mt-1 ml-1 cursor-pointer accent-[#57aada]"/>
