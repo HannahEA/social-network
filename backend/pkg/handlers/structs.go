@@ -125,6 +125,14 @@ type WebsocketMessage struct {
 
 	FollowReply FollowReply `json:"followReply"`
 
+	NewGroupNotif NewGroupNotif `json:"newGroupNotif"`
+
+	OfflineGroupInvites OfflineGroupInvites `json:"offlineGroupInvites"`
+
+	JoinGroupReply JoinGroupReply `json:"joinGroupReply"`
+
+	SendAllGroups SendAllGroups `json:"sendAllGroups"`
+
 	Type string `json:"type"`
 }
 
@@ -185,7 +193,7 @@ type FollowNotif struct {
 
 //single instance of f.r.n. sent to offline private influencer
 type FollowNotifOffline struct {
-	FollowID      string    `json:"followID"`
+	FollowID      string `json:"followID"`
 	FollowerUN    string `json:"followerUN"`
 	InfluencerUN  string `json:"influencerUN"`
 	FollowerURL   string `json:"followerURL"`
@@ -194,8 +202,14 @@ type FollowNotifOffline struct {
 
 // all follow request notifications (f.r.n.) sent to offline private influencer
 type OfflineFollowNotif struct {
-	PendingFollows []FollowNotifOffline `json:"pendingFollows"`
-	NumPending     string               `json:"numPending"`
+	PendingFollows   []FollowNotifOffline `json:"pendingFollows"`
+	NumFollowPending string               `json:"numFollowPending"`
+}
+
+// all group invites notifications sent to offline user
+type OfflineGroupInvites struct {
+	PendingGroupInvites []NewGroupNotif `json:"pendingGroupInvites"`
+	NumGrpsPending      string          `json:"numGrpsPending"`
 }
 
 // follow notification reply by private influencer
@@ -203,4 +217,50 @@ type FollowReply struct {
 	FollowID    string `json:"followID"`
 	FollowReply string `json:"followReply"`
 	Type        string `json:"type"`
+}
+
+//new group information
+type NewGroup struct {
+	ID        int      `json:"id"`
+	Creator   string   `json:"creator"`
+	GpMembers []string `json:"gpMembers"`
+	GrpDescr  string   `json:"grpDescr"`
+	GrpName   string   `json:"grpName"`
+	Type      string   `json:"type"`
+}
+
+//group invite for online members
+type NewGroupNotif struct {
+	GrpName       string `json:"grpName"`
+	GrpDescr      string `json:"grpDescr"`
+	GrpID         int    `json:"grpID"`
+	Creator       string `json:"creator"`
+	Member        string `json:"member"`
+	CreatorURL    string `json:"creatorURL"`
+	CreatorImage  string `json:"creatorImage"`
+	CreatorLogged string `json:"creatorLogged"`
+	MemberLogged  string `json:"memberLogged"`
+	MemberStatus  string `json:"memberStatus"`
+	Type          string `json:"type"`
+}
+
+// follow notification reply by private influencer
+type JoinGroupReply struct {
+	GroupID        string `json:"grpID"`
+	Member         string `json:"groupMember"`
+	JoinGroupReply string `json:"joinReply"`
+	Type           string `json:"type"`
+}
+
+// f.e. request to send list of existing groups
+type RequestAllGroups struct {
+	UsrEmail string `json:"usrEmail"`
+	Type     string `json:"type"`
+}
+
+type SendAllGroups struct {
+	Requestor     string     `json:"requestor"`
+	NbGroups      string     `json:"nbGroups"`
+	SliceOfGroups []NewGroup `json:"sliceOfGroups"`
+	Type          string     `json:"type"`
 }

@@ -10,6 +10,7 @@ import { TopNavigation, ThemeIcon } from "./components/TopNavigation";
 import Notification from "./components/notifications/notification.jsx";
 import Alerts from "./components/notifications/countAlerts.jsx";
 import GroupsModal from "./components/groups/groupsModal.jsx";
+import NewGroupNotification from "./components/groups/newGroupNotification.jsx";
 const apiURL = process.env.REACT_APP_API_URL;
 function App() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -34,9 +35,10 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/feed" element={<WebSocketProvider>
       <Feed/>
-      <Notification/>
-      <Alerts/>
-      <groupsModal/>
+      {/* <Notification/>
+      <Alerts/> */}
+      {/* <GroupsModal/> */}
+      {/* <NewGroupNotification/> */}
     </WebSocketProvider>} />
         {/* <Route path="/profile" element={<Profile />} /> */}
       </Routes>

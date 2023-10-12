@@ -4,32 +4,53 @@ import { useWebSocket } from "../WebSocketProvider.jsx";
 
 
 
-function GroupsModal({closeGroups, followers}){
+function GroupsModal({onClose, followers, creator, allGroups}){
+
+  
 
   const { websocketRef, isWebSocketConnected} = useWebSocket();
 
   // to close the groups modal
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
-          closeGroups();
+          onClose();
         }
       };
 
     //store new group form inputs
-    const [newGroupInputs, setNewGroupInputs] = useState({});
-    const[joinGroup, setJoinGroup] = useState({});
+    const [newGroupInputs, setNewGroupInputs] = useState({["type"]: "newGroup"});
+    const [gpMembers, setGpMembers] = useState([]);
+    //store join group form selections
+    const [joinGroup, setJoinGroup] = useState({["type"]: "joinGroup"});
+    const [gpList, setGpList] = useState([]);
 
-    //collect new group form's info
     const handleNewGP = (event) => {
-      const {name, value} = event.target;
-      setNewGroupInputs({...newGroupInputs, [name]: value})
-    }
+      const { name, value } = event.target;
+
+      // Check if the input is a checkbox with a value of "on"
+      if (event.target.type === "checkbox" && value === "on") {
+        // Clone the existing array of group info and add the checkbox name to it
+        const updatedGpMembers = [...gpMembers, name];
+        setGpMembers(updatedGpMembers); 
+         // Update the newGroupInputs state, incorporating the gpMembers array
+          setNewGroupInputs({
+          ...newGroupInputs,
+              gpMembers: updatedGpMembers,
+              creator: creator,
+          });
+      }else{
+          // Update the newGroupInputs state for other inputs
+              setNewGroupInputs({ ...newGroupInputs, [name]: value });
+      }
+
+    };
 
 
   
     //process user inputs for new group & send through ws
     const handleSubmitNewGP = (event) => {
       event.preventDefault();
+
       //clear text inputs
       document.getElementById("grpName").value = ""; // Clear the group name value
       document.getElementById("grpDescr").value = ""; // Clear the group description value
@@ -40,10 +61,9 @@ function GroupsModal({closeGroups, followers}){
         grpMembers[i].checked = false; //un-tick check boxes
       }
 
-      alert(JSON.stringify(newGroupInputs, null, 2)); // Convert to JSON string for display; the second argument null is for replacer function, and the third argument 2 is for indentation
-      //send reply object to back end
-        setNewGroupInputs({...newGroupInputs, ["type"]: "newGroup"});
-        console.log("new group sent to b.e.:", newGroupInputs);
+      //alert(JSON.stringify(newGroupInputs, null, 2)); // Convert to JSON string for display; the second argument null is for replacer function, and the third argument 2 is for indentation
+
+        console.log("new group inputs sent to b.e.:", newGroupInputs);
 
         websocketRef.current.send(
         JSON.stringify(newGroupInputs)
@@ -54,7 +74,24 @@ function GroupsModal({closeGroups, followers}){
 
     const handleSelectGP = (event) => {
       const {name, value} = event.target;
-      setJoinGroup({...joinGroup, [name]: value})
+
+      // Check if the input is a checkbox with a value of "on"
+        if (event.target.type === "checkbox" && value === "on") {
+      // Clone the existing array of groups and add the checkbox name to it
+        const updatedGpList = [...gpList, name];
+        setGpList(updatedGpList); 
+        // Update the joinGroup state and include the requestor
+        setJoinGroup({
+          ...joinGroup,
+            gpList: updatedGpList,
+            requestor: creator,
+           });
+      }
+
+
+
+
+      //setJoinGroup({...joinGroup, [name]: value})
     }
 
     //process join group
@@ -65,15 +102,15 @@ function GroupsModal({closeGroups, followers}){
       //clear checkboxes
       const joinForm = document.getElementById("joinGP");
       const joinGrps = joinForm.querySelectorAll('input[type="checkbox"]:checked')//make HTMLCollection
-      console.log("does joinGrps HTMLCollection work?",joinGrps);
+
       for (let i = 0; i < joinGrps.length; i++){
         joinGrps[i].checked = false; //un-tick check boxes
       }
 
       //alert(JSON.stringify(joinGrps, null, 2)); // Convert to JSON string for display; the second argument null is for replacer function, and the third argument 2 is for indentation
-      alert(joinGrps, null,2)
+      alert(joinGroup, null,2)
       //send reply object to back end
-        setJoinGroup({...joinGroup, ["type"]: "joinGrp"});
+        // setJoinGroup({...joinGroup, ["type"]: "joinGrp"});
         console.log("join group to be sent to the b.e.:", joinGroup);
 
         websocketRef.current.send(
@@ -88,7 +125,7 @@ function GroupsModal({closeGroups, followers}){
       return (
         <div id="modalOverly" className="modal-overlay" onClick={handleOverlayClick}>
           <div id="modalContainer" className="bg-[#a8daf7] relative top-1 x-3 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(60%-1rem)] gpsModal-content dark:bg-[#81b7d7]">
-            <button className="hover:bg-[#f3bca1] hover:text-gray-200 hover:shadow-gray-400 dark:hover:bg-[#65c3f9] shadow-md z-50 pb-3 pt-3 modal-close dark:text-white ml-60 pr-3 pl-3 font-bold bg-[#c7e6f8] dark:bg-[#57aada]  text-[#57aada] rounded-md" onClick={() => {closeGroups()}}>
+            <button className="hover:bg-[#7acaf8] hover:text-gray-200 hover:shadow-gray-400 dark:hover:bg-[#65c3f9] shadow-md z-50 pb-3 pt-3 modal-close dark:text-white ml-60 pr-3 pl-3 font-bold bg-[#c7e6f8] dark:bg-[#57aada]  text-[#57aada] rounded-md" onClick={() => {onClose()}}>
               Close
             </button>
             {/* {children} */}
@@ -105,20 +142,16 @@ function GroupsModal({closeGroups, followers}){
                 </label>
                 <p className="ml-2 text-[#717575] dark:text-white">Invite group members:</p>
                   <br></br>
-                <ul className="flex space-x-4">
-                  <li>
-                    <input class="chk" name="Jackie" type="checkbox" onChange={handleNewGP} border="hidden" background-color="white" className="rounded-sm h-4 w-4 ml-1 cursor-pointer accent-[#57aada]"/>
-                    <label class="addToGroup dark:text-[#3f82a9]">Jackie</label>
+                  {console.log("followers inside the GroupsModal component: ",followers)}
+                  <ul className="flex space-x-4"> 
+                    {followers == null ? <label class="addToGroup dark:text-[#3f82a9]">Group membership is restricted to followers </label> : followers.map((follw) => (
+                  <li key={follw}>
+                    <input class="chk" name={follw} type="checkbox" onChange={handleNewGP} border="hidden" background-color="white" className="rounded-sm h-4 w-4 ml-1 cursor-pointer accent-[#57aada]"/>
+                    <label class="addToGroup dark:text-[#3f82a9]">{follw}</label>
                   </li>
-                  <li>
-                    <input class="chk" name="Arabella"  type="checkbox" onChange={handleNewGP} border="hidden" background-color="white" className="h-4 w-4 ml-1 cursor-pointer accent-[#57aada] "/>
-                    <label class="addToGroup dark:text-[#3f82a9]">Arabella</label>
-                  </li>
-                  <li>
-                    <input class="chk" name="Lee"  type="checkbox" onChange={handleNewGP} border="hidden" className="h-4 w-4 bg-white ml-1 cursor-pointer accent-[#57aada] "/>
-                    <label class="addToGroup dark:text-[#3f82a9]">Lee</label>
-                  </li>
-                </ul>
+                  
+                ))}
+                  </ul>
                 <div id="addFollowersToGroup" className="text-sm font-sm text-[#717575] dark:text-primary-500">
                
                 </div>
@@ -144,16 +177,23 @@ function GroupsModal({closeGroups, followers}){
                 <br></br>
                 <div >
                 <form id="joinGP" onSubmit={handleSubmitJoinGP}>
+                {console.log("allGroups inside the GroupsModal component: ", allGroups)}
                   <ul>
+                  {(parseInt(allGroups.nbGroups, 10) || 0) > 0 ? <label class="addToGroup dark:text-[#3f82a9]">Group membership is restricted to followers </label> : followers.map((follw) => 
                   <span>
+
+                  {/* requestor: "",
+                    nbGroups: "",
+                    sliceOfGroups: [],
+                    type: "" */}
                   
                   <li className="py-2 px-2 text-ml hover:bg-[#c7e6f8] dark:hover:bg-[#5a9fc6] dark:hover:text-[#2f627f] flex space-x-4">
-                  <input class="chkJoin" name="FriendsID"  type="checkbox" onChange={handleSelectGP} border="hidden" className="h-4 w-4 bg-white mt-1 ml-1 cursor-pointer accent-[#57aada]"/>
+                  <input class="chkJoin" name="Friends"  type="checkbox" onChange={handleSelectGP} border="hidden" className="h-4 w-4 bg-white mt-1 ml-1 cursor-pointer accent-[#57aada]"/>
                   <p style={{cursor: 'pointer'}} class="addToGroup font-bold dark:text-[#3f82a9] dark:hover:text-[#2f627f] ">Friends of happiness </p>
                   <p  className="dark:text-white text-[#717575]"> Antisocial social club</p></li></span>
                   <span>
                   <li className="py-2 px-2 text-ml hover:bg-[#c7e6f8] dark:hover:bg-[#5a9fc6] dark:hover:text-[#2f627f]  flex space-x-4">
-                  <input class="chkJoin" name="BandID"  type="checkbox" onChange={handleSelectGP} border="hidden" className="h-4 w-4 bg-white mt-1 ml-1 cursor-pointer accent-[#57aada]"/>
+                  <input class="chkJoin" name="Band"  type="checkbox" onChange={handleSelectGP} border="hidden" className="h-4 w-4 bg-white mt-1 ml-1 cursor-pointer accent-[#57aada]"/>
                   <p style={{cursor: 'pointer'}} class="addToGroup font-bold dark:text-[#3f82a9] dark:hover:text-[#2f627f]">Band of saints</p>
                   <p  className="dark:text-white text-[#717575]"> Antisocial social club</p></li></span>
                   </ul>
