@@ -142,6 +142,7 @@ const Feed = () => {
   const [sPost, setSpost] = useState("");
   const [Content, setContent] = useState("");
   const [Visibility, setVisibility] = useState("");
+  const [postViewers, setPostViewers] = useState([])
   const [tag, setTags] = useState([]);
   const navigate = useNavigate();
   const [avatar, setAvatar] = useState(null);
@@ -498,8 +499,20 @@ const [viewProfile, setViewProfile] = useState(false)
     setContent(event.target.value);
   };
   const handleVisibility = (event) => {
-    setVisibility(event.target.value);
+    let e = event.target 
+    setVisibility(e.options[e.selectedIndex].text);
   };
+
+  const handlePostViewers = (event) => {
+    let i = postViewers.indexOf(event.target.name)
+    if ( i > -1) {
+      let v = postViewers
+      v.splice(i, 1)
+      setPostViewers( v)
+    } else {
+      setPostViewers([...postViewers, event.target.name])
+    } 
+  }
   // const handleTag = (event) => {
   //   setTag(event.target.value);
   // };
@@ -535,7 +548,7 @@ const [viewProfile, setViewProfile] = useState(false)
     event.preventDefault();
     let e = document.getElementById("Visibility");
     let v = e.options[e.selectedIndex].text;
-    let data = await SubmitPost({ title: Title, content: Content, visibility: v, url: imageURL, file: imageFile, category: tag });
+    let data = await SubmitPost({ title: Title, content: Content, visibility: v, url: imageURL, file: imageFile, category: tag , postViewers: postViewers});
     setSpost(data);
     setTitle("");
     setContent("");
@@ -663,7 +676,7 @@ const [viewProfile, setViewProfile] = useState(false)
                         pendingFolNotif={allData.current.offlineFollowNotif.pendingFollows}
                       />
                       )}
-            {console.log("inside alerts div",allData.current.offlineFollowNotif.numPending)}
+            {/* {console.log("inside alerts div",allData.current.offlineFollowNotif.numPending)} */}
             </button>
             </div> 
          
@@ -1537,6 +1550,7 @@ const [viewProfile, setViewProfile] = useState(false)
         onFollow={() => {handleFollowUser()}}
         influencer={parseInt(selectedUser.influencer, 10)} // Pass the influencer prop here
         name={selectedUser.username}
+        visib={selectedUser.profVisib}
         >
           {selectedUser && (
             <Card
@@ -1795,7 +1809,23 @@ const [viewProfile, setViewProfile] = useState(false)
                 <option name="private" value={Visibility}>
                   Private
                 </option>
+                <option name="almostPrivate" value={Visibility}>
+                  Almost Private
+                </option>
               </select>
+              <ul className="inline-block">
+              {Visibility == "Almost Private" && allData.current.followers?
+              allData.current.followers.map( (follower, index) => (
+                <li key={index}>
+                  <input type="checkbox" name={follower} onClick={(e) => {handlePostViewers(e)}}/>
+                  <label htmlFor={follower}>{follower}</label>
+                </li>
+              )
+              ): Visibility == "Almost Private"?
+              <p>You have no followers.</p> :
+               null
+              }
+              </ul>
               <div className="flex">
                 <input
                   type="text"
@@ -1822,7 +1852,7 @@ const [viewProfile, setViewProfile] = useState(false)
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800">
-          <Posts sPost={sPost} page={"feed"}/>
+          <Posts sPost={sPost} page={"feed"} username={""}/>
         </div>
       </main>
     </div>

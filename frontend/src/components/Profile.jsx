@@ -184,12 +184,12 @@ const Profile = () => {
               <p className="text-gray-600 text-lg dark:text-gray-200 mb-0.5">@{username}</p>
               <p className="mb-3 text-md text-gray-500 dark:text-gray-400">{aboutMe}</p>
               <div className="flex justify-center items-center gap-1">
-                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full">
+                <span className="py-1 px-2.5 bg-blue-200 text-md text-gray-400 dark:text-white dark:bg-[#57aada] text-center rounded-full">
                 <strong>{calculateAge(dateOfBirth)}</strong>
                 </span>
-                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"><strong>{gender}</strong></span>
-                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"> <strong>{following? (following.length): 0} following</strong></span>
-                <span className="py-1 px-2.5 bg-[#57aada] text-md text-gray-200 dark:text-gray-40 text-center rounded-full"> <strong>{followers? (followers.length): 0} followers</strong></span>
+                <span className="py-1 px-2.5 bg-blue-200 text-md text-gray-400 dark:text-white dark:bg-[#57aada] text-center rounded-full"><strong>{gender}</strong></span>
+                <span className="py-1 px-2.5 bg-blue-200 text-md text-gray-400 dark:text-white dark:bg-[#57aada] text-center rounded-full"> <strong>{following? (following.length): 0} following</strong></span>
+                <span className="py-1 px-2.5 bg-blue-200 text-md text-gray-400 dark:text-white dark:bg-[#57aada] text-center rounded-full"> <strong>{followers? (followers.length): 0} followers</strong></span>
               </div>
             </div>
             

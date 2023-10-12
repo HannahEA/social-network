@@ -59,7 +59,8 @@ type AllDbMethods interface {
 	FindByUsername(name string) *User
 	DeleteCookieDB(cookieValue string) (int64, error)
 	//post database queries
-	AddPostToDB(data Post) error
+	AddPostToDB(data Post) (int,error)
+	AddPostViewersToDB(data Post) error 
 	GetPublicPosts(user *User) ([]Post, error)
 	UploadVisibilityValue(data ProfileVisibilityData) (string, error)
 	GetUsersData(email string) ([]AllUsersData, error)

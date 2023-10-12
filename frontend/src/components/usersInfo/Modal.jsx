@@ -2,8 +2,8 @@
 import React from "react";
 import  {Posts} from "./../feed/Posts.jsx";
 
-function Modal({ children, onClose, onFollow, influencer, name}) {
-  console.log("name from modal", name)
+function Modal({ children, onClose, onFollow, influencer, name, visib}) {
+ 
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -13,7 +13,7 @@ function Modal({ children, onClose, onFollow, influencer, name}) {
 
   return (
     <div className="modal-overlay dark:bg-gray-600" onClick={handleOverlayClick}>
-     <div className="dark:bg-gray-600 w-auto bg-white p-4 m-6 position-relative overflow-auto max-h-screen min-h-min min-w-max"> 
+     <div className="dark:bg-gray-600 w-3/4 bg-white p-4 m-6 position-relative overflow-auto max-h-screen min-h-min min-w-fit"> 
         <button className="modal-close dark:text-white" onClick={() => {onClose()}} classn="ml-60  pl-5 pr-5 font-bold bg-[#00cec9] text-[#255f5a] rounded-md">
           Close
         </button>
@@ -27,7 +27,8 @@ function Modal({ children, onClose, onFollow, influencer, name}) {
         >
           {influencer === 1 ? "Un-follow" : "Follow"}
         </button>
-        <Posts page={"myProfile"} username={name}/>
+        {visib == 'public'? <Posts page={"myProfile"} username={name}/> : null }
+        
       </div>
     </div>
   );

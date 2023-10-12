@@ -30,18 +30,26 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 		user = service.repo.FindByUsername(data.Cookie)
 	} else {
 		fmt.Println("no username sent with post data form frontend")
+		data.Cookie = c.String()
 		cookieArr := strings.Split(c.String(), "=")
 		cookieID := cookieArr[1]
 		user = service.repo.GetUserByCookie(cookieID)
 	}
 
 	if data.PostType == "newPost" {
-		err := service.repo.AddPostToDB(data)
+		fmt.Println("postData", data)
+		//return id of the new post
+		id, err := service.repo.AddPostToDB(data)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "Failed to add new post", http.StatusInternalServerError)
 			return
 		}
+		// if post visibility is almost private add each of viewers to post viewers table with post id of post they are allowed to see
+		if data.Visibility == "Almost Private" {
+
+		}
+		fmt.Println("post id", id)
 		fmt.Println("getting Public posts")
 		posts, err := service.repo.GetPublicPosts(user)
 		if err != nil {
@@ -93,6 +101,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 				http.Error(w, "Failed to get public post", http.StatusInternalServerError)
 				return
 			}
+			//search post table for almost private posts this user has been allowed to see and append to list
 			posts = append(posts, privatePosts...)
 
 		}
@@ -184,7 +193,7 @@ func ScanPosts(rows *sql.Rows) ([]Post, error) {
 
 func (repo *dbStruct) GetPublicPosts(user *User) ([]Post, error) {
 	posts := []Post{}
-	rows, err := repo.db.Query(`SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM posts WHERE postVisibility = 'Public' OR postVisibility = 'Private' AND Author = ?`, user.NickName)
+	rows, err := repo.db.Query(`SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM posts WHERE postVisibility = 'Public' OR postVisibility = 'Private' AND Author = ? OR postVisibility = 'Almost Private' AND Author = ?`, user.NickName, user.NickName)
 	if err != nil {
 		return posts, fmt.Errorf("DB Query error: %+v", err)
 	}
@@ -255,7 +264,7 @@ func (repo *dbStruct) GetAllUserPosts(user *User) ([]Post, error) {
 	return posts, nil
 }
 
-func (repo *dbStruct) AddPostToDB(post Post) error {
+func (repo *dbStruct) AddPostToDB(post Post) (int,error) {
 	// time
 	date := time.Now()
 	//cookie
@@ -266,11 +275,25 @@ func (repo *dbStruct) AddPostToDB(post Post) error {
 	//category
 	categories := strings.Join(post.Category, ",")
 	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
+	
+	rows, err := repo.db.Query(`Select last_insert_rowid()`)
 	if err != nil {
 		log.Println(err)
-		return fmt.Errorf("failed to add Post to Database")
+		return 0,fmt.Errorf("failed to add Post to Database")
 	}
-	return nil
+	var id int
+	for rows.Next() {
+		err:= rows.Scan(&id)
+		if err != nil {
+			log.Println(err)
+			return 0,fmt.Errorf("failed to add Post to Database")
+		}
+	}
+	return id,nil
+}
+
+func (repo *dbStruct) AddPostViewersToDB(data Post) error {
+	return nil 
 }
 
 func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {

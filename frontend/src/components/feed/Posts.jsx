@@ -12,8 +12,10 @@ const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
 
 
-const SubmitPost = ({title, content, visibility, url, file, category}) => {
-
+const SubmitPost = ({title, content, visibility, url, file, category, postViewers}) => {
+  if (!postViewers) {
+    postViewers = []
+  }
  console.log(url, file)
  const newPost = {
     title: title,
@@ -22,7 +24,8 @@ const SubmitPost = ({title, content, visibility, url, file, category}) => {
     category: category,
     url: url,
     file: file,
-    type: "newPost"
+    type: "newPost",
+    postViewers: postViewers,
  }
  // Make a POST request to the server
 

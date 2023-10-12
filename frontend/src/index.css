@@ -53,6 +53,7 @@ code {
     position: relative;
     max-width: 80%; /* Adjust the max-width as needed */
     max-height: 80%; /* Adjust the max-height as needed */
+    min-width:20%;
     overflow: auto; /* Enable scrolling if the content is too large */
   }
   
