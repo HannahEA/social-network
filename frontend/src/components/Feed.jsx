@@ -354,7 +354,12 @@ const handleClickUsersList = () => {
 //display the groups modal
  const handleGroupsClick = () => {
       setGroupsModalVisible(true);
-      //send message to b.e. to get back data from GetExistingGroups(member string) (int, []NewGroup)
+      //send request to b.e. to get back a list of existing groups
+      let getGroups = {"usrEmail": email, "type": "getGroups",}
+      console.log("printing getGroups to be sent via websocket: ", getGroups)
+      websocketRef.current.send(
+        JSON.stringify(getGroups)
+      )
 
  }
 
@@ -1656,26 +1661,11 @@ const [viewProfile, setViewProfile] = useState(false)
       {groupsModalVisible && (
         <GroupsModal 
         onClose={() => {handleGroupsClose()}} 
-        followers={allData.current.following}
+        followers={allData.current.followers}
         creator={email}
-        // onFollow={() => {handleFollowUser()}}
-        // influencer={parseInt(selectedUser.influencer, 10)} // Pass the influencer prop here
         >
-          {/* {selectedUser && (
-            <Card
-              name={selectedUser.username}
-              avt={selectedUser.avatar}
-              img={selectedUser.image}
-              visib={selectedUser.profVisib}
-              influencer= {parseInt(selectedUser.influencer, 10)}
-              about={selectedUser.aboutMe}
-            />
-          )} */}
         </GroupsModal>
       )}
-
-
-
       </div>
       {/* End of show groupsModal */}
           

@@ -242,17 +242,17 @@ type NewGroupNotif struct {
 	Type          string `json:"type"`
 }
 
-//join group request
-// type JoinGroup struct {
-// 	GpList    []string `json:"gpList"`
-// 	Requestor string   `json:"requestor"`
-// 	Type      string   `json:"type"`
-// }
-
 // follow notification reply by private influencer
 type JoinGroupReply struct {
 	GroupID        string `json:"grpID"`
 	Member         string `json:"groupMember"`
 	JoinGroupReply string `json:"joinReply"`
 	Type           string `json:"type"`
+}
+
+// f.e. request to send list of existing groups
+type RequestAllGroups struct {
+	// GpList    []string `json:"gpList"`
+	UsrEmail string   `json:"usrEmail"`
+	Type      string   `json:"type"`
 }
