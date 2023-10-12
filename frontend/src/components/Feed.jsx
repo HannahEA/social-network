@@ -128,7 +128,7 @@ const Feed = () => {
           allData.current.newGroupNotif = message.newGroupNotif
           showGroupInvites();
           console.log("newGroupNotif received by member: ", allData.current.newGroupNotif)
-        } else if (message.type == sendAllGroups){
+        } else if (message.type == "sendAllGroups"){
 
             allData.current.sendAllGroups = message.sendAllGroups
           //update the state variable 'setGroupsList'

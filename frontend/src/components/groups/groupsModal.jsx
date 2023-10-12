@@ -124,6 +124,7 @@ function GroupsModal({onClose, followers, creator, allGroups}){
       
       return (
         <div id="modalOverly" className="modal-overlay" onClick={handleOverlayClick}>
+          <div id="modalContainerOuter">
           <div id="modalContainer" className="bg-[#a8daf7] relative top-1 x-3 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(60%-1rem)] gpsModal-content dark:bg-[#81b7d7]">
             <button className="hover:bg-[#7acaf8] hover:text-gray-200 hover:shadow-gray-400 dark:hover:bg-[#65c3f9] shadow-md z-50 pb-3 pt-3 modal-close dark:text-white ml-60 pr-3 pl-3 font-bold bg-[#c7e6f8] dark:bg-[#57aada]  text-[#57aada] rounded-md" onClick={() => {onClose()}}>
               Close
@@ -132,7 +133,7 @@ function GroupsModal({onClose, followers, creator, allGroups}){
             <div id="makeNewGroupModal" className="bg-[#a8daf7] dark:bg-[#81b7d7]  absolute top-6 pb-4 pt-4">
             <p className="font-bold text-center text-lg dark:text-[#3f82a9] text-[#4893be]"><strong>Make a group</strong></p>
               <div id="newGroupForm">
-              <form onSubmit={handleSubmitNewGP} className="bg-[#a8daf7] dark:bg-[#81b7d7]">
+              <form onSubmit={handleSubmitNewGP} className=" bg-[#a8daf7] dark:bg-[#81b7d7]">
                 <br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Group name:
                 <input type="text" name="grpName" value={newGroupInputs.grpName || ""} onChange={handleNewGP} placeholder="Enter group name" className="border-hidden mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="grpName"/>
@@ -149,7 +150,6 @@ function GroupsModal({onClose, followers, creator, allGroups}){
                     <input class="chk" name={follw} type="checkbox" onChange={handleNewGP} border="hidden" background-color="white" className="rounded-sm h-4 w-4 ml-1 cursor-pointer accent-[#57aada]"/>
                     <label class="addToGroup dark:text-[#3f82a9]">{follw}</label>
                   </li>
-                  
                 ))}
                   </ul>
                 <div id="addFollowersToGroup" className="text-sm font-sm text-[#717575] dark:text-primary-500">
@@ -179,23 +179,14 @@ function GroupsModal({onClose, followers, creator, allGroups}){
                 <form id="joinGP" onSubmit={handleSubmitJoinGP}>
                 {console.log("allGroups inside the GroupsModal component: ", allGroups)}
                   <ul>
-                  {(parseInt(allGroups.nbGroups, 10) || 0) > 0 ? <label class="addToGroup dark:text-[#3f82a9]">Group membership is restricted to followers </label> : followers.map((follw) => 
+                  {(parseInt(allGroups.nbGroups, 10) || 0) == 0 ? <label class="allGroups dark:text-[#3f82a9]">There are no groups available </label> : allGroups.sliceOfGroups.map((grp) => 
                   <span>
-
-                  {/* requestor: "",
-                    nbGroups: "",
-                    sliceOfGroups: [],
-                    type: "" */}
-                  
                   <li className="py-2 px-2 text-ml hover:bg-[#c7e6f8] dark:hover:bg-[#5a9fc6] dark:hover:text-[#2f627f] flex space-x-4">
                   <input class="chkJoin" name="Friends"  type="checkbox" onChange={handleSelectGP} border="hidden" className="h-4 w-4 bg-white mt-1 ml-1 cursor-pointer accent-[#57aada]"/>
-                  <p style={{cursor: 'pointer'}} class="addToGroup font-bold dark:text-[#3f82a9] dark:hover:text-[#2f627f] ">Friends of happiness </p>
-                  <p  className="dark:text-white text-[#717575]"> Antisocial social club</p></li></span>
-                  <span>
-                  <li className="py-2 px-2 text-ml hover:bg-[#c7e6f8] dark:hover:bg-[#5a9fc6] dark:hover:text-[#2f627f]  flex space-x-4">
-                  <input class="chkJoin" name="Band"  type="checkbox" onChange={handleSelectGP} border="hidden" className="h-4 w-4 bg-white mt-1 ml-1 cursor-pointer accent-[#57aada]"/>
-                  <p style={{cursor: 'pointer'}} class="addToGroup font-bold dark:text-[#3f82a9] dark:hover:text-[#2f627f]">Band of saints</p>
-                  <p  className="dark:text-white text-[#717575]"> Antisocial social club</p></li></span>
+                  <p style={{cursor: 'pointer'}} class="addToGroup font-bold dark:text-[#3f82a9] dark:hover:text-[#2f627f] ">{grp.grpName}</p>
+                  <p  className="dark:text-white text-[#717575]">{grp.grpDescr}</p></li>
+                  </span>
+                  )}
                   </ul>
                   <div>
                   <br></br>
@@ -210,6 +201,7 @@ function GroupsModal({onClose, followers, creator, allGroups}){
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
       );
