@@ -1,5 +1,7 @@
 ## Helena To Do ##
-new group component to include add group members
+Use the GetExistingGroups function 
+to get all data from 'Groups' and GroupMembers tables and send it to f.e. 
+to populate the 'Groups' section of groupModal.jsx
 
 
 ## Hannah's fav colour palette: 

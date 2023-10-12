@@ -30,6 +30,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 		user = service.repo.FindByUsername(data.Cookie)
 	} else {
 		fmt.Println("no username sent with post data form frontend")
+		data.Cookie = c.String()
 		cookieArr := strings.Split(c.String(), "=")
 		cookieID := cookieArr[1]
 		user = service.repo.GetUserByCookie(cookieID)
