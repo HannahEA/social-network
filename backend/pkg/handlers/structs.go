@@ -131,6 +131,8 @@ type WebsocketMessage struct {
 
 	JoinGroupReply JoinGroupReply `json:"joinGroupReply"`
 
+	SendAllGroups SendAllGroups `json:"sendAllGroups"`
+
 	Type string `json:"type"`
 }
 
@@ -252,7 +254,13 @@ type JoinGroupReply struct {
 
 // f.e. request to send list of existing groups
 type RequestAllGroups struct {
-	// GpList    []string `json:"gpList"`
-	UsrEmail string   `json:"usrEmail"`
-	Type      string   `json:"type"`
+	UsrEmail string `json:"usrEmail"`
+	Type     string `json:"type"`
+}
+
+type SendAllGroups struct {
+	Requestor     string     `json:"requestor"`
+	NbGroups      string     `json:"nbGroups"`
+	SliceOfGroups []NewGroup `json:"sliceOfGroups"`
+	Type          string     `json:"type"`
 }

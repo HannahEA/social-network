@@ -402,14 +402,46 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			}
 
 		case "getGroups":
-			//send to f.e. a slice of existing groups
+			//this is a request to send a slice of existing groups to the f.e.
 			var rAllGps RequestAllGroups
+			var sendAllGps SendAllGroups
 
 			jsonErr := json.Unmarshal(b, &rAllGps)
-				if jsonErr != nil {
-					fmt.Println("error unmarshalling getGroups: ", jsonErr)
-					
+			if jsonErr != nil {
+				fmt.Println("error unmarshalling getGroups: ", jsonErr)
+			}
+			//retrieve a list of existing groups and their associated data
+			grpCount, grpSlice := service.repo.GetExistingGroups()
+
+			//get user's data
+			theUsr, err := service.repo.GetUserByEmail(rAllGps.UsrEmail)
+			if err != nil {
+				fmt.Println("error from function GetUserByEmail: ", err)
+			}
+
+			//populate the sendAllGroups struct
+			sendAllGps.Requestor = theUsr.NickName
+			sendAllGps.NbGroups = grpCount
+			sendAllGps.SliceOfGroups = grpSlice
+			sendAllGps.Type = "sendAllGroups"
+
+			fmt.Println("The slice of groups sent to the f.e. is: ", sendAllGps)
+
+			//send the 'sendAllGps' struct to member
+			online := false
+			fmt.Println("Printing to get rid of the error", online)
+			reciever := make(map[*websocket.Conn]string)
+			//find member's channel
+			for conn, client := range Clients {
+				if client == sendAllGps.Requestor {
+					reciever[conn] = client
+					online = true
+
+					fmt.Printf("get groups requestor's channel and name %v, %v ", conn, client)
+					fmt.Println("groups slice sent via ws: ", sendAllGps)
+					service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{SendAllGroups: sendAllGps, Type: sendAllGps.Type}, Connections: reciever})
 				}
+			}
 
 		}
 
@@ -893,13 +925,11 @@ func (repo *dbStruct) InsertGroupMemberReply(joinGrpReply JoinGroupReply) error 
 
 //get data for existing groups
 //group invites sent to offline users
-func (repo *dbStruct) GetExistingGroups(member string) (int, []NewGroup) {
+func (repo *dbStruct) GetExistingGroups() (string, []NewGroup) {
 	var allGroups []NewGroup
 	var gpMembers []string
 	var aMember string
-	var gCount int
-
-	fmt.Println("From inside GetExistingGroups, the user name is: ", member)
+	var gCount string
 
 	var oneGr NewGroup
 	//return a single group info from 'Groups' table
@@ -909,7 +939,7 @@ func (repo *dbStruct) GetExistingGroups(member string) (int, []NewGroup) {
 	rows1, err1 := repo.db.Query(query1)
 	if err1 != nil {
 		fmt.Println("GetExistingGroups query error : ", err1)
-		return 0, allGroups
+		return "0", allGroups
 	}
 
 	defer rows1.Close()
@@ -919,7 +949,7 @@ func (repo *dbStruct) GetExistingGroups(member string) (int, []NewGroup) {
 		err := rows1.Scan(&oneGr.ID, &oneGr.Creator, &oneGr.GrpName, &oneGr.GrpDescr)
 		if err != nil {
 			fmt.Println("GetExistingGroups scan Error", err, oneGr)
-			return 0, allGroups
+			return "0", allGroups
 		}
 
 		oneGr.Type = "arrayOfGroups"
@@ -929,18 +959,18 @@ func (repo *dbStruct) GetExistingGroups(member string) (int, []NewGroup) {
 				SELECT member FROM GroupMembers WHERE grpID = ?
 		`
 		rows2, err2 := repo.db.Query(query2, oneGr.ID)
-			if err2 != nil {
-				fmt.Println("GetExistingGroups error querying the list of group members: ",err2)
-				return 0, allGroups
-			}
+		if err2 != nil {
+			fmt.Println("GetExistingGroups error querying the list of group members: ", err2)
+			return "0", allGroups
+		}
 
 		defer rows2.Close()
 
 		for rows2.Next() {
 			err3 := rows2.Scan(&aMember)
-			if err3 != nil{
-				fmt.Println("GetExistingGroups error scanning one group member: ",err3)
-				return 0, allGroups
+			if err3 != nil {
+				fmt.Println("GetExistingGroups error scanning one group member: ", err3)
+				return "0", allGroups
 			}
 
 			gpMembers = append(gpMembers, aMember)
@@ -950,11 +980,10 @@ func (repo *dbStruct) GetExistingGroups(member string) (int, []NewGroup) {
 		fmt.Print("One group data: ", oneGr)
 		//add the group to allGroups slice
 		allGroups = append(allGroups, oneGr)
-		
 
 		//clear member variable
 		aMember = ""
-		
+
 		//clear slice of gp members
 		gpMembers = []string{""}
 
@@ -965,8 +994,7 @@ func (repo *dbStruct) GetExistingGroups(member string) (int, []NewGroup) {
 
 	fmt.Println("Slice of all existing groups: ===>", allGroups)
 
-	gCount = len(allGroups)
+	gCount = strconv.Itoa(len(allGroups))
 
 	return gCount, allGroups
 }
-
