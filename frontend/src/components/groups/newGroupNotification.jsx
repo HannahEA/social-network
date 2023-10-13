@@ -16,13 +16,13 @@ function NewGroupNotification ( props ) {
     let reply = "Yes";
     // Make a reply object
     var YesNo = {
-        "groupId": (props.groupData.grpID).toString(),
+        "grpID": (props.groupData.grpID).toString(),
         "groupMember": (props.groupData.member),
-        "followReply": reply,
+        "joinReply": reply,
         "type": "joinGroupReply",
     };
 
-    console.log("the followReply sent to back end: ", YesNo)
+    console.log("the joinGroupReply sent to back end: ", YesNo)
 
     //send reply object to back end
     websocketRef.current.send(
@@ -38,13 +38,13 @@ function NewGroupNotification ( props ) {
     let reply = "No";
     // Make a reply object
     var YesNo = {
-        "groupId": (props.groupData.grpID).toString(),
+        "grpID": (props.groupData.grpID).toString(),
         "groupMember": (props.groupData.member),
-        "followReply": reply,
+        "joinReply": reply,
         "type": "joinGroupReply",
     };
 
-    console.log("the followReply sent to back end: ", YesNo)
+    console.log("the joinGroupReply sent to back end: ", YesNo)
     //send user reply to back end
     websocketRef.current.send(
       JSON.stringify(YesNo)

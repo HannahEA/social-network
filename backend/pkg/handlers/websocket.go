@@ -336,7 +336,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 			//populate the NewGroup struct
 			jsonErr := json.Unmarshal(b, &newGp)
-			fmt.Println("newGp:", newGp)
+
 			if jsonErr != nil {
 				fmt.Println("there is an error with json msg: newGp")
 			}
@@ -345,6 +345,8 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			if err != nil {
 				fmt.Println("error inserting new gp data", err)
 			}
+
+			fmt.Println("newGp:", newGp)
 
 			//insert group members into the GroupMembers table
 			for i := 0; i < len(newGp.GpMembers); i++ {
@@ -359,6 +361,9 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				if err1 != nil {
 					fmt.Println("error returning newGpNotif data: ", err1)
 				}
+
+				fmt.Println("The new gp notification sent to f.e.: ", newGpNotif)
+
 				//check if the group member is online and send notification
 				if newGpNotif.MemberStatus == "memberPending" && newGpNotif.MemberLogged == "Yes" {
 					//send new group notification to member
@@ -370,9 +375,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 						if client == newGpNotif.Member {
 							reciever[conn] = client
 							online = true
-
-							fmt.Printf("follow request client/ receiver %v %v is %v", client, reciever, online)
-							fmt.Println("new group notification via ws: ", newGpNotif)
 							service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{NewGroupNotif: newGpNotif, Type: newGpNotif.Type}, Connections: reciever})
 						}
 					}
@@ -436,9 +438,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				if client == sendAllGps.Requestor {
 					reciever[conn] = client
 					online = true
-
-					fmt.Printf("get groups requestor's channel and name %v, %v ", conn, client)
-					fmt.Println("groups slice sent via ws: ", sendAllGps)
 					service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{SendAllGroups: sendAllGps, Type: sendAllGps.Type}, Connections: reciever})
 				}
 			}
@@ -792,7 +791,7 @@ func (repo *dbStruct) CheckUserOnline(grNm string, grDescr string, grId int, use
 	//instantiate the NewGroupNotif struct
 	var newGpNotif NewGroupNotif
 
-	//return 'loggedIn' value for member and for creator
+	//return 'loggedIn' value for member
 	err1 := repo.db.QueryRow("SELECT loggedIn from Users where nickName = ?", user).Scan(&newGpNotif.MemberLogged)
 	if err1 != nil {
 		fmt.Println("error returning loggedIn data", err1)
@@ -800,11 +799,12 @@ func (repo *dbStruct) CheckUserOnline(grNm string, grDescr string, grId int, use
 	}
 
 	//return 'member status' value for member
-	err2 := repo.db.QueryRow("SELECT status from GroupMembers where member = ?", user).Scan(&newGpNotif.MemberStatus)
+	err2 := repo.db.QueryRow("SELECT status from GroupMembers where member = ? AND grpID = ? ", user, grId).Scan(&newGpNotif.MemberStatus)
 	if err2 != nil {
 		fmt.Println("error returning member status data", err2)
 		return newGpNotif, err2
 	}
+
 
 	//return avatar URL and image for creator
 	err3 := repo.db.QueryRow("SELECT avatarURL, imageFile, nickName, loggedIn from Users where email = ?", creator).Scan(&newGpNotif.CreatorURL, &newGpNotif.CreatorImage, &newGpNotif.Creator, &newGpNotif.CreatorLogged)

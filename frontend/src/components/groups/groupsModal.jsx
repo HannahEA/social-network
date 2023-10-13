@@ -61,7 +61,7 @@ function GroupsModal({onClose, followers, creator, allGroups}){
         grpMembers[i].checked = false; //un-tick check boxes
       }
 
-      //alert(JSON.stringify(newGroupInputs, null, 2)); // Convert to JSON string for display; the second argument null is for replacer function, and the third argument 2 is for indentation
+      alert(JSON.stringify(newGroupInputs, null, 2)); // Convert to JSON string for display; the second argument null is for replacer function, and the third argument 2 is for indentation
 
         console.log("new group inputs sent to b.e.:", newGroupInputs);
 
