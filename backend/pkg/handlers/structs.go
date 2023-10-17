@@ -264,3 +264,12 @@ type SendAllGroups struct {
 	SliceOfGroups []NewGroup `json:"sliceOfGroups"`
 	Type          string     `json:"type"`
 }
+
+//user requests to join group, group creator to respond
+type JoinGroupRequest struct {
+	Type          string `json:"type"`
+	GrpID         string `json:"grpID"`
+	JoinRequestBy string `json:"joinRequestBy"`
+	GrpCreator    string `json:"grpCreator"`
+	GrpName       string `json:"grpName"`
+}
