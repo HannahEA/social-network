@@ -15,6 +15,7 @@ import Detail from "./usersInfo/Detail.jsx";
 import Alerts from "./notifications/countAlerts.jsx";
 import Notification from "./notifications/notification.jsx";
 import NewGroupNotification from "./groups/newGroupNotification.jsx";
+import JoinGpReq from "./groups/joinGpReq.jsx"
 import { Notyf } from "notyf";
 // import { FunctionsRounded } from "@material-ui/icons";
 
@@ -32,7 +33,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, offlineGroupInvites:{}, sendAllGroups:{} })
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, offlineGroupInvites:{}, sendAllGroups:{}, oneJoinGroupRequest:{} })
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
   
@@ -141,6 +142,11 @@ const Feed = () => {
             }
             )
           ) 
+        }else if (message.type == "oneJoinGroupRequest"){
+          //send join group request to group creator
+          allData.current.oneJoinGroupRequest = message.oneJoinGroupRequest
+          showJoinGroupRequests();
+          console.log("The requestToJoinGroup data: ", allData.current.oneJoinGroupRequest)
         }
     };
   }
@@ -165,6 +171,7 @@ const Feed = () => {
   const [groupsModalVisible, setGroupsModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const[isGroupsVisible, setIsGroupsVisible] = useState(false);
+  const [isJoinGroupVisible, setIsJoinGroupVisible] = useState(false);
   const [redDotVisible, setRedDotVisible] = useState(false);
   const[isPendingListVisible, setIsPendingListVisible] = useState(false);
   const[pendingNotif, setPendingNotif] = useState([]);
@@ -200,7 +207,12 @@ const Feed = () => {
     setIsGroupsVisible(true);
   };
 
-    // Function to show the Notification
+  // Function to show join group request notifications for online group creators
+  const showJoinGroupRequests = () => {
+    setIsJoinGroupVisible(true);
+  };
+
+    // Function to show the offline Notifications
     const showRedDot = () => {
       setRedDotVisible(true);
     };
@@ -1632,6 +1644,19 @@ const [viewProfile, setViewProfile] = useState(false)
           )}
           </div>
         {/* End of new group notification */}
+
+        {/* Start of join group request notification */}
+          <div id="joinGpReq" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+          {console.log("the state variable of isJoinGroupVisible: ", isJoinGroupVisible)}
+          {isJoinGroupVisible && (
+            <JoinGpReq 
+              setJoinGpVisible={setIsJoinGroupVisible}
+              joinGrVisible={isJoinGroupVisible}
+              joinRequest={allData.current.oneJoinGroupRequest}
+            />
+          )}
+          </div>
+        {/* End of join group request notification */}
 
 
 

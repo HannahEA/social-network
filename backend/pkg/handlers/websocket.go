@@ -442,7 +442,72 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				}
 			}
 
-		}
+		case "allJoinGrRequests":
+			//user requests group creator for permission to join group
+			var joinGpsRequests JoinGroupsRequests
+
+			jsonError := json.Unmarshal(b, &joinGpsRequests)
+			if jsonError != nil {
+				fmt.Println("error unmarshalling joinGroupRequest: ", jsonError)
+				return
+			}
+
+			fmt.Println("the slice of join group requests: *******", joinGpsRequests)
+
+			//iterate over slice of join grp requests
+			for _, req := range joinGpsRequests.AllJoinGrRequests {
+				//this is the email of user asking to join
+				joinWhoEmail := req.JoinRequestBy
+				//get user data
+				joinWho, err1 := service.repo.GetUserByEmail(joinWhoEmail)
+				if err1 != nil {
+					fmt.Println("error retrieving gp creator data: ", err1)
+					return
+				}
+
+				//assign nickName to requestor
+				req.JoinRequestBy = joinWho.NickName
+
+				fmt.Println("Checking the type inside req: ", req.Type)
+
+				//get group creator's data
+				askWho, err2 := service.repo.GetUserByNickName(req.GrpCreator)
+				if err2 != nil {
+					fmt.Println("error retrieving gp creator by nickName: ", err2)
+					return
+				}
+				//upload join group request data to the GroupMembers table
+				joinStatus := "creatorPending"
+
+				err3 := service.repo.InsertJoinRequest(req, joinStatus)
+				if err3 != nil {
+					fmt.Println("error inserting a join group request: ", err3)
+					return
+				}
+
+				fmt.Println("This is the join group request sent to the group creator: *****", req)
+				fmt.Println("Is the group creator logged in and nickName: >>>>>", askWho.LoggedIn, askWho.NickName)
+				fmt.Println("Is the askWho data: >>>>>", askWho)
+
+				//if group creator is online send a notification
+				if askWho.LoggedIn == "Yes" {
+					//send request to group creator
+					online := false
+					fmt.Println("Printing to get rid of the error", online)
+					reciever := make(map[*websocket.Conn]string)
+					//find member's channel
+					for conn, client := range Clients {
+						if client == askWho.NickName {
+							reciever[conn] = client
+							online = true
+							service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{OneJoinGroupRequest: req, Type: "oneJoinGroupRequest"}, Connections: reciever})
+						}
+					}
+
+				} //Else if group creator is offline, Join group request will be added to offline alerts and sent from case: "connect"
+
+			} //end of iteration over AllJoinGrRequests array
+		} //end of 'switch type'
 
 	}
 }
@@ -758,7 +823,7 @@ func (repo *dbStruct) InsertNewGroup(g NewGroup) (int, error) {
 
 }
 
-//Populate the GroupMembers table
+//Populate new group's GroupMembers table
 func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int, status string) error {
 	//retrieve creator's user name
 	creator, err := repo.GetUserByEmail(newGp.Creator)
@@ -777,6 +842,25 @@ func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int, status string) erro
 	}
 
 	_, err = stmt.Exec(newGp.ID, creatorUN, newGp.GpMembers[i], status)
+	if err != nil {
+		fmt.Println("error inserting group member", err)
+		return err
+	}
+
+	return nil
+}
+
+//Populate join group request's GroupMembers table
+func (repo *dbStruct) InsertJoinRequest(joinReq OneJoinGroupRequest, status string) error {
+
+	//prepare the query
+	stmt, err := repo.db.Prepare("INSERT OR IGNORE into GroupMembers (grpID, creator, member, status) values(?, ?, ?, ?)")
+	if err != nil {
+		fmt.Println("error preparing statement to insert join group request", err)
+		return err
+	}
+
+	_, err = stmt.Exec(joinReq.GrpID, joinReq.GrpCreator, joinReq.JoinRequestBy, status)
 	if err != nil {
 		fmt.Println("error inserting group member", err)
 		return err
@@ -804,7 +888,6 @@ func (repo *dbStruct) CheckUserOnline(grNm string, grDescr string, grId int, use
 		fmt.Println("error returning member status data", err2)
 		return newGpNotif, err2
 	}
-
 
 	//return avatar URL and image for creator
 	err3 := repo.db.QueryRow("SELECT avatarURL, imageFile, nickName, loggedIn from Users where email = ?", creator).Scan(&newGpNotif.CreatorURL, &newGpNotif.CreatorImage, &newGpNotif.Creator, &newGpNotif.CreatorLogged)

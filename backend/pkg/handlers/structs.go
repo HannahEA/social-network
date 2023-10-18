@@ -133,6 +133,8 @@ type WebsocketMessage struct {
 
 	SendAllGroups SendAllGroups `json:"sendAllGroups"`
 
+	OneJoinGroupRequest OneJoinGroupRequest `json:"oneJoinGroupRequest"`
+
 	Type string `json:"type"`
 }
 
@@ -265,11 +267,18 @@ type SendAllGroups struct {
 	Type          string     `json:"type"`
 }
 
-//user requests to join group, group creator to respond
-type JoinGroupRequest struct {
+//user requests to join groups, groups creators to respond
+type JoinGroupsRequests struct {
+	Type              string                `json:"type"`
+	AllJoinGrRequests []OneJoinGroupRequest `json:"allJoinGrRequests"`
+}
+
+//one requests to join group, group creator to respond
+type OneJoinGroupRequest struct {
 	Type          string `json:"type"`
 	GrpID         string `json:"grpID"`
 	JoinRequestBy string `json:"joinRequestBy"`
 	GrpCreator    string `json:"grpCreator"`
 	GrpName       string `json:"grpName"`
+	GrpDescr      string `json:"grpDescr"`
 }
