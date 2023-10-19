@@ -44,24 +44,18 @@ code {
   }
   
   /* Styles for the modal content */
-    #modalContainerOuter {
-      width: 400px;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    /* Styles for the modal content */
-    #modalContainer {
-
-      height: 700px;
-      border-radius: 8px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-      padding: 16px;
-      position: relative;
-      max-width: 100%; /* Adjust the max-width as needed */
-      max-height: 100%; /* Adjust the max-height as needed */
-      overflow: auto; /* Enable scrolling if the content is too large */
-    }
+  .modal-content {
+    width: 400px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    position: relative;
+    max-width: 80%; /* Adjust the max-width as needed */
+    max-height: 80%; /* Adjust the max-height as needed */
+    min-width:20%;
+    overflow: auto; /* Enable scrolling if the content is too large */
+  }
   
   
   /* ===> Styles for the close button <=== */

@@ -114,7 +114,7 @@ func (repo *dbStruct) GetUserByCookie(cookieValue string) *User {
 	fmt.Println("from inside GetUserByCookie, the user id: ", userID)
 	u := repo.FindByUserID(userID)
 
-	fmt.Println("from inside GetUserByCookie, all user info: ", u)
+	// fmt.Println("from inside GetUserByCookie, all user info: ", u)
 	return u
 }
 

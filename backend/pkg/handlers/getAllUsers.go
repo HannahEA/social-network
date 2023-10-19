@@ -86,7 +86,7 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 	//that equals 1 if follow request has been accepted, 2 if is pending, 0 if user is not being followed
 
 	query := `
-		SELECT U.id, U.nickName, U.avatarURL, U.imageFile, U.aboutMe, U.profileVisibility, U.loggedIn,
+		SELECT U.id, U.nickName, U.avatarURL, U.imageFile, U.aboutMe, U.profileVisibility, U.loggedIn, U.firstName, U.lastName, U.age, U.gender, U.email,
     	CASE
         	WHEN F.followerUserName = ? AND F.accepted = 'Yes' THEN 1
        	 	WHEN F.followerUserName = ? AND F.accepted = 'Pending' THEN 2
@@ -108,13 +108,20 @@ func (repo *dbStruct) GetUsersData(email string) ([]AllUsersData, error) {
 	var oneUser AllUsersData
 
 	for rows.Next() {
-		err := rows.Scan(&oneUser.ID, &oneUser.NickName, &oneUser.Avatar, &oneUser.Image, &oneUser.AboutMe, &oneUser.ProfVisib, &oneUser.LoggedIn, &oneUser.Influencer)
+		err := rows.Scan(&oneUser.ID, &oneUser.NickName, &oneUser.Avatar, &oneUser.Image, &oneUser.AboutMe, &oneUser.ProfVisib, &oneUser.LoggedIn, &oneUser.FirstName, &oneUser.LastName, &oneUser.Age, &oneUser.Gender, &oneUser.Email, &oneUser.Influencer)
 		if err != nil {
 			return uData, err
 		}
 
 		fmt.Println("getAllUsers one slice item: ",oneUser)
-
+		oneUser.Followers, err = repo.GetFollowers(oneUser.NickName)
+		if err != nil {
+			return uData, err
+		}
+		oneUser.Following, err = repo.GetFollowing(oneUser.NickName)
+		if err != nil {
+			return uData, err
+		}
 		uData = append(uData, oneUser)
 
 		fmt.Println("getAllUsers complete slice of users: ", uData)
