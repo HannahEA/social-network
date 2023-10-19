@@ -222,6 +222,19 @@ func (repo *dbStruct) GetUserByEmail(email string) (User, error) {
 	return userInfo, nil
 }
 
+func (repo *dbStruct) GetUserByNickName(nickName string) (User, error) {
+	var userInfo User
+	theUserQuery := "SELECT * FROM Users WHERE nickName = ?"
+	rowCurrentUser := repo.db.QueryRow(theUserQuery, nickName)
+	// Writing user information into userInfo struct
+	err3 := rowCurrentUser.Scan(&userInfo.id, &userInfo.FirstName, &userInfo.LastName, &userInfo.NickName, &userInfo.Age, &userInfo.Gender, &userInfo.Email, &userInfo.Password, &userInfo.Avatar, &userInfo.Image, &userInfo.AboutMe, &userInfo.ProfVisib, &userInfo.LoggedIn, &userInfo.Created_At)
+	if err3 != nil {
+		// fmt.Println("error accessing DB")
+		return userInfo, err3
+	}
+	return userInfo, nil
+}
+
 // Code to send avatar image back to the front end:
 func (repo *dbStruct) getAvatar(email string) (string, error) {
 	// Retrieve the avatar image or URL from the database

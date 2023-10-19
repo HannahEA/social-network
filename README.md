@@ -1,7 +1,5 @@
 ## Helena To Do ##
-Use the GetExistingGroups function 
-to get all data from 'Groups' and GroupMembers tables and send it to f.e. 
-to populate the 'Groups' section of groupModal.jsx
+Join group request alert for offline group creator
 
 
 ## Hannah's fav colour palette: 

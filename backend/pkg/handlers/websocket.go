@@ -160,11 +160,21 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				NumGrpsPending:      strconv.Itoa(countGroupInvites),
 			}
 
+			//get user's pending join group requests
+			countJoinReq, sliceJoinReq := service.repo.GetPendingJoinGroupRequests(user.NickName)
+
+			//instantiate the OfflineJoinGroupRequests struct to be sent to f.e.
+			var offlineJoinGroupRequests = OfflineJoinGroupRequests{
+				NumGrpsPending:        countJoinReq,
+				OfflineJoinGrRequests: sliceJoinReq,
+			}
+
 			webMessage := WebsocketMessage{
-				Presences:           presences,
-				OfflineFollowNotif:  offlineFollowNotif,
-				OfflineGroupInvites: offlineGroupInvites,
-				Type:                "connect",
+				Presences:                presences,
+				OfflineFollowNotif:       offlineFollowNotif,
+				OfflineGroupInvites:      offlineGroupInvites,
+				OfflineJoinGroupRequests: offlineJoinGroupRequests,
+				Type:                     "connect",
 			}
 
 			fmt.Println("the webMessage struct sent to f.e.: ", webMessage)
@@ -336,7 +346,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 			//populate the NewGroup struct
 			jsonErr := json.Unmarshal(b, &newGp)
-			fmt.Println("newGp:", newGp)
+
 			if jsonErr != nil {
 				fmt.Println("there is an error with json msg: newGp")
 			}
@@ -345,6 +355,8 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			if err != nil {
 				fmt.Println("error inserting new gp data", err)
 			}
+
+			fmt.Println("newGp:", newGp)
 
 			//insert group members into the GroupMembers table
 			for i := 0; i < len(newGp.GpMembers); i++ {
@@ -359,6 +371,9 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				if err1 != nil {
 					fmt.Println("error returning newGpNotif data: ", err1)
 				}
+
+				fmt.Println("The new gp notification sent to f.e.: ", newGpNotif)
+
 				//check if the group member is online and send notification
 				if newGpNotif.MemberStatus == "memberPending" && newGpNotif.MemberLogged == "Yes" {
 					//send new group notification to member
@@ -370,9 +385,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 						if client == newGpNotif.Member {
 							reciever[conn] = client
 							online = true
-
-							fmt.Printf("follow request client/ receiver %v %v is %v", client, reciever, online)
-							fmt.Println("new group notification via ws: ", newGpNotif)
 							service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{NewGroupNotif: newGpNotif, Type: newGpNotif.Type}, Connections: reciever})
 						}
 					}
@@ -436,14 +448,76 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				if client == sendAllGps.Requestor {
 					reciever[conn] = client
 					online = true
-
-					fmt.Printf("get groups requestor's channel and name %v, %v ", conn, client)
-					fmt.Println("groups slice sent via ws: ", sendAllGps)
 					service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{SendAllGroups: sendAllGps, Type: sendAllGps.Type}, Connections: reciever})
 				}
 			}
 
-		}
+		case "allJoinGrRequests":
+			//user requests group creator for permission to join group
+			var joinGpsRequests JoinGroupsRequests
+
+			jsonError := json.Unmarshal(b, &joinGpsRequests)
+			if jsonError != nil {
+				fmt.Println("error unmarshalling joinGroupRequest: ", jsonError)
+				return
+			}
+
+			fmt.Println("the slice of join group requests: *******", joinGpsRequests)
+
+			//iterate over slice of join grp requests
+			for _, req := range joinGpsRequests.AllJoinGrRequests {
+				//this is the email of user asking to join
+				joinWhoEmail := req.JoinRequestBy
+				//get user data
+				joinWho, err1 := service.repo.GetUserByEmail(joinWhoEmail)
+				if err1 != nil {
+					fmt.Println("error retrieving gp creator data: ", err1)
+					return
+				}
+
+				//assign nickName to requestor
+				req.JoinRequestBy = joinWho.NickName
+
+				fmt.Println("Checking the type inside req: ", req.Type)
+
+				//get group creator's data
+				askWho, err2 := service.repo.GetUserByNickName(req.GrpCreator)
+				if err2 != nil {
+					fmt.Println("error retrieving gp creator by nickName: ", err2)
+					return
+				}
+				//upload join group request data to the GroupMembers table
+				joinStatus := "creatorPending"
+
+				err3 := service.repo.InsertJoinRequest(req, joinStatus)
+				if err3 != nil {
+					fmt.Println("error inserting a join group request: ", err3)
+					return
+				}
+
+				fmt.Println("This is the join group request sent to the group creator: *****", req)
+				fmt.Println("Is the group creator logged in and nickName: >>>>>", askWho.LoggedIn, askWho.NickName)
+				fmt.Println("Is the askWho data: >>>>>", askWho)
+
+				//if group creator is online send a notification
+				if askWho.LoggedIn == "Yes" {
+					//send request to group creator
+					online := false
+					fmt.Println("Printing to get rid of the error", online)
+					reciever := make(map[*websocket.Conn]string)
+					//find member's channel
+					for conn, client := range Clients {
+						if client == askWho.NickName {
+							reciever[conn] = client
+							online = true
+							service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{OneJoinGroupRequest: req, Type: "oneJoinGroupRequest"}, Connections: reciever})
+						}
+					}
+
+				} //Else if group creator is offline, Join group request will be added to offline alerts and sent from case: "connect"
+
+			} //end of iteration over AllJoinGrRequests array
+		} //end of 'switch for message type'
 
 	}
 }
@@ -759,7 +833,7 @@ func (repo *dbStruct) InsertNewGroup(g NewGroup) (int, error) {
 
 }
 
-//Populate the GroupMembers table
+//Populate new group's GroupMembers table
 func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int, status string) error {
 	//retrieve creator's user name
 	creator, err := repo.GetUserByEmail(newGp.Creator)
@@ -786,13 +860,32 @@ func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int, status string) erro
 	return nil
 }
 
+//Populate join group request's GroupMembers table
+func (repo *dbStruct) InsertJoinRequest(joinReq OneJoinGroupRequest, status string) error {
+
+	//prepare the query
+	stmt, err := repo.db.Prepare("INSERT OR IGNORE into GroupMembers (grpID, creator, member, status) values(?, ?, ?, ?)")
+	if err != nil {
+		fmt.Println("error preparing statement to insert join group request", err)
+		return err
+	}
+
+	_, err = stmt.Exec(joinReq.GrpID, joinReq.GrpCreator, joinReq.JoinRequestBy, status)
+	if err != nil {
+		fmt.Println("error inserting group member", err)
+		return err
+	}
+
+	return nil
+}
+
 //check if a user is online or offline,
 //used for group and event notifications
 func (repo *dbStruct) CheckUserOnline(grNm string, grDescr string, grId int, user string, creator string) (NewGroupNotif, error) {
 	//instantiate the NewGroupNotif struct
 	var newGpNotif NewGroupNotif
 
-	//return 'loggedIn' value for member and for creator
+	//return 'loggedIn' value for member
 	err1 := repo.db.QueryRow("SELECT loggedIn from Users where nickName = ?", user).Scan(&newGpNotif.MemberLogged)
 	if err1 != nil {
 		fmt.Println("error returning loggedIn data", err1)
@@ -800,7 +893,7 @@ func (repo *dbStruct) CheckUserOnline(grNm string, grDescr string, grId int, use
 	}
 
 	//return 'member status' value for member
-	err2 := repo.db.QueryRow("SELECT status from GroupMembers where member = ?", user).Scan(&newGpNotif.MemberStatus)
+	err2 := repo.db.QueryRow("SELECT status from GroupMembers where member = ? AND grpID = ? ", user, grId).Scan(&newGpNotif.MemberStatus)
 	if err2 != nil {
 		fmt.Println("error returning member status data", err2)
 		return newGpNotif, err2
@@ -831,7 +924,7 @@ func (repo *dbStruct) GetPendingGroupInvites(member string) (int, []NewGroupNoti
 	fmt.Println("From inside GetPendingGroupInvites, the user name is: ", member)
 
 	var oneGroupPending NewGroupNotif
-	//returns avatar from 'Users' and info from 'Followers' table
+	//returns avatar from 'Users' and info from 'GroupMembers' table
 	query := `
 			SELECT U.avatarURL, U.imageFile, G.grpID, G.creator, G.member, G.status
 			FROM Users U
@@ -997,4 +1090,64 @@ func (repo *dbStruct) GetExistingGroups() (string, []NewGroup) {
 	gCount = strconv.Itoa(len(allGroups))
 
 	return gCount, allGroups
+}
+
+//join group requests sent to offline group creator
+func (repo *dbStruct) GetPendingJoinGroupRequests(creator string) (string, []OneOfflineJoinGroupRequest) {
+	var gPending []OneOfflineJoinGroupRequest
+	var gCount string
+
+	fmt.Println("From inside GetPendingJoinGroupRequests, the creator name is: ", creator)
+
+	var oneGroupPending OneOfflineJoinGroupRequest
+	//returns avatar from 'Users' and info from 'GroupMembers' table
+	query := `
+			SELECT U.avatarURL, U.imageFile, G.grpID, G.creator, G.member, G.status
+			FROM Users U
+			INNER JOIN GroupMembers G ON U.nickName = G.member
+			WHERE G.creator = ? AND G.status = 'creatorPending' AND U.nickName != G.creator
+		`
+	rows, err := repo.db.Query(query, creator)
+	if err != nil {
+		fmt.Println("error querying pending join group requests for offline creator", err)
+		return "", gPending
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+
+		err := rows.Scan(&oneGroupPending.MemberURL, &oneGroupPending.MemberImage, &oneGroupPending.GrpID, &oneGroupPending.GrpCreator, &oneGroupPending.Member, &oneGroupPending.MemberStatus)
+		if err != nil {
+			fmt.Println("GetPendingFollowRequests for offline user scan Error", err, oneGroupPending)
+			return "", gPending
+		}
+
+		//get group name and description
+		err3 := repo.db.QueryRow("SELECT title, description from Groups where groupID = ?", oneGroupPending.GrpID).Scan(&oneGroupPending.GrpName, &oneGroupPending.GrpDescr)
+		if err3 != nil {
+			fmt.Println("error returning group name and description: ", err3)
+			return "", gPending
+		}
+
+		oneGroupPending.CreatorLogged = "No"
+		oneGroupPending.Type = "connect"
+
+		fmt.Println("One pending join group request for offline creator: ", oneGroupPending)
+
+		gPending = append(gPending, oneGroupPending)
+
+		fmt.Println("Slice of pending join group requests for offline creator", gPending)
+		oneGroupPending = OneOfflineJoinGroupRequest{}
+
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return "", gPending
+	}
+
+	gCount = strconv.Itoa((len(gPending)))
+
+	return gCount, gPending
 }

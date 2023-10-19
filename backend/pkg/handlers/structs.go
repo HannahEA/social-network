@@ -133,6 +133,10 @@ type WebsocketMessage struct {
 
 	SendAllGroups SendAllGroups `json:"sendAllGroups"`
 
+	OneJoinGroupRequest OneJoinGroupRequest `json:"oneJoinGroupRequest"`
+
+	OfflineJoinGroupRequests OfflineJoinGroupRequests `json:"offlineJoinGroupRequests"`
+
 	Type string `json:"type"`
 }
 
@@ -263,4 +267,40 @@ type SendAllGroups struct {
 	NbGroups      string     `json:"nbGroups"`
 	SliceOfGroups []NewGroup `json:"sliceOfGroups"`
 	Type          string     `json:"type"`
+}
+
+//user requests to join groups, groups creators to respond
+type JoinGroupsRequests struct {
+	Type              string                `json:"type"`
+	AllJoinGrRequests []OneJoinGroupRequest `json:"allJoinGrRequests"`
+}
+
+//one requests to join group, online group creator to respond
+type OneJoinGroupRequest struct {
+	Type          string `json:"type"`
+	GrpID         string `json:"grpID"`
+	JoinRequestBy string `json:"joinRequestBy"`
+	GrpCreator    string `json:"grpCreator"`
+	GrpName       string `json:"grpName"`
+	GrpDescr      string `json:"grpDescr"`
+}
+
+//user requests to join one or more groups, offline groups creators to respond
+type OfflineJoinGroupRequests struct {
+	NumGrpsPending        string                       `json:"numGrpsPending"`
+	OfflineJoinGrRequests []OneOfflineJoinGroupRequest `json:"offlineJoinGrRequests"`
+}
+
+//one requests to join group, offline group creator to respond
+type OneOfflineJoinGroupRequest struct {
+	Type          string `json:"type"`
+	GrpID         string `json:"grpID"`
+	Member        string `json:"member"`
+	MemberURL     string `json:"memberURL"`
+	MemberImage   string `json:"memberImage"`
+	MemberStatus  string `json:"memberStatus"`
+	GrpCreator    string `json:"grpCreator"`
+	CreatorLogged string `json:"creatorLogged"`
+	GrpName       string `json:"grpName"`
+	GrpDescr      string `json:"grpDescr"`
 }
