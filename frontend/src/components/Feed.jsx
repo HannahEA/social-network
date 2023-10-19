@@ -128,7 +128,7 @@ const Feed = () => {
           allData.current.newGroupNotif = message.newGroupNotif
           showGroupInvites();
           console.log("newGroupNotif received by member: ", allData.current.newGroupNotif)
-        } else if (message.type == sendAllGroups){
+        } else if (message.type == 'sendAllGroups'){
 
             allData.current.sendAllGroups = message.sendAllGroups
           //update the state variable 'setGroupsList'
@@ -1669,11 +1669,11 @@ const [viewProfile, setViewProfile] = useState(false)
         onClose={() => {handleCloseModal()}} 
         onFollow={() => {handleFollowUser()}}
         influencer={parseInt(selectedUser.influencer, 10)} // Pass the influencer prop here
-        name={selectedUser.username}
-        visib={selectedUser.profVisib}
+        user = {selectedUser}
         >
           {selectedUser && (
             <Card
+            user = {selectedUser}
               name={selectedUser.username}
               avt={selectedUser.avatar}
               img={selectedUser.image}

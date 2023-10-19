@@ -60,14 +60,14 @@ type AllDbMethods interface {
 	DeleteCookieDB(cookieValue string) (int64, error)
 	//post database queries
 	AddPostToDB(data Post) (int,error)
-	AddPostViewersToDB(data Post) error 
+	AddPostViewersToDB(data Post, id int) error 
 	GetPublicPosts(user *User) ([]Post, error)
 	UploadVisibilityValue(data ProfileVisibilityData) (string, error)
 	GetUsersData(email string) ([]AllUsersData, error)
 	GetAlmostPrivatePosts(user *User) ([]Post, error)
 	GetPrivatePosts(user *User) ([]Post, error)
-	GetFollowing(user *User) ([]any, error)
-	GetFollowers(user *User) ([]any, error)
+	GetFollowing(username string) ([]any, error)
+	GetFollowers(username string) ([]any, error)
 	//comment database queries
 	AddCommentToDB(data Post) error
 	GetComments(data Post) ([]Comment, error)

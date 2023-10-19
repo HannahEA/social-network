@@ -42,13 +42,13 @@ func (service *AllDbMethodsWrapper) CheckCookieHandler(w http.ResponseWriter, r 
 	var image string = string(loggedInUser.Image)
 
 	//get followers
-	followers, errf1:= service.repo.GetFollowers(loggedInUser)
+	followers, errf1:= service.repo.GetFollowers(loggedInUser.NickName)
 	if errf1 != nil {
 		fmt.Println("error with GetFollowers: ",errf1)
 			return
 	}
 	//get following
-	following, errf2:= service.repo.GetFollowing(loggedInUser)
+	following, errf2:= service.repo.GetFollowing(loggedInUser.NickName)
 	if errf2 != nil {
 		fmt.Println("error with GetFollowing: ",errf2)
 			return
@@ -127,29 +127,29 @@ func (repo *dbStruct) checkCookieDB(cookieValue string) int {
 
 }
 
-func (repo *dbStruct) GetFollowing(user *User) ([]any, error) {
-	var followers []any
-	rows, err2 := repo.db.Query(`SELECT influencerUserName FROM Followers WHERE followerUserName = ? AND accepted = 'Yes'`, user.NickName)
+func (repo *dbStruct) GetFollowing(username string) ([]any, error) {
+	var following []any
+	rows, err2 := repo.db.Query(`SELECT influencerUserName FROM Followers WHERE followerUserName = ? AND accepted = 'Yes'`, username)
 	if err2 != nil {
-		fmt.Println("FullChatUserList: query error", err2)
-		return followers, err2
+		fmt.Println("Get following: query error", err2)
+		return following, err2
 	}
 	for rows.Next() {
 		var follower string
 		err := rows.Scan(&follower)
 		if err != nil {
-			fmt.Println("GetFollowers: row scan error:", err)
+			fmt.Println("GetFollowing: row scan error:", err)
 			continue
 		}
-		followers = append(followers, follower)
+		following = append(following, follower)
 	}
-	return followers, nil
+	return following, nil
 }
-func (repo *dbStruct) GetFollowers(user *User) ([]any, error) {
+func (repo *dbStruct) GetFollowers(username string) ([]any, error) {
 	var followers []any
-	rows, err2 := repo.db.Query(`SELECT followerUserName FROM Followers WHERE influencerUserName  = ? AND accepted = 'Yes'`, user.NickName)
+	rows, err2 := repo.db.Query(`SELECT followerUserName FROM Followers WHERE influencerUserName  = ? AND accepted = 'Yes'`, username)
 	if err2 != nil {
-		fmt.Println("FullChatUserList: query error", err2)
+		fmt.Println("GetFollowers: query error", err2)
 		return followers, err2
 	}
 	for rows.Next() {

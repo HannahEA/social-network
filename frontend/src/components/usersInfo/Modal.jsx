@@ -2,14 +2,22 @@
 import React from "react";
 import  {Posts} from "./../feed/Posts.jsx";
 
-function Modal({ children, onClose, onFollow, influencer, name, visib}) {
+function Modal({ children, onClose, onFollow, influencer, user}) {
  
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
-
+  const checkFollow = () => {
+    if(user.influencer === 1 ){ 
+    return "Yes"
+    } else if (user.influencer === 2) { 
+    return `Awaiting ${user.name} reply`
+    } else {
+    return "No"
+    };
+}
 
   return (
     <div className="modal-overlay dark:bg-gray-600" onClick={handleOverlayClick}>
@@ -27,7 +35,12 @@ function Modal({ children, onClose, onFollow, influencer, name, visib}) {
         >
           {influencer === 1 ? "Un-follow" : "Follow"}
         </button>
-        {visib == 'public'? <Posts page={"myProfile"} username={name}/> : null }
+        {user.profVisib == 'public' || checkFollow() == 'Yes' ? 
+        <div>
+          <Posts page={"myProfile"} username={user.username}/> 
+        </div>
+        
+        : null }
         
       </div>
     </div>

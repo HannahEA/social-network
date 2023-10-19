@@ -179,7 +179,7 @@ function GroupsModal({onClose, followers, creator, allGroups}){
                 <form id="joinGP" onSubmit={handleSubmitJoinGP}>
                 {console.log("allGroups inside the GroupsModal component: ", allGroups)}
                   <ul>
-                  {(parseInt(allGroups.nbGroups, 10) || 0) > 0 ? <label class="addToGroup dark:text-[#3f82a9]">Group membership is restricted to followers </label> : followers.map((follw) => 
+                  {/* {(parseInt(allGroups.nbGroups, 10) || 0) > 0 ? <label class="addToGroup dark:text-[#3f82a9]">Group membership is restricted to followers </label> : followers.map((follw) =>  */}
                   <span>
 
                   {/* requestor: "",

@@ -42,14 +42,21 @@ type ProfileVisibilityData struct {
 }
 
 type AllUsersData struct {
-	ID         int    `json:"id"`
-	NickName   string `json:"username"`
-	Avatar     string `json:"avatar"`
-	Image      string `json:"image"`
-	ProfVisib  string `json:"profVisib"`
-	AboutMe    string `json:"aboutMe"`
-	LoggedIn   string `json:"loggedIn"`
-	Influencer int    `json:"influencer"`
+	ID         int      `json:"id"`
+	NickName   string   `json:"username"`
+	Avatar     string   `json:"avatar"`
+	Image      string   `json:"image"`
+	ProfVisib  string   `json:"profVisib"`
+	AboutMe    string   `json:"aboutMe"`
+	LoggedIn   string   `json:"loggedIn"`
+	Influencer int      `json:"influencer"`
+	FirstName  string   `json:"firstName"`
+	LastName   string   `json:"lastName"`
+	Age        string   `json:"age"`
+	Gender     string   `json:"gender"`
+	Email      string   `json:"email"`
+	Followers  []any `json:"followers"`
+	Following  []any `json:"following"`
 }
 
 type RegistrationData struct {
@@ -85,6 +92,7 @@ type Post struct {
 	PostType   string    `json:"type"`
 	Page       string    `json:"page"`
 	Comments   []Comment `json:"comments"`
+	Viewers    []string  `json:"postViewers"`
 }
 
 type Comment struct {
@@ -191,7 +199,7 @@ type FollowNotif struct {
 	Type     string `json:"type"`
 }
 
-//single instance of f.r.n. sent to offline private influencer
+// single instance of f.r.n. sent to offline private influencer
 type FollowNotifOffline struct {
 	FollowID      string `json:"followID"`
 	FollowerUN    string `json:"followerUN"`
@@ -219,7 +227,7 @@ type FollowReply struct {
 	Type        string `json:"type"`
 }
 
-//new group information
+// new group information
 type NewGroup struct {
 	ID        int      `json:"id"`
 	Creator   string   `json:"creator"`
@@ -229,7 +237,7 @@ type NewGroup struct {
 	Type      string   `json:"type"`
 }
 
-//group invite for online members
+// group invite for online members
 type NewGroupNotif struct {
 	GrpName       string `json:"grpName"`
 	GrpDescr      string `json:"grpDescr"`

@@ -13,10 +13,7 @@ const apiURL = process.env.REACT_APP_API_URL;
 
 
 const SubmitPost = ({title, content, visibility, url, file, category, postViewers}) => {
-  if (!postViewers) {
-    postViewers = []
-  }
- console.log(url, file)
+ console.log(url, file, postViewers)
  const newPost = {
     title: title,
     content: content,
