@@ -3,8 +3,8 @@ import { useWebSocket } from "../WebSocketProvider.jsx";
 
 
 
-function NewGroupNotification ( props ) {
-    //{console.log("new group info inside newGroupNotification component:", props.information)}
+function JoinGpReq ( props ) {
+    {console.log("join group request inside JoinGpReq component:", props.joinRequest)}
     {console.log("show the props inside NewGroupNotification: ",props)}
 
 
@@ -17,8 +17,8 @@ function NewGroupNotification ( props ) {
     let reply = "Yes";
     // Make a reply object
     var YesNo = {
-        "grpID": (props.groupData.grpID).toString(),
-        "groupMember": (props.groupData.member),
+        "grpID": (props.joinRequest.grpID),
+        "groupMember": (props.joinRequest.joinRequestBy),
         "joinReply": reply,
         "type": "joinGroupReply",
     };
@@ -30,7 +30,7 @@ function NewGroupNotification ( props ) {
       JSON.stringify(YesNo)
     )
     // After handling the action, hide the Notification
-    props.setGroupsVisible(false);
+    props.setJoinGpVisible(false);
 
   };
 
@@ -39,8 +39,8 @@ function NewGroupNotification ( props ) {
     let reply = "No";
     // Make a reply object
     var YesNo = {
-        "grpID": (props.groupData.grpID).toString(),
-        "groupMember": (props.groupData.member),
+        "grpID": (props.joinRequest.grpID),
+        "groupMember": (props.joinRequest.joinRequestBy),
         "joinReply": reply,
         "type": "joinGroupReply",
     };
@@ -51,20 +51,22 @@ function NewGroupNotification ( props ) {
       JSON.stringify(YesNo)
     )
     // After handling the action, hide the Notification
-    props.setGroupsVisible(false);
+    props.setJoinGpVisible(false);
 
   };
 
-    //return isVisible ? (
     return (
-    <div className="z-999 notification-item text-gray-600 font-normal text-sm mb-1.5 dark:text-gray-400 bg-[#9dd6f7]" style={{visibility:`${props.grNotifVisible ? 'visible' : 'hidden'}`}}>
-      <p id="msg"><span className="font-semibold text-gray-700 dark:text-white">{props.groupData.creator} </span>has invited you to join the group: </p>
+    <div className="z-999 notification-item text-gray-600 font-normal text-sm mb-1.5 dark:text-gray-400 bg-[#9dd6f7]" style={{visibility:`${props.joinGrVisible ? 'visible' : 'hidden'}`}}>
       <br></br>
       <br></br>
       <br></br>
-      <p id="grpN">Name: <span className="font-semibold text-gray-700 dark:text-white">{props.groupData.grpName}</span></p>
+      <p id="msg"><span className="font-semibold text-gray-700 dark:text-white">{props.joinRequest.joinRequestBy} </span>wishes to join your group: </p>
       <br></br>
-      <p id="grpD">Description: <span className="font-semibold text-gray-700 dark:text-white">{props.groupData.grpDescr}</span></p>
+      <br></br>
+      <br></br>
+      <p id="grpN">Name: <span className="font-semibold text-gray-700 dark:text-white">{props.joinRequest.grpName}</span></p>
+      <br></br>
+      <p id="grpD">Description: <span className="font-semibold text-gray-700 dark:text-white">{props.joinRequest.grpDescr}</span></p>
       <span>
       <button id="btnNotifOK"
         onClick={handleAccept}
@@ -83,7 +85,7 @@ function NewGroupNotification ( props ) {
       </button>
       </span>
     </div>
-    ) //: null; // Render null when isVisible is false
+    )
 };
 
-export default NewGroupNotification;
+export default JoinGpReq;
