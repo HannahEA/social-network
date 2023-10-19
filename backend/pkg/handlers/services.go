@@ -93,6 +93,7 @@ type AllDbMethods interface {
 	GetPendingGroupInvites(member string) (int, []NewGroupNotif)
 	InsertGroupMemberReply(joinGrpReply JoinGroupReply) error
 	GetExistingGroups() (string, []NewGroup)
+	GetPendingJoinGroupRequests(creator string) (string, []OneOfflineJoinGroupRequest)
 }
 
 // The dabataseStruct

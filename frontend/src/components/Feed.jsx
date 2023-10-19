@@ -33,7 +33,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, offlineGroupInvites:{}, sendAllGroups:{}, oneJoinGroupRequest:{} })
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, offlineGroupInvites:{}, sendAllGroups:{}, oneJoinGroupRequest:{}, offlineJoinGroupRequests:{} })
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
   
@@ -47,16 +47,20 @@ const Feed = () => {
           allData.current.presences = message.presences
           allData.current.offlineFollowNotif = message.offlineFollowNotif
           allData.current.offlineGroupInvites = message.offlineGroupInvites
+          allData.current.offlineJoinGroupRequests = message.offlineJoinGroupRequests
 
           //to prevent getting 'undefined' when there are no notifications
           let numFollowPending = parseInt(allData.current.offlineFollowNotif.numFollowPending, 10) || 0;
           let numGroupPending =  parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10) || 0;
-          let allNotifications = numFollowPending + numGroupPending
+          let numJoinGroupPending = parseInt(allData.current.offlineJoinGroupRequests.numGrpsPending, 10) || 0;
+          //all pending alerts is the sum of the above
+          let allNotifications = numFollowPending + numGroupPending + numJoinGroupPending
           console.log("all notifications are: ", allNotifications)
           //check if there are pending follow notifs or group invites
           if (allNotifications > 0) {
             console.log("notifications count: ", allData.current.offlineFollowNotif.numFollowPending)
             console.log("new groups count: ", allData.current.offlineGroupInvites.numGrpsPending)
+            console.log("new join groups count: ", allData.current.offlineJoinGroupRequests.numGrpsPending)
             //if yes, display the red alert
             showRedDot();
             //change corresponding state variables
@@ -66,7 +70,9 @@ const Feed = () => {
             if (numGroupPending > 0){
               setPendingGroups(allData.current.offlineGroupInvites.pendingGroupInvites);
             }
-            
+            if(numJoinGroupPending > 0){
+              setPendingJoinGroups(allData.current.offlineJoinGroupRequests.offlineJoinGrRequests)
+            }
 
           }else{
            console.log("numPending is zero, Nan or undefined", allData.current.offlineFollowNotif.numPending);
@@ -176,6 +182,7 @@ const Feed = () => {
   const[isPendingListVisible, setIsPendingListVisible] = useState(false);
   const[pendingNotif, setPendingNotif] = useState([]);
   const[pendingGroups, setPendingGroups] = useState([]);
+  const[pendingJoinGroups, setPendingJoinGroups] = useState([]);
   const[groupsList, setGroupsList] = useState({
     requestor: "",
     nbGroups: "",
@@ -772,13 +779,15 @@ const [viewProfile, setViewProfile] = useState(false)
                       <Alerts 
                         setDotVisible={setRedDotVisible}
                         dotVisible={redDotVisible}
-                        countFollowNotifs={(parseInt(allData.current.offlineFollowNotif.numPending, 10)||0) + (parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10)||0)}
+                        countFollowNotifs={(parseInt(allData.current.offlineFollowNotif.numPending, 10)||0) + (parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10)||0) + (parseInt(allData.current.offlineJoinGroupRequests.numGrpsPending, 10) ||0)}
                         pendingFolNotif={allData.current.offlineFollowNotif.pendingFollows}
                         pendingGroupInvites={allData.current.offlineGroupInvites}
+                        pendingJoinGroups={allData.current.offlineJoinGroupRequests}
                       />
                       )}
             {console.log("follows inside alerts div",allData.current.offlineFollowNotif.numPending)}
             {console.log("group invites inside alerts div",allData.current.offlineGroupInvites)}
+            {console.log("join group requests pending: ",allData.current.offlineJoinGroupRequests)}
             </button>
             </div> 
          
@@ -1767,7 +1776,7 @@ const [viewProfile, setViewProfile] = useState(false)
                   </div>
               </ul>
     {/* End of offline follow notifs */}
-
+                    
     {/* Start of group invites offline notif */}
     <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300" id="offlGroupInvitesTitle">
                 Group Invites
@@ -1815,6 +1824,55 @@ const [viewProfile, setViewProfile] = useState(false)
                   </div>
               </ul>
               {/* End of group invites offline notif */}
+                       
+               {/* Start of join group requests offline notif */}
+              <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300" id="offlJoinGroupRequestsTitle">
+                Join Group Requests
+              </div>
+              <ul className="py-0 text-gray-700 dark:text-gray-200" id="offlineJoinGrpRequestsUL">
+                  <div
+                    className="block py-2 px-4 text-sm hover:bg-[#7ca3ba] dark:hover:bg-[#7096ac] dark:text-gray-600 dark:hover:text-white dark:bg-[#a5dcfc]"
+                  >
+                  {console.log("the pendingJoinGroupsReq from feed", pendingJoinGroups)}
+                    {pendingJoinGroups.map((jg)=> (
+                      <li key={jg.grpID} id={jg.grpID} >
+                       <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
+                      <div className="flex-shrink-0">
+                      <img
+                        className="w-11 h-11 rounded-full"
+                        src={jg.memberURL || jg.memberImage || "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"}
+                        alt="groupInvite"
+                      />
+                      <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 bg-gray-900 rounded-full border border-white dark:border-gray-700">
+                        <svg
+                          aria-hidden="true"
+                          className="w-3 h-3 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 19"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                        <path d="M14.5 0A3.987 3.987 0 0 0 11 2.1a4.977 4.977 0 0 1 3.9 5.858A3.989 3.989 0 0 0 14.5 0ZM9 13h2a4 4 0 0 1 4 4v2H5v-2a4 4 0 0 1 4-4Z" />
+                        <path d="M5 19h10v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2ZM5 7a5.008 5.008 0 0 1 4-4.9 3.988 3.988 0 1 0-3.9 5.859A4.974 4.974 0 0 1 5 7Zm5 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm5-1h-.424a5.016 5.016 0 0 1-1.942 2.232A6.007 6.007 0 0 1 17 17h2a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5ZM5.424 9H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h2a6.007 6.007 0 0 1 4.366-5.768A5.016 5.016 0 0 1 5.424 9Z"/>
+                        </svg>
+                      </div>
+                      </div>
+                      <div className="pl-3 w-full">
+                      <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
+                        <span className="font-semibold text-gray-700 dark:text-white">{jg.member} </span>
+                          wishes to join your <span className="font-semibold text-gray-700 dark:text-white">{jg.grpName}</span> group
+                      </div>
+                      </div>
+                    </a>
+                    <div className="text-xs font-medium text-primary-600 dark:text-primary-500">                  
+                        <a onClick={()=>(handleOfflGroupAccept(jg))} style={{cursor: 'pointer'}} class="offlineAccept">Join</a>
+                        <a onClick={()=>(handleOfflGroupDecline(jg))} style={{cursor: 'pointer'}} class="offineDecline"> Decline</a>
+                    </div>
+                    </li>
+                    ))}
+                  </div>
+              </ul>
+              {/* End of join group requests offline notif */}
+
 
               {/* Start of event invite offline notif */}
               <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300" id="offlEventsTitle">
