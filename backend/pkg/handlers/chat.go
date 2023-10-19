@@ -22,7 +22,7 @@ func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r
 
 	// check if it it a request to add a chat notification
 	if chat.Status == "delivered" {
-		fmt.Println("new chat notification")
+		fmt.Println("new chat notification---------")
 		// add chat notification to database
 		oldChats, count, err := service.repo.CheckForNotification(chat)
 		//add new notif to database or add 1 to count
@@ -45,12 +45,13 @@ func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r
 			response["status"] = "notification removed"
 		} else {
 			response["status"] = "error removing notification"
+			
 		}
 
 	} else {
 		// new chat box has been opened get convoersation id
 		// delete any notifs for this chat from notif table
-		fmt.Println("converation", chat)
+		
 		conversation := service.repo.FindConversation(chat)
 		//get chat history
 		chats := service.repo.GetChatHistory(conversation)
@@ -81,7 +82,7 @@ func (repo *dbStruct) FindConversation(chat Chat) Conversation {
 	}
 
 	if count == 0 {
-		fmt.Println("conversationID not found")
+		
 		//add conversation to db
 		repo.NewPrivateChatToDB(chat)
 	}
@@ -92,7 +93,7 @@ func (repo *dbStruct) FindConversation(chat Chat) Conversation {
 		fmt.Println("FindConversation: convoID Query Error", err3, chat)
 	}
 
-	fmt.Println("conversationID found")
+	
 	var conversationId string
 	for row.Next() {
 		err := row.Scan(&conversationId)
@@ -135,7 +136,7 @@ func (r *dbStruct) GetChatHistory(convo Conversation) []Chat {
 		return chats
 	}
 
-	fmt.Println("chat messages found")
+	
 	var chat Chat
 	for row.Next() {
 		err := row.Scan(&chat.ConversationId, &chat.Message, &chat.Sender, &chat.Date)
