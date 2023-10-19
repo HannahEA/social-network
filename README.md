@@ -1,5 +1,5 @@
 ## Helena To Do ##
-Join group request alert for offline group creator
+Group page and event notifications
 
 
 ## Hannah's fav colour palette: 
