@@ -17,6 +17,7 @@ import Notification from "./notifications/notification.jsx";
 import NewGroupNotification from "./groups/newGroupNotification.jsx";
 import JoinGpReq from "./groups/joinGpReq.jsx"
 import GroupProfile from "./groups/groupProfile.jsx";
+import GrProfileCard from "./groups/grProfileCard.jsx"
 import { Notyf } from "notyf";
 // import { FunctionsRounded } from "@material-ui/icons";
 
@@ -137,7 +138,7 @@ const Feed = () => {
           showGroupInvites();
           console.log("newGroupNotif received by member: ", allData.current.newGroupNotif)
         } else if (message.type == "sendAllGroups"){
-
+            
             allData.current.sendAllGroups = message.sendAllGroups
           //update the state variable 'setGroupsList'
             setGroupsList((prevState) => ({
@@ -191,6 +192,14 @@ const Feed = () => {
     sliceOfGroups: [],
     type: ""
   })
+  const [selectedGroup, setSelectedGroup] = useState({
+    id: "",
+    creator: "",
+    gpMembers: [],
+    grpDescr: "",
+    grpName: "",
+    type: ""
+  });
   allData.current.userInfo = userInfo
   // allData.current.offlineFollowNotif = offlineFollowNotif
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
@@ -427,7 +436,7 @@ const handleClickUsersList = () => {
 
 
 
-      const handleFollowUser = () => {
+  const handleFollowUser = () => {
     if (isWebSocketConnected) {
       var influencerUN = selectedUser.username;
       var influencerID = selectedUser.id;
@@ -1734,17 +1743,12 @@ const [viewProfile, setViewProfile] = useState(false)
         onGpClose={() => {handleGpCloseModal()}} 
         onShowGroup={() => {handleGpCloseModal()}}
         // influencer={parseInt(selectedUser.influencer, 10)} // Pass the influencer prop here
-        // user = {selectedUser}
+        theGroup={selectedGroup}
         >
-          {selectedUser && (
-            <Card
-              /*user = {selectedUser}
-              name={selectedUser.username}
-              avt={selectedUser.avatar}
-              img={selectedUser.image}
-              visib={selectedUser.profVisib}
-               influencer= {parseInt(selectedUser.influencer, 10)}
-              about={selectedUser.aboutMe}*/
+          {selectedGroup && (
+            <GrProfileCard
+              setGrp={setSelectedGroup}
+              theGroup={selectedGroup}
             />
           )}
         </GroupProfile>
@@ -1760,6 +1764,8 @@ const [viewProfile, setViewProfile] = useState(false)
         <GroupsModal 
         onClose={() => {handleGroupsClose()}} 
         setGrpProfileVisible={setGroupProfileVisible}
+        setGrp={setSelectedGroup}
+        theGp={selectedGroup}
         grpProfileVisible={isGroupProfileVisible}
         followers={allData.current.followers}
         creator={email}

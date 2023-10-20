@@ -8,7 +8,7 @@ const notyf = new Notyf(); // Create a single instance of Notyf
 
 
 
-function GroupsModal({onClose, setGrpProfileVisible, grpProfileVisible, followers, creator, allGroups}){
+function GroupsModal({onClose, setGrpProfileVisible, setGrp, theGp, grpProfileVisible, followers, creator, allGroups}){
 
   
 
@@ -122,16 +122,28 @@ function GroupsModal({onClose, setGrpProfileVisible, grpProfileVisible, follower
         console.log("the gpList sent to b.e.: ====> ", gpList)
       }
 
-      // //select group name
-      // let showGrpProfile = document.getElementById("selectedGrp")
 
       // //make the group profile page visible
-      // showGrpProfile.onclick = setGrpProfileVisible(true)
-
       const handleOpenGpProfile = () => {
         setGrpProfileVisible(true);
         onClose()
       };
+
+      //change state variable boject 'setGrp' 
+      const handleSelectGrp = (grp) => {
+        console.log("the group data: ", grp)
+        setGrp((prevState) => ({
+          ...prevState,
+          id: grp.id,
+          creator: grp.creator,
+          gpMembers: grp.gpMembers,
+          grpDescr: grp.grpDescr,
+          grpName: grp.grpName,
+          type: grp.type
+        }
+        )
+      ) 
+      }
 
 
     //process submit join group
@@ -238,7 +250,10 @@ function GroupsModal({onClose, setGrpProfileVisible, grpProfileVisible, follower
                   <span>
                   <li key={grp.id} className="py-2 px-2 text-ml hover:bg-[#c7e6f8] dark:hover:bg-[#5a9fc6] dark:hover:text-[#2f627f] flex space-x-4">
                   <input class="chkJoin" name={grp.id}  type="checkbox" onChange={handleSelectGP} border="hidden" className="h-4 w-4 bg-white mt-1 ml-1 cursor-pointer accent-[#57aada]"/>
-                  <p style={{cursor: 'pointer'}} id="selectedGrp" onClick={handleOpenGpProfile}class="addToGroup font-bold dark:text-[#3f82a9] dark:hover:text-[#2f627f] ">{grp.grpName}</p>
+                  <p style={{ cursor: 'pointer' }} id="selectedGrp" onClick={() => {
+                      handleOpenGpProfile();
+                      handleSelectGrp(grp);
+                      }} class="addToGroup font-bold dark:text-[#3f82a9] dark:hover:text-[#2f627f] ">{grp.grpName}</p>
                   <p  className="dark:text-white text-[#717575]">{grp.grpDescr}</p>
                   </li>
                   </span>
