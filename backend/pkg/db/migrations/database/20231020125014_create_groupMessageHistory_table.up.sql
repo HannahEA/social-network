@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS "GroupChatsHistory" ( 
+CREATE TABLE IF NOT EXISTS "GroupMessageHistory" ( 
 					"messageID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 					"chatID" INTEGER,
 					"chatMessage" STRING NOT NULL,
