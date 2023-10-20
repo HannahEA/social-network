@@ -27,8 +27,9 @@ sudo apt-get update
 3. Set up golang-migrate:
 sudo apt-get install migrate
 
-4. VSC terminal command to create up/down migration files: 
-migrate create -ext sql -dir ./pkg/db/migrations/database create_sessions_table
+4. VSC terminal command to create up/down migration files:
+- cd backend
+- migrate create -ext sql -dir ./pkg/db/migrations/database create_sessions_table
 (e.g. from the root folder in VSC terminal type:
 migrate -database sqlite3:///backend/pkg/db/database/database.db -path backend/pkg/db/migrations/database up
 )

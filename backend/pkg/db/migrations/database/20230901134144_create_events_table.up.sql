@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS "Events" (
             "organizer"  TEXT,
             "title" TEXT,
             "description" TEXT,
-            "day_time" TEXT,
+            "day" TEXT,
+            "time" TEXT,
            FOREIGN KEY(groupID)REFERENCES Groups(groupID),
            FOREIGN KEY(organizer)REFERENCES Users(nickName)
            );
