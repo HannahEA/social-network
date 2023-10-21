@@ -39,7 +39,7 @@ code {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black overlay */
+  background-color: #000000b3; /* Semi-transparent black overlay */
   z-index: 1000; /* Adjust the z-index as needed */
   }
   
@@ -52,7 +52,6 @@ code {
 
   /* Styles for the modal content */
   #modalContainer {
-
     height: 700px;
     border-radius: 8px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
@@ -83,7 +82,6 @@ code {
     right: 8px;
     border: none;
     cursor: pointer;
-    color: #666;
   }
 
   /* ===> Start of 'Card' component styling <==== */
@@ -112,7 +110,8 @@ code {
     padding: 25px 15px;
     background-color: #9dd6f7;
     margin: 25px 0;
-    height: 200px;
+    height: 250px;
+    width: 550px;
     box-shadow: 0 2px 5px #ccc;
     text-align:left;
   }
@@ -230,6 +229,20 @@ position: relative
   position: absolute;
   top: 4px;
   right: 4px;
+}
+
+.isMember {
+  width: 16px;
+  height: 16px;
+  background-color: #2dbd2d;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  margin-top: 4px;
+  margin-right: 10px;
+  left: 11px;
 }
 
 /* to style the notification */

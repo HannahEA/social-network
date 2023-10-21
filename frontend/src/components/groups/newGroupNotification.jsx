@@ -1,6 +1,6 @@
 import React from 'react';
 import { useWebSocket } from "../WebSocketProvider.jsx";
-
+//this is the join group notification sent to a prospective member that is online
 
 
 function NewGroupNotification ( props ) {

@@ -1,6 +1,6 @@
 -- notifications types:  'private_chat', 'group_chat', 'follow', 'group', or 'event'
 -- status can be: 'pending', 'approved' or 'declined'.
-CREATE TABLE IF NOT EXISTS "Notifications" ( 
+CREATE TABLE IF NOT EXISTS "ChatNotifications" ( 
             "notificationID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             "sender" TEXT,
             "recipient" TEXT,

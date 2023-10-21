@@ -1,6 +1,6 @@
 import React from 'react';
 import { useWebSocket } from "../WebSocketProvider.jsx";
-
+//this is a follow notification sent to online private influencer
 
 
 function Notification ( props ) {

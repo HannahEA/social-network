@@ -1,6 +1,5 @@
 import React from "react";
-// import Avatar from "./Avatar";
-// import Detail from "./Detail";
+//This is the component to display user information
 
 
 
@@ -15,6 +14,21 @@ function Card(props){
         return "No"
         };
     }
+
+    function calculateAge(dateOfBirth) {
+        const dob = new Date(dateOfBirth);
+        const today = new Date();
+    
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        const dayDiff = today.getDate() - dob.getDate();
+    
+        if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+          age--;
+        }
+    
+        return age;
+      }
     
 
 return(
@@ -39,7 +53,7 @@ return(
             {/* <div class="flexbox-container"> */}
             {props.user.profVisib == 'public' || checkFollow() == 'Yes' ? 
             <div className="ml-2">
-            <div className="info">Age: {props.user.age} </div>
+            <div className="info">Age: {calculateAge(props.user.age)} </div>
             {/* <Detail detailInfo= {props.visib} /> */}
             {/* </div> */}
             {/* <div class="flexbox-container"> */}
