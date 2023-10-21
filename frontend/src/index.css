@@ -231,6 +231,20 @@ position: relative
   right: 4px;
 }
 
+.isMember {
+  width: 16px;
+  height: 16px;
+  background-color: #2dbd2d;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  margin-top: 4px;
+  margin-right: 10px;
+  left: 11px;
+}
+
 /* to style the notification */
 .notification-item {
   position: relative;

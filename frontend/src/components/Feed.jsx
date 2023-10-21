@@ -149,7 +149,8 @@ const Feed = () => {
               type: allData.current.sendAllGroups.type
             }
             )
-          ) 
+          )
+            setRequestBy(allData.current.sendAllGroups.requestor) 
         }else if (message.type == "oneJoinGroupRequest"){
           //send join group request to group creator
           allData.current.oneJoinGroupRequest = message.oneJoinGroupRequest
@@ -200,6 +201,8 @@ const Feed = () => {
     grpName: "",
     type: ""
   });
+  const [requestBy, setRequestBy] = useState("");
+  const [greenDotVisible, setGreenDotVisible] = useState(false);
   allData.current.userInfo = userInfo
   // allData.current.offlineFollowNotif = offlineFollowNotif
  const [isDarkTheme, setDarkTheme] = useState(false); // Example state for isDarkTheme
@@ -1759,8 +1762,8 @@ const [viewProfile, setViewProfile] = useState(false)
      {/* Start of show groupsModal*/}
           
       <div id="showGroups" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
-    {groupsModalVisible && (console.log("the followers in feed: ", allData.current))}
-      {(groupsModalVisible && groupsList) && (
+    {groupsModalVisible && (console.log("the allData in feed: ", allData.current))}
+      {(groupsModalVisible && groupsList && requestBy) && (
         <GroupsModal 
         onClose={() => {handleGroupsClose()}} 
         setGrpProfileVisible={setGroupProfileVisible}
@@ -1769,6 +1772,7 @@ const [viewProfile, setViewProfile] = useState(false)
         grpProfileVisible={isGroupProfileVisible}
         followers={allData.current.followers}
         creator={email}
+        request={requestBy}
         allGroups={groupsList}
         >
         </GroupsModal>

@@ -1,5 +1,6 @@
 
 import React from "react";
+//this is the modal that contains a group's profile
 
 function GroupProfile({ children, onGpClose}) {
  

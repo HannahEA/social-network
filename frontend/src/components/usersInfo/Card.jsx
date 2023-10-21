@@ -1,6 +1,5 @@
 import React from "react";
-// import Avatar from "./Avatar";
-// import Detail from "./Detail";
+//This is the component to display user information
 
 
 

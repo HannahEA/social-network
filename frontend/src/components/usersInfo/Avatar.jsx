@@ -1,4 +1,5 @@
 import React from "react";
+//This is the round picture component
 
 function Avatar(prop){
     // return <img className="circle-img" src={prop.img} alt="avatar_img"/>;

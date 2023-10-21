@@ -1,6 +1,7 @@
 
 import React from "react";
 import  {Posts} from "./../feed/Posts.jsx";
+//This is the modal component for the <Card/> component that is used to display user info
 
 function Modal({ children, onClose, onFollow, influencer, user}) {
  
