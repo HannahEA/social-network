@@ -42,21 +42,21 @@ type ProfileVisibilityData struct {
 }
 
 type AllUsersData struct {
-	ID         int      `json:"id"`
-	NickName   string   `json:"username"`
-	Avatar     string   `json:"avatar"`
-	Image      string   `json:"image"`
-	ProfVisib  string   `json:"profVisib"`
-	AboutMe    string   `json:"aboutMe"`
-	LoggedIn   string   `json:"loggedIn"`
-	Influencer int      `json:"influencer"`
-	FirstName  string   `json:"firstName"`
-	LastName   string   `json:"lastName"`
-	Age        string   `json:"age"`
-	Gender     string   `json:"gender"`
-	Email      string   `json:"email"`
-	Followers  []any `json:"followers"`
-	Following  []any `json:"following"`
+	ID         int    `json:"id"`
+	NickName   string `json:"username"`
+	Avatar     string `json:"avatar"`
+	Image      string `json:"image"`
+	ProfVisib  string `json:"profVisib"`
+	AboutMe    string `json:"aboutMe"`
+	LoggedIn   string `json:"loggedIn"`
+	Influencer int    `json:"influencer"`
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	Age        string `json:"age"`
+	Gender     string `json:"gender"`
+	Email      string `json:"email"`
+	Followers  []any  `json:"followers"`
+	Following  []any  `json:"following"`
 }
 
 type RegistrationData struct {
@@ -311,4 +311,15 @@ type OneOfflineJoinGroupRequest struct {
 	CreatorLogged string `json:"creatorLogged"`
 	GrpName       string `json:"grpName"`
 	GrpDescr      string `json:"grpDescr"`
+}
+
+//grup member invites follower to join group
+type GroupInvite struct {
+	Type       string `json:"type"`
+	GCreator   string `json:"gCreator"`
+	GName      string `json:"gName"`
+	GDescr     string `json:"gDescr"`
+	GId        string `json:"gId"`
+	InvitedBy  string `json:"invitedBy"`
+	InvitedWho string `json:"invitedWho"`
 }

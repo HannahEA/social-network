@@ -407,7 +407,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				fmt.Println("error unmarshalling joinGroupReply msg: ", jsonErr)
 			}
 
-			//insert new group data in the 'Groups' table
+			//insert member reply in the 'GroupMembers' table
 			err = service.repo.InsertGroupMemberReply(joinGrpReply)
 			if err != nil {
 				fmt.Println("error inserting gp member reply into GroupMembers table", err)
@@ -517,6 +517,27 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				} //Else if group creator is offline, Join group request will be added to offline alerts and sent from case: "connect"
 
 			} //end of iteration over AllJoinGrRequests array
+
+		case "groupInvite":
+			//A group member has invited one of his followers to join
+			var groupInvite GroupInvite
+
+			jsonError := json.Unmarshal(b, &groupInvite)
+			if jsonError != nil {
+				fmt.Println("error unmarshalling groupInvite: ", jsonError)
+				return
+			}
+
+			//get invitee's data
+			askWho, err2 := service.repo.GetUserByNickName(groupInvite.InvitedWho)
+				if err2 != nil {
+						fmt.Println("error retrieving gp creator by nickName: ", err2)
+						return
+				}
+			//upload join group request data to the GroupMembers table
+			joinStatus := "memberPending"
+			
+
 		} //end of 'switch for message type'
 
 	}
@@ -690,7 +711,7 @@ func (r *dbStruct) IsClientOnline(rows *sql.Rows, user *User) [][]string {
 		}
 		_, count, err3 := r.CheckForNotification(chat)
 		if err3 != nil {
-
+			fmt.Println("the error returned by CheckForNotification: ", err3)
 		}
 		c := strconv.Itoa(count)
 		client = append(client, c)
