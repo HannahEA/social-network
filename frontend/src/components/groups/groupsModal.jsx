@@ -9,7 +9,7 @@ const notyf = new Notyf(); // Create a single instance of Notyf
 
 
 
-function GroupsModal({onClose, setGrpProfileVisible, setGrp, grpProfileVisible, followers, creator, allGroups, request}){
+function GroupsModal({onClose, setGrpProfileVisible, setGrp, grpProfileVisible, setGrpMember, grpMember, followers, creator, allGroups, request}){
 
 console.log("the request inside 'GroupsModal': ",request)
 
@@ -130,7 +130,7 @@ console.log("the request inside 'GroupsModal': ",request)
         onClose()
       };
 
-      //change state variable boject 'setGrp' 
+      //change state variable object 'setGrp' 
       const handleSelectGrp = (grp) => {
         console.log("the group data: ", grp)
         setGrp((prevState) => ({
@@ -246,56 +246,44 @@ console.log("the request inside 'GroupsModal': ",request)
                 <div id="joinGrp">
                 <form id="joinGP" onSubmit={handleSubmitJoinGP}>
                 {console.log("allGroups inside the GroupsModal component: ", allGroups)}
-                  {/* <ul>
-                  {(parseInt(allGroups.nbGroups, 10) || 0) === 0 ? <label class="allGroups dark:text-[#3f82a9]">There are no groups available </label> : allGroups.sliceOfGroups.map((grp) => 
-                  <span>
-                  <li key={grp.id} className="py-2 px-2 text-ml hover:bg-[#c7e6f8] dark:hover:bg-[#5a9fc6] dark:hover:text-[#2f627f] flex space-x-4">
-                  {theGp.gpMembers.includes(request) === false ? (<input class="chkJoin" name={grp.id} type="checkbox" onChange={handleJoinGP} border="hidden" className="h-4 w-4 bg-white mt-1 ml-1 cursor-pointer accent-[#57aada]"/>) : (<p>Yes</p>) }
-                  <p style={{ cursor: 'pointer' }} id="selectedGrp" onClick={() => {
-                      handleOpenGpProfile();
-                      // handleIsMember(grp.gpMembers);
-                      handleSelectGrp(grp);
-                      }} class="addToGroup font-bold dark:text-[#3f82a9] dark:hover:text-[#2f627f] ">{grp.grpName}</p>
-                  <p  className="dark:text-white text-[#717575]">{grp.grpDescr}</p>
-                  </li>
-                  </span>
-                  )}
-                  </ul> */}
                   <ul>
-  {(parseInt(allGroups.nbGroups, 10) || 0) === 0 ? (
-    <label className="allGroups dark:text-[#3f82a9]">There are no groups available</label>
-  ) : (
-    allGroups.sliceOfGroups.map((grp) => (
-      <span key={grp.id}>
-        <li className="py-2 px-2 text-ml hover:bg-[#c7e6f8] dark:hover:bg-[#5a9fc6] dark:hover:text-[#2f627f] flex space-x-4">
-          {grp.gpMembers === null || grp.gpMembers.includes(request) === false ? (
-            <input
-              name={grp.id}
-              type="checkbox"
-              onChange={handleJoinGP}
-              className="chkJoin h-4 w-4 bg-white mt-1 ml-1 cursor-pointer accent-[#57aada]"
-            />
-          ) : (
-            <div className="isMember "></div>
-          )}
-          <p
-            style={{ cursor: 'pointer' }}
-            id="selectedGrp"
-            onClick={() => {
-              handleOpenGpProfile();
-              // handleIsMember(grp.gpMembers);
-              handleSelectGrp(grp);
-            }}
-            className="addToGroup font-bold dark:text-[#3f82a9] dark:hover:text-[#2f627f]"
-          >
-            {grp.grpName}
-          </p>
-          <p className="dark:text-white text-[#717575]">{grp.grpDescr}</p>
-        </li>
-      </span>
-    ))
-  )}
-</ul>
+                    {(parseInt(allGroups.nbGroups, 10) || 0) === 0 ? (
+                      <label className="allGroups dark:text-[#3f82a9]">There are no groups available</label>
+                      ) : (
+                        allGroups.sliceOfGroups.map((grp) => (
+                        <span key={grp.id}>
+                        <li className="py-2 px-2 text-ml hover:bg-[#c7e6f8] dark:hover:bg-[#5a9fc6] dark:hover:text-[#2f627f] flex space-x-4">
+                        
+                        {console.log("the value of grpMemberis: ",grpMember)}
+                        {grp.gpMembers === null || grp.gpMembers.includes(request) === false ?  (
+                        <input
+                        name={grp.id}
+                        type="checkbox"
+                        onChange={handleJoinGP}
+                        className="chkJoin h-4 w-4 bg-white mt-1 ml-1 cursor-pointer accent-[#57aada]"
+                        />
+            
+                        ) : (
+                        <div className="isMember "></div>
+                        )}
+                        <p
+                        style={{ cursor: 'pointer' }}
+                        id="selectedGrp"
+                        onClick={() => {
+                        grp.gpMembers === null || grp.gpMembers.includes(request) === false ? setGrpMember(false) : setGrpMember(true)
+                        handleOpenGpProfile();
+                        handleSelectGrp(grp);
+                        }}
+                        className="addToGroup font-bold dark:text-[#3f82a9] dark:hover:text-[#2f627f]"
+                        >
+                        {grp.grpName}
+                        </p>
+                        <p className="dark:text-white text-[#717575]">{grp.grpDescr}</p>
+                        </li>
+                        </span>
+                        ))
+                        )}
+                  </ul>
 
                   <div>
                   <br></br>

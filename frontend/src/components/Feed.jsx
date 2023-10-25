@@ -178,6 +178,7 @@ const Feed = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isGroupProfileVisible, setGroupProfileVisible] = useState(false);
+  const [groupMember, setGroupMember] = useState(false)
   const [groupsModalVisible, setGroupsModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const[isGroupsVisible, setIsGroupsVisible] = useState(false);
@@ -1743,6 +1744,7 @@ const [viewProfile, setViewProfile] = useState(false)
         {/* Start of GroupProfile */}
         {(isGroupProfileVisible && requestBy)&& (
         <GroupProfile 
+        grpMember={groupMember}
         onGpClose={() => {handleGpCloseModal()}} 
         onShowGroup={() => {handleGpCloseModal()}}
         followers={allData.current.followers}
@@ -1770,6 +1772,8 @@ const [viewProfile, setViewProfile] = useState(false)
         setGrpProfileVisible={setGroupProfileVisible}
         setGrp={setSelectedGroup}
         grpProfileVisible={isGroupProfileVisible}
+        setGrpMember={setGroupMember}
+        grpMember={groupMember}
         followers={allData.current.followers}
         creator={email}
         request={requestBy}

@@ -4,7 +4,7 @@ import {useState} from "react";
 import { useWebSocket } from "../WebSocketProvider.jsx";
 //this is the modal that contains a group's profile
 
-function GroupProfile({ children, onGpClose, followers, request, theGroup}) {
+function GroupProfile({ children, grpMember, onGpClose, followers, request, theGroup}) {
 
 const { websocketRef, isWebSocketConnected} = useWebSocket();
  
@@ -60,9 +60,9 @@ const handleGroupInvite = (e) => {
         </button>
         {children}
          {/* start of group invites */}
-        <div id="addMember">
+        <div id="addMember" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
         <form name="addMember" id="addMember" onSubmit={handleGroupInvite}>
-          <span><label className="info">Invite other people : </label></span>
+          <span><label className="info dark:text-white">Invite other people : </label></span>
           <span>
             <select id="dropDown" name="choosePeople" className="choosePeople rounded-md text-[#53a1ce] bg-[#bfe0f3] p-1" onChange={handleAddMember}>
             <optgroup label="Your followers" >
@@ -92,7 +92,7 @@ const handleGroupInvite = (e) => {
 
         {/* start of group events */}
             
-            
+
         {/* end of group events */}
       </div>
     </div>
