@@ -378,10 +378,11 @@ background-color: #2f5d78;
 
     /* start of group profile */
 
+    /* addMember contains invite follower, make a post, create event */
     #addMember{
       position:relative;
-      height: 150px;
-      width: 400px;
+      height: 350px;
+      width: auto;
     }
 
     #joinGpSubmit{
@@ -389,7 +390,7 @@ background-color: #2f5d78;
       width: 37%;
       margin: 0 auto;
       top:25px;
-      left:25px;
+      left:72px;
       bottom: 4px;
     }
 
