@@ -97,6 +97,10 @@ type AllDbMethods interface {
 	GetExistingGroups() (string, []NewGroup)
 	GetPendingJoinGroupRequests(creator string) (string, []OneOfflineJoinGroupRequest)
 	getUserAvatar(nkName string) (NewGroupNotif, error)
+	GetGroupComments(post Post) ([]Comment, error) 
+	GetGroupPosts(id int) ([]Post, error) 
+	AddGroupPostToDB(post Post) (error) 
+	AddGroupCommentToDB(post Post) error 
 }
 
 // The dabataseStruct

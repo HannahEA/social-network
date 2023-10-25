@@ -133,7 +133,7 @@ const handleGroupInvite = (e) => {
         </button>
         {children}
          {/* start of group invites */}
-        <div id="addMember" className="flex">
+        <div id="addMember" className="flex m-2 p-2">
 
         <form name="addMember" id="addMember" onSubmit={handleGroupInvite}>
           <span><label className="info">Invite other people : </label></span>
@@ -222,13 +222,15 @@ const handleGroupInvite = (e) => {
                 Post
               </button>
             </form>
-            
+
         </div>
         {/* end of group invites */}
-
+              <br></br>
         {/* start of group posts */}
-            
-        <Posts page="groupProfile" id={theGroup.id} username ={""}/>
+          <div className="block">
+                    <Posts page="groupProfile" groupID={theGroup.id} username ={""} sPost={sPost}/>
+
+            </div>  
 
         {/* end of group posts */}
 

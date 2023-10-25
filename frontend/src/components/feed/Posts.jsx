@@ -52,14 +52,14 @@ const SubmitPost = ({title, content, visibility, url, file, category, postViewer
     
 }
 
-const Posts = ({sPost, page, username, id}) => {
+const Posts = ({sPost, page, username, groupID}) => {
   const [pData, setpData] = useState([])
   
   let getPosts = {
     cookie: username, 
     type: "getPosts",
     page: page,
-    groupID: id
+    groupID: groupID
   }
 
   const fetchPosts = () => {
@@ -110,7 +110,7 @@ const Posts = ({sPost, page, username, id}) => {
   const handleSendComment = (event) => {
     event.preventDefault();
     //postID set
-    let newComment = SubmitComment(commentContent, parseInt(event.target.value))
+    let newComment = SubmitComment(commentContent, parseInt(event.target.value), page)
     let allInput = document.querySelectorAll("input")
     allInput.forEach(singleInput => singleInput.value = '')
     setNewComment(newComment)
@@ -164,7 +164,7 @@ const Posts = ({sPost, page, username, id}) => {
                     </div>
                     
                   </div>
-                  <Comments postID={post.postId} newComment={newComment}/>
+                  <Comments postID={post.postId} newComment={newComment} page={page}/>
                 </div>
                 </div>
                 </div>
@@ -219,7 +219,7 @@ const Posts = ({sPost, page, username, id}) => {
                     </div>
                     
                   </div>
-                 <Comments postID={post.postId} newComment={newComment}/>
+                 <Comments postID={post.postId} newComment={newComment} page={page}/>
                 </div>
                 </div>
                 
@@ -234,13 +234,14 @@ const Posts = ({sPost, page, username, id}) => {
     );
  }
 
-const SubmitComment = (comment, postId) => {
+const SubmitComment = (comment, postId, page) => {
   console.log(comment, postId)
  
  const newComment = {
     postId: postId,
     content: comment,
-    type: "newComment"
+    type: "newComment",
+    page: page,
  }
  const json = JSON.stringify(newComment)
   console.log("json", json)
@@ -268,11 +269,12 @@ const SubmitComment = (comment, postId) => {
   return data 
 }
 
-const Comments = ({postID, newComment}) => {
+const Comments = ({postID, newComment, page}) => {
   const [cData, setCData] = useState([])
   const getComments = {
     postId: postID,
-    type: "getComments"
+    type: "getComments",
+    page: page,
  }
   const fetchComments = () => {
     fetch(`/post`, {

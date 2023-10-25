@@ -38,117 +38,165 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 
 	if data.PostType == "newPost" {
 		if data.GroupId > 0 {
-			//submitting post at group profile page 
-			//add post to db 
-			// get latest post and send back to client side
-
-
-		} else {
-			//submitting post at feed
-			//return id of the new post
-		id, err := service.repo.AddPostToDB(data)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "Failed to add new post", http.StatusInternalServerError)
-			return
-		}
-		// if post visibility is almost private add each of viewers to post viewers table with post id of post they are allowed to see
-		fmt.Println("post Viewers", data.Visibility, data.Viewers)
-		if data.Visibility == "Almost Private" {
-			
-			err:= service.repo.AddPostViewersToDB(data, id)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Failed to add users to Almost Private post", http.StatusInternalServerError)
-				return
-			}
-		}
-		fmt.Println("getting Public posts")
-		posts, err := service.repo.GetPublicPosts(user)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
-			return
-		}
-		fmt.Println("getting comments for latest post")
-
-		comments, err := service.repo.GetComments(posts[0])
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "Failed to get comments", http.StatusInternalServerError)
-			return
-		}
-		posts[0].Comments = comments
-
-		fmt.Println("successfully retrieved comments")
-		fmt.Println("Sending latest post")
-		json.NewEncoder(w).Encode(posts[0])
-		}
-		
-
-	} else if data.PostType == "getPosts" {
-		posts := []Post{}
-		//use cookie to get user
-
-		if data.Page == "myProfile" {
-			//profile page
-			// query database for all posts by this user
-			userPosts, err := service.repo.GetAllUserPosts(user)
-			
-			posts = userPosts
-			if err != nil {
-				fmt.Println("Post Handler: GetAllUserPosts error: ", err)
-			}
-		} else if data.Page == "feed" {
-			//feed page
-			fmt.Println("getting Public posts")
-			publicPosts, err := service.repo.GetPublicPosts(user)
-			posts = publicPosts
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Failed to get public post", http.StatusInternalServerError)
-				return
-			}
-			fmt.Println("getting Private posts")
-			privatePosts, err2 := service.repo.GetPrivatePosts(user)
-			if err2 != nil {
-				log.Println(err2)
-				http.Error(w, "Failed to get private post", http.StatusInternalServerError)
-				return
-			}
-			//search post table for almost private posts this user has been allowed to see and append to list
-			almPrivatePosts, err3 := service.repo.GetAlmostPrivatePosts(user)
-			if err3 != nil {
-				log.Println(err3)
-				http.Error(w, "Failed to get almost private post", http.StatusInternalServerError)
-				return
-			}
-			fmt.Println("how many almost private posts?", len(almPrivatePosts))
-			posts = append(posts, privatePosts...)
-			posts = append(posts, almPrivatePosts...)
-
-		} else if data.Page == "groupProfile" {
-		
-			//check group posts using group id to get all group posts, return slice of posts
-			// range through posts to get comments using group post id return slice of comments
-			// post.comments = comments
-			// send slice of posts
-
-		}
-		fmt.Println("getting comments for posts")
-		for i, p := range posts {
-			comments, err := service.repo.GetComments(p)
+			//submitting post at group profile page
+			//add post to db
+			posts := []Post{}
+			err := service.repo.AddGroupPostToDB(data)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, "Failed to get comments", http.StatusInternalServerError)
 				return
 			}
-			posts[i].Comments = comments
+			// get group posts
+			posts, err = service.repo.GetGroupPosts(data.GroupId)
+			// get comments
+			comments := []Comment{}
+			comments, err = service.repo.GetGroupComments(posts[0])
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to get comments", http.StatusInternalServerError)
+				return
+			}
+			posts[0].Comments = comments
+			// get latest post and send back to client side with group id
+			json.NewEncoder(w).Encode(posts[0])
+		} else {
+			//submitting post at feed
+			//return id of the new post
+			id, err := service.repo.AddPostToDB(data)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to add new post", http.StatusInternalServerError)
+				return
+			}
+			// if post visibility is almost private add each of viewers to post viewers table with post id of post they are allowed to see
+			fmt.Println("post Viewers", data.Visibility, data.Viewers)
+			if data.Visibility == "Almost Private" {
+
+				err := service.repo.AddPostViewersToDB(data, id)
+				if err != nil {
+					log.Println(err)
+					http.Error(w, "Failed to add users to Almost Private post", http.StatusInternalServerError)
+					return
+				}
+			}
+			fmt.Println("getting Public posts")
+			posts, err := service.repo.GetPublicPosts(user)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to get public post", http.StatusInternalServerError)
+				return
+			}
+			fmt.Println("getting comments for latest post")
+
+			comments, err := service.repo.GetComments(posts[0])
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to get comments", http.StatusInternalServerError)
+				return
+			}
+			posts[0].Comments = comments
+
+			fmt.Println("successfully retrieved comments")
+			fmt.Println("Sending latest post")
+			json.NewEncoder(w).Encode(posts[0])
 		}
-		fmt.Println("successfully retrieved comments")
-		json.NewEncoder(w).Encode(posts)
+
+	} else if data.PostType == "getPosts" {
+		posts := []Post{}
+		//use cookie to get user
+		if data.Page == "groupProfile" {
+			fmt.Println("getting posts for Group Profile", data.GroupId)
+			// get group posts
+			posts := []Post{}
+			posts, err := service.repo.GetGroupPosts(data.GroupId)
+			if err != nil {
+				if err != nil {
+					log.Println(err)
+					http.Error(w, "Failed to get group posts", http.StatusInternalServerError)
+					return
+				}
+			}
+			//get group comments
+			comments := []Comment{}
+			for i, post := range posts {
+				comments, err = service.repo.GetGroupComments(post)
+				if err != nil {
+					if err != nil {
+						log.Println(err)
+						http.Error(w, "Failed to get groupcomments", http.StatusInternalServerError)
+						return
+					}
+				}
+				posts[i].Comments = comments
+				comments = []Comment{}
+			}
+			fmt.Println("group posts", posts)
+			json.NewEncoder(w).Encode(posts)
+
+		} else {
+			if data.Page == "myProfile" {
+				//profile page
+				// query database for all posts by this user
+				userPosts, err := service.repo.GetAllUserPosts(user)
+
+				posts = userPosts
+				if err != nil {
+					fmt.Println("Post Handler: GetAllUserPosts error: ", err)
+				}
+			} else if data.Page == "feed" {
+				//feed page
+				fmt.Println("getting Public posts")
+				publicPosts, err := service.repo.GetPublicPosts(user)
+				posts = publicPosts
+				if err != nil {
+					log.Println(err)
+					http.Error(w, "Failed to get public post", http.StatusInternalServerError)
+					return
+				}
+				fmt.Println("getting Private posts")
+				privatePosts, err2 := service.repo.GetPrivatePosts(user)
+				if err2 != nil {
+					log.Println(err2)
+					http.Error(w, "Failed to get private post", http.StatusInternalServerError)
+					return
+				}
+				//search post table for almost private posts this user has been allowed to see and append to list
+				almPrivatePosts, err3 := service.repo.GetAlmostPrivatePosts(user)
+				if err3 != nil {
+					log.Println(err3)
+					http.Error(w, "Failed to get almost private post", http.StatusInternalServerError)
+					return
+				}
+				fmt.Println("how many almost private posts?", len(almPrivatePosts))
+				posts = append(posts, privatePosts...)
+				posts = append(posts, almPrivatePosts...)
+
+			}
+			fmt.Println("getting comments for posts")
+			for i, p := range posts {
+				comments, err := service.repo.GetComments(p)
+				if err != nil {
+					log.Println(err)
+					http.Error(w, "Failed to get comments", http.StatusInternalServerError)
+					return
+				}
+				posts[i].Comments = comments
+			}
+			fmt.Println("successfully retrieved comments")
+			json.NewEncoder(w).Encode(posts)
+		}
+
 	} else if data.PostType == "getComments" {
-		comments, err := service.repo.GetComments(data)
+		// is there a group id
+		var comments []Comment
+		var err error
+		if data.Page == "groupProfile" {
+			comments, err = service.repo.GetGroupComments(data)
+		} else {
+			comments, err = service.repo.GetComments(data)
+
+		}
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "Failed to get public post", http.StatusInternalServerError)
@@ -156,12 +204,23 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 		}
 
 		json.NewEncoder(w).Encode(comments)
+
 	} else if data.PostType == "newComment" {
-		err := service.repo.AddCommentToDB(data)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "Failed to add new comment", http.StatusInternalServerError)
-			return
+		// is there a group id
+		if data.Page == "groupProfile" {
+			err := service.repo.AddGroupCommentToDB(data)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to add new comment", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			err := service.repo.AddCommentToDB(data)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Failed to add new comment", http.StatusInternalServerError)
+				return
+			}
 		}
 
 	}
@@ -258,8 +317,8 @@ func (repo *dbStruct) GetPrivatePosts(user *User) ([]Post, error) {
 	// Generate placeholders for the IN clause
 	followers, err := repo.GetFollowers(user.NickName)
 	if err != nil {
-		fmt.Println("error getting followers: ",err)
-		
+		fmt.Println("error getting followers: ", err)
+
 	}
 	fmt.Println("who user follows this user?", followers)
 	placeholders := make([]string, len(followers))
@@ -298,7 +357,7 @@ func (repo *dbStruct) GetAllUserPosts(user *User) ([]Post, error) {
 	return posts, nil
 }
 
-func (repo *dbStruct) AddPostToDB(post Post) (int,error) {
+func (repo *dbStruct) AddPostToDB(post Post) (int, error) {
 	// time
 	date := time.Now()
 	//cookie
@@ -312,21 +371,21 @@ func (repo *dbStruct) AddPostToDB(post Post) (int,error) {
 	if err != nil {
 		fmt.Println("error executing query: ", err)
 	}
-	
+
 	rows, err := repo.db.Query(`Select last_insert_rowid()`)
 	if err != nil {
 		log.Println(err)
-		return 0,fmt.Errorf("failed to add Post to Database")
+		return 0, fmt.Errorf("failed to add Post to Database")
 	}
 	var id int
 	for rows.Next() {
-		err:= rows.Scan(&id)
+		err := rows.Scan(&id)
 		if err != nil {
 			log.Println(err)
-			return 0,fmt.Errorf("failed to add Post to Database")
+			return 0, fmt.Errorf("failed to add Post to Database")
 		}
 	}
-	return id,nil
+	return id, nil
 }
 
 func (repo *dbStruct) AddPostViewersToDB(data Post, id int) error {
@@ -337,7 +396,7 @@ func (repo *dbStruct) AddPostViewersToDB(data Post, id int) error {
 			return fmt.Errorf("failed to add PostViewers to Database")
 		}
 	}
-	return nil 
+	return nil
 }
 
 func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
@@ -405,7 +464,7 @@ func (repo *dbStruct) AddCommentToDB(post Post) error {
 	return nil
 }
 
-func (repo *dbStruct) AddGroupPostToDB(post Post) (int,error) {
+func (repo *dbStruct) AddGroupPostToDB(post Post) error {
 	// time
 	date := time.Now()
 	//cookie
@@ -416,23 +475,131 @@ func (repo *dbStruct) AddGroupPostToDB(post Post) (int,error) {
 	//category
 	categories := strings.Join(post.Category, ",")
 	var visibility = "Public"
-	_, err := repo.db.Exec("INSERT INTO Grouposts (authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, visibility)
+	_, err := repo.db.Exec("INSERT INTO GroupPosts (groupID, authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", post.GroupId, user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, visibility)
 	if err != nil {
 		fmt.Println("error executing query: ", err)
 	}
-	
-	rows, err := repo.db.Query(`Select last_insert_rowid()`)
+
+	return nil
+}
+
+func (repo *dbStruct) GetGroupPosts(id int) ([]Post, error) {
+	posts := []Post{}
+	rows, err := repo.db.Query(`SELECT groupID, postID, author, title, content, category, imageURL, imageFile, creationDate FROM GroupPosts WHERE groupID = ?`, id)
+	if err != nil {
+		return posts, fmt.Errorf("DB Query error: %+v", err)
+	}
+	var groupID int
+	var postID int
+	var postDate string
+	var author string
+	var title string
+	var category string
+	var imageURL string
+	var imageFile string
+	var postcontent string
+	for rows.Next() {
+		err := rows.Scan(&groupID, &postID, &author, &title, &postcontent, &category, &imageURL, &imageFile, &postDate)
+		if err != nil {
+			return posts, fmt.Errorf("GetGroupPosts rows.Scan error: %+v", err)
+		}
+		postTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", postDate)
+
+		if parseError != nil {
+			return posts, fmt.Errorf("getGroupPosts: parse creationDate Error")
+		}
+		//get the current date
+		currTime := time.Now()
+		currDate := currTime.Format("2006-01-02")
+		//get the date the post was created
+		postDate = postTime.Format("2006-01-02")
+		//if the post was created today
+		if currDate == postDate {
+			//send the time insted of the date
+
+			postDate = postTime.Format("3:04PM")
+
+		}
+
+		//tags
+		tags := strings.Split(category, ",")
+		posts = append([]Post{{
+			PostID:    postID,
+			Author:    author,
+			Title:     title,
+			Category:  tags,
+			Content:   postcontent,
+			ImageFile: imageFile,
+			ImageURL:  imageURL,
+			Date:      postDate,
+			GroupId:   groupID,
+		}}, posts...)
+	}
+
+	return posts, nil
+}
+
+func (repo *dbStruct) AddGroupCommentToDB(post Post) error {
+	// time
+	date := time.Now()
+	//cookie
+	cookieArr := strings.Split(post.Cookie, "=")
+	cookieID := cookieArr[1]
+	//user info
+	user := repo.GetUserByCookie(cookieID)
+
+	_, err := repo.db.Exec("INSERT INTO GroupComments ( groupID, postID, authorID, author, content, creationDate) VALUES ( ?, ?, ?, ?, ?, ?)", 1, post.PostID, user.id, user.NickName, post.Content, date)
 	if err != nil {
 		log.Println(err)
-		return 0,fmt.Errorf("failed to add Group Post to Database")
+		return fmt.Errorf("failed to add GroupComment to Database")
 	}
-	var id int
+	return nil
+}
+
+func (repo *dbStruct) GetGroupComments(post Post) ([]Comment, error) {
+	comments := []Comment{}
+	rows, err := repo.db.Query(`SELECT commentID, author, content, creationDate FROM GroupComments WHERE postID = ?`, post.PostID)
+	if err != nil {
+		return comments, fmt.Errorf("GetGroupComments DB Query error %+v", err)
+	}
+	var commentID int
+	var commentDate string
+	var author string
+	var content string
 	for rows.Next() {
-		err:= rows.Scan(&id)
+		err := rows.Scan(&commentID, &author, &content, &commentDate)
 		if err != nil {
-			log.Println(err)
-			return 0,fmt.Errorf("failed to add Group Post to Database")
+			return comments, fmt.Errorf("GetGroupComments rows.Scan error %+v", err)
 		}
+		cTime, parseError := time.Parse("2006-01-02T15:04:05.999999999Z07:00", commentDate)
+
+		if parseError != nil {
+			log.Fatal("addGroupComments: parse commentDate Error")
+		}
+		//get the current date
+		currTime := time.Now()
+		currDate := currTime.Format("2006-01-02")
+		//get the date the post was created
+		commentDate = cTime.Format("2006-01-02")
+		//if the post was created today
+		if currDate == commentDate {
+			//send the time insted of the date
+
+			commentDate = cTime.Format("3:04PM")
+
+		}
+		comments = append([]Comment{{
+			CommentID: commentID,
+			PostID:    post.PostID,
+			Author:    author,
+			Content:   content,
+			Date:      commentDate,
+		}}, comments...)
 	}
-	return id,nil
+	err = rows.Err()
+	if err != nil {
+		return comments, err
+	}
+	return comments, nil
+
 }
