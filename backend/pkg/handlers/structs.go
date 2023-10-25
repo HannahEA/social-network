@@ -242,12 +242,14 @@ type NewGroup struct {
 }
 
 // group invite for online members
+//this struct is used for new groups and for when a grup member invites her follower to join a group
 type NewGroupNotif struct {
 	GrpName       string `json:"grpName"`
 	GrpDescr      string `json:"grpDescr"`
 	GrpID         int    `json:"grpID"`
 	Creator       string `json:"creator"`
 	Member        string `json:"member"`
+	InvitedBy     string `json:"invitedBy"`
 	CreatorURL    string `json:"creatorURL"`
 	CreatorImage  string `json:"creatorImage"`
 	CreatorLogged string `json:"creatorLogged"`
@@ -255,6 +257,7 @@ type NewGroupNotif struct {
 	MemberStatus  string `json:"memberStatus"`
 	Type          string `json:"type"`
 }
+
 
 // follow notification reply by private influencer
 type JoinGroupReply struct {
@@ -313,13 +316,6 @@ type OneOfflineJoinGroupRequest struct {
 	GrpDescr      string `json:"grpDescr"`
 }
 
-//grup member invites follower to join group
-type GroupInvite struct {
-	Type       string `json:"type"`
-	GCreator   string `json:"gCreator"`
-	GName      string `json:"gName"`
-	GDescr     string `json:"gDescr"`
-	GId        string `json:"gId"`
-	InvitedBy  string `json:"invitedBy"`
-	InvitedWho string `json:"invitedWho"`
-}
+
+
+

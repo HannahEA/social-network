@@ -24,12 +24,12 @@ function handleAddMember(){
     //The js object to be sent to b.e. via w.s.
     setInviteMember( {
       ...inviteMember,
-      gCreator: theGroup.creator,
-      gName: theGroup.grpName,
-      gDescr: theGroup.grpDescr,
-      gId: theGroup.id,
+      creator: theGroup.creator,
+      grpName: theGroup.grpName,
+      grpDescr: theGroup.grpDescr,
+      grpID: theGroup.id,
       invitedBy: request,
-      invitedWho: follower,
+      member: follower,
      }
     )
      console.log("Info to join a group: =====> ", inviteMember)
@@ -59,6 +59,7 @@ const handleGroupInvite = (e) => {
           Close
         </button>
         {children}
+         {/* start of group invites */}
         <div id="addMember">
         <form name="addMember" id="addMember" onSubmit={handleGroupInvite}>
           <span><label className="info">Invite other people : </label></span>
@@ -82,6 +83,17 @@ const handleGroupInvite = (e) => {
               </div>
           </form>
         </div>
+        {/* end of group invites */}
+
+        {/* start of group posts */}
+            
+
+        {/* end of group posts */}
+
+        {/* start of group events */}
+            
+            
+        {/* end of group events */}
       </div>
     </div>
   );
