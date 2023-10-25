@@ -1,20 +1,95 @@
 
 import React from "react";
-import {useState} from "react";
+import {useState, useRef} from "react";
 import { useWebSocket } from "../WebSocketProvider.jsx";
-import {SubmitPost, Posts, Tags} from "../feed/Posts.jsx"
-//this is the modal that contains a group's profile
+import {SubmitPost, Posts, Tags} from "../feed/Posts.jsx";
+import { Notyf } from "notyf";
+import "notyf/notyf.min.css";
+//This is the modal used to create new groups, join existing groups, and open a group's profile
 
-function GroupProfile({ children, grpMember, onGpClose, followers, request, theGroup}) {
+const notyf = new Notyf(); // Create a single instance of Notyf
 
-  const [Title, setTitle] = useState("")
+
+function GroupProfile({ children, grpMember, onGpClose, followers, request, theGroup, creator}) {
+
+  
+
+  
+  //--------CREATE EVENT
+
+    //when the user selects a date.
+    const handleDateChange = (e) => {
+      setDOB(e.target.value);
+    };
+
+    const [date, setDOB] = useState('');
+    const dateInputRef = useRef(null);
+
+// to be removed at a later date
+
+const [gpMembers, setGpMembers] = useState([]);
+const [newGroupInputs, setNewGroupInputs] = useState({["type"]: "newGroup"});
+
+    //make a new group
+    const handleNewGP = (event) => {
+      const { name, value } = event.target;
+
+      // Check if the input is a checkbox with a value of "on"
+      if (event.target.type === "checkbox" && value === "on") {
+        // Clone the existing array of group info and add the checkbox name to it
+        const updatedGpMembers = [...gpMembers, name];
+        setGpMembers(updatedGpMembers); 
+         // Update the newGroupInputs state, incorporating the gpMembers array
+          setNewGroupInputs({
+          ...newGroupInputs,
+              gpMembers: updatedGpMembers,
+              creator: creator,
+          });
+      }else{
+          // Update the newGroupInputs state for other inputs
+              setNewGroupInputs({ ...newGroupInputs, [name]: value });
+      }
+
+    };
+
+    const handleSubmitNewGP = (event) => {
+      event.preventDefault();
+
+      //clear text inputs
+      document.getElementById("grpName").value = ""; // Clear the group name value
+      document.getElementById("grpDescr").value = ""; // Clear the group description value
+      
+      //clear checkboxes
+      const grpMembers = document.querySelectorAll('input[type="checkbox"]:checked')//make HTMLCollection
+      for (let i = 0; i < grpMembers.length; i++){
+        grpMembers[i].checked = false; //un-tick check boxes
+      }
+
+      //alert(JSON.stringify(newGroupInputs, null, 2)); // Convert to JSON string for display; the second argument null is for replacer function, and the third argument 2 is for indentation
+
+        console.log("new group inputs sent to b.e.:", newGroupInputs);
+
+      // Display a success notification
+      notyf.success("New group created");
+        
+        websocketRef.current.send(
+        JSON.stringify(newGroupInputs)
+
+        
+    )
+    };
+
+// end of to be removed
+
+//-----------SUBMIT POST 
+
+const [Title, setTitle] = useState("")
   const [Content, setContent] = useState("")
   const [Visibility, setVisibility] = useState("")
   const [tag, setTags] = useState([])
   const [imageFile, setImageFile] = useState(null)
   const [imageURL, setImageURL] = useState("")
   const [sPost, setSpost] = useState(null)
-
   const handleTitle = (event) => {
       setTitle(event.target.value);
     };
@@ -131,11 +206,15 @@ const handleGroupInvite = (e) => {
         <button className="modal-close text-white dark:text-white" onClick={() => {onGpClose()}} classn="ml-60  pl-5 pr-5 font-bold bg-[#00cec9] text-[#255f5a] rounded-md">
           Close
         </button>
+        <div className="flex justify-around">
         {children}
-         {/* start of group invites */}
-        <div id="addMember" className="flex" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
+        </div>
 
-        <form name="addMember" id="addMember" onSubmit={handleGroupInvite}>
+         {/* start of group invites, group posts, group events */}
+        <div id="addMember" className="flex justify-around" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
+
+      {/* start of group invites */}
+        <form name="addMember" id="addMember" onSubmit={handleGroupInvite} className="justify-around">
           <span><label className="info dark:text-white">Invite other people : </label></span>
           <span>
             <select id="dropDown" name="choosePeople" className="choosePeople rounded-md text-[#53a1ce] bg-[#bfe0f3] p-1" onChange={handleAddMember}>
@@ -156,7 +235,12 @@ const handleGroupInvite = (e) => {
                 />
               </div>
           </form>
-          <form onSubmit={submitPost}>
+          {/* end of group invites */}
+
+          {/* start of group posts */}
+          
+          <form onSubmit={submitPost} className="justify-between">
+          <p className="font-bold text-center text-lg dark:text-[#3f82a9] text-[#378dbe]">Create a post</p>
               <span className="flex p-2.5 pl-5">
                 <p className="flex-row mr-5 font-bold text-[#5aadde]">Title</p>
                 <input
@@ -167,7 +251,6 @@ const handleGroupInvite = (e) => {
                 />
               </span>
 
-              
               <div className="flex justify-right items-right flex-col">
                 <p className="p-2.5 pl-5 font-bold text-[#5aadde]">Content</p>
                 <textarea
@@ -222,20 +305,66 @@ const handleGroupInvite = (e) => {
                 Post
               </button>
             </form>
+            {/* end of group posts */}
+
+            {/* start of group events */}
+            <div id="newGroupForm">
+            <p className="font-bold text-center text-lg dark:text-[#3f82a9] text-[#5fc1fa]">Create an event</p>
+              <form onSubmit={handleSubmitNewGP} className=" bg-[#a8daf7] dark:bg-[#81b7d7] justify-between">
+                <br></br>
+                <label className="ml-2 text-[#717575] dark:text-white">Group name:
+                <input type="text" name="grpName" valuechkJoin={newGroupInputs.grpName || ""} onChange={handleNewGP} placeholder="Enter group name" className="border-hidden mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="grpName" required />
+                </label><br></br>
+                <label className="ml-2 text-[#717575] dark:text-white">Description:
+                <input type="text" name="grpDescr" value={newGroupInputs.grpDescr || ""} onChange={handleNewGP} placeholder="Enter description" className="border-hidden mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(70%-1rem)] rounded-md" id="grpDescr" required/>
+                </label>
+              <br></br>
+                <label className="ml-2 text-[#717575] dark:text-white">Date and time:
+                <input
+                type="datetime-local"
+                className="mb-6 ml-6 bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  onChange={handleDateChange}
+                  ref={dateInputRef}
+                />
+                </label>
+                <p className="ml-2 text-[#717575] dark:text-white">Invite group members:</p>
+                  <br></br>
+                  {console.log("followers inside the GroupsModal component: ",followers)}
+                  <ul className="flex space-x-4"> 
+                    {followers == null ? <label class="addToGroup dark:text-[#3f82a9]">Group membership is restricted to followers </label> : followers.map((follw) => (
+                  <li key={follw}>
+                    <input class="chk" name={follw} type="checkbox" onChange={handleNewGP} border="hidden" background-color="white" className="rounded-sm h-4 w-4 ml-1 cursor-pointer accent-[#57aada]"/>
+                    <label class="addToGroup dark:text-[#3f82a9]">{follw}</label>
+                  </li>
+                ))}
+                  </ul>
+                <div id="addFollowersToGroup" className="text-sm font-sm text-[#717575] dark:text-primary-500">
+               
+                </div>
+                <div className="justify-center flex">
+                <input type="submit" id="newGpSubmit" value="Create group"
+                  className="cursor-pointer  items-center p-2 w-[calc(35%-1rem)] text-base font-medium text-white 
+                  rounded-lg transition duration-75 group bg-[#57aada] dark:bg-[#4e99c4] hover:bg-[#4c97c2] hover:text-[#c2e5f9]
+                  shadow-lg dark:text-white dark:hover:bg-[#64afda]
+                  [box-shadow:0_3px_0_0_#407da1]"
+                />
+                </div>
+              </form>
+              </div>
+
+            {/* end of group events */}
             
         </div>
-        {/* end of group invites */}
+        {/* end of group invites, group posts, group events */}
+        
 
-        {/* start of group posts */}
+       
             
         <Posts page="groupProfile" id={theGroup.id} username ={""}/>
 
-        {/* end of group posts */}
+        
 
-        {/* start of group events */}
-            
 
-        {/* end of group events */}
       </div>
     </div>
   );

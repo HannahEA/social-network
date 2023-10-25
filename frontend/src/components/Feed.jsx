@@ -1750,6 +1750,7 @@ const [viewProfile, setViewProfile] = useState(false)
         followers={allData.current.followers}
         request={requestBy}
         theGroup={selectedGroup}
+        creator={email}
         >
           {selectedGroup && (
             <GrProfileCard
