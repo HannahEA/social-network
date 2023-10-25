@@ -7,12 +7,6 @@ function Notification ( props ) {
 
 
     const { websocketRef, isWebSocketConnected} = useWebSocket();
-
-    // console.log("show the props inside Notification: ",props)
-    // console.log("show if the WS is connected inside Notification: ",isWebSocketConnected)
-
-
-    //console.log("show the visibility of Notification: ", isVisible)
     
     const handleAccept = () => {
     // Send a request to the backend with followID and the user's acceptance
