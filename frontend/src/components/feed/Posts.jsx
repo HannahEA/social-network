@@ -54,7 +54,7 @@ const SubmitPost = ({title, content, visibility, url, file, category, postViewer
 
 const Posts = ({sPost, page, username, groupID}) => {
   const [pData, setpData] = useState([])
-  
+  console.log("group id to fetch", groupID)
   let getPosts = {
     cookie: username, 
     type: "getPosts",

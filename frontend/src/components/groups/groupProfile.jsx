@@ -359,8 +359,8 @@ const handleGroupInvite = (e) => {
         
 
        
-            
-        <Posts page="groupProfile" id={theGroup.id} username ={""}/>
+            {console.log("the group id i request for", theGroup.id)}
+        <Posts page="groupProfile" groupID={theGroup.id} username ={""}/>
 
         
 
