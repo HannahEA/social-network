@@ -157,7 +157,7 @@ const Profile = () => {
   
   return (
 
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8">
+        <div className="min-h-screen bg-gray-100 dark:bg-[#000000b3] py-8">
           <div className="max-w-md mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
             <div className="flex items-center justify-center mb-4">
               <div className="w-24 h-24 border-gradient border-4 border-[#57aada] rounded-[50%] overflow-hidden">

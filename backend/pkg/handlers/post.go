@@ -240,6 +240,10 @@ func (repo *dbStruct) GetPrivatePosts(user *User) ([]Post, error) {
 	posts := []Post{}
 	// Generate placeholders for the IN clause
 	followers, err := repo.GetFollowers(user.NickName)
+	if err != nil {
+		fmt.Println("error getting followers: ",err)
+		
+	}
 	fmt.Println("who user follows this user?", followers)
 	placeholders := make([]string, len(followers))
 	for i := range followers {
@@ -288,6 +292,9 @@ func (repo *dbStruct) AddPostToDB(post Post) (int,error) {
 	//category
 	categories := strings.Join(post.Category, ",")
 	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
+	if err != nil {
+		fmt.Println("error executing query: ", err)
+	}
 	
 	rows, err := repo.db.Query(`Select last_insert_rowid()`)
 	if err != nil {
