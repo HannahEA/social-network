@@ -2,10 +2,83 @@
 import React from "react";
 import {useState} from "react";
 import { useWebSocket } from "../WebSocketProvider.jsx";
+import {SubmitPost, Posts, Tags} from "../feed/Posts.jsx"
 //this is the modal that contains a group's profile
 
 function GroupProfile({ children, grpMember, onGpClose, followers, request, theGroup}) {
 
+  const [Title, setTitle] = useState("")
+  const [Content, setContent] = useState("")
+  const [Visibility, setVisibility] = useState("")
+  const [tag, setTags] = useState([])
+  const [imageFile, setImageFile] = useState(null)
+  const [imageURL, setImageURL] = useState("")
+  const [sPost, setSpost] = useState(null)
+
+  const handleTitle = (event) => {
+      setTitle(event.target.value);
+    };
+    const handleContent = (event) => {
+      setContent(event.target.value);
+    };
+    const handleVisibility = (event) => {
+      let e = event.target 
+      setVisibility(e.options[e.selectedIndex].text);
+    };
+    const addTag = (event) => {
+      event.preventDefault();
+      let input = document.getElementById("postTags");
+      console.log("adding tag");
+      console.log("input value", input.value);
+      if (input.value != "") {
+        setTags([...tag, input.value]);
+        console.log(tag);
+        input.value = "";
+      }
+    };
+  
+  
+    //image upload for posts
+    const handlePostImage = (event) => {
+      const { value } = event.target;
+  
+      if (value.startsWith("http") || value.startsWith("https")) {
+        // It's an image URL
+        setImageURL(value);
+      } else {
+        // It's a file upload
+        const file = event.target.files[0];
+  
+        //now get file type
+        /*const fType = file.type;
+      console.log({fType});//this should show e.g. "image/jpg"
+      fileType = fType.split("/");
+      fileType = fileType[1];
+      console.log({fileType});*/ //this should show e.g. "jpg"
+  
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result;
+          setImageFile(result);
+        };
+        reader.readAsDataURL(file);
+        console.log(imageFile);
+      }
+    };
+    // on new post form submission, handle in post file
+    const submitPost = async (event) => {
+      event.preventDefault();
+      let e = document.getElementById("Visibility");
+      let v = e.options[e.selectedIndex].text;
+      let data = await SubmitPost({ title: Title, content: Content, visibility: v, url: imageURL, file: imageFile, category: tag , postViewers: [], groupID: theGroup.id});
+      setSpost(data);
+      setTitle("");
+      setTags([])
+      setContent("");
+      setImageURL(null);
+      setImageFile("");
+    };
+   
 const { websocketRef, isWebSocketConnected} = useWebSocket();
  
   const handleOverlayClick = (e) => {
@@ -60,7 +133,8 @@ const handleGroupInvite = (e) => {
         </button>
         {children}
          {/* start of group invites */}
-        <div id="addMember" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
+        <div id="addMember" className="flex" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
+
         <form name="addMember" id="addMember" onSubmit={handleGroupInvite}>
           <span><label className="info dark:text-white">Invite other people : </label></span>
           <span>
@@ -82,11 +156,79 @@ const handleGroupInvite = (e) => {
                 />
               </div>
           </form>
+          <form onSubmit={submitPost}>
+              <span className="flex p-2.5 pl-5">
+                <p className="flex-row mr-5 font-bold text-[#5aadde]">Title</p>
+                <input
+                  className="flex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
+                  type="text"
+                  value={Title}
+                  onChange={handleTitle}
+                />
+              </span>
+
+              
+              <div className="flex justify-right items-right flex-col">
+                <p className="p-2.5 pl-5 font-bold text-[#5aadde]">Content</p>
+                <textarea
+                  className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none"
+                  name="postContent"
+                  id="postContent"
+                  cols="8"
+                  rows="3"
+                  maxLength="100"
+                  value={Content}
+                  onChange={handleContent}
+                ></textarea>
+              </div>
+              <span className="flex p-2.5 pl-5">
+                <p className="flex-row mr-5 font-bold text-[#5aadde]">Tags</p>
+                <input
+                  type="text"
+                  id="postTags"
+                  className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
+                />
+                <button
+                  onClick={addTag}
+                  type="submit"
+                  value="Add Tag"
+                  className="flex-row pl-2  pr-2 font-bold bg-[#8cc0de] text-sm text-white rounded-md cursor-pointer hover:bg-[#76a1ba] shadow-lg"
+                >
+                  Add Tag
+                </button>
+              </span>
+              <Tags tags={tag} />
+             
+              <div className="flex">
+                <input
+                  type="text"
+                  name="imageUrl"
+                  id="imageUrl"
+                  placeholder="Enter image URL"
+                  className="ml-5 m-2.5 pl-5 pr-5 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  // value={imageURL}
+                  onChange={handlePostImage}
+                />
+                <label
+                  htmlFor="imageFile"
+                  className="ml-5 m-2.5 pl-5 pr-5  items-center justify-center text-sm font-bold bg-[#8cc0de] text-white border border-transparent rounded-lg cursor-pointer hover:bg-[#76a1ba] shadow-lg"
+                >
+                  Upload Image File
+                </label>
+                {/* <input type="file" name="imageFile" id="imageFile" accept="image/*" className="hidden" value={imageFile} onChange={handlePostImage} /> */}
+                <input type="file" name="mageFile" id="imageFile" accept="image/*" className="hidden" onChange={handlePostImage} />
+              </div>
+              <button className="ml-5 m-2.5 pl-5 pr-5 font-bold bg-[#57aada] cursor-pointer hover:bg-[#3a7597] text-white rounded-md shadow-lg" type="submit ">
+                Post
+              </button>
+            </form>
+            
         </div>
         {/* end of group invites */}
 
         {/* start of group posts */}
             
+        <Posts page="groupProfile" id={theGroup.id} username ={""}/>
 
         {/* end of group posts */}
 
