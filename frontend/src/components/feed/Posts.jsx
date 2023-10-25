@@ -12,7 +12,7 @@ const apiURL = process.env.REACT_APP_API_URL;
 //const apiURL = "http://localhost:8000"
 
 
-const SubmitPost = ({title, content, visibility, url, file, category, postViewers}) => {
+const SubmitPost = ({title, content, visibility, url, file, category, postViewers, groupID}) => {
  console.log(url, file, postViewers)
  const newPost = {
     title: title,
@@ -23,6 +23,7 @@ const SubmitPost = ({title, content, visibility, url, file, category, postViewer
     file: file,
     type: "newPost",
     postViewers: postViewers,
+    groupID: groupID,
  }
  // Make a POST request to the server
 
@@ -51,13 +52,14 @@ const SubmitPost = ({title, content, visibility, url, file, category, postViewer
     
 }
 
-const Posts = ({sPost, page, username}) => {
+const Posts = ({sPost, page, username, id}) => {
   const [pData, setpData] = useState([])
   
   let getPosts = {
     cookie: username, 
     type: "getPosts",
     page: page,
+    groupID: id
   }
 
   const fetchPosts = () => {

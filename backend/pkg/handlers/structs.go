@@ -93,6 +93,7 @@ type Post struct {
 	Page       string    `json:"page"`
 	Comments   []Comment `json:"comments"`
 	Viewers    []string  `json:"postViewers"`
+	GroupId    int       `json:"groupID"`
 }
 
 type Comment struct {
@@ -242,7 +243,7 @@ type NewGroup struct {
 }
 
 // group invite for online members
-//this struct is used for new groups and for when a grup member invites her follower to join a group
+// this struct is used for new groups and for when a grup member invites her follower to join a group
 type NewGroupNotif struct {
 	GrpName       string `json:"grpName"`
 	GrpDescr      string `json:"grpDescr"`
@@ -257,7 +258,6 @@ type NewGroupNotif struct {
 	MemberStatus  string `json:"memberStatus"`
 	Type          string `json:"type"`
 }
-
 
 // follow notification reply by private influencer
 type JoinGroupReply struct {
@@ -280,13 +280,13 @@ type SendAllGroups struct {
 	Type          string     `json:"type"`
 }
 
-//user requests to join groups, groups creators to respond
+// user requests to join groups, groups creators to respond
 type JoinGroupsRequests struct {
 	Type              string                `json:"type"`
 	AllJoinGrRequests []OneJoinGroupRequest `json:"allJoinGrRequests"`
 }
 
-//one requests to join group, online group creator to respond
+// one requests to join group, online group creator to respond
 type OneJoinGroupRequest struct {
 	Type          string `json:"type"`
 	GrpID         string `json:"grpID"`
@@ -296,13 +296,13 @@ type OneJoinGroupRequest struct {
 	GrpDescr      string `json:"grpDescr"`
 }
 
-//user requests to join one or more groups, offline groups creators to respond
+// user requests to join one or more groups, offline groups creators to respond
 type OfflineJoinGroupRequests struct {
 	NumGrpsPending        string                       `json:"numGrpsPending"`
 	OfflineJoinGrRequests []OneOfflineJoinGroupRequest `json:"offlineJoinGrRequests"`
 }
 
-//one requests to join group, offline group creator to respond
+// one requests to join group, offline group creator to respond
 type OneOfflineJoinGroupRequest struct {
 	Type          string `json:"type"`
 	GrpID         string `json:"grpID"`
@@ -315,7 +315,3 @@ type OneOfflineJoinGroupRequest struct {
 	GrpName       string `json:"grpName"`
 	GrpDescr      string `json:"grpDescr"`
 }
-
-
-
-

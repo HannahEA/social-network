@@ -1,8 +1,11 @@
 import React from "react";
+
 //This is the group profile component
 
 
 function GrProfileCard(props){
+
+    
     
 
 return(
@@ -20,8 +23,9 @@ return(
             </div>
             
         </div>
+        
     </div>
-
+    
 );
 }
 
