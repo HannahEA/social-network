@@ -37,7 +37,15 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 	}
 
 	if data.PostType == "newPost" {
-		//return id of the new post
+		if data.GroupId > 0 {
+			//submitting post at group profile page 
+			//add post to db 
+			// get latest post and send back to client side
+
+
+		} else {
+			//submitting post at feed
+			//return id of the new post
 		id, err := service.repo.AddPostToDB(data)
 		if err != nil {
 			log.Println(err)
@@ -75,6 +83,8 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 		fmt.Println("successfully retrieved comments")
 		fmt.Println("Sending latest post")
 		json.NewEncoder(w).Encode(posts[0])
+		}
+		
 
 	} else if data.PostType == "getPosts" {
 		posts := []Post{}
@@ -89,7 +99,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			if err != nil {
 				fmt.Println("Post Handler: GetAllUserPosts error: ", err)
 			}
-		} else {
+		} else if data.Page == "feed" {
 			//feed page
 			fmt.Println("getting Public posts")
 			publicPosts, err := service.repo.GetPublicPosts(user)
@@ -116,6 +126,13 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			fmt.Println("how many almost private posts?", len(almPrivatePosts))
 			posts = append(posts, privatePosts...)
 			posts = append(posts, almPrivatePosts...)
+
+		} else if data.Page == "groupProfile" {
+		
+			//check group posts using group id to get all group posts, return slice of posts
+			// range through posts to get comments using group post id return slice of comments
+			// post.comments = comments
+			// send slice of posts
 
 		}
 		fmt.Println("getting comments for posts")
@@ -386,4 +403,36 @@ func (repo *dbStruct) AddCommentToDB(post Post) error {
 		return fmt.Errorf("failed to add Comment to Database")
 	}
 	return nil
+}
+
+func (repo *dbStruct) AddGroupPostToDB(post Post) (int,error) {
+	// time
+	date := time.Now()
+	//cookie
+	cookieArr := strings.Split(post.Cookie, "=")
+	cookieID := cookieArr[1]
+	//user info
+	user := repo.GetUserByCookie(cookieID)
+	//category
+	categories := strings.Join(post.Category, ",")
+	var visibility = "Public"
+	_, err := repo.db.Exec("INSERT INTO Grouposts (authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, visibility)
+	if err != nil {
+		fmt.Println("error executing query: ", err)
+	}
+	
+	rows, err := repo.db.Query(`Select last_insert_rowid()`)
+	if err != nil {
+		log.Println(err)
+		return 0,fmt.Errorf("failed to add Group Post to Database")
+	}
+	var id int
+	for rows.Next() {
+		err:= rows.Scan(&id)
+		if err != nil {
+			log.Println(err)
+			return 0,fmt.Errorf("failed to add Group Post to Database")
+		}
+	}
+	return id,nil
 }
