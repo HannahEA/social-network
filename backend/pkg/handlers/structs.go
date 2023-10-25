@@ -42,21 +42,21 @@ type ProfileVisibilityData struct {
 }
 
 type AllUsersData struct {
-	ID         int      `json:"id"`
-	NickName   string   `json:"username"`
-	Avatar     string   `json:"avatar"`
-	Image      string   `json:"image"`
-	ProfVisib  string   `json:"profVisib"`
-	AboutMe    string   `json:"aboutMe"`
-	LoggedIn   string   `json:"loggedIn"`
-	Influencer int      `json:"influencer"`
-	FirstName  string   `json:"firstName"`
-	LastName   string   `json:"lastName"`
-	Age        string   `json:"age"`
-	Gender     string   `json:"gender"`
-	Email      string   `json:"email"`
-	Followers  []any `json:"followers"`
-	Following  []any `json:"following"`
+	ID         int    `json:"id"`
+	NickName   string `json:"username"`
+	Avatar     string `json:"avatar"`
+	Image      string `json:"image"`
+	ProfVisib  string `json:"profVisib"`
+	AboutMe    string `json:"aboutMe"`
+	LoggedIn   string `json:"loggedIn"`
+	Influencer int    `json:"influencer"`
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	Age        string `json:"age"`
+	Gender     string `json:"gender"`
+	Email      string `json:"email"`
+	Followers  []any  `json:"followers"`
+	Following  []any  `json:"following"`
 }
 
 type RegistrationData struct {
@@ -242,12 +242,14 @@ type NewGroup struct {
 }
 
 // group invite for online members
+//this struct is used for new groups and for when a grup member invites her follower to join a group
 type NewGroupNotif struct {
 	GrpName       string `json:"grpName"`
 	GrpDescr      string `json:"grpDescr"`
 	GrpID         int    `json:"grpID"`
 	Creator       string `json:"creator"`
 	Member        string `json:"member"`
+	InvitedBy     string `json:"invitedBy"`
 	CreatorURL    string `json:"creatorURL"`
 	CreatorImage  string `json:"creatorImage"`
 	CreatorLogged string `json:"creatorLogged"`
@@ -255,6 +257,7 @@ type NewGroupNotif struct {
 	MemberStatus  string `json:"memberStatus"`
 	Type          string `json:"type"`
 }
+
 
 // follow notification reply by private influencer
 type JoinGroupReply struct {
@@ -312,3 +315,7 @@ type OneOfflineJoinGroupRequest struct {
 	GrpName       string `json:"grpName"`
 	GrpDescr      string `json:"grpDescr"`
 }
+
+
+
+

@@ -1,5 +1,5 @@
 ## Helena To Do ##
-Group page and event notifications
+Group page: Group invite b.e. and event notifications
 
 
 ## Hannah's fav colour palette: 

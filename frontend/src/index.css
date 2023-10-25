@@ -115,6 +115,47 @@ code {
     box-shadow: 0 2px 5px #ccc;
     text-align:left;
   }
+
+  /* start of group profile */
+  .gpTop{
+    border-radius: 25px 25px 0 0;
+    height: 100px;
+    width: 100%;
+    background-color: #53a1ce;
+    position:absolute;
+    top:0px;
+    left:0;
+    display:flex;
+  }
+  
+  .gpHeading{
+    text-align: center;
+    font-size: 2em;
+    color: #2d3436;
+    margin: 50px 0 20px;
+  }
+  
+  .gpCard{
+    border-radius: 25px;
+    position: relative;
+    padding: 25px 15px;
+    background-color: #73c9fa;
+    margin: 25px 0;
+    height: 250px;
+    width: 550px;
+    box-shadow: 0 2px 5px #ccc;
+    text-align:left;
+  }
+
+  .gpBottom{
+    margin-top:80px;
+  }
+
+.gpCard img{
+    margin: 5px 10px 0px 12px;
+  }
+
+   /* end of group profile */
   
   .card img{
     margin: 5px 10px 0px 12px;
@@ -334,3 +375,22 @@ background-color: #2f5d78;
 
     
     /* ====> End of offline notifications */
+
+    /* start of group profile */
+
+    #addMember{
+      position:relative;
+      height: 150px;
+      width: 400px;
+    }
+
+    #joinGpSubmit{
+      position: relative;
+      width: 37%;
+      margin: 0 auto;
+      top:25px;
+      left:25px;
+      bottom: 4px;
+    }
+
+    /* end of group profile */

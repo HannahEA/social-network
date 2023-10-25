@@ -407,7 +407,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				fmt.Println("error unmarshalling joinGroupReply msg: ", jsonErr)
 			}
 
-			//insert new group data in the 'Groups' table
+			//insert member reply in the 'GroupMembers' table
 			err = service.repo.InsertGroupMemberReply(joinGrpReply)
 			if err != nil {
 				fmt.Println("error inserting gp member reply into GroupMembers table", err)
@@ -517,6 +517,74 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				} //Else if group creator is offline, Join group request will be added to offline alerts and sent from case: "connect"
 
 			} //end of iteration over AllJoinGrRequests array
+
+		case "groupInvite":
+			//A group member has invited one of his followers to join
+			var groupInvite NewGroupNotif
+
+			jsonError := json.Unmarshal(b, &groupInvite)
+			if jsonError != nil {
+				fmt.Println("error unmarshalling groupInvite: ", jsonError)
+				return
+			}
+
+			//get invitee's data
+			askWho, err2 := service.repo.GetUserByNickName(groupInvite.Member)
+			if err2 != nil {
+				fmt.Println("error retrieving gp creator by nickName: ", err2)
+				return
+			}
+
+			joinStatus := "memberPending"
+
+			//upload join group request data to the GroupMembers table
+			err3 := service.repo.InsertGrpInvite(groupInvite, joinStatus)
+			if err3 != nil {
+				fmt.Println("error inserting gp invite: ", err3)
+				return
+			}
+
+			//get avatar for gp member extending the invite
+			theAvtr, err4 := service.repo.getUserAvatar(groupInvite.InvitedBy)
+			if err4 != nil {
+				fmt.Println("error returning InvitedBy avatar: ", err4)
+			}
+
+			//here the creator is swapped with invitedBy for all fields in the 'groupInvite' struct
+			//hence creatorURL and Image are actually the url and image of the user that extended the invite (= InvitedBy)
+			//this is done so that front end notifications and alerts will work for both 'new group' and for 'join group' events
+			groupInvite.CreatorURL = theAvtr.CreatorURL
+			groupInvite.CreatorImage = theAvtr.CreatorImage
+			//re-assign value for creator field to invitedBy
+			groupInvite.Creator = groupInvite.InvitedBy
+			//assign same type as for new group
+			groupInvite.Type = "newGroupNotif"
+			groupInvite.CreatorLogged = "Yes"
+			groupInvite.MemberLogged = askWho.LoggedIn
+			groupInvite.MemberStatus = "memberPending"
+
+			fmt.Println("the group invite notif object sent to front end: ", groupInvite)
+
+			//check if follower is online and if so send notification
+			if groupInvite.MemberStatus == "memberPending" && groupInvite.MemberLogged == "Yes" {
+				//send new group notification to member
+				online := false
+				fmt.Println("Printing to get rid of the error", online)
+				reciever := make(map[*websocket.Conn]string)
+				//find member's channel
+				for conn, client := range Clients {
+					if client == groupInvite.Member {
+						reciever[conn] = client
+						online = true
+						service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{NewGroupNotif: groupInvite, Type: groupInvite.Type}, Connections: reciever})
+					}
+				}
+			} else if groupInvite.MemberStatus == "memberPending" && groupInvite.MemberLogged == "No" {
+				fmt.Println("Entering the new group offline branch")
+				//new group member is off-line
+				//offline countAlerts are sent from case: "connect"
+			}
+
 		} //end of 'switch for message type'
 
 	}
@@ -690,7 +758,7 @@ func (r *dbStruct) IsClientOnline(rows *sql.Rows, user *User) [][]string {
 		}
 		_, count, err3 := r.CheckForNotification(chat)
 		if err3 != nil {
-
+			fmt.Println("the error returned by CheckForNotification: ", err3)
 		}
 		c := strconv.Itoa(count)
 		client = append(client, c)
@@ -1150,4 +1218,37 @@ func (repo *dbStruct) GetPendingJoinGroupRequests(creator string) (string, []One
 	gCount = strconv.Itoa((len(gPending)))
 
 	return gCount, gPending
+}
+
+//Populate GroupMembers table with group invite where a member invites her follower
+func (repo *dbStruct) InsertGrpInvite(gpInv NewGroupNotif, status string) error {
+
+	//prepare the query
+	stmt, err := repo.db.Prepare("INSERT OR IGNORE into GroupMembers (grpID, creator, member, status) values(?, ?, ?, ?)")
+	if err != nil {
+		fmt.Println("error preparing statement to insert group members", err)
+		return err
+	}
+	//In this instance, the nickName of the member that extended the invite is uploaded in the 'creator' field
+	_, err = stmt.Exec(gpInv.GrpID, gpInv.InvitedBy, gpInv.Member, status)
+	if err != nil {
+		fmt.Println("error inserting group invite", err)
+		return err
+	}
+
+	return nil
+}
+
+//used for join group request
+func (repo *dbStruct) getUserAvatar(nkName string) (NewGroupNotif, error) {
+	var theInvite NewGroupNotif
+
+	//return avatar URL and image for given nickName
+	err3 := repo.db.QueryRow("SELECT avatarURL, imageFile from Users where nickName = ?", nkName).Scan(&theInvite.CreatorURL, &theInvite.CreatorImage)
+	if err3 != nil {
+		fmt.Println("error returning URL and image: ", err3)
+		return theInvite, err3
+	}
+
+	return theInvite, nil
 }

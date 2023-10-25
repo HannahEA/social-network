@@ -1,14 +1,54 @@
 
 import React from "react";
+import {useState} from "react";
+import { useWebSocket } from "../WebSocketProvider.jsx";
 //this is the modal that contains a group's profile
 
-function GroupProfile({ children, onGpClose}) {
+function GroupProfile({ children, onGpClose, followers, request, theGroup}) {
+
+const { websocketRef, isWebSocketConnected} = useWebSocket();
  
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onGpClose();
     }
   };
+
+  const [inviteMember, setInviteMember] = useState({["type"]:"groupInvite"})
+
+  //get follower to send group invite to
+function handleAddMember(){
+  var follower = document.querySelector("#dropDown").value;
+  console.log("the chosen follower is: ===>>",follower)
+
+    //The js object to be sent to b.e. via w.s.
+    setInviteMember( {
+      ...inviteMember,
+      creator: theGroup.creator,
+      grpName: theGroup.grpName,
+      grpDescr: theGroup.grpDescr,
+      grpID: theGroup.id,
+      invitedBy: request,
+      member: follower,
+     }
+    )
+     console.log("Info to join a group: =====> ", inviteMember)
+  }
+
+
+
+
+const handleGroupInvite = (e) => {
+    e.preventDefault();
+
+    let reSet = document.querySelector("#dropDown").options[0];
+    reSet.selected = true;
+
+    websocketRef.current.send(
+      JSON.stringify(inviteMember)
+     )
+
+  }
 
 
   return (
@@ -19,6 +59,41 @@ function GroupProfile({ children, onGpClose}) {
           Close
         </button>
         {children}
+         {/* start of group invites */}
+        <div id="addMember">
+        <form name="addMember" id="addMember" onSubmit={handleGroupInvite}>
+          <span><label className="info">Invite other people : </label></span>
+          <span>
+            <select id="dropDown" name="choosePeople" className="choosePeople rounded-md text-[#53a1ce] bg-[#bfe0f3] p-1" onChange={handleAddMember}>
+            <optgroup label="Your followers" >
+            <option key="" value="" disabled selected hidden>Choose a name</option>
+            {followers == null ? <label class="addToGroup dark:text-[#3f82a9]">No followers available</label> : followers.map((follw) => (
+              <option key={follw} value={follw} >{follw}</option>
+            ))}
+            </optgroup>
+            </select>
+          </span>
+              <div>
+                <input type="submit" id="joinGpSubmit" value="Invite"
+                  className="cursor-pointer absolute justify-center flex items-center p-2 w-[calc(35%-1rem)] text-base font-medium text-white 
+                  rounded-lg transition duration-75 group bg-[#57aada] dark:bg-[#4e99c4] hover:bg-[#4c97c2] hover:text-[#c2e5f9]
+                  shadow-lg dark:text-white dark:hover:bg-[#64afda]
+                  [box-shadow:0_3px_0_0_#407da1]"
+                />
+              </div>
+          </form>
+        </div>
+        {/* end of group invites */}
+
+        {/* start of group posts */}
+            
+
+        {/* end of group posts */}
+
+        {/* start of group events */}
+            
+            
+        {/* end of group events */}
       </div>
     </div>
   );

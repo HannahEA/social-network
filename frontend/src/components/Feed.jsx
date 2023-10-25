@@ -1741,11 +1741,12 @@ const [viewProfile, setViewProfile] = useState(false)
 
 
         {/* Start of GroupProfile */}
-        {isGroupProfileVisible && (
+        {(isGroupProfileVisible && requestBy)&& (
         <GroupProfile 
         onGpClose={() => {handleGpCloseModal()}} 
         onShowGroup={() => {handleGpCloseModal()}}
-        // influencer={parseInt(selectedUser.influencer, 10)} // Pass the influencer prop here
+        followers={allData.current.followers}
+        request={requestBy}
         theGroup={selectedGroup}
         >
           {selectedGroup && (
@@ -1768,7 +1769,6 @@ const [viewProfile, setViewProfile] = useState(false)
         onClose={() => {handleGroupsClose()}} 
         setGrpProfileVisible={setGroupProfileVisible}
         setGrp={setSelectedGroup}
-        theGp={selectedGroup}
         grpProfileVisible={isGroupProfileVisible}
         followers={allData.current.followers}
         creator={email}
