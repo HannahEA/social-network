@@ -380,9 +380,9 @@ background-color: #2f5d78;
 
     /* addMember contains invite follower, make a post, create event */
     #addMember{
-      position:relative;
-      height: 350px;
-      width: auto;
+      /* position:relative; */
+      /* height: auto;
+      width: auto; */
     }
 
     #joinGpSubmit{
