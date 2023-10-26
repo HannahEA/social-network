@@ -45,7 +45,7 @@ code {
   
   /* Styles for the modal content */
   #modalContainerOuter {
-    width: 400px;
+    width: 750px;
     border-radius: 8px;
     overflow: hidden;
   }
@@ -53,6 +53,7 @@ code {
   /* Styles for the modal content */
   #modalContainer {
     height: 700px;
+    width: 500px;
     border-radius: 8px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
     padding: 16px;
@@ -214,14 +215,15 @@ hr.dottedL{
 
 /* align buttons */
 #newGpSubmit{
+  /* align-content: center; */
   top:250px;
-  left:115px;
+  left:165px;
 }
 
-#joinGpSubmit{
+/* #joinGpSubmit{
   bottom:4px;
   left:115px;
-}
+} */
 
 .addToGroup{
   color:#4b93bd;
@@ -280,10 +282,9 @@ position: relative
   display: flex;
   align-items: center;
   justify-content: center;
-  position: absolute;
   margin-top: 4px;
   margin-right: 10px;
-  left: 11px;
+  margin-left: 5px;
 }
 
 /* to style the notification */
@@ -387,11 +388,11 @@ background-color: #2f5d78;
 
     #joinGpSubmit{
       position: relative;
+      align-content: center;
       width: 37%;
       margin: 0 auto;
       top:25px;
-      left:72px;
-      bottom: 4px;
+      bottom:6px;
     }
 
     /* end of group profile */
