@@ -357,10 +357,12 @@ const handleGroupInvite = (e) => {
         </div>
         {/* end of group invites, group posts, group events */}
         
-
+      
        
-            {console.log("the group id i request for", theGroup.id)}
-        <Posts page="groupProfile" groupID={theGroup.id} username ={""}/>
+          <div style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
+            <Posts page="groupProfile" groupID={theGroup.id} username ={""}/>
+          </div>
+        
 
         
 
