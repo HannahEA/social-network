@@ -17,6 +17,50 @@ function GroupProfile({ children, grpMember, onGpClose, followers, request, theG
   
   //--------CREATE EVENT
 
+  const handleAccept = () => {
+
+    //Store user reply
+    let reply = "Yes";
+    // Make a reply object
+    var YesNo = {
+        // "grpID": (props.joinRequest.grpID),
+        // "groupMember": (props.joinRequest.joinRequestBy),
+        // "joinReply": reply,
+        // "type": "joinGroupReply",
+    };
+
+    console.log("the joinGroupReply sent to back end: ", YesNo)
+
+    //send reply object to back end
+    websocketRef.current.send(
+      JSON.stringify(YesNo)
+    )
+    // After handling the action, hide the Notification
+    //props.setJoinGpVisible(false);
+
+  };
+
+  const handleNo = () => {
+    //send to back end using the websocket:
+    let reply = "No";
+    // Make a reply object
+    var YesNo = {
+        // "grpID": (props.joinRequest.grpID),
+        // "groupMember": (props.joinRequest.joinRequestBy),
+        // "joinReply": reply,
+        // "type": "joinGroupReply",
+    };
+
+    console.log("the joinGroupReply sent to back end: ", YesNo)
+    //send user reply to back end
+    websocketRef.current.send(
+      JSON.stringify(YesNo)
+    )
+    // After handling the action, hide the Notification
+    //props.setJoinGpVisible(false);
+
+  };
+
     //when the user selects a date.
     const handleDateChange = (e) => {
       setDOB(e.target.value);
@@ -27,28 +71,13 @@ function GroupProfile({ children, grpMember, onGpClose, followers, request, theG
 
 // to be removed at a later date
 
-const [gpMembers, setGpMembers] = useState([]);
 const [newGroupEvt, setNewGroupEvt] = useState({["type"]: "newEvent"});
 
     //make a new group
     const handleNewEvt = (event) => {
       const { name, value } = event.target;
 
-      // Check if the input is a checkbox with a value of "on"
-     /* if (event.target.type === "checkbox" && value === "on") {
-        // Clone the existing array of group info and add the checkbox name to it
-        const updatedGpMembers = [...gpMembers, name];
-        setGpMembers(updatedGpMembers); 
-         // Update the newGroupInputs state, incorporating the gpMembers array
-          setNewGroupInputs({
-          ...newGroupInputs,
-              gpMembers: updatedGpMembers,
-              creator: creator,
-          });
-      }else{*/
-          // Update the newGroupInputs state for other inputs
           setNewGroupEvt({ ...newGroupEvt, [name]: value, "invitedBy": request, "grpID": theGroup.id, "creator":theGroup.creator, "gpMembers":theGroup.gpMembers, "grpDescr":theGroup.grpDescr, "grpName":theGroup.grpName });
-      //}
 
     };
 
@@ -59,25 +88,48 @@ const [newGroupEvt, setNewGroupEvt] = useState({["type"]: "newEvent"});
        document.getElementById("evtName").value = ""; // Clear the group name value
        document.getElementById("evtDescr").value = ""; // Clear the group description value
        document.getElementById("evtDateTime").value = ""; //Clear the date and time falues
-      
-      //clear checkboxes
-      // const grpMembers = document.querySelectorAll('input[type="checkbox"]:checked')//make HTMLCollection
-      // for (let i = 0; i < grpMembers.length; i++){
-      //   grpMembers[i].checked = false; //un-tick check boxes
-      // }
-
-      //alert(JSON.stringify(newGroupInputs, null, 2)); // Convert to JSON string for display; the second argument null is for replacer function, and the third argument 2 is for indentation
 
         console.log("new event inputs sent to b.e.:", newGroupEvt);
 
       // Display a success notification
       notyf.success("New event created");
+
+      //Show the event on group profile page
+      var newEvt = document.createElement('div')//is a node
+
+      newEvt.innerHTML =`
+        <p style="font:'semibold'; color:'gray'; dark:text-white; padding:'10px';">Event invite </p>
+        <p id="evt"><span style="font:'semibold'; color:'gray'; padding:'10px';">${request} </span>has invited you to event: </p>
+        
+        <p >Name: <span style="font:'semibold'; color:'gray'; padding:'10px';">${newGroupEvt.evtName}</span></p>
+        <p >Description: <span style="font:'semibold'; color:'gray';  padding:'10px';">${newGroupEvt.evtDescr}</span></p>
+        <span>
+        <button id="btnNotifOK"
+          onClick={handleAccept}
+          style="  hover:'#3488af';  backgroundColor:'#57aada'; fontWeight:'strong'; padding:'10px';"
+        >
+          Accept
+        </button>
+        </span>
+        <span>
+        <button id="btnNotifNO"
+          onClick={handleNo}
+          style="hover:'#3488af'; backgroundColor:'#57aada'; fontWeight:'strong'; items-center; padding:'10px';"
+        >
+          Decline
+        </button>
+        </span>
+
+      `;
+
+      newEvt.classList.add("addEvent");
+
+      //append the new event inside DOM
+      document.querySelector("#showEvts").appendChild(newEvt);
         
         websocketRef.current.send(
-        JSON.stringify(newGroupEvt)
-
-        
-    )
+        JSON.stringify(newGroupEvt)  
+        )
     };
 
 // end of to be removed
@@ -326,24 +378,9 @@ const handleGroupInvite = (e) => {
                 type="datetime-local" name="evtDateTime" 
                 className="mb-6 ml-6 bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                  onChange={handleNewEvt} 
-                  // onChange={handleDateChange}
                   ref={dateInputRef}
                 />
                 </label>
-                {/* <p className="ml-2 text-[#717575] dark:text-white">Invite group members:</p>
-                  <br></br>
-                  {console.log("followers inside the GroupsModal component: ",followers)}
-                  <ul className="flex space-x-4"> 
-                    {followers == null ? <label class="addToGroup dark:text-[#3f82a9]">Group membership is restricted to followers </label> : followers.map((follw) => (
-                  <li key={follw}>
-                    <input class="chk" name={follw} type="checkbox" onChange={handleNewGP} border="hidden" background-color="white" className="rounded-sm h-4 w-4 ml-1 cursor-pointer accent-[#57aada]"/>
-                    <label class="addToGroup dark:text-[#3f82a9]">{follw}</label>
-                  </li>
-                ))}
-                  </ul> */}
-                {/* <div id="addFollowersToGroup" className="text-sm font-sm text-[#717575] dark:text-primary-500">
-               
-                </div> */}
                 <div className="justify-center flex">
                 <input type="submit" id="newGpSubmit" value="Create event"
                   className="cursor-pointer  items-center p-2 w-[calc(35%-1rem)] text-base font-medium text-white 
@@ -360,9 +397,12 @@ const handleGroupInvite = (e) => {
         </div>
         {/* end of group invites, group posts, group events */}
         
-      
+        <div id="showEvts">
+
+        </div>
        
-          <div style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
+          <div style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}} >
+
             <Posts page="groupProfile" groupID={theGroup.id} username ={""}/>
           </div>
         

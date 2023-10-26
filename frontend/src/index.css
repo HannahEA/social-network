@@ -318,8 +318,7 @@ position: relative
 }
 
 #btnNotifOK{
-  position: absolute;
-  color: white;
+  color: #5dbaf0;
   top: 150px;
   left: 35px;
   border-radius: 6px;
@@ -332,8 +331,7 @@ position: relative
   }
 
 #btnNotifNO{
-  position: absolute;
-  color: white;
+  color: #5dbaf0;
   top: 150px;
   left: 160px;
   border-radius: 6px;
@@ -394,5 +392,17 @@ background-color: #2f5d78;
       top:25px;
       bottom:6px;
     }
+
+    .addEvent{
+      /* position: relative; */
+      box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      width: 300px;
+      height: 200px;
+      background-color: #a8daf7;
+    }
+    
 
     /* end of group profile */
