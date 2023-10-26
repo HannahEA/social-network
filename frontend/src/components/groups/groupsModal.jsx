@@ -270,7 +270,8 @@ console.log("the request inside 'GroupsModal': ",request)
                         style={{ cursor: 'pointer' }}
                         id="selectedGrp"
                         onClick={() => {
-                        grp.gpMembers === null || grp.gpMembers.includes(request) === false ? setGrpMember(false) : setGrpMember(true)
+                          {console.log("who ids the group creator", grp.creator, request)}
+                        grp.gpMembers === null || (grp.creator != request && grp.gpMembers.includes(request) === false) ? setGrpMember(false): setGrpMember(true)
                         handleOpenGpProfile();
                         handleSelectGrp(grp);
                         }}

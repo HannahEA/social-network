@@ -103,6 +103,7 @@ type Comment struct {
 	Author    string `json:"author"`
 	Content   string `json:"content"`
 	Date      string `string:"date"`
+	Page      string `json:"page"`
 }
 
 //	type Profile struct {

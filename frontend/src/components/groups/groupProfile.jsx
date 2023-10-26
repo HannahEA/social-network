@@ -360,10 +360,12 @@ const handleGroupInvite = (e) => {
         </div>
         {/* end of group invites, group posts, group events */}
         
-
+      
        
-            
-        <Posts page="groupProfile" id={theGroup.id} username ={""}/>
+          <div style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
+            <Posts page="groupProfile" groupID={theGroup.id} username ={""}/>
+          </div>
+        
 
         
 
