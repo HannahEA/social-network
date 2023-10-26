@@ -28,14 +28,14 @@ function GroupProfile({ children, grpMember, onGpClose, followers, request, theG
 // to be removed at a later date
 
 const [gpMembers, setGpMembers] = useState([]);
-const [newGroupInputs, setNewGroupInputs] = useState({["type"]: "newGroup"});
+const [newGroupEvt, setNewGroupEvt] = useState({["type"]: "newEvent"});
 
     //make a new group
-    const handleNewGP = (event) => {
+    const handleNewEvt = (event) => {
       const { name, value } = event.target;
 
       // Check if the input is a checkbox with a value of "on"
-      if (event.target.type === "checkbox" && value === "on") {
+     /* if (event.target.type === "checkbox" && value === "on") {
         // Clone the existing array of group info and add the checkbox name to it
         const updatedGpMembers = [...gpMembers, name];
         setGpMembers(updatedGpMembers); 
@@ -45,35 +45,36 @@ const [newGroupInputs, setNewGroupInputs] = useState({["type"]: "newGroup"});
               gpMembers: updatedGpMembers,
               creator: creator,
           });
-      }else{
+      }else{*/
           // Update the newGroupInputs state for other inputs
-              setNewGroupInputs({ ...newGroupInputs, [name]: value });
-      }
+          setNewGroupEvt({ ...newGroupEvt, [name]: value, "invitedBy": request, "grpID": theGroup.id, "creator":theGroup.creator, "gpMembers":theGroup.gpMembers, "grpDescr":theGroup.grpDescr, "grpName":theGroup.grpName });
+      //}
 
     };
 
-    const handleSubmitNewGP = (event) => {
+    const handleSubmitNewEvt = (event) => {
       event.preventDefault();
 
       //clear text inputs
-      document.getElementById("grpName").value = ""; // Clear the group name value
-      document.getElementById("grpDescr").value = ""; // Clear the group description value
+       document.getElementById("evtName").value = ""; // Clear the group name value
+       document.getElementById("evtDescr").value = ""; // Clear the group description value
+       document.getElementById("evtDateTime").value = ""; //Clear the date and time falues
       
       //clear checkboxes
-      const grpMembers = document.querySelectorAll('input[type="checkbox"]:checked')//make HTMLCollection
-      for (let i = 0; i < grpMembers.length; i++){
-        grpMembers[i].checked = false; //un-tick check boxes
-      }
+      // const grpMembers = document.querySelectorAll('input[type="checkbox"]:checked')//make HTMLCollection
+      // for (let i = 0; i < grpMembers.length; i++){
+      //   grpMembers[i].checked = false; //un-tick check boxes
+      // }
 
       //alert(JSON.stringify(newGroupInputs, null, 2)); // Convert to JSON string for display; the second argument null is for replacer function, and the third argument 2 is for indentation
 
-        console.log("new group inputs sent to b.e.:", newGroupInputs);
+        console.log("new event inputs sent to b.e.:", newGroupEvt);
 
       // Display a success notification
-      notyf.success("New group created");
+      notyf.success("New event created");
         
         websocketRef.current.send(
-        JSON.stringify(newGroupInputs)
+        JSON.stringify(newGroupEvt)
 
         
     )
@@ -310,24 +311,26 @@ const handleGroupInvite = (e) => {
             {/* start of group events */}
             <div id="newGroupForm">
             <p className="font-bold text-center text-lg dark:text-[#3f82a9] text-[#5fc1fa]">Create an event</p>
-              <form onSubmit={handleSubmitNewGP} className=" bg-[#a8daf7] dark:bg-[#81b7d7] justify-between">
+              <form onSubmit={handleSubmitNewEvt} className=" bg-[#a8daf7] dark:bg-[#81b7d7] justify-between rounded-md h-72">
                 <br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Group name:
-                <input type="text" name="grpName" valuechkJoin={newGroupInputs.grpName || ""} onChange={handleNewGP} placeholder="Enter group name" className="border-hidden mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="grpName" required />
+                <input type="text" name="evtName" valuechkJoin={newGroupEvt.grpName || ""} onChange={handleNewEvt} placeholder="Enter group name" className="border-hidden mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="evtName" required />
                 </label><br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Description:
-                <input type="text" name="grpDescr" value={newGroupInputs.grpDescr || ""} onChange={handleNewGP} placeholder="Enter description" className="border-hidden mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(70%-1rem)] rounded-md" id="grpDescr" required/>
+                <input type="text" name="evtDescr" onChange={handleNewEvt} placeholder="Enter description" className="border-hidden mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(70%-1rem)] rounded-md" id="evtDescr" required/>
                 </label>
               <br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Date and time:
                 <input
-                type="datetime-local"
+                id="evtDateTime"
+                type="datetime-local" name="evtDateTime" 
                 className="mb-6 ml-6 bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  onChange={handleDateChange}
+                 onChange={handleNewEvt} 
+                  // onChange={handleDateChange}
                   ref={dateInputRef}
                 />
                 </label>
-                <p className="ml-2 text-[#717575] dark:text-white">Invite group members:</p>
+                {/* <p className="ml-2 text-[#717575] dark:text-white">Invite group members:</p>
                   <br></br>
                   {console.log("followers inside the GroupsModal component: ",followers)}
                   <ul className="flex space-x-4"> 
@@ -337,12 +340,12 @@ const handleGroupInvite = (e) => {
                     <label class="addToGroup dark:text-[#3f82a9]">{follw}</label>
                   </li>
                 ))}
-                  </ul>
-                <div id="addFollowersToGroup" className="text-sm font-sm text-[#717575] dark:text-primary-500">
+                  </ul> */}
+                {/* <div id="addFollowersToGroup" className="text-sm font-sm text-[#717575] dark:text-primary-500">
                
-                </div>
+                </div> */}
                 <div className="justify-center flex">
-                <input type="submit" id="newGpSubmit" value="Create group"
+                <input type="submit" id="newGpSubmit" value="Create event"
                   className="cursor-pointer  items-center p-2 w-[calc(35%-1rem)] text-base font-medium text-white 
                   rounded-lg transition duration-75 group bg-[#57aada] dark:bg-[#4e99c4] hover:bg-[#4c97c2] hover:text-[#c2e5f9]
                   shadow-lg dark:text-white dark:hover:bg-[#64afda]

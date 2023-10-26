@@ -397,7 +397,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			} //end of inserting new group members in the GroupMembers table
 
 		case "joinGroupReply":
-
+			//reply to creator's invite
 			var joinGrpReply JoinGroupReply
 
 			//populate the JoinGroupReply struct
