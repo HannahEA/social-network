@@ -15,6 +15,7 @@ import Detail from "./usersInfo/Detail.jsx";
 import Alerts from "./notifications/countAlerts.jsx";
 import Notification from "./notifications/notification.jsx";
 import NewGroupNotification from "./groups/newGroupNotification.jsx";
+import EventNotif from "./groups/eventNotif.jsx";
 import JoinGpReq from "./groups/joinGpReq.jsx"
 import GroupProfile from "./groups/groupProfile.jsx";
 import GrProfileCard from "./groups/grProfileCard.jsx"
@@ -35,7 +36,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, offlineGroupInvites:{}, sendAllGroups:{}, oneJoinGroupRequest:{}, offlineJoinGroupRequests:{} })
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, newEventNotif:{}, offlineGroupInvites:{}, sendAllGroups:{}, oneJoinGroupRequest:{}, offlineJoinGroupRequests:{}, offlineEventsInvites:{}})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
   
@@ -50,19 +51,22 @@ const Feed = () => {
           allData.current.offlineFollowNotif = message.offlineFollowNotif
           allData.current.offlineGroupInvites = message.offlineGroupInvites
           allData.current.offlineJoinGroupRequests = message.offlineJoinGroupRequests
+          allData.current.offlineEventsInvites = message.offlineEventsInvites
 
           //to prevent getting 'undefined' when there are no notifications
           let numFollowPending = parseInt(allData.current.offlineFollowNotif.numFollowPending, 10) || 0;
           let numGroupPending =  parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10) || 0;
           let numJoinGroupPending = parseInt(allData.current.offlineJoinGroupRequests.numGrpsPending, 10) || 0;
+          let numEventsInvites = parseInt(allData.current.offlineEventsInvites.numEvtsPending, 10) || 0;
           //all pending alerts is the sum of the above
-          let allNotifications = numFollowPending + numGroupPending + numJoinGroupPending
+          let allNotifications = numFollowPending + numGroupPending + numJoinGroupPending + numEventsInvites
           console.log("all notifications are: ", allNotifications)
-          //check if there are pending follow notifs or group invites
+          //check if there are pending follow notifs or group invites or events invites
           if (allNotifications > 0) {
             console.log("notifications count: ", allData.current.offlineFollowNotif.numFollowPending)
             console.log("new groups count: ", allData.current.offlineGroupInvites.numGrpsPending)
             console.log("new join groups count: ", allData.current.offlineJoinGroupRequests.numGrpsPending)
+            console.log("new events invites count: ",allData.current.offlineEventsInvites.numEvtsPending)
             //if yes, display the red alert
             showRedDot();
             //change corresponding state variables
@@ -74,6 +78,9 @@ const Feed = () => {
             }
             if(numJoinGroupPending > 0){
               setPendingJoinGroups(allData.current.offlineJoinGroupRequests.offlineJoinGrRequests)
+            }
+            if(numEventsInvites > 0){
+              setEventsInvites(allData.current.offlineEventsInvites.offlEventsInvites)
             }
 
           }else{
@@ -137,7 +144,13 @@ const Feed = () => {
           allData.current.newGroupNotif = message.newGroupNotif
           showGroupInvites();
           console.log("newGroupNotif received by member: ", allData.current.newGroupNotif)
-        } else if (message.type == "sendAllGroups"){
+        } else if (message.type == "newEventNotif"){
+          allData.current.newEventNotif = message.newEventNotif
+          showEventInvites();
+          console.log("newEventNotif received by member: ", allData.current.newEventNotif)
+        }
+        
+        else if (message.type == "sendAllGroups"){
             
             allData.current.sendAllGroups = message.sendAllGroups
           //update the state variable 'setGroupsList'
@@ -182,12 +195,14 @@ const Feed = () => {
   const [groupsModalVisible, setGroupsModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const[isGroupsVisible, setIsGroupsVisible] = useState(false);
+  const [isEventVisible, setIsEventVisible] = useState(false);
   const [isJoinGroupVisible, setIsJoinGroupVisible] = useState(false);
   const [redDotVisible, setRedDotVisible] = useState(false);
   const[isPendingListVisible, setIsPendingListVisible] = useState(false);
   const[pendingNotif, setPendingNotif] = useState([]);
   const[pendingGroups, setPendingGroups] = useState([]);
   const[pendingJoinGroups, setPendingJoinGroups] = useState([]);
+  const[eventsInvites, setEventsInvites] = useState([]);
   const[groupsList, setGroupsList] = useState({
     requestor: "",
     nbGroups: "",
@@ -229,6 +244,11 @@ const Feed = () => {
   const showGroupInvites = () => {
     setIsGroupsVisible(true);
   };
+  
+  //function to show events notifications for online participant
+  const showEventInvites = () => {
+    setIsEventVisible(true);
+  }
 
   // Function to show join group request notifications for online group creators
   const showJoinGroupRequests = () => {
@@ -773,7 +793,7 @@ const [viewProfile, setViewProfile] = useState(false)
               </div>
             </form>
           </div>
-          <div className="flex items-center static lg:order-2">
+          <div className="flex items-center lg:order-2">
             <button
               type="button"
               data-drawer-toggle="drawer-navigation"
@@ -805,21 +825,23 @@ const [viewProfile, setViewProfile] = useState(false)
             </button>
             {/* {console.log("the numPending :====>",allData)} */}
             {/* <div className="counter" style={{visibility:`${parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0 ? 'visible' : 'hidden'}`}}> */}
-            <div className="counter" id="aCounter">
+            <div className="counter" id="aCounter" onClick={togglePendingListVisible}>
             <button onClick={togglePendingListVisible} id="offlineNotifBtn">
                        {redDotVisible && (
                       <Alerts 
                         setDotVisible={setRedDotVisible}
                         dotVisible={redDotVisible}
-                        countFollowNotifs={(parseInt(allData.current.offlineFollowNotif.numFollowPending, 10)||0) + (parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10)||0) + (parseInt(allData.current.offlineJoinGroupRequests.numGrpsPending, 10) ||0)}
+                        countFollowNotifs={(parseInt(allData.current.offlineFollowNotif.numFollowPending, 10)||0) + (parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10)||0) + (parseInt(allData.current.offlineJoinGroupRequests.numGrpsPending, 10) ||0) + (parseInt(allData.current.offlineEventsInvites.numEvtsPending, 10) || 0)}
                         pendingFolNotif={allData.current.offlineFollowNotif.pendingFollows}
                         pendingGroupInvites={allData.current.offlineGroupInvites}
                         pendingJoinGroups={allData.current.offlineJoinGroupRequests}
+                        eventsInvites={allData.current.offlineEventsInvites}
                       />
                       )}
             {console.log("follows inside alerts div",allData.current.offlineFollowNotif.numPending)}
             {console.log("group invites inside alerts div",allData.current.offlineGroupInvites)}
             {console.log("join group requests pending: ",allData.current.offlineJoinGroupRequests)}
+            {console.log("events invites inside alerts div", allData.current.offlineEventsInvites)}
             </button>
             </div> 
          
@@ -1686,6 +1708,21 @@ const [viewProfile, setViewProfile] = useState(false)
           </div>
         {/* End of new group notification */}
 
+        {/*  Start of event notification */}
+
+        <div id="showEventNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+         {console.log("the state variable of isEventVisible: ", isEventVisible)}
+          {isEventVisible && (
+          <EventNotif 
+            setEventVisible={setIsEventVisible}
+            eventVisible={isEventVisible}
+            eventData={allData.current.newEventNotif}
+          />
+          )}
+          </div>
+
+        {/* End of event notification */}
+
         {/* Start of join group request notification */}
           <div id="joinGpReq" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
           {console.log("the state variable of isJoinGroupVisible: ", isJoinGroupVisible)}
@@ -1944,14 +1981,14 @@ const [viewProfile, setViewProfile] = useState(false)
                   <div
                     className="block py-2 px-4 text-sm hover:bg-[#7ca3ba] dark:hover:bg-[#7096ac] dark:text-gray-600 dark:hover:text-white dark:bg-[#a5dcfc]"
                   >
-                    {pendingNotif.map((f)=> (
-                      <li key={f.followID}>
+                    {eventsInvites.map((e)=> (
+                      <li key={e.id}>
                        <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
                       <div className="flex-shrink-0">
                       <img
                         className="w-11 h-11 rounded-full"
                         //src={(f.followerURL).substring(0,3)==="" && (f.followerImage).substring(0.3)==="" ? "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj" :(f.followerURL).substring(0,3)==="htt" ? f.followerURL : f.followerImage}
-                        src={f.followerURL || f.followerImage || "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"}
+                        src={e.evtCreatorURL || e.evtCreatorImage || "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"}
                       alt="eventInvite"
                       />
                       <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 bg-gray-900 rounded-full border border-white dark:border-gray-700">
@@ -1968,14 +2005,14 @@ const [viewProfile, setViewProfile] = useState(false)
                       </div>
                       <div className="pl-3 w-full">
                       <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
-                        <span className="font-semibold text-gray-900 dark:text-white">{f.followerUN} </span>
-                          has invited you to event {f.influencerUN}
+                        <span className="font-semibold text-gray-900 dark:text-white">{e.grpName} </span>
+                          has a new event: <span className="font-semibold text-gray-900 dark:text-white">{e.evtName}</span>
                       </div>
                       </div>
                     </a>
                     <div className="text-xs font-medium text-primary-600 dark:text-primary-500">                  
-                        <a onClick={()=>(handleOfflFollowAccept(f))} style={{cursor: 'pointer'}} class="offlineAccept">Accept</a>
-                        <a onClick={()=>(handleOfflFollowDecline(f))} style={{cursor: 'pointer'}} class="offineDecline"> Decline</a>
+                        <a onClick={()=>(handleOfflFollowAccept(e))} style={{cursor: 'pointer'}} class="offlineAccept">View event</a>
+                        {/* <a onClick={()=>(handleOfflFollowDecline(e))} style={{cursor: 'pointer'}} class="offineDecline"> Decline</a> */}
                     </div>
                     </li>
                     ))}

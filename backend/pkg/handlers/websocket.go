@@ -169,11 +169,21 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				OfflineJoinGrRequests: sliceJoinReq,
 			}
 
+			//get user's pending event invites
+			countEvtInvites, sliceEventInvites := service.repo.GetPendingEventInvites(user.NickName)
+
+			//instantiate the NewEventNotif struct to be sent to f.e.
+			var offlineEventsInvites = OfflineEventsInvites{
+				NumEvtsPending:    countEvtInvites,
+				OfflEventsInvites: sliceEventInvites,
+			}
+
 			webMessage := WebsocketMessage{
 				Presences:                presences,
 				OfflineFollowNotif:       offlineFollowNotif,
 				OfflineGroupInvites:      offlineGroupInvites,
 				OfflineJoinGroupRequests: offlineJoinGroupRequests,
+				OfflineEventsInvites:     offlineEventsInvites,
 				Type:                     "connect",
 			}
 
@@ -585,6 +595,75 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				//offline countAlerts are sent from case: "connect"
 			}
 
+		case "newEvent":
+			var newEv NewEventNotif
+			status := "participantPending"
+
+			//populate the newEv struct with f.e. data
+			jsonErr := json.Unmarshal(b, &newEv)
+
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: newEv")
+			}
+			//insert new event data in the 'Events' table
+			eID, err := service.repo.InsertNewEvent(newEv)
+			if err != nil {
+				fmt.Println("error inserting new gp data", err)
+			}
+
+			newEv.ID = eID
+
+			fmt.Println("newEv:", newEv)
+
+			//insert event members into the EventsParticipants table
+			for i := 0; i < len(newEv.GrpMembers); i++ {
+				if newEv.GrpMembers[i] == "" {
+					continue
+				}
+
+				err = service.repo.InsertEvtMember(newEv, i, status)
+				if err != nil {
+					fmt.Println("error inserting evtMember: ", newEv.GrpMembers[i])
+				}
+
+				//return new event notification information
+				newEvNotif, err1 := service.repo.CheckEvParticipantOnline(newEv.EvtName, newEv.EvtDescr, newEv.ID, newEv.GrpMembers[i], newEv.EvtCreator)
+				if err1 != nil {
+					fmt.Println("error returning newEvNotif data: ", err1)
+				}
+
+				//add missing info to the newEvNotif struct
+				//the type is: newEventNotif
+				newEvNotif.EvtDateTime = newEv.EvtDateTime
+				newEvNotif.GrpCreator = newEv.GrpCreator
+				newEvNotif.GrpDescr = newEv.GrpDescr
+				newEvNotif.GrpName = newEv.GrpName
+				newEvNotif.GrpMembers = newEv.GrpMembers
+
+				fmt.Println("The new event notification sent to f.e.: ", newEvNotif)
+
+				//check if the event participant is online and send notification
+				if newEvNotif.EvtMemberStatus == "participantPending" && newEvNotif.EvtMemberLogged == "Yes" {
+					//send new group notification to member
+					online := false
+					fmt.Println("Printing to get rid of the error", online)
+					reciever := make(map[*websocket.Conn]string)
+					//find member's channel
+					for conn, client := range Clients {
+						if client == newEvNotif.EvtMember {
+							reciever[conn] = client
+							online = true
+							service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{NewEventNotif: newEvNotif, Type: newEvNotif.Type}, Connections: reciever})
+						}
+					}
+				} else if newEvNotif.EvtMemberStatus == "participantPending" && newEvNotif.EvtMemberLogged == "No" {
+					fmt.Println("Entering the new event offline branch")
+					//new event participant is off-line
+					//offline countAlerts are sent from case: "connect"
+				}
+
+			} //end of inserting new event participants in the EventsParticipants table
+
 		} //end of 'switch for message type'
 
 	}
@@ -948,7 +1027,7 @@ func (repo *dbStruct) InsertJoinRequest(joinReq OneJoinGroupRequest, status stri
 }
 
 //check if a user is online or offline,
-//used for group and event notifications
+//used for group notifications
 func (repo *dbStruct) CheckUserOnline(grNm string, grDescr string, grId int, user string, creator string) (NewGroupNotif, error) {
 	//instantiate the NewGroupNotif struct
 	var newGpNotif NewGroupNotif
@@ -1251,4 +1330,154 @@ func (repo *dbStruct) getUserAvatar(nkName string) (NewGroupNotif, error) {
 	}
 
 	return theInvite, nil
+}
+
+//populate the Events table
+func (repo *dbStruct) InsertNewEvent(e NewEventNotif) (int, error) {
+	fmt.Printf("from inside the InsertNewEvent the TYPE of grpID = %T", e.GrpID)
+	//populate the db table 'Events'
+	stmnt, err := repo.db.Prepare("INSERT OR IGNORE INTO Events (groupID, groupName, organizer, title, description, day_time) VALUES (?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		fmt.Println("Error preparing insert stmt for new event: ", err)
+		return 0, err
+	}
+	_, err = stmnt.Exec(e.GrpID, e.GrpName, e.EvtCreator, e.EvtName, e.EvtDescr, e.EvtDateTime)
+	if err != nil {
+		fmt.Println("Error inserting new event into DB: ", err)
+		return 0, err
+	}
+
+	//return the auto-generated 'eventID'
+	rows, err := repo.db.Query("SELECT seq FROM sqlite_sequence WHERE name = 'Events'")
+	if err != nil {
+		fmt.Println("Error returning 'new event id'", err)
+		return 0, err
+	}
+	for rows.Next() {
+		err := rows.Scan(&e.ID)
+		if err != nil {
+			fmt.Println("event ID sqlite_sequence: row scan error", err)
+			return 0, err
+		}
+	}
+	return e.ID, nil
+
+}
+
+//Populate new event's EventsParticipants table
+func (repo *dbStruct) InsertEvtMember(newEv NewEventNotif, i int, status string) error {
+	fmt.Printf("from inside the InsertEvtMember the TYPE of eventID = %T", newEv.ID)
+
+	//prepare the query
+	stmt, err := repo.db.Prepare("INSERT OR IGNORE into EventsParticipants (eventID, groupID, organizer, participant, option) values(?, ?, ?, ?, ?)")
+	if err != nil {
+		fmt.Println("error preparing statement to insert event participants", err)
+		return err
+	}
+
+	_, err = stmt.Exec(newEv.ID, newEv.GrpID, newEv.EvtCreator, newEv.GrpMembers[i], status)
+	if err != nil {
+		fmt.Println("error inserting event participant", err)
+		return err
+	}
+
+	return nil
+}
+
+//check if a user is online or offline,
+//used for event notifications
+func (repo *dbStruct) CheckEvParticipantOnline(EvtName string, EvtDescr string, ID int, gMember string, EvtCreator string) (NewEventNotif, error) {
+	//instantiate the NewGroupNotif struct
+	var newEvNotif NewEventNotif
+
+	//return 'loggedIn' value for event participant
+	err1 := repo.db.QueryRow("SELECT loggedIn from Users where nickName = ?", gMember).Scan(&newEvNotif.EvtMemberLogged)
+	if err1 != nil {
+		fmt.Println("error returning loggedIn data", err1)
+		return newEvNotif, err1
+	}
+
+	//return 'member status' value for member
+	err2 := repo.db.QueryRow("SELECT option from EventsParticipants where participant = ? AND eventID = ? ", gMember, ID).Scan(&newEvNotif.EvtMemberStatus)
+	if err2 != nil {
+		fmt.Println("error returning participant status data", err2)
+		return newEvNotif, err2
+	}
+
+	//return avatar URL and image for creator
+	err3 := repo.db.QueryRow("SELECT avatarURL, imageFile, loggedIn from Users where nickName = ?", EvtCreator).Scan(&newEvNotif.EvtCreatorURL, &newEvNotif.EvtCreatorImage, &newEvNotif.EvtCreatorLogged)
+	if err3 != nil {
+		fmt.Println("error returning URL, image, logged in for EvtCreator: ", err3)
+		return newEvNotif, err3
+	}
+
+	newEvNotif.EvtCreator = EvtCreator
+	newEvNotif.EvtMember = gMember
+	newEvNotif.EvtName = EvtName
+	newEvNotif.EvtDescr = EvtDescr
+	newEvNotif.GrpID = ID
+	newEvNotif.Type = "newEventNotif"
+
+	return newEvNotif, nil
+
+}
+
+//event invites sent to offline users
+func (repo *dbStruct) GetPendingEventInvites(member string) (string, []NewEventNotif) {
+	var ePending []NewEventNotif
+	var eCount string
+
+	fmt.Println("From inside GetPendingEventInvites, the user name is: ", member)
+
+	var oneGroupPending NewEventNotif
+	//returns avatar from 'Users' and info from 'EventsMembers' table
+	query := `
+			SELECT U.avatarURL, U.imageFile, E.eventID, E.groupID, E.organizer, E.participant, E.option
+			FROM Users U
+			INNER JOIN EventsParticipants E ON U.nickName = E.organizer
+			WHERE E.participant = ? AND E.option = 'participantPending' AND U.nickName != E.participant
+		`
+	rows, err := repo.db.Query(query, member)
+	if err != nil {
+		fmt.Println("error querying pending event invites for offline participant", err)
+		return "", ePending
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+
+		err := rows.Scan(&oneGroupPending.EvtCreatorURL, &oneGroupPending.EvtCreatorImage, &oneGroupPending.ID, &oneGroupPending.GrpID, &oneGroupPending.EvtCreator, &oneGroupPending.EvtMember, &oneGroupPending.EvtMemberStatus)
+		if err != nil {
+			fmt.Println("GetPendingEventsRequests for offline user scan Error", err, oneGroupPending)
+			return "", ePending
+		}
+
+		//get event name, description, date and time
+		err3 := repo.db.QueryRow("SELECT groupID, groupName, title, description, day_time from Events where eventID = ?", oneGroupPending.ID).Scan(&oneGroupPending.GrpID, &oneGroupPending.GrpName, &oneGroupPending.EvtName, &oneGroupPending.EvtDescr, &oneGroupPending.EvtDateTime)
+		if err3 != nil {
+			fmt.Println("error returning group name and description: ", err3)
+			return "", ePending
+		}
+
+		oneGroupPending.EvtMemberLogged = "No"
+		oneGroupPending.Type = "connect"
+
+		fmt.Println("One pending new event for offline user: ", oneGroupPending)
+
+		ePending = append(ePending, oneGroupPending)
+
+		fmt.Println("Slice of pending events invites for offline user", ePending)
+		oneGroupPending = NewEventNotif{}
+
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return "", ePending
+	}
+
+	eCount = strconv.Itoa(len(ePending))
+
+	return eCount, ePending
 }

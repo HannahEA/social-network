@@ -317,7 +317,43 @@ position: relative
   left: 18px;
 }
 
+/* event date and time */
+#grpT{
+  position:absolute;
+  top: 120px;
+  left: 18px;
+}
+
+/* event notif btn ok */
+#btnEventOK{
+  color: #5dbaf0;
+  top: 150px;
+  left: 35px;
+  border-radius: 6px;
+  width: 100px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+}
+
+#btnEventOK:hover{
+  background-color: #2f5d78;
+  }
+
+#btnEventNO{
+
+  color: #5dbaf0;
+  top: 150px;
+  left: 160px;
+  border-radius: 6px;
+  width: 100px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+}
+
+#btnEventNO:hover{
+background-color: #2f5d78;
+}
+
 #btnNotifOK{
+  position:absolute;
   color: #5dbaf0;
   top: 150px;
   left: 35px;
@@ -331,6 +367,7 @@ position: relative
   }
 
 #btnNotifNO{
+  position:absolute;
   color: #5dbaf0;
   top: 150px;
   left: 160px;

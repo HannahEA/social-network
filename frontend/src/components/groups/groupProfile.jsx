@@ -77,7 +77,7 @@ const [newGroupEvt, setNewGroupEvt] = useState({["type"]: "newEvent"});
     const handleNewEvt = (event) => {
       const { name, value } = event.target;
 
-          setNewGroupEvt({ ...newGroupEvt, [name]: value, "invitedBy": request, "grpID": theGroup.id, "creator":theGroup.creator, "gpMembers":theGroup.gpMembers, "grpDescr":theGroup.grpDescr, "grpName":theGroup.grpName });
+          setNewGroupEvt({ ...newGroupEvt, [name]: value, "evtCreator": request, "grpID": theGroup.id, "grpCreator":theGroup.creator, "grpMembers":theGroup.gpMembers, "grpDescr":theGroup.grpDescr, "grpName":theGroup.grpName });
 
     };
 
@@ -98,23 +98,23 @@ const [newGroupEvt, setNewGroupEvt] = useState({["type"]: "newEvent"});
       var newEvt = document.createElement('div')//is a node
 
       newEvt.innerHTML =`
-        <p style="font:'semibold'; color:'gray'; dark:text-white; padding:'10px';">Event invite </p>
-        <p id="evt"><span style="font:'semibold'; color:'gray'; padding:'10px';">${request} </span>has invited you to event: </p>
-        
-        <p >Name: <span style="font:'semibold'; color:'gray'; padding:'10px';">${newGroupEvt.evtName}</span></p>
-        <p >Description: <span style="font:'semibold'; color:'gray';  padding:'10px';">${newGroupEvt.evtDescr}</span></p>
+        <p style="font:bold; text:center; color:gray; dark:text-white; padding:10px;">Event invite </p>
+        <p id="evt"><span style="font:semibold; color:gray; padding:10px;">${request} </span>has invited you to event: </p>
+        <p style="padding:5px;">Name: <span style="font:semibold; color:gray; padding:10px;">${newGroupEvt.evtName}</span></p>
+        <p style="padding:5px;">Description: <span style="font:semibold; color:gray;  padding:10px;">${newGroupEvt.evtDescr}</span></p>
+        <p style="padding:5px;">Date & time: <span style="font:semibold; color:gray;  padding:10px;">${formatDateTime(newGroupEvt.evtDateTime)}</span></p>
         <span>
-        <button id="btnNotifOK"
+        <button id="btnEventOK"
           onClick={handleAccept}
-          style="  hover:'#3488af';  backgroundColor:'#57aada'; fontWeight:'strong'; padding:'10px';"
+          style="hover:#3488af; backgroundColor:#57aada; fontWeight:strong; padding:5px;"
         >
           Accept
         </button>
         </span>
         <span>
-        <button id="btnNotifNO"
+        <button id="btnEventNO"
           onClick={handleNo}
-          style="hover:'#3488af'; backgroundColor:'#57aada'; fontWeight:'strong'; items-center; padding:'10px';"
+          style="hover:#3488af; backgroundColor:#57aada; fontWeight:strong; items-center; padding:5px;"
         >
           Decline
         </button>
@@ -251,6 +251,32 @@ const handleGroupInvite = (e) => {
 
   }
 
+  //format the yyyy-mm-ddThh:mm date-time in a readable format
+  function formatDateTime(inputDateTime) {
+    const parts = inputDateTime.split('T'); // Split the input by 'T' to separate date and time
+  
+    const datePart = parts[0];
+    const timePart = parts[1];
+  
+    const [year, month, day] = datePart.split('-');
+  
+    const [hour, minute] = timePart.split(':');
+  
+    // Create a new Date object with the components
+    const date = new Date(year, month - 1, day, hour, minute);
+  
+    const options = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    };
+  
+    return date.toLocaleString('en-UK', options);
+  }
+  
+
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
@@ -268,7 +294,9 @@ const handleGroupInvite = (e) => {
 
       {/* start of group invites */}
         <form name="addMember" id="addMember" onSubmit={handleGroupInvite} className="justify-around">
-          <span><label className="info dark:text-white">Invite other people : </label></span>
+        <p className="font-bold text-center text-lg dark:text-[#3f82a9] text-[#28698f]">Invite other people</p>
+          <br></br>
+          <span><label className="info dark:text-white">Select people : </label></span>
           <span>
             <select id="dropDown" name="choosePeople" className="choosePeople rounded-md text-[#53a1ce] bg-[#bfe0f3] p-1" onChange={handleAddMember}>
             <optgroup label="Your followers" >

@@ -88,11 +88,15 @@ type AllDbMethods interface {
 	GetAllUserPosts(user *User) ([]Post, error)
 	//Groups
 	InsertNewGroup(g NewGroup) (int, error)
+	InsertNewEvent(e NewEventNotif) (int, error)
 	InsertGrpMember(newGp NewGroup, i int, status string) error
+	InsertEvtMember(newEv NewEventNotif, i int, status string) error
 	InsertGrpInvite(gpInv NewGroupNotif, status string) error 
 	InsertJoinRequest(joinReq OneJoinGroupRequest, status string) error
 	CheckUserOnline(grpName string, grpDescr string, grpID int, user string, creator string) (NewGroupNotif, error)
+	CheckEvParticipantOnline(EvtName string, EvtDescr string, ID int, gMember string, EvtCreator string) (NewEventNotif, error) 
 	GetPendingGroupInvites(member string) (int, []NewGroupNotif)
+	GetPendingEventInvites(member string) (string, []NewEventNotif)
 	InsertGroupMemberReply(joinGrpReply JoinGroupReply) error
 	GetExistingGroups() (string, []NewGroup)
 	GetPendingJoinGroupRequests(creator string) (string, []OneOfflineJoinGroupRequest)
