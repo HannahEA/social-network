@@ -1,5 +1,7 @@
 ## Helena To Do ##
-Group page: create a new event and event notifications
+event notifications reply back end;
+rendering all events on group profile page and buttons b.e.;
+event creator 'option' field in EventsParticipants' table to be automatically set to 'Yes'
 
 
 ## Hannah's fav colour palette: 
