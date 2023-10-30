@@ -317,6 +317,43 @@ position: relative
   left: 18px;
 }
 
+/* start of event notification */
+
+/* the event appearing inside the group profile immediately after it was created */
+/* the div containing .addEvent */
+#showEvts{
+  margin-top: 10px;
+  display:flex;
+}
+/* Event details inside the group profile */
+.addEvent{
+  position: relative;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top:5px;
+  margin-bottom: 20px;
+  margin-left: 5px;
+  width: 300px;
+  height: 200px;
+  align-content:center;
+  flex-direction: column;
+}
+
+/* to style the notification */
+.evtNotification-item {
+  position: relative;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  width: 300px;
+  height: 200px;
+  visibility: hidden;
+  align-content:center;
+  flex-direction: column;
+}
+
 /* event date and time */
 #grpT{
   position:absolute;
@@ -324,7 +361,7 @@ position: relative
   left: 18px;
 }
 
-/* event notif btn ok */
+/* event btn ok */
 #btnEventOK{
   color: #5dbaf0;
   top: 150px;
@@ -332,25 +369,48 @@ position: relative
   border-radius: 6px;
   width: 100px;
   box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  flex-direction:row;
+  justify-content:center;
 }
 
 #btnEventOK:hover{
   background-color: #2f5d78;
   }
 
+/* event btn decline */
 #btnEventNO{
-
   color: #5dbaf0;
   top: 150px;
   left: 160px;
   border-radius: 6px;
   width: 100px;
   box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  flex-direction:row;
+  justify-content:center;
 }
 
 #btnEventNO:hover{
 background-color: #2f5d78;
 }
+
+#btnViewEvent{
+  color: #82cbf5;
+  top: 150px;
+  left: 35px;
+  margin-top: 110px;
+  margin-left: 90px;
+  border-radius: 6px;
+  width: 100px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  justify-content:center;
+}
+
+
+#btnViewEvent:hover{
+  background-color: #4383a8;
+  }
+
+/* end of event notification */
 
 #btnNotifOK{
   position:absolute;
@@ -415,10 +475,18 @@ background-color: #2f5d78;
     /* start of group profile */
 
     /* addMember contains invite follower, make a post, create event */
-    #addMember{
-      /* position:relative; */
-      /* height: auto;
-      width: auto; */
+    .pTitle{
+      width: 200px;
+    }
+
+    .pContent{
+      width: 250px;
+      height: 27px;
+      resize:none;
+    }
+
+    .pTags{
+      width: 170px;
     }
 
     #joinGpSubmit{

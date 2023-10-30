@@ -323,7 +323,7 @@ type OneOfflineJoinGroupRequest struct {
 	GrpDescr      string `json:"grpDescr"`
 }
 
-//new event notification to all group members
+//new event notification to all group memlistbers
 type NewEventNotif struct {
 	GrpCreator       string   `json:"grpCreator"`
 	EvtDateTime      string   `json:"evtDateTime"`

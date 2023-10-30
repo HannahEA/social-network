@@ -100,13 +100,13 @@ const [newGroupEvt, setNewGroupEvt] = useState({["type"]: "newEvent"});
       newEvt.innerHTML =`
         <p style="font:bold; text:center; color:gray; dark:text-white; padding:10px;">Event invite </p>
         <p id="evt"><span style="font:semibold; color:gray; padding:10px;">${request} </span>has invited you to event: </p>
-        <p style="padding:5px;">Name: <span style="font:semibold; color:gray; padding:10px;">${newGroupEvt.evtName}</span></p>
-        <p style="padding:5px;">Description: <span style="font:semibold; color:gray;  padding:10px;">${newGroupEvt.evtDescr}</span></p>
-        <p style="padding:5px;">Date & time: <span style="font:semibold; color:gray;  padding:10px;">${formatDateTime(newGroupEvt.evtDateTime)}</span></p>
+        <p style="margin-left:5px; padding:5px;">Name: <span style="font:semibold; color:gray; padding:10px;">${newGroupEvt.evtName}</span></p>
+        <p style="margin-left:5px; padding:5px;">Description: <span style="font:semibold; color:gray;  padding:10px;">${newGroupEvt.evtDescr}</span></p>
+        <p style="margin-left:5px; padding:5px;">Date & time: <span style="font:semibold; color:gray;  padding:10px;">${formatDateTime(newGroupEvt.evtDateTime)}</span></p>
         <span>
         <button id="btnEventOK"
           onClick={handleAccept}
-          style="hover:#3488af; backgroundColor:#57aada; fontWeight:strong; padding:5px;"
+          style="hover:#3488af; backgroundColor:#57aada; fontWeight:strong; items-center; padding:5px;"
         >
           Accept
         </button>
@@ -293,12 +293,12 @@ const handleGroupInvite = (e) => {
         <div id="addMember" className="flex justify-around" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
 
       {/* start of group invites */}
-        <form name="addMember" id="addMember" onSubmit={handleGroupInvite} className="justify-around">
-        <p className="font-bold text-center text-lg dark:text-[#3f82a9] text-[#28698f]">Invite other people</p>
+        <form name="addMember" id="addMember" onSubmit={handleGroupInvite} className=" bg-[#a8daf7] dark:bg-[#81b7d7] space-between rounded-md h-72">
+        <p className="mt-5 font-bold text-center text-lg dark:text-[#53a9db] text-[#378dbe]">Invite other people</p>
           <br></br>
-          <span><label className="info dark:text-white">Select people : </label></span>
+          <span><label className="ml-8 mr-5 text-[#717575] dark:text-white">Select people : </label></span>
           <span>
-            <select id="dropDown" name="choosePeople" className="choosePeople rounded-md text-[#53a1ce] bg-[#bfe0f3] p-1" onChange={handleAddMember}>
+            <select id="dropDown" name="choosePeople" className="mr-8 border-b-2 border-green shadow-md choosePeople rounded-md text-[#53a1ce] bg-[#bfe0f3] p-1" onChange={handleAddMember}>
             <optgroup label="Your followers" >
             <option key="" value="" disabled selected hidden>Choose a name</option>
             {followers == null ? <label class="addToGroup dark:text-[#3f82a9]">No followers available</label> : followers.map((follw) => (
@@ -307,8 +307,9 @@ const handleGroupInvite = (e) => {
             </optgroup>
             </select>
           </span>
+          <br></br>
               <div>
-                <input type="submit" id="joinGpSubmit" value="Invite"
+                <input type="submit" id="joinGpSubmit" value="Invite to join"
                   className="cursor-pointer absolute justify-center flex items-center p-2 w-[calc(35%-1rem)] text-base font-medium text-white 
                   rounded-lg transition duration-75 group bg-[#57aada] dark:bg-[#4e99c4] hover:bg-[#4c97c2] hover:text-[#c2e5f9]
                   shadow-lg dark:text-white dark:hover:bg-[#64afda]
@@ -316,47 +317,51 @@ const handleGroupInvite = (e) => {
                 />
               </div>
           </form>
+
           {/* end of group invites */}
 
           {/* start of group posts */}
           
-          <form onSubmit={submitPost} className="justify-between">
-          <p className="font-bold text-center text-lg dark:text-[#3f82a9] text-[#378dbe]">Create a post</p>
+          <form onSubmit={submitPost} className="space-between bg-[#a8daf7] dark:bg-gray-600 rounded-md h-72">
+          <p className="mt-5 font-bold text-center text-lg dark:text-[#53a9db] text-[#378dbe]">Create a post</p>
               <span className="flex p-2.5 pl-5">
-                <p className="flex-row mr-5 font-bold text-[#5aadde]">Title</p>
+                <p className="flex-row mr-5 text-[#717575]">Title:</p>
                 <input
-                  className="flex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
+                  className="pTitle flex-row border-b-2 border-green shadow-md dark:bg-[#81b7d7] dark:text-white focus:outline-none rounded-md bg-[#c7e6f8]"
                   type="text"
+                  placeholder="Enter title"
                   value={Title}
                   onChange={handleTitle}
                 />
               </span>
 
-              <div className="flex justify-right items-right flex-col">
-                <p className="p-2.5 pl-5 font-bold text-[#5aadde]">Content</p>
-                <textarea
-                  className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none"
+              <span className="flex p-2.5 pl-5">
+                <p className="flex-row mr-5 text-[#717575]">Post:</p>
+                <input
+                  className="pContent flex-row border-b-2 border-green shadow-md dark:bg-[#81b7d7] dark:text-white focus:outline-none rounded-md bg-[#c7e6f8]"
+                  type="text"
                   name="postContent"
                   id="postContent"
-                  cols="8"
-                  rows="3"
                   maxLength="100"
+                  placeholder="Enter post"
                   value={Content}
                   onChange={handleContent}
-                ></textarea>
-              </div>
+                />
+              </span>
+
               <span className="flex p-2.5 pl-5">
-                <p className="flex-row mr-5 font-bold text-[#5aadde]">Tags</p>
+                <p className="flex-row mr-5 text-[#717575]">Tags:</p>
                 <input
                   type="text"
                   id="postTags"
-                  className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
+                  placeholder="Enter tag"
+                  className="pTags flex-row mr-5 border-b-2 border-green shadow-md dark:bg-[#81b7d7] dark:text-white focus:outline-none rounded-md bg-[#c7e6f8]"
                 />
                 <button
                   onClick={addTag}
                   type="submit"
                   value="Add Tag"
-                  className="flex-row pl-2  pr-2 font-bold bg-[#8cc0de] text-sm text-white rounded-md cursor-pointer hover:bg-[#76a1ba] shadow-lg"
+                  className="ml-2 flex-row pl-2  pr-2  bg-[#57aada] dark:bg-[#4e99c4] hover:bg-[#4c97c2] hover:text-[#c2e5f9] text-white rounded-md cursor-pointer shadow-lg"
                 >
                   Add Tag
                 </button>
@@ -364,47 +369,52 @@ const handleGroupInvite = (e) => {
               <Tags tags={tag} />
              
               <div className="flex">
+              <p className="flex-row ml-5 mr-5 text-[#717575]">Image:</p>
                 <input
                   type="text"
                   name="imageUrl"
                   id="imageUrl"
                   placeholder="Enter image URL"
-                  className="ml-5 m-2.5 pl-5 pr-5 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="pTags border-b-2 border-green shadow-md m-2.5 pl-5 pr-5 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-[#aedbf5] dark:text-white bg-[#c7e6f8]"
                   // value={imageURL}
                   onChange={handlePostImage}
                 />
                 <label
                   htmlFor="imageFile"
-                  className="ml-5 m-2.5 pl-5 pr-5  items-center justify-center text-sm font-bold bg-[#8cc0de] text-white border border-transparent rounded-lg cursor-pointer hover:bg-[#76a1ba] shadow-lg"
+                  className="ml-5 m-2.5 pl-2  pr-2  items-center justify-center bg-[#57aada] dark:bg-[#4e99c4] hover:bg-[#4c97c2] hover:text-[#c2e5f9] text-white border border-transparent rounded-lg cursor-pointer shadow-lg"
                 >
-                  Upload Image File
+                  Upload file
                 </label>
-                {/* <input type="file" name="imageFile" id="imageFile" accept="image/*" className="hidden" value={imageFile} onChange={handlePostImage} /> */}
-                <input type="file" name="mageFile" id="imageFile" accept="image/*" className="hidden" onChange={handlePostImage} />
+                <input type="file" name="mageFile" id="imageFile" accept="image/*" className="hidden bg-[#46a3da]" onChange={handlePostImage}/>
               </div>
-              <button className="ml-5 m-2.5 pl-5 pr-5 font-bold bg-[#57aada] cursor-pointer hover:bg-[#3a7597] text-white rounded-md shadow-lg" type="submit ">
-                Post
+              <div className="justify-center flex">
+              <button  type="submit" className="cursor-pointer items-center p-2 w-[calc(35%-1rem)] text-base font-medium text-white 
+                  rounded-lg transition duration-75 group bg-[#57aada] dark:bg-[#4e99c4] hover:bg-[#4c97c2] hover:text-[#c2e5f9]
+                  shadow-lg dark:text-white dark:hover:bg-[#64afda]
+                  [box-shadow:0_3px_0_0_#407da1]">
+                Add post
               </button>
+              </div>
             </form>
             {/* end of group posts */}
 
             {/* start of group events */}
-            <div id="newGroupForm">
-            <p className="font-bold text-center text-lg dark:text-[#3f82a9] text-[#5fc1fa]">Create an event</p>
-              <form onSubmit={handleSubmitNewEvt} className=" bg-[#a8daf7] dark:bg-[#81b7d7] justify-between rounded-md h-72">
+           
+              <form onSubmit={handleSubmitNewEvt} className=" bg-[#a8daf7] dark:bg-[#81b7d7] space-between rounded-md h-72">
+                <p className="mt-5 font-bold text-center text-lg dark:text-[#53a9db] text-[#378dbe]">Organize an event</p>
                 <br></br>
-                <label className="ml-2 text-[#717575] dark:text-white">Group name:
-                <input type="text" name="evtName" valuechkJoin={newGroupEvt.grpName || ""} onChange={handleNewEvt} placeholder="Enter group name" className="border-hidden mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="evtName" required />
+                <label className="ml-2 text-[#717575] dark:text-white">Event name:
+                <input type="text" name="evtName" valuechkJoin={newGroupEvt.grpName || ""} onChange={handleNewEvt} placeholder="Enter group name" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="evtName" required />
                 </label><br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Description:
-                <input type="text" name="evtDescr" onChange={handleNewEvt} placeholder="Enter description" className="border-hidden mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(70%-1rem)] rounded-md" id="evtDescr" required/>
+                <input type="text" name="evtDescr" onChange={handleNewEvt} placeholder="Enter description" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(70%-1rem)] rounded-md" id="evtDescr" required/>
                 </label>
               <br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Date and time:
                 <input
                 id="evtDateTime"
                 type="datetime-local" name="evtDateTime" 
-                className="mb-6 ml-6 bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="mb-6 ml-6 bg-[#c7e6f8] border-b-2 border-green shadow-md text-[#717575] sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                  onChange={handleNewEvt} 
                   ref={dateInputRef}
                 />
@@ -418,7 +428,6 @@ const handleGroupInvite = (e) => {
                 />
                 </div>
               </form>
-              </div>
 
             {/* end of group events */}
             

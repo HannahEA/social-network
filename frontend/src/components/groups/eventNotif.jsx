@@ -1,5 +1,4 @@
 import React from 'react';
-import { useWebSocket } from "../WebSocketProvider.jsx";
 //this is the event notification sent to a prospective participant that is online
 
 
@@ -8,54 +7,33 @@ function EventNotif ( props ) {
     {console.log("show the props inside EventNotif: ",props)}
 
 
-    const { websocketRef, isWebSocketConnected} = useWebSocket();
 
-    
-    const handleAccept = () => {
+  //make the group profile page visible
+   const handleOpenGpProfile = () => {
+      props.setGrpProfileVisible(true);
+      props.close()
+   };
 
-    // Store user reply
-    let reply = "Yes";
-    // Make a reply object
-    var YesNo = {
-        "grpID": (props.groupData.grpID).toString(),
-        "groupMember": (props.groupData.member),
-        "joinReply": reply,
-        "type": "joinGroupReply",
-    };
 
-    console.log("the joinGroupReply sent to back end: ", YesNo)
 
-    //send reply object to back end
-    websocketRef.current.send(
-      JSON.stringify(YesNo)
-    )
-    // After handling the action, hide the Notification
-    props.setGroupsVisible(false);
+  //change state variable object 'setGrp' 
+    const handleSelectGrp = () => {
+       props.setGrp((prevState) => ({
+            ...prevState,
+            id: props.eventData.grpID,
+            creator: props.eventData.grpCreator,
+            gpMembers: props.eventData.grpMembers,
+            grpDescr: props.eventData.grpDescr,
+            grpName: props.eventData.grpName,
+            type: "arrayOfGroups"
+        }
+       )
+     ) 
+    }
 
-  };
 
-  const handleNo = () => {
-    //send to back end using the websocket:
-    let reply = "No";
-    // Make a reply object
-    var YesNo = {
-        "grpID": (props.groupData.grpID).toString(),
-        "groupMember": (props.groupData.member),
-        "joinReply": reply,
-        "type": "joinGroupReply",
-    };
 
-    console.log("the joinGroupReply sent to back end: ", YesNo)
-    //send user reply to back end
-    websocketRef.current.send(
-      JSON.stringify(YesNo)
-    )
-    // After handling the action, hide the Notification
-    props.setGroupsVisible(false);
-
-  };
-
-  //format the yyyy-mm-ddThh:mm date-time in a readable format
+  //change format of the 'yyyy-mm-ddThh:mm' date-time to a 'dd-mm-yyyy hh:mm' format
   function formatDateTime(inputDateTime) {
     const parts = inputDateTime.split('T'); // Split the input by 'T' to separate date and time
   
@@ -86,21 +64,27 @@ function EventNotif ( props ) {
   // Assuming props.eventData.evtDateTime is in the format "YYYY-MM-DDTHH:mm"
   const formattedDateTime = formatDateTime(props.eventData.evtDateTime);
 
+
+
     return (
-    <div className="z-999 notification-item text-gray-600 font-normal text-sm mb-1.5 dark:text-gray-400 bg-[#9dd6f7]" style={{visibility:`${props.eventVisible ? 'visible' : 'hidden'}`}}>
+    <div className="z-999 evtNotification-item text-gray-600 font-normal text-sm mb-1.5 dark:text-gray-400 bg-[#9dd6f7]" style={{visibility:`${props.eventVisible ? 'visible' : 'hidden'}`}}>
       <p id="msg">Group <span className="font-semibold text-gray-700 dark:text-white">{props.eventData.grpName} </span>has a new event: </p>
       <br></br>
       <p id="grpN">Name: <span className="m-l-1 font-semibold text-gray-700 dark:text-white">{props.eventData.evtName}</span></p>
       <br></br>
       <p id="grpD">Description: <span className="font-semibold text-gray-700 dark:text-white">{props.eventData.evtDescr}</span></p>
-      {/* <p id="grpT">Date & time: <span className="font-semibold text-gray-700 dark:text-white">{props.eventData.evtDateTime}</span></p> */}
       <p id="grpT">Date & time: <span className="font-semibold text-gray-700 dark:text-white">{formattedDateTime}</span></p>
       <span>
-      <button id="btnNotifOK"
-        onClick={handleAccept}
+      <button id="btnViewEvent"
+        onClick={() => {
+                          {console.log("group creator, event creator, and event participant:", props.eventData.grpCreator, props.eventData.evtCreator, props.eventData.EvtMember)}
+                        props.eventData.grpMembers === null || (props.eventData.evtCreator != props.eventData.EvtMember && props.eventData.grpMembers.includes(props.eventData.EvtMember) === false) ? props.setGrpMember(false): props.setGrpMember(true)
+                        handleOpenGpProfile();
+                        handleSelectGrp();
+                        }}
         style={{  hover:'#4488af',  backgroundColor: '#4488af' }}
       >
-        View group event
+        View event in group profile
       </button>
       </span>
     </div>

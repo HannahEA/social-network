@@ -250,6 +250,12 @@ const Feed = () => {
     setIsEventVisible(true);
   }
 
+    //function to hide events notifications for online participant
+    //invoked when user klickes the 'go to event' button
+    const hideEventInvites = () => {
+      setIsEventVisible(false);
+    }
+
   // Function to show join group request notifications for online group creators
   const showJoinGroupRequests = () => {
     setIsJoinGroupVisible(true);
@@ -1713,10 +1719,17 @@ const [viewProfile, setViewProfile] = useState(false)
         <div id="showEventNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
          {console.log("the state variable of isEventVisible: ", isEventVisible)}
           {isEventVisible && (
-          <EventNotif 
+          <EventNotif
+            close={() => {hideEventInvites()}}
             setEventVisible={setIsEventVisible}
             eventVisible={isEventVisible}
+            setGrp={setSelectedGroup}
+            theGroup={selectedGroup}
             eventData={allData.current.newEventNotif}
+            setGrpMember={setGroupMember}
+            grpMember={groupMember}
+            setGrpProfileVisible={setGroupProfileVisible}
+            grpProfileVisible={isGroupProfileVisible}
           />
           )}
           </div>
