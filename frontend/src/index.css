@@ -326,12 +326,13 @@ position: relative
   display:flex;
 }
 /* Event details inside the group profile */
-.addEvent{
+.addEvt{
+  background-color: #d2e9f7;
   position: relative;
   box-shadow: 0 0 10px rgba(0,0,0, 0.3);
   border-radius: 10px;
   overflow: hidden;
-  margin-top:5px;
+  margin-top:15px;
   margin-bottom: 20px;
   margin-left: 5px;
   width: 300px;
@@ -363,13 +364,14 @@ position: relative
 
 /* event btn ok */
 #btnEventOK{
-  color: #5dbaf0;
+  color: white;
   top: 150px;
-  left: 35px;
+  left: 80px;
   border-radius: 6px;
   width: 100px;
+  height: 40px;
   box-shadow: 0 0 10px rgba(0,0,0, 0.3);
-  flex-direction:row;
+  flex-direction:column;
   justify-content:center;
 }
 
@@ -379,13 +381,13 @@ position: relative
 
 /* event btn decline */
 #btnEventNO{
-  color: #5dbaf0;
+  color: white;
   top: 150px;
-  left: 160px;
   border-radius: 6px;
   width: 100px;
+  height: 40px;
   box-shadow: 0 0 10px rgba(0,0,0, 0.3);
-  flex-direction:row;
+  flex-direction:column;
   justify-content:center;
 }
 

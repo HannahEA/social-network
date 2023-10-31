@@ -1,8 +1,9 @@
 
 import React from "react";
-import {useState, useRef} from "react";
+import {useState} from "react";
 import { useWebSocket } from "../WebSocketProvider.jsx";
 import {SubmitPost, Posts, Tags} from "../feed/Posts.jsx";
+import EventProfile from "./eventProfile.jsx";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 //This is the modal used to create new groups, join existing groups, and open a group's profile
@@ -12,75 +13,23 @@ const notyf = new Notyf(); // Create a single instance of Notyf
 
 function GroupProfile({ children, grpMember, onGpClose, followers, request, theGroup, creator}) {
 
-  
 
-  
-  //--------CREATE EVENT
 
-  const handleAccept = () => {
+const [newGrpEvt, setNewGrpEvt] = useState({["type"]: "newEvent"});
+const [showEvtProfile, setShowEvtProfile] = useState(false);
 
-    //Store user reply
-    let reply = "Yes";
-    // Make a reply object
-    var YesNo = {
-        // "grpID": (props.joinRequest.grpID),
-        // "groupMember": (props.joinRequest.joinRequestBy),
-        // "joinReply": reply,
-        // "type": "joinGroupReply",
-    };
 
-    console.log("the joinGroupReply sent to back end: ", YesNo)
 
-    //send reply object to back end
-    websocketRef.current.send(
-      JSON.stringify(YesNo)
-    )
-    // After handling the action, hide the Notification
-    //props.setJoinGpVisible(false);
-
-  };
-
-  const handleNo = () => {
-    //send to back end using the websocket:
-    let reply = "No";
-    // Make a reply object
-    var YesNo = {
-        // "grpID": (props.joinRequest.grpID),
-        // "groupMember": (props.joinRequest.joinRequestBy),
-        // "joinReply": reply,
-        // "type": "joinGroupReply",
-    };
-
-    console.log("the joinGroupReply sent to back end: ", YesNo)
-    //send user reply to back end
-    websocketRef.current.send(
-      JSON.stringify(YesNo)
-    )
-    // After handling the action, hide the Notification
-    //props.setJoinGpVisible(false);
-
-  };
-
-    //when the user selects a date.
-    const handleDateChange = (e) => {
-      setDOB(e.target.value);
-    };
-
-    const [date, setDOB] = useState('');
-    const dateInputRef = useRef(null);
-
-// to be removed at a later date
-
-const [newGroupEvt, setNewGroupEvt] = useState({["type"]: "newEvent"});
-
-    //make a new group
+    //make a new event object
     const handleNewEvt = (event) => {
       const { name, value } = event.target;
 
-          setNewGroupEvt({ ...newGroupEvt, [name]: value, "evtCreator": request, "grpID": theGroup.id, "grpCreator":theGroup.creator, "grpMembers":theGroup.gpMembers, "grpDescr":theGroup.grpDescr, "grpName":theGroup.grpName });
+          setNewGrpEvt({ ...newGrpEvt, [name]: value, "evtCreator": request, "grpID": theGroup.id, "grpCreator":theGroup.creator, "grpMembers":theGroup.gpMembers, "grpDescr":theGroup.grpDescr, "grpName":theGroup.grpName });
 
     };
 
+    //Send the event object to the back end
+    //and show the event profile with options
     const handleSubmitNewEvt = (event) => {
       event.preventDefault();
 
@@ -89,50 +38,21 @@ const [newGroupEvt, setNewGroupEvt] = useState({["type"]: "newEvent"});
        document.getElementById("evtDescr").value = ""; // Clear the group description value
        document.getElementById("evtDateTime").value = ""; //Clear the date and time falues
 
-        console.log("new event inputs sent to b.e.:", newGroupEvt);
+        console.log("new event inputs sent to b.e.:", newGrpEvt);
 
       // Display a success notification
       notyf.success("New event created");
 
-      //Show the event on group profile page
-      var newEvt = document.createElement('div')//is a node
-
-      newEvt.innerHTML =`
-        <p style="font:bold; text:center; color:gray; dark:text-white; padding:10px;">Event invite </p>
-        <p id="evt"><span style="font:semibold; color:gray; padding:10px;">${request} </span>has invited you to event: </p>
-        <p style="margin-left:5px; padding:5px;">Name: <span style="font:semibold; color:gray; padding:10px;">${newGroupEvt.evtName}</span></p>
-        <p style="margin-left:5px; padding:5px;">Description: <span style="font:semibold; color:gray;  padding:10px;">${newGroupEvt.evtDescr}</span></p>
-        <p style="margin-left:5px; padding:5px;">Date & time: <span style="font:semibold; color:gray;  padding:10px;">${formatDateTime(newGroupEvt.evtDateTime)}</span></p>
-        <span>
-        <button id="btnEventOK"
-          onClick={handleAccept}
-          style="hover:#3488af; backgroundColor:#57aada; fontWeight:strong; items-center; padding:5px;"
-        >
-          Accept
-        </button>
-        </span>
-        <span>
-        <button id="btnEventNO"
-          onClick={handleNo}
-          style="hover:#3488af; backgroundColor:#57aada; fontWeight:strong; items-center; padding:5px;"
-        >
-          Decline
-        </button>
-        </span>
-
-      `;
-
-      newEvt.classList.add("addEvent");
-
-      //append the new event inside DOM
-      document.querySelector("#showEvts").appendChild(newEvt);
+      //display event profile on group profile page
+      setShowEvtProfile(true);
         
+      //send the new event object to the back end
         websocketRef.current.send(
-        JSON.stringify(newGroupEvt)  
+        JSON.stringify(newGrpEvt) 
         )
     };
 
-// end of to be removed
+  //--------End of CREATE EVENT
 
 //-----------SUBMIT POST 
 
@@ -302,7 +222,11 @@ const handleGroupInvite = (e) => {
             <optgroup label="Your followers" >
             <option key="" value="" disabled selected hidden>Choose a name</option>
             {followers == null ? <label class="addToGroup dark:text-[#3f82a9]">No followers available</label> : followers.map((follw) => (
+              follw != theGroup.creator && theGroup.gpMembers.includes(follw) === false ?  (
               <option key={follw} value={follw} >{follw}</option>
+              ) : (
+             <option key={follw} value='not_available' ></option>
+              ) 
             ))}
             </optgroup>
             </select>
@@ -404,7 +328,7 @@ const handleGroupInvite = (e) => {
                 <p className="mt-5 font-bold text-center text-lg dark:text-[#53a9db] text-[#378dbe]">Organize an event</p>
                 <br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Event name:
-                <input type="text" name="evtName" valuechkJoin={newGroupEvt.grpName || ""} onChange={handleNewEvt} placeholder="Enter group name" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="evtName" required />
+                <input type="text" name="evtName" valuechkJoin={newGrpEvt.grpName || ""} onChange={handleNewEvt} placeholder="Enter group name" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="evtName" required />
                 </label><br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Description:
                 <input type="text" name="evtDescr" onChange={handleNewEvt} placeholder="Enter description" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(70%-1rem)] rounded-md" id="evtDescr" required/>
@@ -416,7 +340,7 @@ const handleGroupInvite = (e) => {
                 type="datetime-local" name="evtDateTime" 
                 className="mb-6 ml-6 bg-[#c7e6f8] border-b-2 border-green shadow-md text-[#717575] sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                  onChange={handleNewEvt} 
-                  ref={dateInputRef}
+                  // ref={dateInputRef}
                 />
                 </label>
                 <div className="justify-center flex">
@@ -435,6 +359,11 @@ const handleGroupInvite = (e) => {
         {/* end of group invites, group posts, group events */}
         
         <div id="showEvts">
+        {showEvtProfile && (
+          <EventProfile
+            newEvt={newGrpEvt}
+          />
+        )}
 
         </div>
        

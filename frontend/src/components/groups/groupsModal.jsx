@@ -255,7 +255,8 @@ console.log("the request inside 'GroupsModal': ",request)
                         <li className="py-2 px-2 text-ml hover:bg-[#c7e6f8] dark:hover:bg-[#5a9fc6] dark:hover:text-[#2f627f] flex space-x-4">
                         
                         {console.log("the value of grpMemberis: ",grpMember)}
-                        {grp.gpMembers === null || grp.gpMembers.includes(request) === false ?  (
+                        {console.log("the value of request, creator, and grp.gpMembers is: ",request, grp.creator, grp.gpMembers)}
+                        {grp.gpMembers === null || request != grp.creator && grp.gpMembers.includes(request) === false ?  (
                         <input
                         name={grp.id}
                         type="checkbox"
@@ -270,7 +271,7 @@ console.log("the request inside 'GroupsModal': ",request)
                         style={{ cursor: 'pointer' }}
                         id="selectedGrp"
                         onClick={() => {
-                          {console.log("who ids the group creator", grp.creator, request)}
+                          {console.log("who is the group creator", grp.creator, request)}
                         grp.gpMembers === null || (grp.creator != request && grp.gpMembers.includes(request) === false) ? setGrpMember(false): setGrpMember(true)
                         handleOpenGpProfile();
                         handleSelectGrp(grp);

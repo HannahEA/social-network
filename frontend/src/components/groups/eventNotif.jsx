@@ -77,8 +77,8 @@ function EventNotif ( props ) {
       <span>
       <button id="btnViewEvent"
         onClick={() => {
-                          {console.log("group creator, event creator, and event participant:", props.eventData.grpCreator, props.eventData.evtCreator, props.eventData.EvtMember)}
-                        props.eventData.grpMembers === null || (props.eventData.evtCreator != props.eventData.EvtMember && props.eventData.grpMembers.includes(props.eventData.EvtMember) === false) ? props.setGrpMember(false): props.setGrpMember(true)
+                          {console.log("group creator, event creator, and event participant:", props.eventData.grpCreator, props.eventData.evtCreator, props.eventData.evtMember)}
+                         props.eventData.grpMembers === null || (props.eventData.evtCreator == props.eventData.evtMember && props.eventData.grpMembers.includes(props.eventData.evtMember) === false) ? props.setGrpMember(false): props.setGrpMember(true)
                         handleOpenGpProfile();
                         handleSelectGrp();
                         }}

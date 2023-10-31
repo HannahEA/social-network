@@ -1195,10 +1195,11 @@ func (repo *dbStruct) GetExistingGroups() (string, []NewGroup) {
 		oneGr.Type = "arrayOfGroups"
 
 		//for each group, build an array of group members from the 'GroupMembers' table
+		//I restrict the query to members that have already joined
 		query2 := `
-				SELECT member FROM GroupMembers WHERE grpID = ?
+				SELECT member FROM GroupMembers WHERE grpID = ? and status = ?
 		`
-		rows2, err2 := repo.db.Query(query2, oneGr.ID)
+		rows2, err2 := repo.db.Query(query2, oneGr.ID, "Yes")
 		if err2 != nil {
 			fmt.Println("GetExistingGroups error querying the list of group members: ", err2)
 			return "0", allGroups

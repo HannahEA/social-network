@@ -18,7 +18,7 @@ import NewGroupNotification from "./groups/newGroupNotification.jsx";
 import EventNotif from "./groups/eventNotif.jsx";
 import JoinGpReq from "./groups/joinGpReq.jsx"
 import GroupProfile from "./groups/groupProfile.jsx";
-import GrProfileCard from "./groups/grProfileCard.jsx"
+import GrProfileCard from "./groups/grProfileCard.jsx";
 import { Notyf } from "notyf";
 // import { FunctionsRounded } from "@material-ui/icons";
 
@@ -241,13 +241,20 @@ const Feed = () => {
   };
 
   // Function to show Notifications for online users
+  //provided they are not the group creator
   const showGroupInvites = () => {
-    setIsGroupsVisible(true);
+    if(allData.current.newGroupNotif.creator != allData.current.newGroupNotif.member){
+      setIsGroupsVisible(true);
+    }
+   
   };
   
   //function to show events notifications for online participant
   const showEventInvites = () => {
-    setIsEventVisible(true);
+    if(allData.current.newEventNotif.evtCreator != allData.current.newEventNotif.evtMember){
+      setIsEventVisible(true);
+    }
+   
   }
 
     //function to hide events notifications for online participant
