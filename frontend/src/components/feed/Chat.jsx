@@ -5,9 +5,8 @@ import "notyf/notyf.min.css";
 
 const apiURL = process.env.REACT_APP_API_URL;
 
-const AddUserToChatList = ({type, allData})=>  {
 
-  const GetConversation = ({reciever, name}) => {
+const GetConversation = ({reciever, name, allData, type}) => {
     // const cookie = (document.cookie).split(":")
     
     let input = document.getElementById("chatInput")
@@ -21,6 +20,7 @@ const AddUserToChatList = ({type, allData})=>  {
     const getConversation = {
         reciever: reciever,
         username: sender,
+        type: type
     }
    
      let data = fetch(`${apiURL}/chat`, {
@@ -38,11 +38,13 @@ const AddUserToChatList = ({type, allData})=>  {
 
         return data
     } )
-    let awaitConvo = async(data) =>  {
+
+let awaitConvo = async(data) =>  {
       let convo = await data
       // revive converstion object with sender, reciever and conversation id
         //id should be attached to all chats
-      let chat = document.getElementById("chats")
+      if (convo.type = "private") {
+        let chat = document.getElementById("chats")
       chat.setAttribute("name", convo.conversation.converstionID)
       allData.conversation = {reciever: reciever, id:convo.conversation.converstionID} 
       //cear chat container 
@@ -54,12 +56,16 @@ const AddUserToChatList = ({type, allData})=>  {
         PrintNewChat({chat: chat})
         })
       }
+      } else {
+        //group chat
+      }
+      
       
       
     }
-    awaitConvo(data)
-    
- }
+    awaitConvo(data)    
+  }
+const AddUserToChatList = ({type, allData})=>  {
 
   if (type == "user update" ) {
     //update not full list 
@@ -68,37 +74,50 @@ const AddUserToChatList = ({type, allData})=>  {
   // create presence set css based on online offline
   let style = "flex items-center p-2 w-full text-base font-medium rounded-md transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" 
  
-  if (allData.presences.clients) {
+  if (allData.presences.clients && type != "group chat update") {
+    console.log("private chat update")
     allData.presences.clients.forEach((p)=> {
       if (p[0] != allData.userInfo.username) {
         let button = document.createElement('button')
         button.addEventListener("click", () => {
-          GetConversation({reciever: p[0], name: allData.userInfo.username})
+          GetConversation({reciever: p[0], name: allData.userInfo.username, allData: allData, type:"private"})
         }
         )
-        
+          button.className = style
+          button.innerHTML = p[0]
         if (p[1] == "yes") {
           let online = document.getElementById('online') 
           //add styling to button
-          button.className = style
-          
           button.classList.add("text-gray-900" )
-          
-          button.innerHTML = p[0]
           online.append(button)
         } else {
           let offline = document.getElementById('offline')
           //add styling to button 
-          button.className = style
           button.classList.add("text-gray-300")
-          
-        
-          button.innerHTML = p[0]
           offline.append(button)
         }
         
       }
     } )
+  }
+   if (type != "user update")  {
+    console.log("group chat update")
+    //add group chat button
+    allData.presences.groups.forEach((g)=>{
+      let button = document.createElement('button')
+        button.addEventListener("click", () => {
+            console.log(allData.newGroupNotif, 'add user to chat')
+            GetConversation({reciever: allData.newGroupNotif.grpName, name: allData.userInfo.username, allData: allData, type:"groupChat"})
+          }
+        )
+          button.className = style
+          button.innerHTML = g[0]
+          button.classList.add("text-gray-900" )
+          let groups = document.getElementById('groupChats') 
+         
+          groups.append(button)
+    })
+    
   }
   
   }
@@ -357,6 +376,7 @@ const RemoveChatNotification = ({username, name}) => {
         <aside className="dark:bg-gray-400 flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
         <div id="online"></div>
         <div id= "offline"></div>
+        <div id="groupChats"></div>
         </aside>
       </div>
     </div>

@@ -101,11 +101,12 @@ const Feed = () => {
          }
           
          
-        } else if (message.type == "user update") {
+        } else if (message.type == "user update"||"group chat update") {
           console.log("message type", message.type)
           allData.current.presences = message.presences
           AddUserToChatList({type: message.type, allData: allData.current})
-        }else if (message.type == "chat") {
+
+        } else if (message.type == "chat") {
           console.log("chat recieved", message)
           //check which chat is open in the chatbox by checking the chats div name which should be the converstion id
           let chatId = document.getElementById('chats').getAttribute('name')

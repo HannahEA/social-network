@@ -22,7 +22,7 @@ func OpenDatabase(filename string) *sql.DB {
 	// 	file.Close()
 	// }
 
-	sqliteDatabase, err := sql.Open("sqlite3", filename)
+	sqliteDatabase, err := sql.Open("sqlite3", filename+"?_journal_mode=WAL")
 	if err != nil {
 		log.Fatal(err.Error())
 	}

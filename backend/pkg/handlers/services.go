@@ -100,7 +100,13 @@ type AllDbMethods interface {
 	GetGroupComments(post Post) ([]Comment, error) 
 	GetGroupPosts(id int) ([]Post, error) 
 	AddGroupPostToDB(post Post) (error) 
-	AddGroupCommentToDB(post Post) error 
+	AddGroupCommentToDB(post Post) error
+	AddGroupChatMemeberToDB(groupName string, id int, member string) 
+	GetGroupNameFromId(id int) string
+	FullGroupChatList(user *User) [][]string
+	CheckForGroupNotification(chat Chat) (bool, int, error)
+	FindGroupChat(chat Chat) Conversation
+	GetGroupChatHistory(convo Conversation) []Chat  
 }
 
 // The dabataseStruct

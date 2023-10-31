@@ -48,7 +48,7 @@ func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r
 			
 		}
 
-	} else {
+	} else if chat.Type == "private" {
 		// new chat box has been opened get convoersation id
 		// delete any notifs for this chat from notif table
 		
@@ -57,6 +57,11 @@ func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r
 		chats := service.repo.GetChatHistory(conversation)
 		response["conversation"] = conversation
 		response["chats"] = chats
+		response["type"] = "private"
+	} else {
+		//get group chat id 
+		//get chat history
+		//response type = groupchat
 	}
 	w.Header().Set("Content-Type", "application/json")
 	jsonErr := json.NewEncoder(w).Encode(response)
@@ -227,4 +232,56 @@ func (repo *dbStruct) DeleteChatNotifDB(chat Chat) (int64, error) {
 	}
 	return rowsAffected, err
 
+}
+
+func (r *dbStruct) CheckForGroupNotification(chat Chat) (bool, int, error) {
+	count := 0
+	fmt.Println("checking for notifictations");
+	rows, err := r.db.Query(`SELECT count FROM Notifications WHERE (sender, recipient, type) = (?,?,?) `, chat.Sender, chat.Reciever, "groupChat")
+	if err != nil {
+		log.Println(err)
+		fmt.Println("failed to check Notification count in Database")
+		//no chat notifications yet
+		return false, count, err
+	}
+	//notification exsists already
+	for rows.Next() {
+		//get notification count
+		err := rows.Scan(&count)
+		if err != nil {
+			return true, count, err
+		}
+	}
+	return true, count, nil
+}
+
+func (repo *dbStruct) FindGroupChat(chat Chat) Conversation{
+
+	query2 := `SELECT conversationID FROM GroupChats WHERE title = ?`
+	row, err3 := repo.db.Query(query2, chat.Reciever)
+	if err3 != nil {
+		fmt.Println("FindGroupChat: convoID Query Error", err3, chat)
+	}
+
+	
+	var conversationId string
+	for row.Next() {
+		err := row.Scan(&conversationId)
+		if err != nil {
+			fmt.Println("FindConversation: Scan Error", err, chat)
+		}
+	}
+	convo := Conversation{
+		Participant1:   chat.Sender,
+		Participant2:   chat.Reciever,
+		ConversationId: conversationId,
+	}
+
+	return convo
+
+}
+
+func (r * dbStruct) GetGroupChatHistory(convo Conversation) []Chat {
+	var chats []Chat
+	return chats
 }
