@@ -11,11 +11,11 @@ import "notyf/notyf.min.css";
 const notyf = new Notyf(); // Create a single instance of Notyf
 
 
-function GroupProfile({ children, grpMember, onGpClose, followers, request, theGroup, creator}) {
+function GroupProfile({ children, grpMember, onGpClose, followers, request, theGroup, creator, setEvt, theEvt,}) {
 
 
 
-const [newGrpEvt, setNewGrpEvt] = useState({["type"]: "newEvent"});
+// const [newGrpEvt, setNewGrpEvt] = useState({["type"]: "newEvent"});
 const [showEvtProfile, setShowEvtProfile] = useState(false);
 
 
@@ -24,7 +24,7 @@ const [showEvtProfile, setShowEvtProfile] = useState(false);
     const handleNewEvt = (event) => {
       const { name, value } = event.target;
 
-          setNewGrpEvt({ ...newGrpEvt, [name]: value, "evtCreator": request, "grpID": theGroup.id, "grpCreator":theGroup.creator, "grpMembers":theGroup.gpMembers, "grpDescr":theGroup.grpDescr, "grpName":theGroup.grpName });
+      setEvt({ ...theEvt, [name]: value, "evtCreator": request, "grpID": theGroup.id, "grpCreator":theGroup.creator, "grpMembers":theGroup.gpMembers, "grpDescr":theGroup.grpDescr, "grpName":theGroup.grpName });
 
     };
 
@@ -38,7 +38,7 @@ const [showEvtProfile, setShowEvtProfile] = useState(false);
        document.getElementById("evtDescr").value = ""; // Clear the group description value
        document.getElementById("evtDateTime").value = ""; //Clear the date and time falues
 
-        console.log("new event inputs sent to b.e.:", newGrpEvt);
+        console.log("new event inputs sent to b.e.:", theEvt);
 
       // Display a success notification
       notyf.success("New event created");
@@ -48,7 +48,7 @@ const [showEvtProfile, setShowEvtProfile] = useState(false);
         
       //send the new event object to the back end
         websocketRef.current.send(
-        JSON.stringify(newGrpEvt) 
+        JSON.stringify(theEvt) 
         )
     };
 
@@ -96,13 +96,6 @@ const [Title, setTitle] = useState("")
       } else {
         // It's a file upload
         const file = event.target.files[0];
-  
-        //now get file type
-        /*const fType = file.type;
-      console.log({fType});//this should show e.g. "image/jpg"
-      fileType = fType.split("/");
-      fileType = fileType[1];
-      console.log({fileType});*/ //this should show e.g. "jpg"
   
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -219,13 +212,13 @@ const handleGroupInvite = (e) => {
           <span><label className="ml-8 mr-5 text-[#717575] dark:text-white">Select people : </label></span>
           <span>
             <select id="dropDown" name="choosePeople" className="mr-8 border-b-2 border-green shadow-md choosePeople rounded-md text-[#53a1ce] bg-[#bfe0f3] p-1" onChange={handleAddMember}>
-            <optgroup label="Your followers" >
+            <optgroup label="Available followers" >
             <option key="" value="" disabled selected hidden>Choose a name</option>
             {followers == null ? <label class="addToGroup dark:text-[#3f82a9]">No followers available</label> : followers.map((follw) => (
               follw != theGroup.creator && theGroup.gpMembers.includes(follw) === false ?  (
               <option key={follw} value={follw} >{follw}</option>
               ) : (
-             <option key={follw} value='not_available' ></option>
+             <option key={follw} value='none'></option>
               ) 
             ))}
             </optgroup>
@@ -328,7 +321,7 @@ const handleGroupInvite = (e) => {
                 <p className="mt-5 font-bold text-center text-lg dark:text-[#53a9db] text-[#378dbe]">Organize an event</p>
                 <br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Event name:
-                <input type="text" name="evtName" valuechkJoin={newGrpEvt.grpName || ""} onChange={handleNewEvt} placeholder="Enter group name" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="evtName" required />
+                <input type="text" name="evtName" valuechkJoin={theEvt.grpName || ""} onChange={handleNewEvt} placeholder="Enter group name" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="evtName" required />
                 </label><br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Description:
                 <input type="text" name="evtDescr" onChange={handleNewEvt} placeholder="Enter description" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(70%-1rem)] rounded-md" id="evtDescr" required/>
@@ -361,7 +354,8 @@ const handleGroupInvite = (e) => {
         <div id="showEvts">
         {showEvtProfile && (
           <EventProfile
-            newEvt={newGrpEvt}
+            newEvt={theEvt}
+            user={creator}
           />
         )}
 

@@ -56,12 +56,12 @@ type AllDbMethods interface {
 	AddLoggedInFlag(userID int, flag string) error
 	ReturnId(email string) (int, error)
 	GetUserByEmail(email string) (User, error)
-	GetUserByNickName(nickName string) (User, error) 
+	GetUserByNickName(nickName string) (User, error)
 	FindByUsername(name string) *User
 	DeleteCookieDB(cookieValue string) (int64, error)
 	//post database queries
-	AddPostToDB(data Post) (int,error)
-	AddPostViewersToDB(data Post, id int) error 
+	AddPostToDB(data Post) (int, error)
+	AddPostViewersToDB(data Post, id int) error
 	GetPublicPosts(user *User) ([]Post, error)
 	UploadVisibilityValue(data ProfileVisibilityData) (string, error)
 	GetUsersData(email string) ([]AllUsersData, error)
@@ -89,22 +89,23 @@ type AllDbMethods interface {
 	//Groups
 	InsertNewGroup(g NewGroup) (int, error)
 	InsertNewEvent(e NewEventNotif) (int, error)
-	InsertGrpMember(newGp NewGroup, i int, status string) error
+	InsertGrpMember(newGp NewGroup, i int) error
 	InsertEvtMember(newEv NewEventNotif, i int, status string) error
-	InsertGrpInvite(gpInv NewGroupNotif, status string) error 
+	InsertGrpInvite(gpInv NewGroupNotif, status string) error
 	InsertJoinRequest(joinReq OneJoinGroupRequest, status string) error
 	CheckUserOnline(grpName string, grpDescr string, grpID int, user string, creator string) (NewGroupNotif, error)
-	CheckEvParticipantOnline(EvtName string, EvtDescr string, ID int, gMember string, EvtCreator string) (NewEventNotif, error) 
+	CheckEvParticipantOnline(EvtName string, EvtDescr string, ID int, gMember string, EvtCreator string) (NewEventNotif, error)
 	GetPendingGroupInvites(member string) (int, []NewGroupNotif)
 	GetPendingEventInvites(member string) (string, []NewEventNotif)
 	InsertGroupMemberReply(joinGrpReply JoinGroupReply) error
+	InsertEventPartReply(evReply EvtReply) error
 	GetExistingGroups() (string, []NewGroup)
 	GetPendingJoinGroupRequests(creator string) (string, []OneOfflineJoinGroupRequest)
 	getUserAvatar(nkName string) (NewGroupNotif, error)
-	GetGroupComments(post Post) ([]Comment, error) 
-	GetGroupPosts(id int) ([]Post, error) 
-	AddGroupPostToDB(post Post) (error) 
-	AddGroupCommentToDB(post Post) error 
+	GetGroupComments(post Post) ([]Comment, error)
+	GetGroupPosts(id int) ([]Post, error)
+	AddGroupPostToDB(post Post) error
+	AddGroupCommentToDB(post Post) error
 }
 
 // The dabataseStruct

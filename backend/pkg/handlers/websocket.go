@@ -352,7 +352,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 		case "newGroup":
 			var newGp NewGroup
-			status := "memberPending"
 
 			//populate the NewGroup struct
 			jsonErr := json.Unmarshal(b, &newGp)
@@ -371,7 +370,8 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			//insert group members into the GroupMembers table
 			for i := 0; i < len(newGp.GpMembers); i++ {
 
-				err = service.repo.InsertGrpMember(newGp, i, status)
+
+				err = service.repo.InsertGrpMember(newGp, i)
 				if err != nil {
 					fmt.Println("error inserting grpMember: ", newGp.GpMembers[i])
 				}
@@ -663,6 +663,24 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				}
 
 			} //end of inserting new event participants in the EventsParticipants table
+
+		case "attendEventReply":
+			var evReply EvtReply
+
+			//populate the newEv struct with f.e. data
+			jsonErr := json.Unmarshal(b, &evReply)
+
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: attendEventReply")
+			}
+
+			fmt.Println("the event reply from f.e. is =====>", evReply)
+
+			err := service.repo.InsertEventPartReply(evReply)
+			if err != nil {
+				fmt.Println("error inserting event participant's reply: ", err)
+
+			}
 
 		} //end of 'switch for message type'
 
@@ -981,7 +999,8 @@ func (repo *dbStruct) InsertNewGroup(g NewGroup) (int, error) {
 }
 
 //Populate new group's GroupMembers table
-func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int, status string) error {
+func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int) error {
+	var status string
 	//retrieve creator's user name
 	creator, err := repo.GetUserByEmail(newGp.Creator)
 	if err != nil {
@@ -997,6 +1016,15 @@ func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int, status string) erro
 		fmt.Println("error preparing statement to insert group members", err)
 		return err
 	}
+
+	//group creator is automatically a group member
+		if newGp.GpMembers[i] == creatorUN {
+			status = "Yes"
+		} else {
+			status = "memberPending"
+		}
+
+	fmt.Println("the index, gpMember and status are: ", i, newGp.GpMembers[i], status)
 
 	_, err = stmt.Exec(newGp.ID, creatorUN, newGp.GpMembers[i], status)
 	if err != nil {
@@ -1481,4 +1509,42 @@ func (repo *dbStruct) GetPendingEventInvites(member string) (string, []NewEventN
 	eCount = strconv.Itoa(len(ePending))
 
 	return eCount, ePending
+}
+
+//insert the event participant's reply into EventParticipants table
+func (repo *dbStruct) InsertEventPartReply(evReply EvtReply) error {
+	fmt.Println("the eventReply data received from f.e.: ", evReply)
+
+	//retrieve event id from Events table
+	var evId int
+	err3 := repo.db.QueryRow("SELECT eventID from Events where title = ?", evReply.EvtName).Scan(&evId)
+	if err3 != nil {
+		fmt.Println("error retrieving event id: ", err3)
+		return err3
+	}
+
+	//if member wishes to attend turn option field in EventsParticipants table into "going"
+	if evReply.Reply == "going" {
+		_, err := repo.db.Exec("UPDATE EventsParticipants SET option = ? WHERE eventID = ? AND participant = ?", evReply.Reply, evId, evReply.EvtMember)
+		if err != nil {
+			fmt.Println("error inserting attend event reply", err)
+			return err
+		}
+	} else if evReply.Reply == "not going" {
+		//If member does not wish to attend delete his record from EventsParticipants table
+		fmt.Println("Member declined")
+		stmnt, err := repo.db.Prepare("DELETE FROM EventsParticipants WHERE eventID = ? AND participant = ?")
+		if err != nil {
+			fmt.Println("error preparing the delete statement to remove participant that declined to attend event", err)
+			return err
+		}
+		fmt.Println("after prepare delete request")
+		_, err = stmnt.Exec(evId, evReply.EvtMember)
+		if err != nil {
+			fmt.Println("error deleting record from EventsParticipants")
+			return err
+		}
+	}
+	return nil
+
 }

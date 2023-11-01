@@ -24,7 +24,7 @@ console.log("the request inside 'GroupsModal': ",request)
 
     //store new group form inputs
     const [newGroupInputs, setNewGroupInputs] = useState({["type"]: "newGroup"});
-    const [gpMembers, setGpMembers] = useState([]);
+    const [gpMembers, setGpMembers] = useState([request]);
     //store join group form selections
     const[gpList, setGpList] = useState([])
     var joinGpInfo
@@ -256,7 +256,7 @@ console.log("the request inside 'GroupsModal': ",request)
                         
                         {console.log("the value of grpMemberis: ",grpMember)}
                         {console.log("the value of request, creator, and grp.gpMembers is: ",request, grp.creator, grp.gpMembers)}
-                        {grp.gpMembers === null || request != grp.creator && grp.gpMembers.includes(request) === false ?  (
+                        {request != grp.creator && grp.gpMembers === null || request != grp.creator && grp.gpMembers.includes(request) === false ?  (
                         <input
                         name={grp.id}
                         type="checkbox"
@@ -289,7 +289,7 @@ console.log("the request inside 'GroupsModal': ",request)
 
                   <div>
                   <br></br>
-                  <input type="submit" id="joinGpSubmit" value="Join group"
+                  <input type="submit" id="joinGpSubmit" value="Join group" style={{marginBottom:10+"px"}}
                   className="cursor-pointer absolute justify-center flex items-center p-2 w-[calc(35%-1rem)] text-base font-medium text-white 
                   rounded-lg transition duration-75 group bg-[#66c3f8] dark:bg-[#4e99c4]  hover:bg-[#4c97c2] hover:text-[#c2e5f9]
                   shadow-lg dark:text-white dark:hover:bg-[#62bef3]

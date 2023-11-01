@@ -1,4 +1,5 @@
 import React from 'react';
+// import { useState } from 'react';
 //this is the event notification sent to a prospective participant that is online
 
 
@@ -6,6 +7,9 @@ function EventNotif ( props ) {
     //{console.log("new group info inside newGroupNotification component:", props.information)}
     {console.log("show the props inside EventNotif: ",props)}
 
+    // const [newGrpEvt, setNewGrpEvt] = useState({["type"]: "newEvent"});
+
+    //make a new event object
 
 
   //make the group profile page visible
@@ -30,6 +34,11 @@ function EventNotif ( props ) {
        )
      ) 
     }
+
+  //change the newGrpEvt state variable
+  const handleNewEvent = () => {
+    props.setEvt({ ...props.theEvt, "evtName": props.eventData.evtName, "evtDescr": props.eventData.evtDescr, "evtDateTime": props.eventData.evtDateTime, "evtCreator": props.eventData.evtCreator, "grpID": props.eventData.grpID, "grpCreator": props.eventData.grpCreator, "grpMembers":props.eventData.grpMembers, "grpDescr": props.eventData.grpDescr, "grpName": props.eventData.grpName });
+  }
 
 
 
@@ -79,6 +88,7 @@ function EventNotif ( props ) {
         onClick={() => {
                           {console.log("group creator, event creator, and event participant:", props.eventData.grpCreator, props.eventData.evtCreator, props.eventData.evtMember)}
                          props.eventData.grpMembers === null || (props.eventData.evtCreator == props.eventData.evtMember && props.eventData.grpMembers.includes(props.eventData.evtMember) === false) ? props.setGrpMember(false): props.setGrpMember(true)
+                        handleNewEvent();
                         handleOpenGpProfile();
                         handleSelectGrp();
                         }}

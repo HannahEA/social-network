@@ -19,6 +19,7 @@ import EventNotif from "./groups/eventNotif.jsx";
 import JoinGpReq from "./groups/joinGpReq.jsx"
 import GroupProfile from "./groups/groupProfile.jsx";
 import GrProfileCard from "./groups/grProfileCard.jsx";
+import EventProfile from "./groups/eventProfile.jsx";
 import { Notyf } from "notyf";
 // import { FunctionsRounded } from "@material-ui/icons";
 
@@ -146,6 +147,7 @@ const Feed = () => {
           console.log("newGroupNotif received by member: ", allData.current.newGroupNotif)
         } else if (message.type == "newEventNotif"){
           allData.current.newEventNotif = message.newEventNotif
+          setRequestBy(allData.current.newEventNotif.evtMember)
           showEventInvites();
           console.log("newEventNotif received by member: ", allData.current.newEventNotif)
         }
@@ -203,6 +205,7 @@ const Feed = () => {
   const[pendingGroups, setPendingGroups] = useState([]);
   const[pendingJoinGroups, setPendingJoinGroups] = useState([]);
   const[eventsInvites, setEventsInvites] = useState([]);
+  // const [showEvtProfile, setShowEvtProfile] = useState(false);
   const[groupsList, setGroupsList] = useState({
     requestor: "",
     nbGroups: "",
@@ -218,6 +221,7 @@ const Feed = () => {
     type: ""
   });
   const [requestBy, setRequestBy] = useState("");
+  const [newGrpEvt, setNewGrpEvt] = useState({["type"]: "newEvent"});
   const [greenDotVisible, setGreenDotVisible] = useState(false);
   allData.current.userInfo = userInfo
   // allData.current.offlineFollowNotif = offlineFollowNotif
@@ -1737,6 +1741,8 @@ const [viewProfile, setViewProfile] = useState(false)
             grpMember={groupMember}
             setGrpProfileVisible={setGroupProfileVisible}
             grpProfileVisible={isGroupProfileVisible}
+            setEvt={setNewGrpEvt}
+            theEvt={newGrpEvt}
           />
           )}
           </div>
@@ -1807,7 +1813,9 @@ const [viewProfile, setViewProfile] = useState(false)
         followers={allData.current.followers}
         request={requestBy}
         theGroup={selectedGroup}
-        creator={email}
+        creator={allData.current.userInfo.username}
+        setEvt={setNewGrpEvt}
+        theEvt={newGrpEvt}
         >
           {selectedGroup && (
             <GrProfileCard
@@ -1815,6 +1823,12 @@ const [viewProfile, setViewProfile] = useState(false)
               theGroup={selectedGroup}
             />
           )}
+          {/* {showEvtProfile && (
+          <EventProfile
+            newEvt={newGrpEvt}
+            user={allData.current.userInfo.username}
+          />
+        )} */}
         </GroupProfile>
       )}
 

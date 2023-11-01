@@ -346,6 +346,14 @@ type NewEventNotif struct {
 
 // user requests to join one or more groups, offline groups creators to respond
 type OfflineEventsInvites struct {
-	NumEvtsPending       string          `json:"numEvtsPending"`
+	NumEvtsPending    string          `json:"numEvtsPending"`
 	OfflEventsInvites []NewEventNotif `json:"offlEventsInvites"`
+}
+
+//attend event reply
+type EvtReply struct {
+	EvtName   string `json:"evtName"`
+	EvtMember string `json:"evtMember"`
+	Reply     string `json:"reply"`
+	Type      string `json:"type"`
 }
