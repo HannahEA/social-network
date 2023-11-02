@@ -143,6 +143,8 @@ type WebsocketMessage struct {
 
 	SendAllGroups SendAllGroups `json:"sendAllGroups"`
 
+	SendGpEvents SendGpEvents `json:"sendGpEvents"`
+
 	OneJoinGroupRequest OneJoinGroupRequest `json:"oneJoinGroupRequest"`
 
 	OfflineJoinGroupRequests OfflineJoinGroupRequests `json:"offlineJoinGroupRequests"`
@@ -356,4 +358,28 @@ type EvtReply struct {
 	EvtMember string `json:"evtMember"`
 	Reply     string `json:"reply"`
 	Type      string `json:"type"`
+}
+
+//data for all events in a group
+//requested when user clicks on group's name
+//on the groupsModal page
+type SendGpEvents struct {
+	Requestor     string     `json:"requestor"`
+	NbEvents      string     `json:"nbEvents"`
+	SliceOfEvents []OneEvent `json:"sliceOfEvents"`
+	Type          string     `json:"type"`
+}
+
+//one event's data
+type OneEvent struct {
+	ID          int    `json:"id"`
+	EvtName     string `json:"evtName"`
+	EvtDescr    string `json:"evtDescr"`
+	EvtCreator  string `json:"evtCreator"`
+	EvtMember   string `json:"evtMember"`
+	EvtDateTime string `json:"evtDateTime"`
+	EvtOption   string `json:"evtOption"`
+	GrpID       int    `json:"grpID"`
+	GrpName     string `json:"grpName"`
+	Type        string `json:"type"`
 }

@@ -143,7 +143,19 @@ console.log("the request inside 'GroupsModal': ",request)
           type: grp.type
         }
         )
-      ) 
+      )
+      //get group events
+      const getGpEvents = {
+        grpID: grp.id,
+        grpName: grp.grpName,
+        evtMember: request,
+        type: "getGpEvents"
+      }
+      console.log("the group events request sent to the b.e.: ", getGpEvents);
+
+      websocketRef.current.send(
+        JSON.stringify(getGpEvents)
+      )
       }
 
 
@@ -248,7 +260,7 @@ console.log("the request inside 'GroupsModal': ",request)
                 {console.log("allGroups inside the GroupsModal component: ", allGroups)}
                   <ul>
                     {(parseInt(allGroups.nbGroups, 10) || 0) === 0 ? (
-                      <label className="allGroups dark:text-[#3f82a9]">There are no groups available</label>
+                      <label className="allGroups text-[#4893be] dark:text-[#3f82a9]">There are no groups available</label>
                       ) : (
                         allGroups.sliceOfGroups.map((grp) => (
                         <span key={grp.id}>

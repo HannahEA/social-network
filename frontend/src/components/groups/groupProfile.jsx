@@ -164,8 +164,8 @@ const handleGroupInvite = (e) => {
 
   }
 
-  //format the yyyy-mm-ddThh:mm date-time in a readable format
-  function formatDateTime(inputDateTime) {
+  //moved to 'eventProfile': format the yyyy-mm-ddThh:mm date-time in a readable format
+  /*function formatDateTime(inputDateTime) {
     const parts = inputDateTime.split('T'); // Split the input by 'T' to separate date and time
   
     const datePart = parts[0];
@@ -187,7 +187,7 @@ const handleGroupInvite = (e) => {
     };
   
     return date.toLocaleString('en-UK', options);
-  }
+  }*/
   
 
 
@@ -351,7 +351,7 @@ const handleGroupInvite = (e) => {
         </div>
         {/* end of group invites, group posts, group events */}
         
-        <div id="showEvts">
+        <div id="showEvts" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
         {showEvtProfile && (
           <EventProfile
             newEvt={theEvt}

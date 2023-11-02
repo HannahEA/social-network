@@ -37,7 +37,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, newEventNotif:{}, offlineGroupInvites:{}, sendAllGroups:{}, oneJoinGroupRequest:{}, offlineJoinGroupRequests:{}, offlineEventsInvites:{}})
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, newEventNotif:{}, offlineGroupInvites:{}, sendAllGroups:{}, sendGpEvents:{}, oneJoinGroupRequest:{}, offlineJoinGroupRequests:{}, offlineEventsInvites:{}})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
   
@@ -166,6 +166,23 @@ const Feed = () => {
             )
           )
             setRequestBy(allData.current.sendAllGroups.requestor) 
+
+        } else if (message.type == "sendGpEvents")  {
+
+          allData.current.sendGpEvents = message.sendGpEvents
+
+          //update the 'groupEvents' state variable
+          setGroupEvents((prevState) => ({
+            ...prevState,
+               requestor: allData.current.sendGpEvents.requestor,
+               nbEvents: allData.current.sendGpEvents.nbEvents,
+               sliceOfEvents: allData.current.sendGpEvents.sliceOfEvents,
+               type: allData.current.sendGpEvents.type
+          })
+          )
+          //requestor is the user's nickName
+          setRequestBy(allData.current.sendGpEvents.requestor) 
+         
         }else if (message.type == "oneJoinGroupRequest"){
           //send join group request to group creator
           allData.current.oneJoinGroupRequest = message.oneJoinGroupRequest
@@ -210,6 +227,12 @@ const Feed = () => {
     requestor: "",
     nbGroups: "",
     sliceOfGroups: [],
+    type: ""
+  })
+  const[groupEvents, setGroupEvents] = useState({
+    requestor: "",
+    nbEvents: "",
+    sliceOfEvents: [],
     type: ""
   })
   const [selectedGroup, setSelectedGroup] = useState({

@@ -370,7 +370,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			//insert group members into the GroupMembers table
 			for i := 0; i < len(newGp.GpMembers); i++ {
 
-
 				err = service.repo.InsertGrpMember(newGp, i)
 				if err != nil {
 					fmt.Println("error inserting grpMember: ", newGp.GpMembers[i])
@@ -461,6 +460,42 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{SendAllGroups: sendAllGps, Type: sendAllGps.Type}, Connections: reciever})
 				}
 			}
+
+		//start of get all group events
+		case "getGpEvents":
+			//this is a request to send all group's events
+			var sGpEvents SendGpEvents
+			var oEvent OneEvent
+
+			jsonErr := json.Unmarshal(b, &oEvent)
+			if jsonErr != nil {
+				fmt.Println("error unmarshalling getGpEvents: ", jsonErr)
+			}
+
+			evtCount, evtSlice := service.repo.GetGroupEvents(oEvent)
+
+			//populate the SendGpEvents struct
+			sGpEvents.Requestor = oEvent.EvtMember
+			sGpEvents.NbEvents = evtCount
+			sGpEvents.SliceOfEvents = evtSlice
+			sGpEvents.Type = "sendGpEvents"
+
+			fmt.Println("the SendGpEvents data sent to f.e. ===>", sGpEvents)
+
+			//send group events to front end
+			online := false
+			fmt.Println("Printing to get rid of the error", online)
+			reciever := make(map[*websocket.Conn]string)
+			//find member's channel
+			for conn, client := range Clients {
+				if client == sGpEvents.Requestor {
+					reciever[conn] = client
+					online = true
+					service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{SendGpEvents: sGpEvents, Type: sGpEvents.Type}, Connections: reciever})
+				}
+			}
+
+		//end of get all group events
 
 		case "allJoinGrRequests":
 			//user requests group creator for permission to join group
@@ -1018,11 +1053,11 @@ func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int) error {
 	}
 
 	//group creator is automatically a group member
-		if newGp.GpMembers[i] == creatorUN {
-			status = "Yes"
-		} else {
-			status = "memberPending"
-		}
+	if newGp.GpMembers[i] == creatorUN {
+		status = "Yes"
+	} else {
+		status = "memberPending"
+	}
 
 	fmt.Println("the index, gpMember and status are: ", i, newGp.GpMembers[i], status)
 
@@ -1547,4 +1582,62 @@ func (repo *dbStruct) InsertEventPartReply(evReply EvtReply) error {
 	}
 	return nil
 
+}
+
+//get all events for one group
+func (repo *dbStruct) GetGroupEvents(oEvent OneEvent) (string, []OneEvent) {
+	var eSlice []OneEvent
+	var eCount string
+
+	fmt.Println("From inside GetGroupEvents, oneEvent data: ----> ", oEvent)
+
+	//get
+
+	var oneEv OneEvent
+	//returns avatar from 'Users' and info from 'EventsMembers' table
+	query := `
+			SELECT  P.option, E.eventID, E.organizer, E.title, E.description, E.day_time  
+			FROM EventsParticipants P
+			INNER JOIN Events E ON P.groupID = E.groupID
+			WHERE P.participant = ? AND E.groupID = ?
+		`
+	rows, err := repo.db.Query(query, oEvent.EvtMember, oEvent.GrpID)
+	if err != nil {
+		fmt.Println("error querying pending events for one group", err)
+		return "", eSlice
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+
+		err := rows.Scan(&oneEv.EvtOption, &oneEv.ID, &oneEv.EvtCreator, &oneEv.EvtName, &oneEv.EvtDescr, &oneEv.EvtDateTime)
+		if err != nil {
+			fmt.Println("GetGroupEvents scan Error", err, oneEv)
+			return "", eSlice
+		}
+
+		//populate remaining oneEv struct fields
+		oneEv.EvtMember = oEvent.EvtMember
+		oneEv.GrpName = oEvent.GrpName
+		oneEv.GrpID = oEvent.GrpID
+		oneEv.Type = "sendGpEvents"
+
+		fmt.Println("One event data: ", oneEv)
+
+		eSlice = append(eSlice, oneEv)
+
+		fmt.Println("Slice of events for one group", eSlice)
+		oneEv = OneEvent{}
+
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return "", eSlice
+	}
+
+	eCount = strconv.Itoa(len(eSlice))
+
+	return eCount, eSlice
 }
