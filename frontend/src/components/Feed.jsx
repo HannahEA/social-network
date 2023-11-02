@@ -1839,6 +1839,7 @@ const [viewProfile, setViewProfile] = useState(false)
         creator={allData.current.userInfo.username}
         setEvt={setNewGrpEvt}
         theEvt={newGrpEvt}
+        gEvents={groupEvents}
         >
           {selectedGroup && (
             <GrProfileCard
@@ -1873,6 +1874,7 @@ const [viewProfile, setViewProfile] = useState(false)
         creator={email}
         request={requestBy}
         allGroups={groupsList}
+
         >
         </GroupsModal>
       )}

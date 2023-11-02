@@ -9,7 +9,7 @@ const notyf = new Notyf(); // Create a single instance of Notyf
 
 
 
-function GroupsModal({onClose, setGrpProfileVisible, setGrp, grpProfileVisible, setGrpMember, grpMember, followers, creator, allGroups, request}){
+function GroupsModal({onClose, setGrpProfileVisible, setGrp, grpProfileVisible, setGrpMember, grpMember, followers, creator, allGroups, request }){
 
 console.log("the request inside 'GroupsModal': ",request)
 
