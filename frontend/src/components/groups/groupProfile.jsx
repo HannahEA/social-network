@@ -356,6 +356,7 @@ const handleGroupInvite = (e) => {
           <EventProfile
             newEvt={theEvt}
             user={creator}
+            gpEvents={gEvents}
           />
         )}
 

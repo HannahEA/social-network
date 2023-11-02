@@ -108,9 +108,50 @@ return (
       </span>
     </div>
     </div>
-    
-    
-    
+
+  // Group events into rows of three
+  /*const eventsInRows = [];
+  for (let i = 0; i < props.gEvents.length; i += 3) {
+    const eventRow = props.gEvents.slice(i, i + 3);
+    eventsInRows.push(eventRow);
+  }
+
+
+// Render events in rows
+/*return (
+  <div className="addEvt">
+    {eventsInRows.map((eventRow, rowIndex) => (
+      <div key={rowIndex} className="event-row">
+        {eventRow.map((event, eventIndex) => (
+          <div key={eventIndex} className="event-card">
+            <p style={{ fontSize: 18, lineHeight: "20px", font: "bold", color: "#53a9db", padding: "10px" }}>Event invite</p>
+            <p id="evt">Will you attend this event, <span style={{ font: "semibold", color: "#53a9db" }}>{props.user}</span> ?</p>
+            <p>Name: <span style={{ font: "semibold", color: "#53a9db" }}>{event.evtName}</span></p>
+            <p>Description: <span style={{ font: "semibold", color: "#53a9db" }}>{event.evtDescr}</span></p>
+            <p>Date & time: <span style={{ font: "semibold", color: "#53a9db" }}>{formatDateTime(event.evtDateTime)}</span></p>
+            <div id="eGoingReply">
+              <button
+                id="btnEventOK"
+                onClick={() => handleGoing(event)}
+                style={{ backgroundColor: "#57aada", color: "white", fontWeight: "strong", padding: "10px" }}
+              >
+                Going
+              </button>
+              <button
+                id="btnEventNO"
+                onClick={() => handleNotGoing(event)}
+                style={{ backgroundColor: "#57aada", color: "white", fontWeight: "strong", padding: "10px" }}
+              >
+                Not going
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
+);*/
+
 
 )
 

@@ -1590,6 +1590,7 @@ func (repo *dbStruct) GetGroupEvents(oEvent OneEvent) (string, []OneEvent) {
 	var eCount string
 
 	fmt.Println("From inside GetGroupEvents, oneEvent data: ----> ", oEvent)
+	fmt.Printf("the type of groupID is %T ------------->>", oEvent.GrpID)
 
 	//get
 
