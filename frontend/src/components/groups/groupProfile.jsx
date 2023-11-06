@@ -3,7 +3,8 @@ import React from "react";
 import {useState} from "react";
 import { useWebSocket } from "../WebSocketProvider.jsx";
 import {SubmitPost, Posts, Tags} from "../feed/Posts.jsx";
-import EventProfile from "./eventProfile.jsx";
+import EventProfile from "./newEventProfile.jsx";
+import AllEventsProfiles from "./allEventsProfiles.jsx";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 //This is the modal used to create new groups, join existing groups, and open a group's profile
@@ -11,12 +12,12 @@ import "notyf/notyf.min.css";
 const notyf = new Notyf(); // Create a single instance of Notyf
 
 
-function GroupProfile({ children, grpMember, onGpClose, followers, request, theGroup, creator, setEvt, theEvt, gEvents }) {
+function GroupProfile({ children, showNewEvt, setShowNewEvt, showEvents, grpMember, onGpClose, followers, request, theGroup, creator, setEvt, theEvt, gEvents }) {
 
 {console.log("the group events inside the GroupProfile component: +++++> ",gEvents)}
 
 // const [newGrpEvt, setNewGrpEvt] = useState({["type"]: "newEvent"});
-const [showEvtProfile, setShowEvtProfile] = useState(false);
+//const [showNewEvt, setShowNewEvt] = useState(false);
 
 
 
@@ -44,7 +45,7 @@ const [showEvtProfile, setShowEvtProfile] = useState(false);
       notyf.success("New event created");
 
       //display event profile on group profile page
-      setShowEvtProfile(true);
+      setShowNewEvt(true);
         
       //send the new event object to the back end
         websocketRef.current.send(
@@ -163,31 +164,6 @@ const handleGroupInvite = (e) => {
      )
 
   }
-
-  //moved to 'eventProfile': format the yyyy-mm-ddThh:mm date-time in a readable format
-  /*function formatDateTime(inputDateTime) {
-    const parts = inputDateTime.split('T'); // Split the input by 'T' to separate date and time
-  
-    const datePart = parts[0];
-    const timePart = parts[1];
-  
-    const [year, month, day] = datePart.split('-');
-  
-    const [hour, minute] = timePart.split(':');
-  
-    // Create a new Date object with the components
-    const date = new Date(year, month - 1, day, hour, minute);
-  
-    const options = {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    };
-  
-    return date.toLocaleString('en-UK', options);
-  }*/
   
 
 
@@ -352,9 +328,14 @@ const handleGroupInvite = (e) => {
         {/* end of group invites, group posts, group events */}
         
         <div id="showEvts" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
-        {showEvtProfile && (
+        {showNewEvt && (
           <EventProfile
             newEvt={theEvt}
+            user={creator}
+          />
+        )}
+        {showEvents && (
+          <AllEventsProfiles
             user={creator}
             gpEvents={gEvents}
           />

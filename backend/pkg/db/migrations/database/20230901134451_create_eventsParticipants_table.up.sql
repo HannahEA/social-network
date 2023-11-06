@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS "EventsParticipants" (
            FOREIGN KEY(eventID)REFERENCES Events(eventID),
            FOREIGN KEY(organizer)REFERENCES Users(nickName),
            FOREIGN KEY(participant)REFERENCES Users(nickName),
-           FOREIGN KEY(groupID)REFERENCES Groups(groupID)
+           FOREIGN KEY(groupID)REFERENCES Events(groupID)
            );

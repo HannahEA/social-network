@@ -1592,15 +1592,12 @@ func (repo *dbStruct) GetGroupEvents(oEvent OneEvent) (string, []OneEvent) {
 	fmt.Println("From inside GetGroupEvents, oneEvent data: ----> ", oEvent)
 	fmt.Printf("the type of groupID is %T ------------->>", oEvent.GrpID)
 
-	//get
-
-	var oneEv OneEvent
 	//returns avatar from 'Users' and info from 'EventsMembers' table
 	query := `
-			SELECT  P.option, E.eventID, E.organizer, E.title, E.description, E.day_time  
-			FROM EventsParticipants P
-			INNER JOIN Events E ON P.groupID = E.groupID
-			WHERE P.participant = ? AND E.groupID = ?
+			SELECT DISTINCT E.eventID, E.organizer, E.title, E.description, E.day_time, P.option   
+			FROM Events E
+			INNER JOIN EventsParticipants P ON E.groupID = P.groupID 
+			WHERE P.participant = ? AND P.groupID = ?
 		`
 	rows, err := repo.db.Query(query, oEvent.EvtMember, oEvent.GrpID)
 	if err != nil {
@@ -1610,23 +1607,34 @@ func (repo *dbStruct) GetGroupEvents(oEvent OneEvent) (string, []OneEvent) {
 
 	defer rows.Close()
 
-	for rows.Next() {
+	//========
 
-		err := rows.Scan(&oneEv.EvtOption, &oneEv.ID, &oneEv.EvtCreator, &oneEv.EvtName, &oneEv.EvtDescr, &oneEv.EvtDateTime)
+	// Create a map to track unique event IDs
+	uniqueEventIDs := make(map[int]bool)
+
+	for rows.Next() {
+		var oneEv OneEvent // Initialize oneEv here, inside the loop
+
+		err := rows.Scan(&oneEv.ID, &oneEv.EvtCreator, &oneEv.EvtName, &oneEv.EvtDescr, &oneEv.EvtDateTime, &oneEv.EvtOption)
 		if err != nil {
 			fmt.Println("GetGroupEvents scan Error", err, oneEv)
 			return "", eSlice
 		}
 
-		//populate remaining oneEv struct fields
-		oneEv.EvtMember = oEvent.EvtMember
-		oneEv.GrpName = oEvent.GrpName
-		oneEv.GrpID = oEvent.GrpID
-		oneEv.Type = "sendGpEvents"
+		// Check if the event ID is already in the map
+		if _, exists := uniqueEventIDs[oneEv.ID]; !exists {
+			// If the event ID is not in the map, add the event to the new slice
+			uniqueEventIDs[oneEv.ID] = true
+			oneEv.EvtMember = oEvent.EvtMember
+			oneEv.GrpName = oEvent.GrpName
+			oneEv.GrpID = oEvent.GrpID
+			oneEv.Type = "sendGpEvents"
+			eSlice = append(eSlice, oneEv)
+		}
+
+		//=======
 
 		fmt.Println("One event data: ", oneEv)
-
-		eSlice = append(eSlice, oneEv)
 
 		fmt.Println("Slice of events for one group", eSlice)
 		oneEv = OneEvent{}

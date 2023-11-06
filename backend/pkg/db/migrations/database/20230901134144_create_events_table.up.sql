@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS "Events" (
             "title" TEXT,
             "description" TEXT,
             "day_time" TEXT,
-           FOREIGN KEY(groupID)REFERENCES Groups(groupID),
+           FOREIGN KEY(groupID)REFERENCES EventsParticipants(groupID),
+           FOREIGN KEY(eventID)REFERENCES EventsParticipants(eventID)
            FOREIGN KEY(organizer)REFERENCES Users(nickName)
            );
