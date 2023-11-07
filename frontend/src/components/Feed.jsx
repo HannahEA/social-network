@@ -199,14 +199,11 @@ const Feed = () => {
 }  
 })
 
-// const hideRedDot = () => {
-//   setRedDotVisible(false)
-// }
+
   const location = useLocation();
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
   const userInfo = location.state?.userInfo || {}
-  // const offlineFollowNotif = location.state?.offlineFollowNotif || {}
   const [usersList, setUsersList] = useState([]);
   const [isUsersListVisible, setIsUsersListVisible] = useState(false);
   const usersListRef = useRef(null);
@@ -288,11 +285,50 @@ const Feed = () => {
    
   }
 
-    //function to hide events notifications for online participant
-    //invoked when user klickes the 'go to event' button
+  //function to hide events notifications for online participant
+  //invoked when user klicks the 'go to event' button
     const hideEventInvites = () => {
       setIsEventVisible(false);
     }
+
+   //function to display group profile page for 
+   //offline event participants
+    const handleOpenGpProfile = () => {
+      //change group member state variable
+      setGroupMember(true)
+      //show group profile
+      setGroupProfileVisible(true);
+      //hide offline alerts drop-down
+      togglePendingListVisible()
+    }; 
+
+  //function to set group state variable for offline event participants
+  //and request all group events via ws 
+      const handleSelectGrp = (e) => {
+        console.log("the group data: ", e)
+        setSelectedGroup((prevState) => ({
+          ...prevState,
+          id: e.grpID,
+          creator: e.grpCreator,
+          gpMembers: e.grpMembers,
+          grpDescr: e.grpDescr,
+          grpName: e.grpName,
+          type: e.type
+        })
+        )
+      //request group events through ws
+        const getGpEvents = {
+          grpID: e.grpID,
+          grpName: e.grpName,
+          evtMember: e.evtMember,
+          type: "getGpEvents"
+        }
+        console.log("the group events request sent to the b.e.: ", getGpEvents);
+  
+        websocketRef.current.send(
+          JSON.stringify(getGpEvents)
+        )
+        }
 
   // Function to show join group request notifications for online group creators
   const showJoinGroupRequests = () => {
@@ -856,6 +892,7 @@ const [viewProfile, setViewProfile] = useState(false)
             {/* Notifications */}
             <div id="notificationsBell">
             <button
+              id="aCounter"
               onCick={togglePendingListVisible}
               type="button"
               data-dropdown-toggle="notification-dropdown"
@@ -867,8 +904,6 @@ const [viewProfile, setViewProfile] = useState(false)
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
             </button>
-            {/* {console.log("the numPending :====>",allData)} */}
-            {/* <div className="counter" style={{visibility:`${parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0 ? 'visible' : 'hidden'}`}}> */}
             <div className="counter" id="aCounter" onClick={togglePendingListVisible}>
             <button onClick={togglePendingListVisible} id="offlineNotifBtn">
                        {redDotVisible && (
@@ -888,8 +923,6 @@ const [viewProfile, setViewProfile] = useState(false)
             {console.log("events invites inside alerts div", allData.current.offlineEventsInvites)}
             </button>
             </div> 
-         
-
             </div>
           {/* offline dropdown list moved to id="offlineNotif" */}
 
@@ -1624,7 +1657,7 @@ const [viewProfile, setViewProfile] = useState(false)
                         <path fill="#192f5d" d="M0 0h98.8v70H0z" transform="scale(3.9385)" />
                         <path
                           fill="#fff"
-                          d="M8.2 3l1 2.8HAth8na2Win2L9.7 7.5l.9 2.7-2.4-1.7L6 10.2l.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7L74 8.5l-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 7.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 24.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 21.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 38.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 35.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 52.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 49.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 66.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 63.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9z"
+                          d="M0 10h247v10H0zm0 20h247v10H0zm0 20h247v10H0zm0 20h247v10H0zm0 20h247v10H0zm0 20h247v10H0z"
                           transform="scale(3.9385)"
                         />
                       </g>
@@ -1854,23 +1887,8 @@ const [viewProfile, setViewProfile] = useState(false)
               theGroup={selectedGroup}
             />
           )}
-          {/* {showNewEvt && (
-          <NewEventProfile
-            newEvt={newGrpEvt}
-            user={allData.current.userInfo.username}
-          />
-        )}
-        {showEvents && (
-          <AllEventsProfiles
-            user={allData.current.userInfo.username}
-            gpEvents={groupEvents} 
-          />
-        )
-
-        } */}
         </GroupProfile>
       )}
-
        {/* End of GroupProfile */}
 
      {/* Start of show groupsModal*/}
@@ -2061,7 +2079,6 @@ const [viewProfile, setViewProfile] = useState(false)
                       <div className="flex-shrink-0">
                       <img
                         className="w-11 h-11 rounded-full"
-                        //src={(f.followerURL).substring(0,3)==="" && (f.followerImage).substring(0.3)==="" ? "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj" :(f.followerURL).substring(0,3)==="htt" ? f.followerURL : f.followerImage}
                         src={e.evtCreatorURL || e.evtCreatorImage || "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"}
                       alt="eventInvite"
                       />
@@ -2085,8 +2102,7 @@ const [viewProfile, setViewProfile] = useState(false)
                       </div>
                     </a>
                     <div className="text-xs font-medium text-primary-600 dark:text-primary-500">                  
-                        <a onClick={()=>(handleOfflFollowAccept(e))} style={{cursor: 'pointer'}} class="offlineAccept">View event</a>
-                        {/* <a onClick={()=>(handleOfflFollowDecline(e))} style={{cursor: 'pointer'}} class="offineDecline"> Decline</a> */}
+                        <a onClick={()=>(handleSelectGrp(e), handleOpenGpProfile())} style={{cursor: 'pointer'}} class="offlineAccept">View event</a>
                     </div>
                     </li>
                     ))}

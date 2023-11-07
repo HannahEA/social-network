@@ -7,7 +7,8 @@ import EventProfile from "./newEventProfile.jsx";
 import AllEventsProfiles from "./allEventsProfiles.jsx";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
-//This is the modal used to create new groups, join existing groups, and open a group's profile
+//This is one group's modal that allows to create group events, invite followers 
+//to join the group, and make group posts & comments
 
 const notyf = new Notyf(); // Create a single instance of Notyf
 

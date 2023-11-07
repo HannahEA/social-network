@@ -144,7 +144,7 @@ console.log("the request inside 'GroupsModal': ",request)
         }
         )
       )
-      //get group events
+      //request group events through ws
       const getGpEvents = {
         grpID: grp.id,
         grpName: grp.grpName,
@@ -197,10 +197,6 @@ console.log("the request inside 'GroupsModal': ",request)
     };
 
     console.log("printing outside of the component 'gpList' to be sent to the b.e.:++++++++>", gpList);
-
-    
-    
-
       
       return (
         <div id="modalOverly" className="modal-overlay" onClick={handleOverlayClick}>

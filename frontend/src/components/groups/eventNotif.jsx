@@ -1,5 +1,5 @@
 import React from 'react';
-// import { useState } from 'react';
+
 //this is the event notification sent to a prospective participant that is online
 
 

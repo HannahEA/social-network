@@ -1487,14 +1487,19 @@ func (repo *dbStruct) CheckEvParticipantOnline(EvtName string, EvtDescr string, 
 }
 
 //event invites sent to offline users
+//also used to populate event's group profile when visible
 func (repo *dbStruct) GetPendingEventInvites(member string) (string, []NewEventNotif) {
 	var ePending []NewEventNotif
 	var eCount string
+	var aMember string
+	var gpMembers []string
 
 	fmt.Println("From inside GetPendingEventInvites, the user name is: ", member)
 
 	var oneGroupPending NewEventNotif
-	//returns avatar from 'Users' and info from 'EventsMembers' table
+	//populate all 'oneGroupPending' fields
+
+	//first, returns avatar from 'Users' and participant info from 'EventsMembers' table
 	query := `
 			SELECT U.avatarURL, U.imageFile, E.eventID, E.groupID, E.organizer, E.participant, E.option
 			FROM Users U
@@ -1517,18 +1522,54 @@ func (repo *dbStruct) GetPendingEventInvites(member string) (string, []NewEventN
 			return "", ePending
 		}
 
-		//get event name, description, date and time
+		//Then get event name, evt description, evt date and time
 		err3 := repo.db.QueryRow("SELECT groupID, groupName, title, description, day_time from Events where eventID = ?", oneGroupPending.ID).Scan(&oneGroupPending.GrpID, &oneGroupPending.GrpName, &oneGroupPending.EvtName, &oneGroupPending.EvtDescr, &oneGroupPending.EvtDateTime)
 		if err3 != nil {
-			fmt.Println("error returning group name and description: ", err3)
+			fmt.Println("error returning event details: ", err3)
 			return "", ePending
 		}
 
+		//Next get group creator, group name and description
+		err4 := repo.db.QueryRow("SELECT creator, title, description from Groups where groupID = ?", oneGroupPending.GrpID).Scan(&oneGroupPending.GrpCreator, &oneGroupPending.GrpName, &oneGroupPending.GrpDescr)
+		if err4 != nil {
+			fmt.Println("error returning group creator description and gpMembers: ", err4)
+			return "", ePending
+		}
+
+		//make array of group members from the 'GroupMembers' table.
+		//Only members that have already joined are included
+		query2 := `
+				SELECT member FROM GroupMembers WHERE grpID = ? and status = ?
+		`
+		rows2, err5 := repo.db.Query(query2, oneGroupPending.GrpID, "Yes")
+		if err5 != nil {
+			fmt.Println("GetPendingEventInvites error querying the list of group members: ", err5)
+			return "", ePending
+		}
+
+		defer rows2.Close()
+
+		for rows2.Next() {
+			err3 := rows2.Scan(&aMember)
+			if err3 != nil {
+				fmt.Println("GetPendingEventInvites error scanning one group member: ", err3)
+				return "", ePending
+			}
+
+			gpMembers = append(gpMembers, aMember)
+		}
+
+		//populate the oneGroupPending struct with the slice of gp members
+		oneGroupPending.GrpMembers = gpMembers
+		fmt.Print("group's members are: ", oneGroupPending.GrpMembers)
+
+		//populate remaining fields for oneGroupPending struct
 		oneGroupPending.EvtMemberLogged = "No"
 		oneGroupPending.Type = "connect"
 
 		fmt.Println("One pending new event for offline user: ", oneGroupPending)
-
+		
+		//add oneGroupPending to slice of pending events
 		ePending = append(ePending, oneGroupPending)
 
 		fmt.Println("Slice of pending events invites for offline user", ePending)

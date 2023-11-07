@@ -1,6 +1,7 @@
 import React from "react";
 import { useWebSocket } from '../WebSocketProvider';
 
+//This component renders existing events on group's profile page
 
 function AllEventsProfiles(props){
 
@@ -10,13 +11,13 @@ function AllEventsProfiles(props){
 const { websocketRef, isWebSocketConnected} = useWebSocket();
 
  //event creator or attendee will attend the event
- const handleGoing = () => {
+ const handleGoing = (event) => {
 
     //Store user reply
     let reply = "going";
     // Make a reply object
     var YesNo = {
-        "evtName": props.gpEvents.sliceOfEvents[0].evtName,
+        "evtName": event.evtName,
         "evtMember": props.user,
         "reply": reply,
         "type": "attendEventReply",
@@ -34,12 +35,12 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
   };
 
 //event creator or attendee will not attend the event
-  const handleNotGoing = () => {
+  const handleNotGoing = (event) => {
     //send to back end using the websocket:
     let reply = "not going";
     // Make a reply object
     var YesNo = {
-        "evtName": props.gpEvents.sliceOfEvents[0].evtName,
+        "evtName": event.evtName,
         "evtMember": props.user,
         "reply": reply,
         "type": "attendEventReply",
@@ -84,13 +85,15 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
 
 // Group events into rows of three
   var eventsInRows = [];
+  //if number of events <=3 there are no rows
   if (parseInt(props.gpEvents.nbEvents, 10) <= 3){
     for (let i = 0; i < parseInt(props.gpEvents.nbEvents, 10); i++){
         eventsInRows.push(props.gpEvents.sliceOfEvents[i]);
         }
     }else{
+      //make rows by creating sub-slices of 3 elements each
     for (let i = 0; i < props.gpEvents.sliceOfEvents.length; i += 3) {
-        const eventRow = props.gpEvents.sliceOfEvents.slice(i, i + 3);
+        var eventRow = props.gpEvents.sliceOfEvents.slice(i, i + 3);
         eventsInRows.push(eventRow);
        }
     }
@@ -134,7 +137,7 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
 
 
 
-// Render events in rows
+// Render events in rows of three events
 return (
     <div className="addEvt">
       {(parseInt(props.gpEvents.nbEvents, 10) || 0) === 0 ? (
@@ -145,13 +148,16 @@ return (
             {Array.isArray(eventRow) ? (
               eventRow.map((event) => {
                 console.log('Event:', event);
-                return renderEvent(event); // Don't forget to return the rendered component
+                return (renderEvent(event)); // return to rendered the component
               })
-            ) : (
-              // Handle the case when eventRow is not an array (i.e., a single event) 
+              ) : (
+              // Handle the case when eventRow is not an array (i.e., is a single event) 
                 <>
-                {console.log("event: ",eventRow)}
-                {renderEvent(eventRow)}
+                {console.log("event row: ",eventRow)}
+                {eventsInRows.map((event) => {
+                  return (renderEvent(event))
+                  })
+                }
                 </>
             )}
           </div>
