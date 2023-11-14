@@ -58,7 +58,7 @@ function GroupProfile({ children, showNewEvt, setShowNewEvt, showEvents, grpMemb
 
 //-----------SUBMIT POST 
 
-const [Title, setTitle] = useState("")
+  const [Title, setTitle] = useState("")
   const [Content, setContent] = useState("")
   const [Visibility, setVisibility] = useState("")
   const [tag, setTags] = useState([])
@@ -335,13 +335,14 @@ const handleGroupInvite = (e) => {
             user={creator}
           />
         )}
+        </div>
+        <div id="showAllEvts" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
         {showEvents && (
           <AllEventsProfiles
-            user={creator}
+            user={request}
             gpEvents={gEvents}
           />
         )}
-
         </div>
        
           <div style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}} >

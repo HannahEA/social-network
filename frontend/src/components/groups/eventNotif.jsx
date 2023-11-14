@@ -14,6 +14,7 @@ function EventNotif ( props ) {
 
   //make the group profile page visible
    const handleOpenGpProfile = () => {
+      props.setGrpMember(true);
       props.setGrpProfileVisible(true);
       props.close()
    };
@@ -34,6 +35,8 @@ function EventNotif ( props ) {
        )
      ) 
     }
+
+    console.log("the group data from eventNotiv:",)
 
   //change the newGrpEvt state variable
   const handleNewEvent = () => {

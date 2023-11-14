@@ -126,6 +126,7 @@ console.log("the request inside 'GroupsModal': ",request)
 
       // //make the group profile page visible
       const handleOpenGpProfile = () => {
+        setGrpMember(true);
         setGrpProfileVisible(true);
         onClose()
       };

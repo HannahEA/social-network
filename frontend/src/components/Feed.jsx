@@ -1803,6 +1803,7 @@ const [viewProfile, setViewProfile] = useState(false)
             grpProfileVisible={isGroupProfileVisible}
             setEvt={setNewGrpEvt}
             theEvt={newGrpEvt}
+            eParticipant={requestBy}
           />
           )}
           </div>

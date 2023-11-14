@@ -323,22 +323,41 @@ position: relative
 /* the div containing .addEvent */
 #showEvts{
   margin-top: 10px;
+  /* display:flex; */
+}
+
+/*historical events appearing inside the group profile */
+/* the div containing .addAllEvents */
+#showAllEvts{
+  /* margin-top: 10px; */
   display:flex;
 }
+
+/* div containing a row of events */
+.event-row{
+  margin-top: 10px;
+  width: auto;
+  display:flex;
+}
+
+
+
+
 /* Event details inside the group profile */
 .addEvt{
-  background-color: #d2e9f7;
+  background-color: white;
   position: relative;
-  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
-  border-radius: 10px;
+  /* box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  border-radius: 10px; */
   overflow: hidden;
   margin-top:15px;
   margin-bottom: 20px;
   margin-left: 5px;
-  width: 300px;
-  height: 200px;
-  align-content:center;
-  flex-direction: column;
+  width: 1400px;
+  height: 210px;
+  /* align-content:center; */
+  /* flex-direction: column; */
+  justify-content: space-around;
 }
 
 /* to style the notification */
@@ -509,7 +528,19 @@ background-color: #2f5d78;
       margin-bottom: 20px;
       width: 300px;
       height: 200px;
-      background-color: #a8daf7;
+      background-color: #d8edfa;
+    }
+
+    .addAllEvents{
+      /* position: relative; */
+      /* justify-content:space-around; */
+      box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      width: 300px;
+      height: 200px;
+      background-color: #d8edfa;
     }
     
 

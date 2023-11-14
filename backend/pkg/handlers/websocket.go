@@ -1599,6 +1599,8 @@ func (repo *dbStruct) InsertEventPartReply(evReply EvtReply) error {
 		return err3
 	}
 
+	fmt.Println("the event id where we add event reply to db:", evId)
+
 	//if member wishes to attend turn option field in EventsParticipants table into "going"
 	if evReply.Reply == "going" {
 		_, err := repo.db.Exec("UPDATE EventsParticipants SET option = ? WHERE eventID = ? AND participant = ?", evReply.Reply, evId, evReply.EvtMember)

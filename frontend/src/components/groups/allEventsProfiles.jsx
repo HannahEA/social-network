@@ -6,6 +6,7 @@ import { useWebSocket } from '../WebSocketProvider';
 function AllEventsProfiles(props){
 
 {console.log("the group events inside the AllEventsProfiles component: +=+=+=+=+=> ",props.gpEvents)}
+{console.log("the event participant inside the AllEventsProfiles component: &&&&&&> ",props.user)}
 
 
 const { websocketRef, isWebSocketConnected} = useWebSocket();
@@ -86,14 +87,14 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
 // Group events into rows of three
   var eventsInRows = [];
   //if number of events <=3 there are no rows
-  if (parseInt(props.gpEvents.nbEvents, 10) <= 3){
+  if (parseInt(props.gpEvents.nbEvents, 10) <= 4){
     for (let i = 0; i < parseInt(props.gpEvents.nbEvents, 10); i++){
         eventsInRows.push(props.gpEvents.sliceOfEvents[i]);
         }
     }else{
       //make rows by creating sub-slices of 3 elements each
-    for (let i = 0; i < props.gpEvents.sliceOfEvents.length; i += 3) {
-        var eventRow = props.gpEvents.sliceOfEvents.slice(i, i + 3);
+    for (let i = 0; i < props.gpEvents.sliceOfEvents.length; i += 4) {
+        var eventRow = props.gpEvents.sliceOfEvents.slice(i, i + 4);
         eventsInRows.push(eventRow);
        }
     }
@@ -103,19 +104,19 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
 
       // function to render an individual event
   const renderEvent = (event) => (
-    <div key={event.eventId} className="event-card">
-      <p style={{ fontSize: 18, lineHeight: "20px", fontWeight: "bold", color: "#53a9db", padding: "10px" }}>Event invite</p>
-      <p id="evt">Will you attend this event, <span style={{ fontWeight: "semibold", color: "#53a9db" }}>{props.user}</span> ?</p>
-      <p>Name: <span style={{ fontWeight: "semibold", color: "#53a9db" }}>{event.evtName}</span></p>
-      <p>Description: <span style={{ fontWeight: "semibold", color: "#53a9db" }}>{event.evtDescr}</span></p>
-      <p>Date & time: <span style={{ fontWeight: "semibold", color: "#53a9db" }}>{formatDateTime(event.evtDateTime)}</span></p>
+    <div key={event.eventId} className="addAllEvents">
+      <p style={{ fontSize: 18, lineHeight: "20px", fontWeight: "bold", color: "#53a9db", paddingBottom: "10px", paddingTop: "10px", paddingLeft: "100px" }}>Event invite</p>
+      <p style={{paddingLeft: "10px" }} id="evt">Will you attend this event,<span style={{ fontWeight: "semibold", color: "#53a9db", padding: "2px"}}>{props.user}</span>?</p>
+      <p style={{paddingLeft: "10px" }}>Name: <span style={{ fontWeight: "semibold", color: "#53a9db"}}>{event.evtName}</span></p>
+      <p style={{paddingLeft: "10px" }}>Description: <span style={{ fontWeight: "semibold", color: "#53a9db" }}>{event.evtDescr}</span></p>
+      <p style={{paddingLeft: "10px" }}>Date & time: <span style={{ fontWeight: "semibold", color: "#53a9db" }}>{formatDateTime(event.evtDateTime)}</span></p>
 
       {event.evtOption === "participantPending" ? (
         <div id="eGoingReply">
           <button
             id="btnEventOK"
             onClick={() => handleGoing(event)}
-            style={{ backgroundColor: "#57aada", color: "white", fontWeight: "strong", padding: "10px" }}
+            style={{ paddingLeft: "20px", backgroundColor: "#57aada", color: "white", fontWeight: "strong", padding: "10px" }}
           >
             Going
           </button>
@@ -129,7 +130,7 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
         </div>
       ) : (
         <div id="eGoingReply">
-          <p className="allGroups text-[#4893be] dark:text-[#3f82a9]">You are <span style={{ fontWeight: "semibold", color: "#53a9db" }}>{event.evtOption}</span></p>
+          <p className="pl-24 py-6 allGroups font-extrabold text-[#3089bd] dark:text-[#3f82a9]">You are <span style={{ fontWeight: "800", color:'#3089bd' }}>{event.evtOption}</span></p>
         </div>
       )}
     </div>
@@ -139,12 +140,12 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
 
 // Render events in rows of three events
 return (
-    <div className="addEvt">
+    <div className="addEvt lex justify-around">
       {(parseInt(props.gpEvents.nbEvents, 10) || 0) === 0 ? (
         <label className="allGroups text-[#4893be] dark:text-[#3f82a9]">There are no events for this group</label>
       ) : (
         eventsInRows.map((eventRow, rowIndex) => (
-          <div key={rowIndex} className="event-row">
+          <div key={rowIndex} className="event-row" style={{justifyContent:"space-around"}}>
             {Array.isArray(eventRow) ? (
               eventRow.map((event) => {
                 console.log('Event:', event);
@@ -153,7 +154,8 @@ return (
               ) : (
               // Handle the case when eventRow is not an array (i.e., is a single event) 
                 <>
-                {console.log("event row: ",eventRow)}
+                {console.log("eventsInRows: ",eventsInRows)}
+                <div key="0" className="event-row" style={{justifyContent:"space-around"}}></div>
                 {eventsInRows.map((event) => {
                   return (renderEvent(event))
                   })
