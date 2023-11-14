@@ -86,10 +86,9 @@ const Feed = () => {
             }
 
           }else{
-           console.log("numPending is zero, Nan or undefined", allData.current.offlineFollowNotif.numPending);
+           console.log("numPending is zero, Nan or undefined", allNotifications);
            hideRedDot();
            let aDiv = document.querySelector("#aCounter");
-           hideRedDot()
            aDiv.style.visibility = "hidden";
           }
           
@@ -892,7 +891,7 @@ const [viewProfile, setViewProfile] = useState(false)
             {/* Notifications */}
             <div id="notificationsBell">
             <button
-              id="aCounter"
+              // id="aCounter"
               onCick={togglePendingListVisible}
               type="button"
               data-dropdown-toggle="notification-dropdown"

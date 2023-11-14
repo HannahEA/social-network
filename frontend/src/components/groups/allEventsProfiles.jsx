@@ -138,15 +138,17 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
 
 
 
-// Render events in rows of three events
+// Render events in rows of four events
 return (
-    <div className="addEvt lex justify-around">
+    <div style={{height:"max-content"}} className="addEvt justify-around">
       {(parseInt(props.gpEvents.nbEvents, 10) || 0) === 0 ? (
         <label className="allGroups text-[#4893be] dark:text-[#3f82a9]">There are no events for this group</label>
       ) : (
         eventsInRows.map((eventRow, rowIndex) => (
           <div key={rowIndex} className="event-row" style={{justifyContent:"space-around"}}>
+          {console.log("is eventRow an array?=====++++>>",Array.isArray(eventRow))}
             {Array.isArray(eventRow) ? (
+              
               eventRow.map((event) => {
                 console.log('Event:', event);
                 return (renderEvent(event)); // return to rendered the component
@@ -154,12 +156,7 @@ return (
               ) : (
               // Handle the case when eventRow is not an array (i.e., is a single event) 
                 <>
-                {console.log("eventsInRows: ",eventsInRows)}
-                <div key="0" className="event-row" style={{justifyContent:"space-around"}}></div>
-                {eventsInRows.map((event) => {
-                  return (renderEvent(event))
-                  })
-                }
+                {renderEvent(eventRow)}
                 </>
             )}
           </div>

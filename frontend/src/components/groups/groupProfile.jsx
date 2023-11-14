@@ -219,7 +219,7 @@ const handleGroupInvite = (e) => {
           <form onSubmit={submitPost} className="space-between bg-[#a8daf7] dark:bg-gray-600 rounded-md h-72">
           <p className="mt-5 font-bold text-center text-lg dark:text-[#53a9db] text-[#378dbe]">Create a post</p>
               <span className="flex p-2.5 pl-5">
-                <p className="flex-row mr-5 text-[#717575]">Title:</p>
+                <p className="flex-row mr-5 text-[#717575] dark:text-white">Title:</p>
                 <input
                   className="pTitle flex-row border-b-2 border-green shadow-md dark:bg-[#81b7d7] dark:text-white focus:outline-none rounded-md bg-[#c7e6f8]"
                   type="text"
@@ -230,7 +230,7 @@ const handleGroupInvite = (e) => {
               </span>
 
               <span className="flex p-2.5 pl-5">
-                <p className="flex-row mr-5 text-[#717575]">Post:</p>
+                <p className="flex-row mr-5 text-[#717575] dark:text-white">Post:</p>
                 <input
                   className="pContent flex-row border-b-2 border-green shadow-md dark:bg-[#81b7d7] dark:text-white focus:outline-none rounded-md bg-[#c7e6f8]"
                   type="text"
@@ -244,7 +244,7 @@ const handleGroupInvite = (e) => {
               </span>
 
               <span className="flex p-2.5 pl-5">
-                <p className="flex-row mr-5 text-[#717575]">Tags:</p>
+                <p className="flex-row mr-5 text-[#717575] dark:text-white">Tags:</p>
                 <input
                   type="text"
                   id="postTags"
@@ -263,7 +263,7 @@ const handleGroupInvite = (e) => {
               <Tags tags={tag} />
              
               <div className="flex">
-              <p className="flex-row ml-5 mr-5 text-[#717575]">Image:</p>
+              <p className="flex-row ml-5 mr-5 text-[#717575] dark:text-white">Image:</p>
                 <input
                   type="text"
                   name="imageUrl"
@@ -298,7 +298,7 @@ const handleGroupInvite = (e) => {
                 <p className="mt-5 font-bold text-center text-lg dark:text-[#53a9db] text-[#378dbe]">Organize an event</p>
                 <br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Event name:
-                <input type="text" name="evtName" valuechkJoin={theEvt.grpName || ""} onChange={handleNewEvt} placeholder="Enter group name" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="evtName" required />
+                <input type="text" name="evtName" valuechkJoin={theEvt.grpName || ""} onChange={handleNewEvt} placeholder="Enter event name" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="evtName" required />
                 </label><br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Description:
                 <input type="text" name="evtDescr" onChange={handleNewEvt} placeholder="Enter description" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(70%-1rem)] rounded-md" id="evtDescr" required/>
@@ -308,7 +308,7 @@ const handleGroupInvite = (e) => {
                 <input
                 id="evtDateTime"
                 type="datetime-local" name="evtDateTime" 
-                className="mb-6 ml-6 bg-[#c7e6f8] border-b-2 border-green shadow-md text-[#717575] sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="mb-6 ml-6 bg-[#c7e6f8] border-b-2 border-green shadow-md text-[#717575] sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-[#c7e6f8] dark:border-gray-400 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
                  onChange={handleNewEvt} 
                   // ref={dateInputRef}
                 />

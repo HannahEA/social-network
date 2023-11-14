@@ -472,7 +472,8 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				fmt.Println("error unmarshalling getGpEvents: ", jsonErr)
 			}
 
-			evtCount, evtSlice := service.repo.GetGroupEvents(oEvent)
+			//evtCount, evtSlice := service.repo.GetGroupEvents(oEvent)
+			evtCount, evtSlice := service.repo.GetOneGroupEvents(oEvent)
 
 			//populate the SendGpEvents struct
 			sGpEvents.Requestor = oEvent.EvtMember
@@ -1568,7 +1569,7 @@ func (repo *dbStruct) GetPendingEventInvites(member string) (string, []NewEventN
 		oneGroupPending.Type = "connect"
 
 		fmt.Println("One pending new event for offline user: ", oneGroupPending)
-		
+
 		//add oneGroupPending to slice of pending events
 		ePending = append(ePending, oneGroupPending)
 
@@ -1627,24 +1628,22 @@ func (repo *dbStruct) InsertEventPartReply(evReply EvtReply) error {
 
 }
 
+
 //get all events for one group
-func (repo *dbStruct) GetGroupEvents(oEvent OneEvent) (string, []OneEvent) {
+func (repo *dbStruct) GetOneGroupEvents(oEvent OneEvent) (string, []OneEvent) {
 	var eSlice []OneEvent
 	var eCount string
 
-	fmt.Println("From inside GetGroupEvents, oneEvent data: ----> ", oEvent)
+	fmt.Println("From inside GetOneGroupEvents, oneEvent data: ----> ", oEvent)
 	fmt.Printf("the type of groupID is %T ------------->>", oEvent.GrpID)
 
-	//returns avatar from 'Users' and info from 'EventsMembers' table
+	//returns option and event ID from 'EventsMembers' table
 	query := `
-			SELECT DISTINCT E.eventID, E.organizer, E.title, E.description, E.day_time, P.option   
-			FROM Events E
-			INNER JOIN EventsParticipants P ON E.groupID = P.groupID 
-			WHERE P.participant = ? AND P.groupID = ?
+			SELECT DISTINCT eventID, option FROM EventsParticipants WHERE groupID = ? AND participant= ?
 		`
-	rows, err := repo.db.Query(query, oEvent.EvtMember, oEvent.GrpID)
+	rows, err := repo.db.Query(query, oEvent.GrpID, oEvent.EvtMember)
 	if err != nil {
-		fmt.Println("error querying pending events for one group", err)
+		fmt.Println("error querying pending evt option and evt ID for one group", err)
 		return "", eSlice
 	}
 
@@ -1653,31 +1652,35 @@ func (repo *dbStruct) GetGroupEvents(oEvent OneEvent) (string, []OneEvent) {
 	//========
 
 	// Create a map to track unique event IDs
-	uniqueEventIDs := make(map[int]bool)
+	// uniqueEventIDs := make(map[int]bool)
 
 	for rows.Next() {
 		var oneEv OneEvent // Initialize oneEv here, inside the loop
 
-		err := rows.Scan(&oneEv.ID, &oneEv.EvtCreator, &oneEv.EvtName, &oneEv.EvtDescr, &oneEv.EvtDateTime, &oneEv.EvtOption)
+		err := rows.Scan(&oneEv.ID, &oneEv.EvtOption)
 		if err != nil {
-			fmt.Println("GetGroupEvents scan Error", err, oneEv)
+			fmt.Println("GetOneGroupEvents scan Error", err, oneEv)
 			return "", eSlice
 		}
 
-		// Check if the event ID is already in the map
-		if _, exists := uniqueEventIDs[oneEv.ID]; !exists {
-			// If the event ID is not in the map, add the event to the new slice
-			uniqueEventIDs[oneEv.ID] = true
-			oneEv.EvtMember = oEvent.EvtMember
-			oneEv.GrpName = oEvent.GrpName
-			oneEv.GrpID = oEvent.GrpID
-			oneEv.Type = "sendGpEvents"
-			eSlice = append(eSlice, oneEv)
-		}
+		
+		err4 := repo.db.QueryRow("SELECT organizer, title, description, day_time from Events where eventID = ?", oneEv.ID).Scan(&oneEv.EvtCreator,  &oneEv.EvtName,&oneEv.EvtDescr, &oneEv.EvtDateTime)
+			if err4 != nil {
+				fmt.Println("error querying event details: ",err4)
+			}
 
-		//=======
-
+		
 		fmt.Println("One event data: ", oneEv)
+
+		
+		oneEv.EvtMember = oEvent.EvtMember
+		oneEv.GrpName = oEvent.GrpName
+		oneEv.GrpID = oEvent.GrpID
+		oneEv.Type = "sendGpEvents"
+		eSlice = append(eSlice, oneEv)
+
+
+
 
 		fmt.Println("Slice of events for one group", eSlice)
 		oneEv = OneEvent{}
@@ -1693,3 +1696,4 @@ func (repo *dbStruct) GetGroupEvents(oEvent OneEvent) (string, []OneEvent) {
 
 	return eCount, eSlice
 }
+

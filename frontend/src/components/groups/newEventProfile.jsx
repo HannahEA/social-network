@@ -83,7 +83,7 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
 
 //Show newly created event on group profile page
 return (
-    <div className="addEvt">
+    <div className="addEvent">
       <p style={{fontSize:18, lineHeight:"20px", font:"bold", marginLeft:100+"px", text:"center", color:"#53a9db", padding:"10px"}} > Event invite </p>
       <p id="evt" style={{marginLeft:5+"px", font: "semibold", color: "gray", paddingRight: 1+"px" }}>Will you attend this event, <span style={{font:"semibold", text:"#53a9db"}} > {props.user} </span> ? </p>
       <p style={{marginLeft:5+"px", color:"gray", paddingRight:10+"px"}}>Name: <span style={{font:"semibold", color:"#53a9db"}}>{props.newEvt.evtName}</span></p>

@@ -1,7 +1,8 @@
 ## Helena To Do ##
-event notifications reply back end;
-rendering all events on group profile page and buttons b.e.;
-event creator 'option' field in EventsParticipants' table to be automatically set to 'Yes'
+
+rendering all events that are less than 4 same row in group profile page;
+option buttons to show result on event profile, not on 'new event'
+
 
 
 ## Hannah's fav colour palette: 
