@@ -23,10 +23,13 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
 
     console.log("the attendEventReply sent to back end: ", YesNo)
     //clear buttons and show reply
-    document.querySelector("#eGoingReply").innerHTML=""
-    document.querySelector("#eGoingReply").innerHTML="You are "+reply
-    //send reply object to back end
-    websocketRef.current.send(
+     document.querySelector("#eGoingReply").innerHTML=""
+     document.querySelector("#eGoingReply").innerHTML="You are "+reply
+    //style the answer
+     let opt = document.querySelector("#eGoingReply")
+     opt.classList.add('pl-24', 'py-6', 'allGroups', 'font-extrabold', 'text-[#3089bd]', 'dark:text-[#3f82a9]')
+    //send user reply to back end
+      websocketRef.current.send(
       JSON.stringify(YesNo)
     )
 
@@ -48,8 +51,11 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
     //clear buttons and show reply
       document.querySelector("#eGoingReply").innerHTML=""
       document.querySelector("#eGoingReply").innerHTML="You are "+reply
+    //style the answer
+     let opt = document.querySelector("#eGoingReply")
+     opt.classList.add('pl-24', 'py-6', 'allGroups', 'font-extrabold', 'text-[#3089bd]', 'dark:text-[#3f82a9]')
     //send user reply to back end
-    websocketRef.current.send(
+     websocketRef.current.send(
       JSON.stringify(YesNo)
     )
 

@@ -148,6 +148,16 @@ const Feed = () => {
         } else if (message.type == "newEventNotif"){
           allData.current.newEventNotif = message.newEventNotif
           setRequestBy(allData.current.newEventNotif.evtMember)
+          setSelectedGroup((prevState) => ({
+            ...prevState,
+            id: allData.current.newEventNotif.grpID,
+            creator: allData.current.newEventNotif.grpCreator,
+            gpMembers: allData.current.newEventNotif.grpMembers,
+            grpDescr: allData.current.newEventNotif.grpDescr,
+            grpName: allData.current.newEventNotif.grpName,
+            type: allData.current.newEventNotif.type
+          })
+          )
           showEventInvites();
           console.log("newEventNotif received by member: ", allData.current.newEventNotif)
         }

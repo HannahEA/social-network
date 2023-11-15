@@ -1,7 +1,6 @@
 ## Helena To Do ##
 
-rendering all events that are less than 4 same row in group profile page;
-option buttons to show result on event profile, not on 'new event'
+In group profile page, render all events that are less than 4 in the same row;
 
 
 

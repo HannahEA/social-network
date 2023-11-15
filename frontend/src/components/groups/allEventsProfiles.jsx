@@ -25,9 +25,14 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
     };
 
     console.log("the attendEventReply sent to back end: ", YesNo)
+    console.log("the event.id value is:", event.id)
+
     //clear buttons and show reply
-    document.querySelector("#eGoingReply").innerHTML=""
-    document.querySelector("#eGoingReply").innerHTML="You are "+reply
+    document.getElementById(event.id).innerHTML=""
+    document.getElementById(event.id).innerHTML="You are "+reply
+    //style the answer
+    let opt = document.getElementById(event.id)
+    opt.classList.add('pl-24', 'py-6', 'allGroups', 'font-extrabold', 'text-[#3089bd]', 'dark:text-[#3f82a9]')
     //send reply object to back end
     websocketRef.current.send(
       JSON.stringify(YesNo)
@@ -49,8 +54,11 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
 
     console.log("the joinGroupReply sent to back end: ", YesNo)
     //clear buttons and show reply
-      document.querySelector("#eGoingReply").innerHTML=""
-      document.querySelector("#eGoingReply").innerHTML="You are "+reply
+    document.getElementById(event.id).innerHTML=""
+    document.getElementById(event.id).innerHTML="You are "+reply
+    //style the answer
+    let opt = document.getElementById(event.id)
+    opt.classList.add('pl-24', 'py-6', 'allGroups', 'font-extrabold', 'text-[#3089bd]', 'dark:text-[#3f82a9]')
     //send user reply to back end
     websocketRef.current.send(
       JSON.stringify(YesNo)
@@ -104,7 +112,7 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
 
       // function to render an individual event
   const renderEvent = (event) => (
-    <div key={event.eventId} className="addAllEvents">
+    <div key={event.id} className="addAllEvents">
       <p style={{ fontSize: 18, lineHeight: "20px", fontWeight: "bold", color: "#53a9db", paddingBottom: "10px", paddingTop: "10px", paddingLeft: "100px" }}>Event invite</p>
       <p style={{paddingLeft: "10px" }} id="evt">Will you attend this event,<span style={{ fontWeight: "semibold", color: "#53a9db", padding: "2px"}}>{props.user}</span>?</p>
       <p style={{paddingLeft: "10px" }}>Name: <span style={{ fontWeight: "semibold", color: "#53a9db"}}>{event.evtName}</span></p>
@@ -112,7 +120,7 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
       <p style={{paddingLeft: "10px" }}>Date & time: <span style={{ fontWeight: "semibold", color: "#53a9db" }}>{formatDateTime(event.evtDateTime)}</span></p>
 
       {event.evtOption === "participantPending" ? (
-        <div id="eGoingReply">
+        <div id={event.id}>
           <button
             id="btnEventOK"
             onClick={() => handleGoing(event)}
@@ -145,7 +153,7 @@ return (
         <label className="allGroups text-[#4893be] dark:text-[#3f82a9]">There are no events for this group</label>
       ) : (
         eventsInRows.map((eventRow, rowIndex) => (
-          <div key={rowIndex} className="event-row" style={{justifyContent:"space-around"}}>
+          <div key={rowIndex} className="event-row" style={{justifyContent:"flex-start"}}>
           {console.log("is eventRow an array?=====++++>>",Array.isArray(eventRow))}
             {Array.isArray(eventRow) ? (
               
