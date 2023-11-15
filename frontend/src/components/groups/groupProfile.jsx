@@ -172,7 +172,7 @@ const handleGroupInvite = (e) => {
     <div className="modal-overlay" onClick={handleOverlayClick}>
      <div className="dark:bg-gray-600 w-3/4 bg-white p-4 m-6 position-relative overflow-auto max-h-screen min-h-min min-w-fit"> 
         
-        <button className="modal-close text-white dark:text-white" onClick={() => {onGpClose()}} classn="ml-60  pl-5 pr-5 font-bold bg-[#00cec9] text-[#255f5a] rounded-md">
+        <button className="modal-close text-gray-500 dark:text-white" onClick={() => {onGpClose()}} classn="ml-60  pl-5 pr-5 font-bold bg-[#00cec9] text-[#255f5a] rounded-md">
           Close
         </button>
         <div className="flex justify-around">
@@ -221,7 +221,7 @@ const handleGroupInvite = (e) => {
               <span className="flex p-2.5 pl-5">
                 <p className="flex-row mr-5 text-[#717575] dark:text-white">Title:</p>
                 <input
-                  className="pTitle flex-row border-b-2 border-green shadow-md dark:bg-[#81b7d7] dark:text-white focus:outline-none rounded-md bg-[#c7e6f8]"
+                  className="pl-5 pTitle flex-row border-b-2 border-green shadow-md dark:bg-[#d8edfa] dark:text-white focus:outline-none rounded-md bg-[#c7e6f8]"
                   type="text"
                   placeholder="Enter title"
                   value={Title}
@@ -232,7 +232,7 @@ const handleGroupInvite = (e) => {
               <span className="flex p-2.5 pl-5">
                 <p className="flex-row mr-5 text-[#717575] dark:text-white">Post:</p>
                 <input
-                  className="pContent flex-row border-b-2 border-green shadow-md dark:bg-[#81b7d7] dark:text-white focus:outline-none rounded-md bg-[#c7e6f8]"
+                  className="pl-5 pContent flex-row border-b-2 border-green shadow-md dark:bg-[#d8edfa] dark:text-white focus:outline-none rounded-md bg-[#c7e6f8]"
                   type="text"
                   name="postContent"
                   id="postContent"
@@ -249,7 +249,7 @@ const handleGroupInvite = (e) => {
                   type="text"
                   id="postTags"
                   placeholder="Enter tag"
-                  className="pTags flex-row mr-5 border-b-2 border-green shadow-md dark:bg-[#81b7d7] dark:text-white focus:outline-none rounded-md bg-[#c7e6f8]"
+                  className="pl-5 pTags flex-row mr-5 border-b-2 border-green shadow-md dark:bg-[#d8edfa] dark:text-white focus:outline-none rounded-md bg-[#c7e6f8]"
                 />
                 <button
                   onClick={addTag}
@@ -269,7 +269,7 @@ const handleGroupInvite = (e) => {
                   name="imageUrl"
                   id="imageUrl"
                   placeholder="Enter image URL"
-                  className="pTags border-b-2 border-green shadow-md m-2.5 pl-5 pr-5 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-[#aedbf5] dark:text-white bg-[#c7e6f8]"
+                  className="pTags border-b-2 border-green shadow-md m-2.5 pl-5 pr-5 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-[#d8edfa] dark:text-white bg-[#c7e6f8]"
                   // value={imageURL}
                   onChange={handlePostImage}
                 />
@@ -298,17 +298,17 @@ const handleGroupInvite = (e) => {
                 <p className="mt-5 font-bold text-center text-lg dark:text-[#53a9db] text-[#378dbe]">Organize an event</p>
                 <br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Event name:
-                <input type="text" name="evtName" valuechkJoin={theEvt.grpName || ""} onChange={handleNewEvt} placeholder="Enter event name" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="evtName" required />
+                <input type="text" name="evtName" valuechkJoin={theEvt.grpName || ""} onChange={handleNewEvt} placeholder="Enter event name" className="pl-5 border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(50%-1rem)] rounded-md" id="evtName" required />
                 </label><br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Description:
-                <input type="text" name="evtDescr" onChange={handleNewEvt} placeholder="Enter description" className="border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(70%-1rem)] rounded-md" id="evtDescr" required/>
+                <input type="text" name="evtDescr" onChange={handleNewEvt} placeholder="Enter description" className="pl-5 border-b-2 border-green shadow-md mb-6 ml-6 bg-[#c7e6f8] dark:bg-[#90d0f5] w-[calc(70%-1rem)] rounded-md" id="evtDescr" required/>
                 </label>
               <br></br>
                 <label className="ml-2 text-[#717575] dark:text-white">Date and time:
                 <input
                 id="evtDateTime"
                 type="datetime-local" name="evtDateTime" 
-                className="mb-6 ml-6 bg-[#c7e6f8] border-b-2 border-green shadow-md text-[#717575] sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-[#c7e6f8] dark:border-gray-400 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="pl-5 mb-4 ml-6 bg-[#c7e6f8] border-b-2 border-green shadow-md text-[#717575] sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-[#c7e6f8] dark:border-gray-400 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
                  onChange={handleNewEvt} 
                   // ref={dateInputRef}
                 />

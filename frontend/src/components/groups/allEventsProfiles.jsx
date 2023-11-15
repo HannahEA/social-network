@@ -94,13 +94,13 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
 
 // Group events into rows of three
   var eventsInRows = [];
-  //if number of events <=3 there are no rows
+  //if number of events <=4 there are no rows
   if (parseInt(props.gpEvents.nbEvents, 10) <= 4){
     for (let i = 0; i < parseInt(props.gpEvents.nbEvents, 10); i++){
         eventsInRows.push(props.gpEvents.sliceOfEvents[i]);
         }
     }else{
-      //make rows by creating sub-slices of 3 elements each
+      //make rows by creating sub-slices of 4 elements each
     for (let i = 0; i < props.gpEvents.sliceOfEvents.length; i += 4) {
         var eventRow = props.gpEvents.sliceOfEvents.slice(i, i + 4);
         eventsInRows.push(eventRow);
@@ -113,7 +113,7 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
       // function to render an individual event
   const renderEvent = (event) => (
     <div key={event.id} className="addAllEvents">
-      <p style={{ fontSize: 18, lineHeight: "20px", fontWeight: "bold", color: "#53a9db", paddingBottom: "10px", paddingTop: "10px", paddingLeft: "100px" }}>Event invite</p>
+      <p style={{ fontSize: 18, lineHeight: "20px", fontWeight: "bold", color: "#29aaf5", paddingBottom: "10px", paddingTop: "10px", paddingLeft: "100px" }}>Event invite</p>
       <p style={{paddingLeft: "10px" }} id="evt">Will you attend this event,<span style={{ fontWeight: "semibold", color: "#53a9db", padding: "2px"}}>{props.user}</span>?</p>
       <p style={{paddingLeft: "10px" }}>Name: <span style={{ fontWeight: "semibold", color: "#53a9db"}}>{event.evtName}</span></p>
       <p style={{paddingLeft: "10px" }}>Description: <span style={{ fontWeight: "semibold", color: "#53a9db" }}>{event.evtDescr}</span></p>
@@ -124,14 +124,14 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
           <button
             id="btnEventOK"
             onClick={() => handleGoing(event)}
-            style={{ paddingLeft: "20px", backgroundColor: "#57aada", color: "white", fontWeight: "strong", padding: "10px" }}
+            style={{ paddingLeft: "20px", backgroundColor: "#29aaf5", color: "white", fontWeight: "strong", padding: "10px" }}
           >
             Going
           </button>
           <button
             id="btnEventNO"
             onClick={() => handleNotGoing(event)}
-            style={{ backgroundColor: "#57aada", color: "white", fontWeight: "strong", padding: "10px" }}
+            style={{ backgroundColor: "#29aaf5", color: "white", fontWeight: "strong", padding: "10px" }}
           >
             Not going
           </button>
@@ -145,33 +145,48 @@ const { websocketRef, isWebSocketConnected} = useWebSocket();
   );
 
 
-
 // Render events in rows of four events
 return (
-    <div style={{height:"max-content"}} className="addEvt justify-around">
-      {(parseInt(props.gpEvents.nbEvents, 10) || 0) === 0 ? (
-        <label className="allGroups text-[#4893be] dark:text-[#3f82a9]">There are no events for this group</label>
-      ) : (
-        eventsInRows.map((eventRow, rowIndex) => (
-          <div key={rowIndex} className="event-row" style={{justifyContent:"flex-start"}}>
-          {console.log("is eventRow an array?=====++++>>",Array.isArray(eventRow))}
+  <div style={{ height: "max-content" }} className="addEvt justify-around">
+    {(parseInt(props.gpEvents.nbEvents, 10) || 0) === 0 ? (
+      <label className="allGroups text-[#4893be] dark:text-[#3f82a9]">
+        There are no events for this group
+      </label>
+    ) : (
+      (() => {
+        return eventsInRows.map((eventRow, rowIndex) => (
+          <div key={rowIndex} className="event-row" style={{ justifyContent: "flex-start" }}>
+            {console.log("is eventRow an array?=====++++>>", Array.isArray(eventRow))}
             {Array.isArray(eventRow) ? (
-              
               eventRow.map((event) => {
                 console.log('Event:', event);
-                return (renderEvent(event)); // return to rendered the component
+                return renderEvent(event); // Return to render the component
               })
-              ) : (
-              // Handle the case when eventRow is not an array (i.e., is a single event) 
-                <>
-                {renderEvent(eventRow)}
-                </>
+            ) : (
+              // Handle the case when eventRow is not an array (i.e., is a single event)
+              <React.Fragment key={eventRow.id}>
+                {console.log("the rowIndex",rowIndex)}
+                {/* Render the additional events in the same container */}
+                {eventsInRows.slice(0, Math.min(eventsInRows.length, 4)).map((additionalEvent) => (
+                  (rowIndex == 0) ? (renderEvent(additionalEvent) ) : (
+                    
+                    
+                    //clear the events array to prevent duplicate rendering
+                    eventsInRows = []
+                    
+                    )
+                ))}
+              </React.Fragment>
             )}
           </div>
-        ))
-      )}
-    </div>
-  );
+        ));
+      })()
+    )}
+  </div>
+);
+
+
+
 }
 
 export default AllEventsProfiles;
