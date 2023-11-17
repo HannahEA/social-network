@@ -1,6 +1,6 @@
 ## Helena To Do ##
 
-In group profile page, render all events that are less than 4 in the same row;
+render all events in group profile page when clicking on new event notif button.
 
 
 

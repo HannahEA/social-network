@@ -663,7 +663,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				}
 
 				//return new event notification information
-				newEvNotif, err1 := service.repo.CheckEvParticipantOnline(newEv.EvtName, newEv.EvtDescr, newEv.ID, newEv.GrpMembers[i], newEv.EvtCreator)
+				newEvNotif, err1 := service.repo.CheckEvParticipantOnline(newEv.EvtName, newEv.EvtDescr, newEv.ID, newEv.GrpMembers[i], newEv.EvtCreator, newEv.GrpID)
 				if err1 != nil {
 					fmt.Println("error returning newEvNotif data: ", err1)
 				}
@@ -1451,7 +1451,7 @@ func (repo *dbStruct) InsertEvtMember(newEv NewEventNotif, i int, status string)
 
 //check if a user is online or offline,
 //used for event notifications
-func (repo *dbStruct) CheckEvParticipantOnline(EvtName string, EvtDescr string, ID int, gMember string, EvtCreator string) (NewEventNotif, error) {
+func (repo *dbStruct) CheckEvParticipantOnline(EvtName string, EvtDescr string, ID int, gMember string, EvtCreator string, GrpID int) (NewEventNotif, error) {
 	//instantiate the NewGroupNotif struct
 	var newEvNotif NewEventNotif
 
@@ -1480,7 +1480,7 @@ func (repo *dbStruct) CheckEvParticipantOnline(EvtName string, EvtDescr string, 
 	newEvNotif.EvtMember = gMember
 	newEvNotif.EvtName = EvtName
 	newEvNotif.EvtDescr = EvtDescr
-	newEvNotif.GrpID = ID
+	newEvNotif.GrpID = GrpID
 	newEvNotif.Type = "newEventNotif"
 
 	return newEvNotif, nil
@@ -1628,7 +1628,6 @@ func (repo *dbStruct) InsertEventPartReply(evReply EvtReply) error {
 
 }
 
-
 //get all events for one group
 func (repo *dbStruct) GetOneGroupEvents(oEvent OneEvent) (string, []OneEvent) {
 	var eSlice []OneEvent
@@ -1663,24 +1662,18 @@ func (repo *dbStruct) GetOneGroupEvents(oEvent OneEvent) (string, []OneEvent) {
 			return "", eSlice
 		}
 
-		
-		err4 := repo.db.QueryRow("SELECT organizer, title, description, day_time from Events where eventID = ?", oneEv.ID).Scan(&oneEv.EvtCreator,  &oneEv.EvtName,&oneEv.EvtDescr, &oneEv.EvtDateTime)
-			if err4 != nil {
-				fmt.Println("error querying event details: ",err4)
-			}
+		err4 := repo.db.QueryRow("SELECT organizer, title, description, day_time from Events where eventID = ?", oneEv.ID).Scan(&oneEv.EvtCreator, &oneEv.EvtName, &oneEv.EvtDescr, &oneEv.EvtDateTime)
+		if err4 != nil {
+			fmt.Println("error querying event details: ", err4)
+		}
 
-		
 		fmt.Println("One event data: ", oneEv)
 
-		
 		oneEv.EvtMember = oEvent.EvtMember
 		oneEv.GrpName = oEvent.GrpName
 		oneEv.GrpID = oEvent.GrpID
 		oneEv.Type = "sendGpEvents"
 		eSlice = append(eSlice, oneEv)
-
-
-
 
 		fmt.Println("Slice of events for one group", eSlice)
 		oneEv = OneEvent{}
@@ -1696,4 +1689,3 @@ func (repo *dbStruct) GetOneGroupEvents(oEvent OneEvent) (string, []OneEvent) {
 
 	return eCount, eSlice
 }
-
