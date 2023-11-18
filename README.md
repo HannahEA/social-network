@@ -1,8 +1,3 @@
-## Helena To Do ##
-
-render all events in group profile page when clicking on new event notif button.
-
-
 
 ## Hannah's fav colour palette: 
 https://colorhunt.co/palette/ffeeccffddccffccccfebbcc
