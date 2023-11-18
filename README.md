@@ -50,7 +50,9 @@ In VSC terminal
 
 # to run 'social-network' locally type below commands in VSC terminal:
 
-1. In the 'frontend' folder make an '.env' file that contains: REACT_APP_API_URL=http://localhost:8000
+1. In the 'frontend' folder make an '.env' file that contains: 
+REACT_APP_API_URL=http://localhost:8000
+DANGEROUSLY_DISABLE_HOST_CHECK=true
 
 2. To install node files and create the package-lock.json and package.json files:
    cd frontend
