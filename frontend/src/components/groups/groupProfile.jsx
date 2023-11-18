@@ -3,7 +3,7 @@ import React from "react";
 import {useState} from "react";
 import { useWebSocket } from "../WebSocketProvider.jsx";
 import {SubmitPost, Posts, Tags} from "../feed/Posts.jsx";
-import EventProfile from "./newEventProfile.jsx";
+import NewEventProfile from "./newEventProfile.jsx";
 import AllEventsProfiles from "./allEventsProfiles.jsx";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
@@ -328,14 +328,14 @@ const handleGroupInvite = (e) => {
         </div>
         {/* end of group invites, group posts, group events */}
         
-        <div id="showEvts" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
+        {/* <div id="showEvts" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
         {showNewEvt && (
-          <EventProfile
+          <NewEventProfile
             newEvt={theEvt}
             user={creator}
           />
         )}
-        </div>
+        </div> */}
         <div id="showAllEvts" style={{ visibility:`${grpMember ? 'visible' : 'hidden'}`}}>
         {showEvents && (
           <AllEventsProfiles
