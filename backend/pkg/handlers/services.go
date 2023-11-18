@@ -100,7 +100,7 @@ type AllDbMethods interface {
 	InsertGroupMemberReply(joinGrpReply JoinGroupReply) error
 	InsertEventPartReply(evReply EvtReply) error
 	GetExistingGroups() (string, []NewGroup)
-	GetOneGroupEvents(oEvent OneEvent) (string, []OneEvent) 
+	GetOneGroupEvents(EvtMember string, GrpID int, GrpName string) (string, []OneEvent) 
 	GetPendingJoinGroupRequests(creator string) (string, []OneOfflineJoinGroupRequest)
 	getUserAvatar(nkName string) (NewGroupNotif, error)
 	GetGroupComments(post Post) ([]Comment, error)

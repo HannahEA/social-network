@@ -327,23 +327,25 @@ type OneOfflineJoinGroupRequest struct {
 
 //new event notification to all group members
 type NewEventNotif struct {
-	GrpCreator       string   `json:"grpCreator"`
-	EvtDateTime      string   `json:"evtDateTime"`
-	EvtDescr         string   `json:"evtDescr"`
-	ID               int      `json:"id"`
-	EvtName          string   `json:"evtName"`
-	GrpMembers       []string `json:"grpMembers"`
-	GrpDescr         string   `json:"grpDescr"`
-	GrpID            int      `json:"grpID"`
-	GrpName          string   `json:"grpName"`
-	EvtCreator       string   `json:"evtCreator"`
-	Type             string   `json:"type"`
-	EvtMember        string   `json:"evtMember"`
-	EvtCreatorURL    string   `json:"evtCreatorURL"`
-	EvtCreatorImage  string   `json:"evtCreatorImage"`
-	EvtCreatorLogged string   `json:"evtCreatorLogged"`
-	EvtMemberLogged  string   `json:"evtMemberLogged"`
-	EvtMemberStatus  string   `json:"evtMemberStatus"`
+	GrpCreator       string     `json:"grpCreator"`
+	EvtDateTime      string     `json:"evtDateTime"`
+	EvtDescr         string     `json:"evtDescr"`
+	ID               int        `json:"id"`
+	EvtName          string     `json:"evtName"`
+	GrpMembers       []string   `json:"grpMembers"`
+	GrpDescr         string     `json:"grpDescr"`
+	GrpID            int        `json:"grpID"`
+	GrpName          string     `json:"grpName"`
+	EvtCreator       string     `json:"evtCreator"`
+	Type             string     `json:"type"`
+	EvtMember        string     `json:"evtMember"`
+	EvtCreatorURL    string     `json:"evtCreatorURL"`
+	EvtCreatorImage  string     `json:"evtCreatorImage"`
+	EvtCreatorLogged string     `json:"evtCreatorLogged"`
+	EvtMemberLogged  string     `json:"evtMemberLogged"`
+	EvtMemberStatus  string     `json:"evtMemberStatus"`
+	NbEvents         string     `json:"nbEvents"`
+	SliceOfEvents    []OneEvent `json:"sliceOfEvents"`
 }
 
 // user requests to join one or more groups, offline groups creators to respond

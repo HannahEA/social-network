@@ -63,7 +63,7 @@ const Feed = () => {
           //all pending alerts is the sum of the above
           let allNotifications = numFollowPending + numGroupPending + numJoinGroupPending + numEventsInvites
           console.log("all notifications are: ", allNotifications)
-          //check if there are pending follow notifs or group invites or events invites
+          //check if there are pending follow notifs or group invites or join group requests or events invites
           if (allNotifications > 0) {
             console.log("notifications count: ", allData.current.offlineFollowNotif.numFollowPending)
             console.log("new groups count: ", allData.current.offlineGroupInvites.numGrpsPending)
@@ -158,8 +158,21 @@ const Feed = () => {
             type: allData.current.newEventNotif.type
           })
           )
+          setEventsInvites(allData.current.newEventNotif.sliceOfEvents)
           showEventInvites();
           console.log("newEventNotif received by member: ", allData.current.newEventNotif)
+          //update the 'groupEvents' state variable used in <GroupProfile> component
+            setGroupEvents((prevState) => ({
+             ...prevState,
+             requestor: allData.current.newEventNotif.evtMember,
+             nbEvents: allData.current.newEventNotif.nbEvents,
+             sliceOfEvents: allData.current.newEventNotif.sliceOfEvents,
+             type: allData.current.newEventNotif.type
+            })
+            )
+            //state variable to display events inside <AllEventsProfiles> component
+            setShowEvents(true)
+        
         }
         
         else if (message.type == "sendAllGroups"){

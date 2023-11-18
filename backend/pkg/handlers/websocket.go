@@ -472,8 +472,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				fmt.Println("error unmarshalling getGpEvents: ", jsonErr)
 			}
 
-			//evtCount, evtSlice := service.repo.GetGroupEvents(oEvent)
-			evtCount, evtSlice := service.repo.GetOneGroupEvents(oEvent)
+			evtCount, evtSlice := service.repo.GetOneGroupEvents(oEvent.EvtMember, oEvent.GrpID, oEvent.GrpName)
 
 			//populate the SendGpEvents struct
 			sGpEvents.Requestor = oEvent.EvtMember
@@ -675,6 +674,13 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				newEvNotif.GrpDescr = newEv.GrpDescr
 				newEvNotif.GrpName = newEv.GrpName
 				newEvNotif.GrpMembers = newEv.GrpMembers
+
+				//return group's events
+				evtCount, evtSlice := service.repo.GetOneGroupEvents(newEv.GrpMembers[i], newEv.GrpID, newEv.GrpName)
+
+				//add group events slice to newEvNotif struct
+				newEvNotif.NbEvents = evtCount
+				newEvNotif.SliceOfEvents = evtSlice
 
 				fmt.Println("The new event notification sent to f.e.: ", newEvNotif)
 
@@ -1629,18 +1635,17 @@ func (repo *dbStruct) InsertEventPartReply(evReply EvtReply) error {
 }
 
 //get all events for one group
-func (repo *dbStruct) GetOneGroupEvents(oEvent OneEvent) (string, []OneEvent) {
+func (repo *dbStruct) GetOneGroupEvents(EvtMember string, GrpID int, GrpName string) (string, []OneEvent) {
 	var eSlice []OneEvent
 	var eCount string
 
-	fmt.Println("From inside GetOneGroupEvents, oneEvent data: ----> ", oEvent)
-	fmt.Printf("the type of groupID is %T ------------->>", oEvent.GrpID)
+	fmt.Println("the inputs to GetOneGroupEvents are ------------->>", EvtMember, GrpID, GrpName)
 
 	//returns option and event ID from 'EventsMembers' table
 	query := `
 			SELECT DISTINCT eventID, option FROM EventsParticipants WHERE groupID = ? AND participant= ?
 		`
-	rows, err := repo.db.Query(query, oEvent.GrpID, oEvent.EvtMember)
+	rows, err := repo.db.Query(query, GrpID, EvtMember)
 	if err != nil {
 		fmt.Println("error querying pending evt option and evt ID for one group", err)
 		return "", eSlice
@@ -1669,9 +1674,9 @@ func (repo *dbStruct) GetOneGroupEvents(oEvent OneEvent) (string, []OneEvent) {
 
 		fmt.Println("One event data: ", oneEv)
 
-		oneEv.EvtMember = oEvent.EvtMember
-		oneEv.GrpName = oEvent.GrpName
-		oneEv.GrpID = oEvent.GrpID
+		oneEv.EvtMember = EvtMember
+		oneEv.GrpName = GrpName
+		oneEv.GrpID = GrpID
 		oneEv.Type = "sendGpEvents"
 		eSlice = append(eSlice, oneEv)
 

@@ -22,19 +22,6 @@ function EventNotif ( props ) {
 
 
   //change state variable object 'setGrp' 
- /* const handleSelectGrp = () => {
-    props.setGrp((prevState) => ({
-         ...prevState,
-         id: props.theGroup.grpID,
-         creator: props.theGroup.grpCreator,
-         gpMembers: props.theGroup.grpMembers,
-         grpDescr: props.theGroup.grpDescr,
-         grpName: props.eventData.grpName,
-         type: "arrayOfGroups"
-     }
-    )
-  ) 
- }*/
     const handleSelectGrp = () => {
        props.setGrp((prevState) => ({
             ...prevState,
