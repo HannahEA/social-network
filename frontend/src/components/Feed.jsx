@@ -25,7 +25,6 @@ import { Notyf } from "notyf";
 // import { FunctionsRounded } from "@material-ui/icons";
 
 
-
 //Environment variable from the docker-compose.yml file.
 //This variable will contain the URL of the backend service,
 //allowing the frontend code to make requests to the correct endpoint.
@@ -284,6 +283,25 @@ const Feed = () => {
   const [imageURL, setImageURL] = useState(null);
   const [imageFile, setImageFile] = useState("");
   const notyf = new Notyf();
+
+  //greeting for logged-in user
+  const greeting = () => {
+    var date = new Date();
+    //date.toLocaleString('en-UK', {hour: 'numierc', minute: 'numeric', hour12: true })
+    console.log("the day time is", date)
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    var good = ampm == 'am' ? 'Good morning' : 'Good afternoon'
+    //const strGreet = good + ' ' + userInfo.firstName + ' , you logged-in at ' + hours + ':' + minutes + ' ' + ampm + ' ';
+    const strGreet = good + ' ' + userInfo.firstName + ' ';
+    return strGreet;
+  }
+
+  console.log("the user info: ======>", userInfo)
 
   // Function to show Notifications for online users
   const showNotification = () => {
@@ -1124,7 +1142,7 @@ const [viewProfile, setViewProfile] = useState(false)
             >
               <span className="sr-only">Open user menu</span>
               <img
-                className={`w-10 h-10 rounded-full border-2 border-solid border-[#57aada] dark:border-white`}
+                className={`w-10 h-10 rounded-full border-2 border-solid border-gray-300 dark:border-white`}
                 src={userAvatar}
                 alt="user photo"
               />
@@ -1767,7 +1785,7 @@ const [viewProfile, setViewProfile] = useState(false)
           </div>
         </div>
       </aside>
-      <main className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
+      <main id="session" className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
         <Chat websocketRef={websocketRef} isWebSocketConnected={ isWebSocketConnected} allData={allData}/>
         {viewProfile&& <Profile/>}
         <div></div>
@@ -1780,22 +1798,24 @@ const [viewProfile, setViewProfile] = useState(false)
         </form>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div className="  dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
+          <div className=" cube dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img
               //className="w-16 h-16 mb-2 rounded-full border-2 border-solid border-white-500"
-              className={`w-16 h-16 rounded-full border-2 border-solid border-[#57aada] dark:border-[#f8fafc]`}
+              className={`w-3/4 h-4/5 border-2 border-solid border-gray-300 dark:border-[#f8fafc]`}
               //src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
               src={userAvatar}
               alt="user photo"
+              style={{width:204, height:204 }}
             />
-            <div className="flex justify-center items-center flex-col">
-              <p>Followers: 0</p>
-              <p>Posts: 0</p>
-              <p>Email: {email}</p>
+            <div className="flex justify-center items-center flex-col" onLoad={greeting}>
+            <p className="mt-1 text-md text-[#57aada] dark:text-gray-400"><strong>{greeting()}</strong>🙂</p>
+              {/* <p>Followers: {allData.current.userInfo.followers.join(' ')}</p> */}
+              {/* <p>Posts: 0</p> */}
+              {/* <p>Email: {email}</p> */}
             </div>
           </div>
           {/* Start of new group notification */}
-          <div id="showGroupNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+          <div id="showGroupNotif" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
          {console.log("the state variable of groupVisible: ", isGroupsVisible)}
           {isGroupsVisible && (
           <NewGroupNotification 
@@ -1809,7 +1829,7 @@ const [viewProfile, setViewProfile] = useState(false)
 
         {/*  Start of event notification */}
 
-        <div id="showEventNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+        <div id="showEventNotif" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
          {console.log("the state variable of isEventVisible: ", isEventVisible)}
           {isEventVisible && (
           <EventNotif
@@ -1833,7 +1853,7 @@ const [viewProfile, setViewProfile] = useState(false)
         {/* End of event notification */}
 
         {/* Start of join group request notification */}
-          <div id="joinGpReq" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+          <div id="joinGpReq" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
           {console.log("the state variable of isJoinGroupVisible: ", isJoinGroupVisible)}
           {isJoinGroupVisible && (
             <JoinGpReq 
@@ -1848,7 +1868,7 @@ const [viewProfile, setViewProfile] = useState(false)
 
 
         {/* Start of follow notification */}
-          <div id="showNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+          <div id="showNotif" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
           {isVisible && (
           <Notification 
             setIsVisible={setIsVisible}
@@ -1916,7 +1936,7 @@ const [viewProfile, setViewProfile] = useState(false)
 
      {/* Start of show groupsModal*/}
           
-      <div id="showGroups" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+      <div id="showGroups" className="cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
     {groupsModalVisible && (console.log("the allData in feed: ", allData.current))}
       {(groupsModalVisible && groupsList && requestBy) && (
         <GroupsModal 
@@ -1936,8 +1956,9 @@ const [viewProfile, setViewProfile] = useState(false)
       )}
       </div>
       {/* End of show groupsModal */}
+      <div className="cube relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" ></div>
           
-      <div className="relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" id="offlineNotif">
+      <div className="cube relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" id="offlineNotif">
               {/*Start of offline Notifications Dropdown menu */}
       <div
           className={`top-10 overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700 ${isPendingListVisible ? 'visible' : 'hidden'}`}
@@ -2148,7 +2169,7 @@ const [viewProfile, setViewProfile] = useState(false)
               <span className="flex p-2.5 pl-5">
                 <p className="flex-row mr-5 font-bold text-[#5aadde]">Title</p>
                 <input
-                  className="flex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
+                  className="bg-gray-100 rounded-md lex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
                   type="text"
                   value={Title}
                   onChange={handleTitle}
@@ -2160,7 +2181,7 @@ const [viewProfile, setViewProfile] = useState(false)
                 <input
                   type="text"
                   id="postTags"
-                  className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
+                  className="bg-gray-100 rounded-md flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
                 />
                 <button
                   onClick={addTag}
@@ -2175,7 +2196,7 @@ const [viewProfile, setViewProfile] = useState(false)
               <div className="flex justify-right items-right flex-col">
                 <p className="p-2.5 pl-5 font-bold text-[#5aadde]">Content</p>
                 <textarea
-                  className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none"
+                  className="bg-gray-100 m-5 mt-0 mb-2.5 rounded-md mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none"
                   name="postContent"
                   id="postContent"
                   cols="8"
@@ -2183,6 +2204,7 @@ const [viewProfile, setViewProfile] = useState(false)
                   maxLength="100"
                   value={Content}
                   onChange={handleContent}
+                  style={{width:600+"px", marginLeft:75+"px"}}
                 ></textarea>
               </div>
 
@@ -2215,14 +2237,14 @@ const [viewProfile, setViewProfile] = useState(false)
                null
               }
               </ul>
-              <div className="flex">
+              <div className="flex p-2.5 pl-5">
+                <p className="flex-row font-bold text-[#5aadde]">Image</p>
                 <input
                   type="text"
                   name="imageUrl"
                   id="imageUrl"
                   placeholder="Enter image URL"
-                  className="ml-5 m-2.5 pl-5 pr-5 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  // value={imageURL}
+                  className="bg-gray-100 m-2.5 pl-5 pr-5 shadow-md border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white"
                   onChange={handlePostImage}
                 />
                 <label

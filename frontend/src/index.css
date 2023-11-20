@@ -27,6 +27,25 @@ code {
   display: none; /* Safari and Chrome */
 }
 
+/* =====> start of Feed styling <====== */
+.cube{
+  background-color: "gray-100";
+  background-image:url("https://www.transparenttextures.com/patterns/dark-denim-3.png");
+}
+
+#addPost{
+  background-color: "gray-100";
+  background-image:url("https://www.transparenttextures.com/patterns/dark-denim-3.png");
+}
+
+#postContent{
+  resize:'none';
+  
+}
+
+
+/* =====> End of Feed styling <====== */
+
 /* ====> Start of User Info Modal stylng <=== */
 
 /*===> Styles for the modal overlay <===*/

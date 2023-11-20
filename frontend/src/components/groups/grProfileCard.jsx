@@ -19,7 +19,7 @@ return(
             <div className="ml-2">
             <div className="info">Description: {props.theGroup.grpDescr} </div>
             <div className="info">Creator:  {props.theGroup.creator}</div>
-            <div className="info">Members:  {props.theGroup.gpMembers} </div>
+            <div className="info">Members:  {props.theGroup.gpMembers.join(' ')} </div>
             </div>
             
         </div>
