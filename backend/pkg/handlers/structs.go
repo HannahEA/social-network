@@ -143,9 +143,15 @@ type WebsocketMessage struct {
 
 	SendAllGroups SendAllGroups `json:"sendAllGroups"`
 
+	SendGpEvents SendGpEvents `json:"sendGpEvents"`
+
 	OneJoinGroupRequest OneJoinGroupRequest `json:"oneJoinGroupRequest"`
 
 	OfflineJoinGroupRequests OfflineJoinGroupRequests `json:"offlineJoinGroupRequests"`
+
+	OfflineEventsInvites OfflineEventsInvites `json:"offlineEventsInvites"`
+
+	NewEventNotif NewEventNotif `json:"newEventNotif"`
 
 	Type string `json:"type"`
 }
@@ -244,7 +250,8 @@ type NewGroup struct {
 }
 
 // group invite for online members
-// this struct is used for new groups and for when a grup member invites her follower to join a group
+// this struct is used for new groups
+//and for when a grup member invites her follower to join a group
 type NewGroupNotif struct {
 	GrpName       string `json:"grpName"`
 	GrpDescr      string `json:"grpDescr"`
@@ -274,6 +281,7 @@ type RequestAllGroups struct {
 	Type     string `json:"type"`
 }
 
+//send a slice of all groups data to f.e.
 type SendAllGroups struct {
 	Requestor     string     `json:"requestor"`
 	NbGroups      string     `json:"nbGroups"`
@@ -315,4 +323,65 @@ type OneOfflineJoinGroupRequest struct {
 	CreatorLogged string `json:"creatorLogged"`
 	GrpName       string `json:"grpName"`
 	GrpDescr      string `json:"grpDescr"`
+}
+
+//new event notification to all group members
+type NewEventNotif struct {
+	GrpCreator       string     `json:"grpCreator"`
+	EvtDateTime      string     `json:"evtDateTime"`
+	EvtDescr         string     `json:"evtDescr"`
+	ID               int        `json:"id"`
+	EvtName          string     `json:"evtName"`
+	GrpMembers       []string   `json:"grpMembers"`
+	GrpDescr         string     `json:"grpDescr"`
+	GrpID            int        `json:"grpID"`
+	GrpName          string     `json:"grpName"`
+	EvtCreator       string     `json:"evtCreator"`
+	Type             string     `json:"type"`
+	EvtMember        string     `json:"evtMember"`
+	EvtCreatorURL    string     `json:"evtCreatorURL"`
+	EvtCreatorImage  string     `json:"evtCreatorImage"`
+	EvtCreatorLogged string     `json:"evtCreatorLogged"`
+	EvtMemberLogged  string     `json:"evtMemberLogged"`
+	EvtMemberStatus  string     `json:"evtMemberStatus"`
+	NbEvents         string     `json:"nbEvents"`
+	SliceOfEvents    []OneEvent `json:"sliceOfEvents"`
+}
+
+// user requests to join one or more groups, offline groups creators to respond
+type OfflineEventsInvites struct {
+	NumEvtsPending    string          `json:"numEvtsPending"`
+	OfflEventsInvites []NewEventNotif `json:"offlEventsInvites"`
+}
+
+//attend event reply
+type EvtReply struct {
+	EvtName   string `json:"evtName"`
+	EvtMember string `json:"evtMember"`
+	Reply     string `json:"reply"`
+	Type      string `json:"type"`
+}
+
+//data for all events in a group
+//requested when user clicks on group's name
+//on the groupsModal page
+type SendGpEvents struct {
+	Requestor     string     `json:"requestor"`
+	NbEvents      string     `json:"nbEvents"`
+	SliceOfEvents []OneEvent `json:"sliceOfEvents"`
+	Type          string     `json:"type"`
+}
+
+//one event's data
+type OneEvent struct {
+	ID          int    `json:"id"`
+	EvtName     string `json:"evtName"`
+	EvtDescr    string `json:"evtDescr"`
+	EvtCreator  string `json:"evtCreator"`
+	EvtMember   string `json:"evtMember"`
+	EvtDateTime string `json:"evtDateTime"`
+	EvtOption   string `json:"evtOption"`
+	GrpID       int    `json:"grpID"`
+	GrpName     string `json:"grpName"`
+	Type        string `json:"type"`
 }

@@ -15,12 +15,14 @@ import Detail from "./usersInfo/Detail.jsx";
 import Alerts from "./notifications/countAlerts.jsx";
 import Notification from "./notifications/notification.jsx";
 import NewGroupNotification from "./groups/newGroupNotification.jsx";
+import EventNotif from "./groups/eventNotif.jsx";
 import JoinGpReq from "./groups/joinGpReq.jsx"
 import GroupProfile from "./groups/groupProfile.jsx";
-import GrProfileCard from "./groups/grProfileCard.jsx"
+import GrProfileCard from "./groups/grProfileCard.jsx";
+import NewEventProfile from "./groups/newEventProfile.jsx";
+import AllEventsProfiles from "./groups/allEventsProfiles.jsx";
 import { Notyf } from "notyf";
 // import { FunctionsRounded } from "@material-ui/icons";
-
 
 
 //Environment variable from the docker-compose.yml file.
@@ -35,7 +37,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, offlineGroupInvites:{}, sendAllGroups:{}, oneJoinGroupRequest:{}, offlineJoinGroupRequests:{} })
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, newEventNotif:{}, offlineGroupInvites:{}, sendAllGroups:{}, sendGpEvents:{}, oneJoinGroupRequest:{}, offlineJoinGroupRequests:{}, offlineEventsInvites:{}})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
   
@@ -50,19 +52,22 @@ const Feed = () => {
           allData.current.offlineFollowNotif = message.offlineFollowNotif
           allData.current.offlineGroupInvites = message.offlineGroupInvites
           allData.current.offlineJoinGroupRequests = message.offlineJoinGroupRequests
+          allData.current.offlineEventsInvites = message.offlineEventsInvites
 
           //to prevent getting 'undefined' when there are no notifications
           let numFollowPending = parseInt(allData.current.offlineFollowNotif.numFollowPending, 10) || 0;
           let numGroupPending =  parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10) || 0;
           let numJoinGroupPending = parseInt(allData.current.offlineJoinGroupRequests.numGrpsPending, 10) || 0;
+          let numEventsInvites = parseInt(allData.current.offlineEventsInvites.numEvtsPending, 10) || 0;
           //all pending alerts is the sum of the above
-          let allNotifications = numFollowPending + numGroupPending + numJoinGroupPending
+          let allNotifications = numFollowPending + numGroupPending + numJoinGroupPending + numEventsInvites
           console.log("all notifications are: ", allNotifications)
-          //check if there are pending follow notifs or group invites
+          //check if there are pending follow notifs or group invites or join group requests or events invites
           if (allNotifications > 0) {
             console.log("notifications count: ", allData.current.offlineFollowNotif.numFollowPending)
             console.log("new groups count: ", allData.current.offlineGroupInvites.numGrpsPending)
             console.log("new join groups count: ", allData.current.offlineJoinGroupRequests.numGrpsPending)
+            console.log("new events invites count: ",allData.current.offlineEventsInvites.numEvtsPending)
             //if yes, display the red alert
             showRedDot();
             //change corresponding state variables
@@ -75,12 +80,14 @@ const Feed = () => {
             if(numJoinGroupPending > 0){
               setPendingJoinGroups(allData.current.offlineJoinGroupRequests.offlineJoinGrRequests)
             }
+            if(numEventsInvites > 0){
+              setEventsInvites(allData.current.offlineEventsInvites.offlEventsInvites)
+            }
 
           }else{
-           console.log("numPending is zero, Nan or undefined", allData.current.offlineFollowNotif.numPending);
+           console.log("numPending is zero, Nan or undefined", allNotifications);
            hideRedDot();
            let aDiv = document.querySelector("#aCounter");
-           hideRedDot()
            aDiv.style.visibility = "hidden";
           }
           
@@ -137,7 +144,37 @@ const Feed = () => {
           allData.current.newGroupNotif = message.newGroupNotif
           showGroupInvites();
           console.log("newGroupNotif received by member: ", allData.current.newGroupNotif)
-        } else if (message.type == "sendAllGroups"){
+        } else if (message.type == "newEventNotif"){
+          allData.current.newEventNotif = message.newEventNotif
+          setRequestBy(allData.current.newEventNotif.evtMember)
+          setSelectedGroup((prevState) => ({
+            ...prevState,
+            id: allData.current.newEventNotif.grpID,
+            creator: allData.current.newEventNotif.grpCreator,
+            gpMembers: allData.current.newEventNotif.grpMembers,
+            grpDescr: allData.current.newEventNotif.grpDescr,
+            grpName: allData.current.newEventNotif.grpName,
+            type: allData.current.newEventNotif.type
+          })
+          )
+          setEventsInvites(allData.current.newEventNotif.sliceOfEvents)
+          showEventInvites();
+          console.log("newEventNotif received by member: ", allData.current.newEventNotif)
+          //update the 'groupEvents' state variable used in <GroupProfile> component
+            setGroupEvents((prevState) => ({
+             ...prevState,
+             requestor: allData.current.newEventNotif.evtMember,
+             nbEvents: allData.current.newEventNotif.nbEvents,
+             sliceOfEvents: allData.current.newEventNotif.sliceOfEvents,
+             type: allData.current.newEventNotif.type
+            })
+            )
+            //state variable to display events inside <AllEventsProfiles> component
+            setShowEvents(true)
+        
+        }
+        
+        else if (message.type == "sendAllGroups"){
             
             allData.current.sendAllGroups = message.sendAllGroups
           //update the state variable 'setGroupsList'
@@ -151,6 +188,25 @@ const Feed = () => {
             )
           )
             setRequestBy(allData.current.sendAllGroups.requestor) 
+
+        } else if (message.type == "sendGpEvents")  {
+
+          allData.current.sendGpEvents = message.sendGpEvents
+
+          //update the 'groupEvents' state variable
+          setGroupEvents((prevState) => ({
+            ...prevState,
+               requestor: allData.current.sendGpEvents.requestor,
+               nbEvents: allData.current.sendGpEvents.nbEvents,
+               sliceOfEvents: allData.current.sendGpEvents.sliceOfEvents,
+               type: allData.current.sendGpEvents.type
+          })
+          )
+          //requestor is the user's nickName
+          setRequestBy(allData.current.sendGpEvents.requestor)
+          //show events
+          setShowEvents(true)
+         
         }else if (message.type == "oneJoinGroupRequest"){
           //send join group request to group creator
           allData.current.oneJoinGroupRequest = message.oneJoinGroupRequest
@@ -164,14 +220,11 @@ const Feed = () => {
 }  
 })
 
-// const hideRedDot = () => {
-//   setRedDotVisible(false)
-// }
+
   const location = useLocation();
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
   const userInfo = location.state?.userInfo || {}
-  // const offlineFollowNotif = location.state?.offlineFollowNotif || {}
   const [usersList, setUsersList] = useState([]);
   const [isUsersListVisible, setIsUsersListVisible] = useState(false);
   const usersListRef = useRef(null);
@@ -182,16 +235,26 @@ const Feed = () => {
   const [groupsModalVisible, setGroupsModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const[isGroupsVisible, setIsGroupsVisible] = useState(false);
+  const [isEventVisible, setIsEventVisible] = useState(false);
   const [isJoinGroupVisible, setIsJoinGroupVisible] = useState(false);
   const [redDotVisible, setRedDotVisible] = useState(false);
   const[isPendingListVisible, setIsPendingListVisible] = useState(false);
   const[pendingNotif, setPendingNotif] = useState([]);
   const[pendingGroups, setPendingGroups] = useState([]);
   const[pendingJoinGroups, setPendingJoinGroups] = useState([]);
+  const[eventsInvites, setEventsInvites] = useState([]);
+  const [showNewEvt, setShowNewEvt] = useState(false);
+  const [showEvents, setShowEvents] = useState(false);
   const[groupsList, setGroupsList] = useState({
     requestor: "",
     nbGroups: "",
     sliceOfGroups: [],
+    type: ""
+  })
+  const[groupEvents, setGroupEvents] = useState({
+    requestor: "",
+    nbEvents: "",
+    sliceOfEvents: [],
     type: ""
   })
   const [selectedGroup, setSelectedGroup] = useState({
@@ -203,6 +266,7 @@ const Feed = () => {
     type: ""
   });
   const [requestBy, setRequestBy] = useState("");
+  const [newGrpEvt, setNewGrpEvt] = useState({["type"]: "newEvent"}); //used for event notif
   const [greenDotVisible, setGreenDotVisible] = useState(false);
   allData.current.userInfo = userInfo
   // allData.current.offlineFollowNotif = offlineFollowNotif
@@ -220,15 +284,91 @@ const Feed = () => {
   const [imageFile, setImageFile] = useState("");
   const notyf = new Notyf();
 
+  //greeting for logged-in user
+  const greeting = () => {
+    var date = new Date();
+    //date.toLocaleString('en-UK', {hour: 'numierc', minute: 'numeric', hour12: true })
+    console.log("the day time is", date)
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    var good = ampm == 'am' ? 'Good morning' : 'Good afternoon'
+    //const strGreet = good + ' ' + userInfo.firstName + ' , you logged-in at ' + hours + ':' + minutes + ' ' + ampm + ' ';
+    const strGreet = good + ' ' + userInfo.firstName + ' ';
+    return strGreet;
+  }
+
+  console.log("the user info: ======>", userInfo)
+
   // Function to show Notifications for online users
   const showNotification = () => {
     setIsVisible(true);
   };
 
   // Function to show Notifications for online users
+  //provided they are not the group creator
   const showGroupInvites = () => {
-    setIsGroupsVisible(true);
+    if(allData.current.newGroupNotif.creator != allData.current.newGroupNotif.member){
+      setIsGroupsVisible(true);
+    }
+   
   };
+  
+  //function to show events notifications for online participant
+  const showEventInvites = () => {
+    if(allData.current.newEventNotif.evtCreator != allData.current.newEventNotif.evtMember){
+      setIsEventVisible(true);
+    }
+   
+  }
+
+  //function to hide events notifications for online participant
+  //invoked when user klicks the 'go to event' button
+    const hideEventInvites = () => {
+      setIsEventVisible(false);
+    }
+
+   //function to display group profile page for 
+   //offline event participants
+    const handleOpenGpProfile = () => {
+      //change group member state variable
+      setGroupMember(true)
+      //show group profile
+      setGroupProfileVisible(true);
+      //hide offline alerts drop-down
+      togglePendingListVisible()
+    }; 
+
+  //function to set group state variable for offline event participants
+  //and request all group events via ws 
+      const handleSelectGrp = (e) => {
+        console.log("the group data: ", e)
+        setSelectedGroup((prevState) => ({
+          ...prevState,
+          id: e.grpID,
+          creator: e.grpCreator,
+          gpMembers: e.grpMembers,
+          grpDescr: e.grpDescr,
+          grpName: e.grpName,
+          type: e.type
+        })
+        )
+      //request group events through ws
+        const getGpEvents = {
+          grpID: e.grpID,
+          grpName: e.grpName,
+          evtMember: e.evtMember,
+          type: "getGpEvents"
+        }
+        console.log("the group events request sent to the b.e.: ", getGpEvents);
+  
+        websocketRef.current.send(
+          JSON.stringify(getGpEvents)
+        )
+        }
 
   // Function to show join group request notifications for online group creators
   const showJoinGroupRequests = () => {
@@ -773,7 +913,7 @@ const [viewProfile, setViewProfile] = useState(false)
               </div>
             </form>
           </div>
-          <div className="flex items-center static lg:order-2">
+          <div className="flex items-center lg:order-2">
             <button
               type="button"
               data-drawer-toggle="drawer-navigation"
@@ -792,6 +932,7 @@ const [viewProfile, setViewProfile] = useState(false)
             {/* Notifications */}
             <div id="notificationsBell">
             <button
+              // id="aCounter"
               onCick={togglePendingListVisible}
               type="button"
               data-dropdown-toggle="notification-dropdown"
@@ -803,27 +944,25 @@ const [viewProfile, setViewProfile] = useState(false)
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
             </button>
-            {/* {console.log("the numPending :====>",allData)} */}
-            {/* <div className="counter" style={{visibility:`${parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0 ? 'visible' : 'hidden'}`}}> */}
-            <div className="counter" id="aCounter">
+            <div className="counter" id="aCounter" onClick={togglePendingListVisible}>
             <button onClick={togglePendingListVisible} id="offlineNotifBtn">
                        {redDotVisible && (
                       <Alerts 
                         setDotVisible={setRedDotVisible}
                         dotVisible={redDotVisible}
-                        countFollowNotifs={(parseInt(allData.current.offlineFollowNotif.numFollowPending, 10)||0) + (parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10)||0) + (parseInt(allData.current.offlineJoinGroupRequests.numGrpsPending, 10) ||0)}
+                        countFollowNotifs={(parseInt(allData.current.offlineFollowNotif.numFollowPending, 10)||0) + (parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10)||0) + (parseInt(allData.current.offlineJoinGroupRequests.numGrpsPending, 10) ||0) + (parseInt(allData.current.offlineEventsInvites.numEvtsPending, 10) || 0)}
                         pendingFolNotif={allData.current.offlineFollowNotif.pendingFollows}
                         pendingGroupInvites={allData.current.offlineGroupInvites}
                         pendingJoinGroups={allData.current.offlineJoinGroupRequests}
+                        eventsInvites={allData.current.offlineEventsInvites}
                       />
                       )}
             {console.log("follows inside alerts div",allData.current.offlineFollowNotif.numPending)}
             {console.log("group invites inside alerts div",allData.current.offlineGroupInvites)}
             {console.log("join group requests pending: ",allData.current.offlineJoinGroupRequests)}
+            {console.log("events invites inside alerts div", allData.current.offlineEventsInvites)}
             </button>
             </div> 
-         
-
             </div>
           {/* offline dropdown list moved to id="offlineNotif" */}
 
@@ -1003,7 +1142,7 @@ const [viewProfile, setViewProfile] = useState(false)
             >
               <span className="sr-only">Open user menu</span>
               <img
-                className={`w-10 h-10 rounded-full border-2 border-solid border-[#57aada] dark:border-white`}
+                className={`w-10 h-10 rounded-full border-2 border-solid border-gray-300 dark:border-white`}
                 src={userAvatar}
                 alt="user photo"
               />
@@ -1558,7 +1697,7 @@ const [viewProfile, setViewProfile] = useState(false)
                         <path fill="#192f5d" d="M0 0h98.8v70H0z" transform="scale(3.9385)" />
                         <path
                           fill="#fff"
-                          d="M8.2 3l1 2.8HAth8na2Win2L9.7 7.5l.9 2.7-2.4-1.7L6 10.2l.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7L74 8.5l-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 7.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 24.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 21.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 38.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 35.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 52.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 49.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 66.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 63.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9z"
+                          d="M0 10h247v10H0zm0 20h247v10H0zm0 20h247v10H0zm0 20h247v10H0zm0 20h247v10H0zm0 20h247v10H0z"
                           transform="scale(3.9385)"
                         />
                       </g>
@@ -1646,7 +1785,7 @@ const [viewProfile, setViewProfile] = useState(false)
           </div>
         </div>
       </aside>
-      <main className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
+      <main id="session" className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
         <Chat websocketRef={websocketRef} isWebSocketConnected={ isWebSocketConnected} allData={allData}/>
         {viewProfile&& <Profile/>}
         <div></div>
@@ -1659,22 +1798,24 @@ const [viewProfile, setViewProfile] = useState(false)
         </form>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div className="  dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
+          <div className=" cube dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img
               //className="w-16 h-16 mb-2 rounded-full border-2 border-solid border-white-500"
-              className={`w-16 h-16 rounded-full border-2 border-solid border-[#57aada] dark:border-[#f8fafc]`}
+              className={`w-3/4 h-4/5 border-2 border-solid border-gray-300 dark:border-[#f8fafc]`}
               //src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
               src={userAvatar}
               alt="user photo"
+              style={{width:204, height:204 }}
             />
-            <div className="flex justify-center items-center flex-col">
-              <p>Followers: 0</p>
-              <p>Posts: 0</p>
-              <p>Email: {email}</p>
+            <div className="flex justify-center items-center flex-col" onLoad={greeting}>
+            <p className="mt-1 text-md text-[#57aada] dark:text-gray-400"><strong>{greeting()}</strong>🙂</p>
+              {/* <p>Followers: {allData.current.userInfo.followers.join(' ')}</p> */}
+              {/* <p>Posts: 0</p> */}
+              {/* <p>Email: {email}</p> */}
             </div>
           </div>
           {/* Start of new group notification */}
-          <div id="showGroupNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+          <div id="showGroupNotif" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
          {console.log("the state variable of groupVisible: ", isGroupsVisible)}
           {isGroupsVisible && (
           <NewGroupNotification 
@@ -1686,8 +1827,33 @@ const [viewProfile, setViewProfile] = useState(false)
           </div>
         {/* End of new group notification */}
 
+        {/*  Start of event notification */}
+
+        <div id="showEventNotif" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+         {console.log("the state variable of isEventVisible: ", isEventVisible)}
+          {isEventVisible && (
+          <EventNotif
+            close={() => {hideEventInvites()}}
+            setEventVisible={setIsEventVisible}
+            eventVisible={isEventVisible}
+            setGrp={setSelectedGroup}
+            theGroup={selectedGroup}
+            eventData={allData.current.newEventNotif}
+            setGrpMember={setGroupMember}
+            grpMember={groupMember}
+            setGrpProfileVisible={setGroupProfileVisible}
+            grpProfileVisible={isGroupProfileVisible}
+            setEvt={setNewGrpEvt}
+            theEvt={newGrpEvt}
+            eParticipant={requestBy}
+          />
+          )}
+          </div>
+
+        {/* End of event notification */}
+
         {/* Start of join group request notification */}
-          <div id="joinGpReq" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+          <div id="joinGpReq" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
           {console.log("the state variable of isJoinGroupVisible: ", isJoinGroupVisible)}
           {isJoinGroupVisible && (
             <JoinGpReq 
@@ -1702,7 +1868,7 @@ const [viewProfile, setViewProfile] = useState(false)
 
 
         {/* Start of follow notification */}
-          <div id="showNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+          <div id="showNotif" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
           {isVisible && (
           <Notification 
             setIsVisible={setIsVisible}
@@ -1750,7 +1916,13 @@ const [viewProfile, setViewProfile] = useState(false)
         followers={allData.current.followers}
         request={requestBy}
         theGroup={selectedGroup}
-        creator={email}
+        creator={allData.current.userInfo.username}
+        setEvt={setNewGrpEvt}
+        theEvt={newGrpEvt}
+        gEvents={groupEvents}
+        showNewEvt={showNewEvt}
+        setShowNewEvt={setShowNewEvt}
+        showEvents={showEvents}
         >
           {selectedGroup && (
             <GrProfileCard
@@ -1760,12 +1932,11 @@ const [viewProfile, setViewProfile] = useState(false)
           )}
         </GroupProfile>
       )}
-
        {/* End of GroupProfile */}
 
      {/* Start of show groupsModal*/}
           
-      <div id="showGroups" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+      <div id="showGroups" className="cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
     {groupsModalVisible && (console.log("the allData in feed: ", allData.current))}
       {(groupsModalVisible && groupsList && requestBy) && (
         <GroupsModal 
@@ -1779,13 +1950,15 @@ const [viewProfile, setViewProfile] = useState(false)
         creator={email}
         request={requestBy}
         allGroups={groupsList}
+
         >
         </GroupsModal>
       )}
       </div>
       {/* End of show groupsModal */}
+      <div className="cube relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" ></div>
           
-      <div className="relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" id="offlineNotif">
+      <div className="cube relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" id="offlineNotif">
               {/*Start of offline Notifications Dropdown menu */}
       <div
           className={`top-10 overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700 ${isPendingListVisible ? 'visible' : 'hidden'}`}
@@ -1944,14 +2117,13 @@ const [viewProfile, setViewProfile] = useState(false)
                   <div
                     className="block py-2 px-4 text-sm hover:bg-[#7ca3ba] dark:hover:bg-[#7096ac] dark:text-gray-600 dark:hover:text-white dark:bg-[#a5dcfc]"
                   >
-                    {pendingNotif.map((f)=> (
-                      <li key={f.followID}>
+                    {eventsInvites.map((e)=> (
+                      <li key={e.id}>
                        <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
                       <div className="flex-shrink-0">
                       <img
                         className="w-11 h-11 rounded-full"
-                        //src={(f.followerURL).substring(0,3)==="" && (f.followerImage).substring(0.3)==="" ? "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj" :(f.followerURL).substring(0,3)==="htt" ? f.followerURL : f.followerImage}
-                        src={f.followerURL || f.followerImage || "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"}
+                        src={e.evtCreatorURL || e.evtCreatorImage || "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"}
                       alt="eventInvite"
                       />
                       <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 bg-gray-900 rounded-full border border-white dark:border-gray-700">
@@ -1968,14 +2140,13 @@ const [viewProfile, setViewProfile] = useState(false)
                       </div>
                       <div className="pl-3 w-full">
                       <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
-                        <span className="font-semibold text-gray-900 dark:text-white">{f.followerUN} </span>
-                          has invited you to event {f.influencerUN}
+                        <span className="font-semibold text-gray-900 dark:text-white">{e.grpName} </span>
+                          has a new event: <span className="font-semibold text-gray-900 dark:text-white">{e.evtName}</span>
                       </div>
                       </div>
                     </a>
                     <div className="text-xs font-medium text-primary-600 dark:text-primary-500">                  
-                        <a onClick={()=>(handleOfflFollowAccept(f))} style={{cursor: 'pointer'}} class="offlineAccept">Accept</a>
-                        <a onClick={()=>(handleOfflFollowDecline(f))} style={{cursor: 'pointer'}} class="offineDecline"> Decline</a>
+                        <a onClick={()=>(handleSelectGrp(e), handleOpenGpProfile())} style={{cursor: 'pointer'}} class="offlineAccept">View event</a>
                     </div>
                     </li>
                     ))}
@@ -1998,7 +2169,7 @@ const [viewProfile, setViewProfile] = useState(false)
               <span className="flex p-2.5 pl-5">
                 <p className="flex-row mr-5 font-bold text-[#5aadde]">Title</p>
                 <input
-                  className="flex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
+                  className="bg-gray-100 rounded-md lex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
                   type="text"
                   value={Title}
                   onChange={handleTitle}
@@ -2010,7 +2181,7 @@ const [viewProfile, setViewProfile] = useState(false)
                 <input
                   type="text"
                   id="postTags"
-                  className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
+                  className="bg-gray-100 rounded-md flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
                 />
                 <button
                   onClick={addTag}
@@ -2025,7 +2196,7 @@ const [viewProfile, setViewProfile] = useState(false)
               <div className="flex justify-right items-right flex-col">
                 <p className="p-2.5 pl-5 font-bold text-[#5aadde]">Content</p>
                 <textarea
-                  className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none"
+                  className="bg-gray-100 m-5 mt-0 mb-2.5 rounded-md mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none"
                   name="postContent"
                   id="postContent"
                   cols="8"
@@ -2033,6 +2204,7 @@ const [viewProfile, setViewProfile] = useState(false)
                   maxLength="100"
                   value={Content}
                   onChange={handleContent}
+                  style={{width:600+"px", marginLeft:75+"px"}}
                 ></textarea>
               </div>
 
@@ -2065,14 +2237,14 @@ const [viewProfile, setViewProfile] = useState(false)
                null
               }
               </ul>
-              <div className="flex">
+              <div className="flex p-2.5 pl-5">
+                <p className="flex-row font-bold text-[#5aadde]">Image</p>
                 <input
                   type="text"
                   name="imageUrl"
                   id="imageUrl"
                   placeholder="Enter image URL"
-                  className="ml-5 m-2.5 pl-5 pr-5 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  // value={imageURL}
+                  className="bg-gray-100 m-2.5 pl-5 pr-5 shadow-md border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white"
                   onChange={handlePostImage}
                 />
                 <label

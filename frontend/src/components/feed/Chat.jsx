@@ -333,10 +333,10 @@ const RemoveChatNotification = ({username, name}) => {
  return (
     <div>
         <button onClick={handleOpenChat} id="messages" className="fixed items-center text-base
-        transition duration-75 group bg-[#f4b08e] hover:bg-[#f4a279] 
-        shadow-lg dark:text-white dark:hover:bg-[#b68b76] 
-        first-letter:[box-shadow:0_3px_0_0_#f4a279] 
-        [box-shadow:0_3px_0_0_#b68b76]
+        transition duration-75 group bg-gray-500 hover:bg-gray-400 
+        shadow-lg dark:text-white dark:hover:bg-gray-300 
+        first-letter:[box-shadow:0_3px_0_0_gray-100] 
+        [box-shadow:0_3px_0_0_gray-300]
          text-white font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2" > Messages
         <div className="hidden bg-red-300 rounded-lg absolute -top-4 right-2 w-8 h-8 " id="notifIcon">
           <img src="https://www.svgrepo.com/show/533249/message-circle-notification.svg" alt=""  className=" w-5 absolute top-1 right-1"/>
@@ -349,9 +349,9 @@ const RemoveChatNotification = ({username, name}) => {
           <div id="chats" name="chats" className="flex flex-col overflow-scroll">
           
           </div>
-          <input id="chatInput" type="text" onChange={handleChatMessage} value={chatMessage} className=" hidden bottom-4 bg-[#eacfc2] border-none m-2 p-3 w-9/10 h-2" placeholder="Type message.." name="msg" required/>
+          <input id="chatInput" type="text" onChange={handleChatMessage} value={chatMessage} className=" hidden bottom-4 bg-gray-100 border-none m-2 p-3 w-9/10 h-2" placeholder="Type message.." name="msg" required/>
 
-          <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden mb-2 ml-20 w-1/3 bg-[#ecbba3] rounded-lg text-white shadow-md"><strong>Send</strong></button>
+          <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden mb-2 ml-20 w-1/3 bg-gray-400 rounded-lg text-white shadow-md"><strong>Send</strong></button>
 
         </div>
         <aside className="dark:bg-gray-400 flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">

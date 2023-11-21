@@ -27,6 +27,25 @@ code {
   display: none; /* Safari and Chrome */
 }
 
+/* =====> start of Feed styling <====== */
+.cube{
+  background-color: "gray-100";
+  background-image:url("https://www.transparenttextures.com/patterns/dark-denim-3.png");
+}
+
+#addPost{
+  background-color: "gray-100";
+  background-image:url("https://www.transparenttextures.com/patterns/dark-denim-3.png");
+}
+
+#postContent{
+  resize:'none';
+  
+}
+
+
+/* =====> End of Feed styling <====== */
+
 /* ====> Start of User Info Modal stylng <=== */
 
 /*===> Styles for the modal overlay <===*/
@@ -317,7 +336,129 @@ position: relative
   left: 18px;
 }
 
+/* start of event notification */
+
+/* the event appearing inside the group profile immediately after it was created */
+/* the div containing .addEvent */
+#showEvts{
+  margin-top: 10px;
+  /* display:flex; */
+}
+
+/*historical events appearing inside the group profile */
+/* the div containing .addAllEvents */
+#showAllEvts{
+  /* margin-top: 10px; */
+  display:flex;
+  /* background-color: white; */
+}
+
+/* div containing a row of events */
+.event-row{
+  margin-top: 10px;
+  margin-left: 40px;
+  width: auto;
+  display:flex;
+}
+
+
+
+
+/* Event details inside the group profile */
+.addEvt{
+  /* background-color: #d8edfa; */
+  position: relative;
+  /* box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  border-radius: 10px; */
+  overflow: hidden;
+  margin-top:15px;
+  margin-bottom: 20px;
+  margin-left: 5px;
+  width: 1400px;
+  height: 210px;
+  align-content:center;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+/* to style the notification */
+.evtNotification-item {
+  position: relative;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  width: 300px;
+  height: 200px;
+  visibility: hidden;
+  align-content:center;
+  flex-direction: column;
+}
+
+/* event date and time */
+#grpT{
+  position:absolute;
+  top: 120px;
+  left: 18px;
+}
+
+/* event btn ok */
+#btnEventOK{
+  margin-top:10px;
+  margin-left:35px;
+  margin-right:30px;
+  color: white;
+  top: 150px;
+  left: 80px;
+  border-radius: 6px;
+  width: 100px;
+  height: 40px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  flex-direction:column;
+  justify-content:center;
+}
+
+#btnEventOK:hover{
+  background-color: #2f5d78;
+  }
+
+/* event btn decline */
+#btnEventNO{
+  color: white;
+  top: 150px;
+  border-radius: 6px;
+  width: 100px;
+  height: 40px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  flex-direction:column;
+  justify-content:center;
+}
+
+#btnEventNO:hover{
+background-color: #2f5d78;
+}
+
+#btnViewEvent{
+  color: #82cbf5;
+  top: 150px;
+  left: 35px;
+  margin-top: 110px;
+  margin-left: 90px;
+  border-radius: 6px;
+  width: 100px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  justify-content:center;
+}
+
+
+#btnViewEvent:hover{
+  background-color: #4383a8;
+  }
+
+/* end of event notification */
+
 #btnNotifOK{
+  position:absolute;
   color: #5dbaf0;
   top: 150px;
   left: 35px;
@@ -331,6 +472,7 @@ position: relative
   }
 
 #btnNotifNO{
+  position:absolute;
   color: #5dbaf0;
   top: 150px;
   left: 160px;
@@ -378,10 +520,18 @@ background-color: #2f5d78;
     /* start of group profile */
 
     /* addMember contains invite follower, make a post, create event */
-    #addMember{
-      /* position:relative; */
-      /* height: auto;
-      width: auto; */
+    .pTitle{
+      width: 200px;
+    }
+
+    .pContent{
+      width: 250px;
+      height: 27px;
+      resize:none;
+    }
+
+    .pTags{
+      width: 170px;
     }
 
     #joinGpSubmit{
@@ -389,7 +539,7 @@ background-color: #2f5d78;
       align-content: center;
       width: 37%;
       margin: 0 auto;
-      top:25px;
+      top:130px;
       bottom:6px;
     }
 
@@ -398,10 +548,25 @@ background-color: #2f5d78;
       box-shadow: 0 0 10px rgba(0,0,0, 0.3);
       border-radius: 10px;
       overflow: hidden;
+      margin-top:10px;
+      margin-left:50px;
       margin-bottom: 20px;
       width: 300px;
       height: 200px;
-      background-color: #a8daf7;
+      background-color: #d8edfa;
+    }
+
+    .addAllEvents{
+      /* position: relative; */
+      /* justify-content:space-around; */
+      box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      margin-right: 40px;
+      width: 300px;
+      height: 200px;
+      background-color: #d8edfa;
     }
     
 

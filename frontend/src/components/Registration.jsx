@@ -319,6 +319,11 @@ const RegistrationPage = () => {
           <img className="w-8 h-8 mr-2" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg" alt="logo" />
           Social-Network
         </Link>
+        <span>
+        <Link to="/login" className="font-medium text-primary-500 text-2xl hover:underline dark:text-primary-500 absolute right-10 top-0 mt-0 mr-0">
+                Log in
+        </Link>
+        </span>
         <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-3xl max- xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">Create an account</h1>

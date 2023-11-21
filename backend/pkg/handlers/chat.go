@@ -45,13 +45,13 @@ func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r
 			response["status"] = "notification removed"
 		} else {
 			response["status"] = "error removing notification"
-			
+
 		}
 
 	} else {
 		// new chat box has been opened get convoersation id
 		// delete any notifs for this chat from notif table
-		
+
 		conversation := service.repo.FindConversation(chat)
 		//get chat history
 		chats := service.repo.GetChatHistory(conversation)
@@ -82,7 +82,7 @@ func (repo *dbStruct) FindConversation(chat Chat) Conversation {
 	}
 
 	if count == 0 {
-		
+
 		//add conversation to db
 		repo.NewPrivateChatToDB(chat)
 	}
@@ -93,7 +93,6 @@ func (repo *dbStruct) FindConversation(chat Chat) Conversation {
 		fmt.Println("FindConversation: convoID Query Error", err3, chat)
 	}
 
-	
 	var conversationId string
 	for row.Next() {
 		err := row.Scan(&conversationId)
@@ -136,7 +135,6 @@ func (r *dbStruct) GetChatHistory(convo Conversation) []Chat {
 		return chats
 	}
 
-	
 	var chat Chat
 	for row.Next() {
 		err := row.Scan(&chat.ConversationId, &chat.Message, &chat.Sender, &chat.Date)
@@ -165,8 +163,8 @@ func (r *dbStruct) AddChatToDatabase(chat Chat) {
 
 func (r *dbStruct) CheckForNotification(chat Chat) (bool, int, error) {
 	count := 0
-	fmt.Println("checking for notifictations");
-	rows, err := r.db.Query(`SELECT count FROM Notifications WHERE (sender, recipient, type) = (?,?,?) `, chat.Sender, chat.Reciever, "chat")
+	fmt.Println("checking for notifictations")
+	rows, err := r.db.Query(`SELECT count FROM ChatNotifications WHERE (sender, recipient, type) = (?,?,?) `, chat.Sender, chat.Reciever, "chat")
 	if err != nil {
 		log.Println(err)
 		fmt.Println("failed to check Notification count in Database")
