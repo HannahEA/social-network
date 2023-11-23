@@ -61,10 +61,17 @@ const Profile = () => {
   const [isHovering, setIsHovering] = useState(null);//to show follower and follow names
   const [hoverData, setHoverData] = useState([]);
 
+
   //renders user's list of followers and following
   const handleMouseOver = (id, data) => {
     setIsHovering(id);
-    setHoverData(data.join(' '));
+    if (data != null){
+      setHoverData(data.join(' '));
+    } else {
+      let info = "Grow your social network 👫"
+      setHoverData([info])
+    }
+    
 }
 
   const handleMouseOut = () => {
@@ -170,7 +177,7 @@ const Profile = () => {
   
   return (
 
-        <div className="min-h-screen bg-gray-100 dark:bg-[#000000b3] py-8">
+        <div className="min-h-screen bg-gray-100 dark:bg-[#000000b3] py-8" style={{zIndex:998}}>
           <div id="profileCard" className="max-w-md mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
             <div className="flex items-center justify-center mb-4">
               <div className="w-24 h-24 border-gradient border-4 border-gray-300 rounded-[50%] overflow-hidden">
@@ -228,7 +235,11 @@ const Profile = () => {
 
     {isHovering && (
       <div className="absolute top-full left-0">
-        <h2 className="mb-3 text-md text-[#57aada] dark:text-gray-400">{isHovering} {hoverData}</h2>
+      <h2 className="mb-3 text-md text-[#57aada] dark:text-gray-400">
+  {Array.isArray(hoverData) ? hoverData : isHovering + ' ' + hoverData}
+</h2>
+
+
       </div>
     )}
   </div>

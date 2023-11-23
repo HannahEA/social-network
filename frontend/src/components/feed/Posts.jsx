@@ -170,17 +170,17 @@ const Posts = ({sPost, page, username, groupID}) => {
                 </div>
             ))}
             </div>
-            <div id="even" className="float-left w-1/2">
+            <div id="even" className="float-left w-1/2 rounded-md">
               
                 {pData.map((post, index) => (index%2 == 0 && post != {} && (
               
               <div key={post.postId} className="m-2  ">
                 <div>
                 
-                <div className=" cube leftborder border-solid rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800" >
+                <div className=" cube leftborder border-solid border-gray-300 dark:border-gray-700 dark:bg-gray-800 rounded-md" style={{height: 655+"px", width: 805+"px"}}>
                 <div className="cube flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
-                <h2 className="cube text-l text-left dark:text-white m-6">{post.author}</h2>  
-                <h2 className="cube text-l text-right dark:text-white m-6">{post.date}</h2>
+                <h2 className=" text-l text-left dark:text-white m-6">{post.author}</h2>  
+                <h2 className=" text-l text-right dark:text-white m-6">{post.date}</h2>
                 </div>
                 
                 {post.url.length>0 && 
@@ -198,9 +198,9 @@ const Posts = ({sPost, page, username, groupID}) => {
                   <h2 className="text-md m-4 mr-2 dark:text-white">{post.content}</h2>
                 </div>
                 <hr className="w-10/12 m-auto border-gray dark:border-gray-700"/>
-                <div id = "CommentsContainer" className="bg-white dark:bg-gray-800 ">
+                <div id = "CommentsContainer" className="cube bg-white dark:bg-gray-800 ">
                   
-                  <div className="cube flex justify-start items-center">
+                  <div className=" flex justify-start items-center">
                     <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className=" flex items-center text-l font-bold m-4 mb-2 text-blue-400 ">
                       Comments 
                     <svg  aria-hidden="true" value="5" className="w-4 h-4 ml-2 pointer-events-none" fill="black" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -303,7 +303,7 @@ const Comments = ({postID, newComment, page}) => {
   }, [newComment])
   
   return (
-    <div id = {postID} value = {postID} className="cube hidden flex-col justify-center dark:text-white">
+    <div id = {postID} value = {postID} className="hidden flex-col justify-center dark:text-white">
       {cData.length > 0 ? ( cData.map( comment => (
         <div key={comment.commentId} className="flex flex-row ml-4 mb-2"> 
           <div className="flex flex-col">

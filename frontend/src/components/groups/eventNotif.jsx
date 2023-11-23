@@ -14,6 +14,10 @@ function EventNotif ( props ) {
 
   //make the group profile page visible
    const handleOpenGpProfile = () => {
+      //close group modal if open
+      props.viewGpModal(false);
+      //close user info if open
+      props.viewUserInfo();
       props.setGrpMember(true);
       props.setGrpProfileVisible(true);
       props.close()
@@ -77,9 +81,9 @@ function EventNotif ( props ) {
   const formattedDateTime = formatDateTime(props.eventData.evtDateTime);
 
 
-
+// style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 999 }}
     return (
-    <div className="z-999 evtNotification-item text-gray-600 font-normal text-sm mb-1.5 dark:text-gray-400 bg-[#9dd6f7]" style={{visibility:`${props.eventVisible ? 'visible' : 'hidden'}`}}>
+    <div className="evtNotification-item text-gray-600 font-normal text-sm mb-1.5 dark:text-gray-400 bg-[#9dd6f7]" style={{position: "absolute", top: 150, left: 750, zIndex: 999, visibility:`${props.eventVisible ? 'visible' : 'hidden'}`}}>
       <p id="msg">Group <span className="font-semibold text-gray-700 dark:text-white">{props.eventData.grpName} </span>has a new event: </p>
       <br></br>
       <p id="grpN">Name: <span className="m-l-1 font-semibold text-gray-700 dark:text-white">{props.eventData.evtName}</span></p>

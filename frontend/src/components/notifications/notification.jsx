@@ -67,7 +67,7 @@ function Notification ( props ) {
 
     //return isVisible ? (
     return (
-    <div className="notification-item" style={{ backgroundColor: '#9dd6f7', fontWeight:'strong', visibility:`${props.notifVisible ? 'visible' : 'hidden'}`}}>
+    <div className="notification-item" style={{zIndex:998, backgroundColor: '#9dd6f7', fontWeight:'strong', visibility:`${props.notifVisible ? 'visible' : 'hidden'}`}}>
       <p id="msg">{props.message}</p>
       <span>
       <button id="btnNotifOK" className="hover:bg-[#2e5d78]"
