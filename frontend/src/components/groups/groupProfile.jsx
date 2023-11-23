@@ -14,7 +14,6 @@ const notyf = new Notyf(); // Create a single instance of Notyf
 
 
 function GroupProfile({ children, showNewEvt, setShowNewEvt, showEvents, grpMember, onGpClose, followers, request, theGroup, creator, setEvt, theEvt, gEvents }) {
-
 {console.log("the group events inside the GroupProfile component: +++++> ",gEvents)}
 
 // const [newGrpEvt, setNewGrpEvt] = useState({["type"]: "newEvent"});
@@ -314,7 +313,7 @@ const handleGroupInvite = (e) => {
                 />
                 </label>
                 <div className="justify-center flex">
-                <input type="submit" id="newGpSubmit" value="Create event"
+                <input type="submit" id="newEvSubmit" value="Create event"
                   className="cursor-pointer  items-center p-2 w-[calc(35%-1rem)] text-base font-medium text-white 
                   rounded-lg transition duration-75 group bg-[#57aada] dark:bg-[#4e99c4] hover:bg-[#4c97c2] hover:text-[#c2e5f9]
                   shadow-lg dark:text-white dark:hover:bg-[#64afda]

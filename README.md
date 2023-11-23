@@ -31,12 +31,14 @@ sudo apt-get install migrate
 migrate -database sqlite3:///backend/pkg/db/database/database.db -path backend/pkg/db/migrations/database up
 )
 
-# How To Run social-network
+# How To Run 'social-network'
 
-# to run 'social-network' in Docker:
-1. In VSC terminal access 'social-network' root folder and type: 
+# Run 'social-network' in Docker:
+1. To check docker status type: systemctl status docker
+2. In VSC terminal access 'social-network' root folder and type: 
+   systemctl start docker
    sudo docker-compose up
-2. When images have been built and the containers are running,
+3. When images have been built and the containers are running,
    go to browser url address and type: http//localhost:3000
 
 To exit Docker:
@@ -47,9 +49,15 @@ In VSC terminal
 4. To view all containers: sudo docker ps -a
 5. To remove a container type: 
    sudo docker rm container ID e.g. 637a717eb106
+6. To stop docker type: systemctl stop docker
 
-# to run 'social-network' locally type below commands in VSC terminal:
+Troubleshooting:
+1) If get error message: docker-compose-error-internal-booting-buildkit-http-invalid-host-header
+Run command to add user to the docker group: sudo usermod -aG docker $USER
+2) If get Go error message: update the backend dockerfile to pull an updated go image from repository at https://hub.docker.com/_/golang
+resource: https://www.baeldung.com/ops/docker-cannot-connect
 
+# Run 'social-network' locally
 1. In the 'frontend' folder make an '.env' file that contains: 
 REACT_APP_API_URL=http://localhost:8000
 DANGEROUSLY_DISABLE_HOST_CHECK=true
@@ -67,7 +75,6 @@ DANGEROUSLY_DISABLE_HOST_CHECK=true
    npm start
 
 # VSC commands to merge your branch to master:
-
 1. git checkout master
 2. git add . (Necessary if you need to commit changes in your branch first)
 3. git commit -m "your comment here"
@@ -79,20 +86,16 @@ DANGEROUSLY_DISABLE_HOST_CHECK=true
 9. Make a pull request in your Github branch
 
 # To delete the back-end server, in VSC terminal run:
-
 1. To print you PID of process bound on e.g. port 8000:
    8000/tcp
-
 2. To kill port 8000:
    fuser -k 8000/tcp
 
 
 # Getting Started with Create React App
-
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
-
 This will create a brand new react application in the current folder:
 
 ### `npm rm -g create-react-app`

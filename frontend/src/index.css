@@ -59,7 +59,7 @@ code {
   align-items: center;
   justify-content: center;
   background-color: #000000b3; /* Semi-transparent black overlay */
-  z-index: 1000; /* Adjust the z-index as needed */
+  z-index: 998; 
   }
   
   /* Styles for the modal content */
@@ -234,7 +234,13 @@ hr.dottedL{
 
 /* align buttons */
 #newGpSubmit{
-  /* align-content: center; */
+  position:absolute;
+  top:250px;
+  left:125px;
+}
+
+/* align new Event button */
+#newEvSubmit{
   top:250px;
   left:165px;
 }
@@ -267,6 +273,7 @@ hr.dottedL{
     position:absolute;
     top: 5px;
     left: 10px;
+    z-index: 999;
   }
 
     /* ====> End of notifications popup <====== */
@@ -316,6 +323,7 @@ position: relative
   width: 300px;
   height: 200px;
   visibility: hidden;
+  z-index: 999;
 }
 
 #msg{
@@ -383,7 +391,6 @@ position: relative
 
 /* to style the notification */
 .evtNotification-item {
-  position: relative;
   box-shadow: 0 0 10px rgba(0,0,0, 0.3);
   border-radius: 10px;
   overflow: hidden;
@@ -393,6 +400,7 @@ position: relative
   visibility: hidden;
   align-content:center;
   flex-direction: column;
+  z-index: 999;
 }
 
 /* event date and time */

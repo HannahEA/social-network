@@ -200,8 +200,8 @@ console.log("the request inside 'GroupsModal': ",request)
     console.log("printing outside of the component 'gpList' to be sent to the b.e.:++++++++>", gpList);
       
       return (
-        <div id="modalOverly" className="modal-overlay" onClick={handleOverlayClick}>
-          <div id="modalContainerOuter">
+        <div id="modalOverly" className="z-5 modal-overlay" onClick={handleOverlayClick}>
+          <div id="modalContainerOuter" style={{height:770+"px", width:400+"px"}}>
           <div id="modalContainer" className="bg-[#a8daf7] relative top-1 x-2 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(60%-1rem)] gpsModal-content dark:bg-[#81b7d7]">
             <button className="hover:bg-[#7acaf8] hover:text-gray-200 hover:shadow-gray-400 dark:hover:bg-[#65c3f9] shadow-md z-50 pb-3 pt-3 modal-close dark:text-white ml-60 pr-3 pl-3 font-bold bg-[#c7e6f8] dark:bg-[#57aada]  text-[#57aada] rounded-md" onClick={() => {onClose()}}>
               Close

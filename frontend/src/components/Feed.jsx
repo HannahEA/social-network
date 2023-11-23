@@ -317,9 +317,9 @@ const Feed = () => {
    
   };
   
-  //function to show events notifications for online participant
+  //function to show events notifications for online participant //removed: && selectedGroup.id != allData.current.newEventNotif.grpID
   const showEventInvites = () => {
-    if(allData.current.newEventNotif.evtCreator != allData.current.newEventNotif.evtMember){
+    if(allData.current.newEventNotif.evtCreator != allData.current.newEventNotif.evtMember  && isGroupProfileVisible == false ){
       setIsEventVisible(true);
     }
    
@@ -387,7 +387,9 @@ const Feed = () => {
 
     //Toggle visibility of the list of pending notifications
 const togglePendingListVisible = () => {
-  setIsPendingListVisible(!isPendingListVisible);
+  //hide user profile if visible
+  setViewProfile(false);
+  setIsPendingListVisible(! isPendingListVisible);
 }
 
 const handleOfflFollowAccept = (f) => {
@@ -652,9 +654,11 @@ const handleClickUsersList = () => {
 
 const [viewProfile, setViewProfile] = useState(false)
   const openProfile = () => {
-   
+    //show or hide user profile when clicking button
+    setViewProfile(! viewProfile)
 
-    setViewProfile(true) 
+    //have removed the below as it cleared the feed page
+    /*setViewProfile(true) 
     let main = document.querySelector('main')
     let length = main.children.length
 
@@ -666,7 +670,7 @@ const [viewProfile, setViewProfile] = useState(false)
         let child = main.childNodes[2]
         child.remove()
       } 
-    }
+    }*/
   }
 
 
@@ -1834,6 +1838,8 @@ const [viewProfile, setViewProfile] = useState(false)
           {isEventVisible && (
           <EventNotif
             close={() => {hideEventInvites()}}
+            viewGpModal={setGroupsModalVisible}
+            viewUserInfo={() => {handleCloseModal()}}
             setEventVisible={setIsEventVisible}
             eventVisible={isEventVisible}
             setGrp={setSelectedGroup}
