@@ -27,6 +27,16 @@ code {
   display: none; /* Safari and Chrome */
 }
 
+
+/* =====> Start of Home styling <====== */
+
+.Learn{
+ display:block;
+}
+
+
+/* =====> End of Home styling <====== */
+
 /* =====> start of Feed styling <====== */
 .cube{
   background-color: "gray-100";
