@@ -113,6 +113,9 @@ const Feed = () => {
           allData.current.presences = message.presences
           AddUserToChatList({type: message.type, allData: allData.current})
         }else if (message.type == "chat") {
+          //change current user state variable
+          console.log("the message includes sender?", message)
+          setRequestBy(message.sender)
           console.log("chat recieved", message)
           //check which chat is open in the chatbox by checking the chats div name which should be the converstion id
           let chatId = document.getElementById('chats').getAttribute('name')
@@ -1165,7 +1168,7 @@ const [viewProfile, setViewProfile] = useState(false)
             // 'ref' makes a link to the element that contains the list of users.
             // Together with conditional css styling it ensures that the element is altered independently
             ref={usersListRef}
-              className={`users-list absolute top-[430px] right-4 z-50 my-4 w-56 text-base list-none bg-[#a5dcfc] rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 ${isUsersListVisible ? 'visible' : 'hidden'}`}
+              className={`users-list absolute top-[290px] right-4 z-50 my-4 w-56 text-base list-none bg-[#a5dcfc] rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 ${isUsersListVisible ? 'visible' : 'hidden'}`}
               id="dropdownUsers"
             >
               <ul className="py-0 text-gray-700 dark:text-gray-200">
@@ -1380,7 +1383,8 @@ const [viewProfile, setViewProfile] = useState(false)
         </div>
       </aside>
       <main id="session" className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
-        <Chat websocketRef={websocketRef} isWebSocketConnected={ isWebSocketConnected} allData={allData}/>
+      {console.log("allData inputted to <Chat>PPPPPPPPPPPPPPPPPP>>>>>>>>>", allData)}
+        <Chat websocketRef={websocketRef} isWebSocketConnected={ isWebSocketConnected} allData={allData} who={requestBy}/>
         {viewProfile&& <Profile/>}
         <div></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">

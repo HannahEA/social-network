@@ -133,8 +133,8 @@ const EditToUserList = ({allData}) => {
   
 }
   
- 
-
+// original function by Hannah
+/*
 const PrintNewChat = ({chat}) => {
   
   let chats = document.getElementById("chats")
@@ -154,6 +154,38 @@ const PrintNewChat = ({chat}) => {
   }
   
   
+}*/
+
+//including chat formatting by Helena
+const PrintNewChat = ({chat, who}) => {
+  //let theUser = allData.userInfo.username
+  console.log("chat from PrintNewChat", chat)
+  console.log("who inside PrintNewChat", who)
+  let chats = document.getElementById("chats")
+  let newChat = document.createElement('div')
+  let name = document.createElement("p")
+  if (chats.classList.contains('hidden') == false ) {
+    let nameval = chat.username
+    //if chat is by logged-on user
+  if (nameval == "Jackie") {
+    newChat.classList.add("sender", "flex", "flex-col")
+  }else{
+    //if chat is by any other user
+    newChat.classList.add("recipient", "flex", "flex-col", "flex-end")
+  }
+  let message = document.createElement("p")
+    message.classList.add('text-sm', 'font-bold', 'ml-2')
+    message.innerHTML = chat.message
+    name = document.createElement("p")
+    name.classList.add('cName', 'font-bold', 'text-sm')
+    name.innerHTML = nameval
+
+    newChat.append(message)
+    newChat.append(name)
+    chats.append(newChat)
+
+  }
+   
 }
 
 const RequestChatNotification = ({chat}) => {
@@ -270,7 +302,7 @@ const RemoveChatNotification = ({username, name}) => {
   } )
 }
 
- const Chat = ({websocketRef, isWebSocketConnected, allData}) => {
+ const Chat = ({websocketRef, isWebSocketConnected, allData, who}) => {
      // ---------CHAT FUNCTIONS--------------------
  const [chatMessage, setChatMessage] = useState("")
  
@@ -293,7 +325,8 @@ const RemoveChatNotification = ({username, name}) => {
    setChatMessage(event.target.value)
  }
 
- const sendChatMessage = () => {
+//  Original function by Hannah
+/* const sendChatMessage = () => {
    console.log("...sending chat", chatMessage)
    if (websocketRef.current && isWebSocketConnected) {
     let chats = document.getElementById("chats")
@@ -317,7 +350,7 @@ const RemoveChatNotification = ({username, name}) => {
        name.innerHTML = allData.current.userInfo.username
        name.classList.add('font-bold', 'text-sm', 'ml-2')
        let message = document.createElement("p")
-       message.classList.add('text-sm', 'ml-4')
+       message.classList.add('text-sm', 'ml-2')
        message.innerHTML = chatMessage
        chat.classList.add("flex", "flex-row")
        chat.append(name)
@@ -327,7 +360,43 @@ const RemoveChatNotification = ({username, name}) => {
  
    } 
   
- }
+ }*/
+
+//  Including chat formatting by Helena
+const sendChatMessage = () => {
+  console.log("...sending chat", chatMessage)
+  if (websocketRef.current && isWebSocketConnected) {
+   let chats = document.getElementById("chats")
+   console.log(allData.current.conversation, "converation")
+    websocketRef.current.send(
+      JSON.stringify({
+        message: chatMessage,
+        type: "chat",
+        username: allData.current.userInfo.username,
+        reciever: allData.current.conversation.reciever,
+        chatID: chats.getAttribute("name")
+         
+      })
+    )
+      console.log("chat message sent")
+
+      
+      let chat = document.createElement('div')
+      chat.classList.add("sender", "flex", "flex-col")
+      let message = document.createElement("p")
+      message.classList.add('text-sm', 'font-bold', 'ml-2')
+      message.innerHTML = chatMessage
+      let name = document.createElement("p")
+      name.innerHTML = allData.current.userInfo.username
+      name.classList.add('cName', 'font-bold', 'text-sm')
+      chat.append(message)
+      chat.append(name)
+      chats.append(chat)
+      setChatMessage("")
+
+  } 
+ 
+}
  
  
  return (
@@ -342,7 +411,7 @@ const RemoveChatNotification = ({username, name}) => {
           <img src="https://www.svgrepo.com/show/533249/message-circle-notification.svg" alt=""  className=" w-5 absolute top-1 right-1"/>
         </div>
         </button>
-        <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 w-96 bg-white dark:bg-gray-300" id="chatOpen">
+        <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 bg-white dark:bg-gray-300" id="chatOpen" style={{width:400+"px"}}>
         
         <div id = "chatContainer" className="flex flex-col justify-end align-center w-2/3 overflow-scroll dark:bg-gray-400 ">
           
