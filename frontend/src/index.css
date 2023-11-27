@@ -617,7 +617,7 @@ messages-content {
 .sender {
   color: #fff;
   text-align: left;
-  background: linear-gradient(120deg, #d8edfa, #6fd5f1);
+  background: linear-gradient(120deg, #e4e5e6, #bebebe);
   border-radius: 10px 10px 0 10px;
   width: max-content;
   padding: 5px;

@@ -137,7 +137,7 @@ func (r *dbStruct) GetChatHistory(convo Conversation) []Chat {
 
 	var chat Chat
 	for row.Next() {
-		err := row.Scan(&chat.ConversationId, &chat.Message, &chat.Sender, &chat.Date)
+		err := row.Scan(&chat.ConversationId, &chat.Message, &chat.Sender,  &chat.Date)
 		if err != nil {
 			fmt.Println("FindConversation: Scan Error", err, convo)
 			return chats
@@ -186,7 +186,7 @@ func (r *dbStruct) AddChatNotification(chat Chat, count int) {
 	if count == 0 {
 		fmt.Println("Adding new notification to database")
 		count++
-		_, err := r.db.Exec("INSERT INTO Notifications (sender, recipient, type, count) VALUES (?, ?, ?, ?)", chat.Sender, chat.Reciever, "chat", count)
+		_, err := r.db.Exec("INSERT INTO ChatNotifications (sender, recipient, type, count) VALUES (?, ?, ?, ?)", chat.Sender, chat.Reciever, "chat", count)
 		if err != nil {
 			log.Println(err)
 			fmt.Println("failed to add Notification to Database")
@@ -194,7 +194,7 @@ func (r *dbStruct) AddChatNotification(chat Chat, count int) {
 	} else {
 		fmt.Println("Icreasing count on chat notification")
 		count++
-		_, err := r.db.Exec("UPDATE Notifications SET count = ? WHERE (sender, recipient) = (?,?)", count, chat.Sender, chat.Reciever)
+		_, err := r.db.Exec("UPDATE ChatNotifications SET count = ? WHERE (sender, recipient) = (?,?)", count, chat.Sender, chat.Reciever)
 		if err != nil {
 			log.Println(err)
 			fmt.Println("failed to change count of  Notification in Database")
@@ -205,7 +205,7 @@ func (r *dbStruct) AddChatNotification(chat Chat, count int) {
 
 func (repo *dbStruct) DeleteChatNotifDB(chat Chat) (int64, error) {
 	// Prepare the SQL statement to delete the cookie value from the Sessions table
-	stmt, err := repo.db.Prepare("DELETE FROM Notifications WHERE type = ? AND sender = ? AND recipient = ?")
+	stmt, err := repo.db.Prepare("DELETE FROM ChatNotifications WHERE type = ? AND sender = ? AND recipient = ?")
 	if err != nil {
 		fmt.Println("err with deleting cookie from db:", err)
 		return 0, err

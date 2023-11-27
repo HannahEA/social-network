@@ -118,12 +118,12 @@ const Feed = () => {
           setRequestBy(message.sender)
           console.log("chat recieved", message)
           //check which chat is open in the chatbox by checking the chats div name which should be the converstion id
-          let chatId = document.getElementById('chats').getAttribute('name')
-          console.log(chatId, " chatId")
-          if (message.chat.chatID == chatId) {
+          let chatOpen= document.getElementById('chatOpen').style.display
+          // console.log(chatId, " chatId")
+          if (chatOpen== "flex") {
             console.log("printing chat")
             // if the converstion id of the chat matches the open chat, then print the chat
-            PrintNewChat({chat: message.chat})
+            PrintNewChat({chat: message.chat, who: allData.current.userInfo.username})
           } else {
             // post request- add chat notification to db server side
             RequestChatNotification({chat: message.chat})
@@ -1384,7 +1384,7 @@ const [viewProfile, setViewProfile] = useState(false)
       </aside>
       <main id="session" className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
       {console.log("allData inputted to <Chat>PPPPPPPPPPPPPPPPPP>>>>>>>>>", allData)}
-        <Chat websocketRef={websocketRef} isWebSocketConnected={ isWebSocketConnected} allData={allData} who={requestBy}/>
+        <Chat websocketRef={websocketRef} isWebSocketConnected={ isWebSocketConnected} allData={allData}/>
         {viewProfile&& <Profile/>}
         <div></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">

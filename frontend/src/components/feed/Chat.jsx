@@ -51,7 +51,7 @@ const AddUserToChatList = ({type, allData})=>  {
       //print chat history 
       if (convo.chats) {
         convo.chats.forEach((chat) => {
-        PrintNewChat({chat: chat})
+        PrintNewChat({chat: chat, who: name})
         })
       }
       
@@ -160,14 +160,14 @@ const PrintNewChat = ({chat}) => {
 const PrintNewChat = ({chat, who}) => {
   //let theUser = allData.userInfo.username
   console.log("chat from PrintNewChat", chat)
-  console.log("who inside PrintNewChat", who)
   let chats = document.getElementById("chats")
   let newChat = document.createElement('div')
   let name = document.createElement("p")
   if (chats.classList.contains('hidden') == false ) {
     let nameval = chat.username
     //if chat is by logged-on user
-  if (nameval == "Jackie") {
+    //chat.reciever
+  if (nameval == who) {
     newChat.classList.add("sender", "flex", "flex-col")
   }else{
     //if chat is by any other user
@@ -254,6 +254,7 @@ const ChangeChatNotification = ({usernames}) => {
 
 
 const RemoveChatNotification = ({username, name}) => {
+  console.log("receiver, username and name inside RemoveChatNotification", username, name)
   
   let users = document.getElementById("offline")
   for (let i = 0; i<2 ; i++) {
@@ -302,7 +303,7 @@ const RemoveChatNotification = ({username, name}) => {
   } )
 }
 
- const Chat = ({websocketRef, isWebSocketConnected, allData, who}) => {
+ const Chat = ({websocketRef, isWebSocketConnected, allData}) => {
      // ---------CHAT FUNCTIONS--------------------
  const [chatMessage, setChatMessage] = useState("")
  
@@ -424,7 +425,7 @@ const sendChatMessage = () => {
 
         </div>
         <aside className="dark:bg-gray-400 flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
-        <div id="online"></div>
+        <div id="online" className="dark:bg-gray-500 rounded-md "></div>
         <div id= "offline"></div>
         </aside>
       </div>
