@@ -51,7 +51,7 @@ const AddUserToChatList = ({type, allData})=>  {
       //print chat history 
       if (convo.chats) {
         convo.chats.forEach((chat) => {
-        PrintNewChat({chat: chat})
+        PrintNewChat({chat: chat, who: name})
         })
       }
       
@@ -133,28 +133,62 @@ const EditToUserList = ({allData}) => {
   
 }
   
- 
-
-const PrintNewChat = ({chat}) => {
+// original function by Hannah & Helena's styling
+const PrintNewChat = ({chat, who}) => {
   
   let chats = document.getElementById("chats")
   let newChat = document.createElement('div')
   let name = document.createElement("p")
   if (chats.classList.contains('hidden') == false ) {
-    let nameval = chat.username
-    name.innerHTML = nameval
-    name.classList.add('font-bold', 'text-sm', 'ml-2','dark:text-white')
+  let nameval = chat.username
+  if (nameval == who) {
+      newChat.classList.add("sender", "flex", "flex-col")
+  }else{
+     //if chat is by any other user
+      newChat.classList.add("recipient", "flex", "flex-col", "flex-end")
+  }
     let message = document.createElement("p")
-    message.classList.add('text-sm', 'ml-4', 'dark:text-white')
+    message.classList.add('text-sm', 'font-bold', 'ml-2')
     message.innerHTML = chat.message
-    newChat.classList.add("flex", "flex-row")
-    newChat.append(name)
+    name = document.createElement("p")
+    name.classList.add('cName', 'font-bold', 'text-sm')
+    name.innerHTML = nameval
     newChat.append(message)
+    newChat.append(name)
     chats.append(newChat)
   }
-  
-  
 }
+
+//including chat formatting by Helena
+/*const PrintNewChat = ({chat, who}) => {
+  //let theUser = allData.userInfo.username
+  console.log("chat from PrintNewChat", chat)
+  let chats = document.getElementById("chats")
+  let newChat = document.createElement('div')
+  let name = document.createElement("p")
+  if (chats.classList.contains('hidden') == false ) {
+    let nameval = chat.username
+    //if chat is by logged-on user
+  if (nameval == who) {
+    newChat.classList.add("sender", "flex", "flex-col")
+  }else{
+    //if chat is by any other user
+    newChat.classList.add("recipient", "flex", "flex-col", "flex-end")
+  }
+  let message = document.createElement("p")
+    message.classList.add('text-sm', 'font-bold', 'ml-2')
+    message.innerHTML = chat.message
+    name = document.createElement("p")
+    name.classList.add('cName', 'font-bold', 'text-sm')
+    name.innerHTML = nameval
+
+    newChat.append(message)
+    newChat.append(name)
+    chats.append(newChat)
+
+  }
+   
+}*/
 
 const RequestChatNotification = ({chat}) => {
   console.log("adding chat Notification")
@@ -222,6 +256,7 @@ const ChangeChatNotification = ({usernames}) => {
 
 
 const RemoveChatNotification = ({username, name}) => {
+  console.log("receiver, username and name inside RemoveChatNotification", username, name)
   
   let users = document.getElementById("offline")
   for (let i = 0; i<2 ; i++) {
@@ -293,6 +328,7 @@ const RemoveChatNotification = ({username, name}) => {
    setChatMessage(event.target.value)
  }
 
+//  Original function by Hannah & Helena's styling
  const sendChatMessage = () => {
    console.log("...sending chat", chatMessage)
    if (websocketRef.current && isWebSocketConnected) {
@@ -312,22 +348,57 @@ const RemoveChatNotification = ({username, name}) => {
 
        
        let chat = document.createElement('div')
-       let name = document.createElement("p")
-       
-       name.innerHTML = allData.current.userInfo.username
-       name.classList.add('font-bold', 'text-sm', 'ml-2')
+       chat.classList.add("sender", "flex", "flex-col")
        let message = document.createElement("p")
-       message.classList.add('text-sm', 'ml-4')
+       message.classList.add('text-sm', 'font-bold', 'ml-2')
        message.innerHTML = chatMessage
-       chat.classList.add("flex", "flex-row")
-       chat.append(name)
+       let name = document.createElement("p")
+       name.innerHTML = allData.current.userInfo.username
+       name.classList.add('cName', 'font-bold', 'text-sm')
        chat.append(message)
+       chat.append(name)
        chats.append(chat)
        setChatMessage("")
  
    } 
   
  }
+
+//  Including chat formatting by Helena
+/*const sendChatMessage = () => {
+  console.log("...sending chat", chatMessage)
+  if (websocketRef.current && isWebSocketConnected) {
+   let chats = document.getElementById("chats")
+   console.log(allData.current.conversation, "converation")
+    websocketRef.current.send(
+      JSON.stringify({
+        message: chatMessage,
+        type: "chat",
+        username: allData.current.userInfo.username,
+        reciever: allData.current.conversation.reciever,
+        chatID: chats.getAttribute("name")
+         
+      })
+    )
+      console.log("chat message sent")
+
+      
+      let chat = document.createElement('div')
+      chat.classList.add("sender", "flex", "flex-col")
+      let message = document.createElement("p")
+      message.classList.add('text-sm', 'font-bold', 'ml-2')
+      message.innerHTML = chatMessage
+      let name = document.createElement("p")
+      name.innerHTML = allData.current.userInfo.username
+      name.classList.add('cName', 'font-bold', 'text-sm')
+      chat.append(message)
+      chat.append(name)
+      chats.append(chat)
+      setChatMessage("")
+
+  } 
+ 
+}*/
  
  
  return (
@@ -342,7 +413,7 @@ const RemoveChatNotification = ({username, name}) => {
           <img src="https://www.svgrepo.com/show/533249/message-circle-notification.svg" alt=""  className=" w-5 absolute top-1 right-1"/>
         </div>
         </button>
-        <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 w-96 bg-white dark:bg-gray-300" id="chatOpen">
+        <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 bg-white dark:bg-gray-300" id="chatOpen" style={{width:400+"px"}}>
         
         <div id = "chatContainer" className="flex flex-col justify-end align-center w-2/3 overflow-scroll dark:bg-gray-400 ">
           
@@ -355,7 +426,7 @@ const RemoveChatNotification = ({username, name}) => {
 
         </div>
         <aside className="dark:bg-gray-400 flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
-        <div id="online"></div>
+        <div id="online" className="dark:bg-gray-500 rounded-md "></div>
         <div id= "offline"></div>
         </aside>
       </div>

@@ -137,10 +137,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			//ws - new connection pointer
 			reciever[ws] = user.NickName
 
-			//pending follow requests moved to login.go
-
-			// //get user's pending follow requests
-			// fmt.Println("The offline requests are for influencer: ", user.NickName)
+			//pending follow requests moved to login.goconsole.log(chatId, " chatId")
 			countPending, slicePending := service.repo.GetPendingFollowRequests(user.NickName)
 
 			//instantiate the OfflineFollowNotif struct to be sent via ws

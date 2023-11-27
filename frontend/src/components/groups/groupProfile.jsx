@@ -168,8 +168,8 @@ const handleGroupInvite = (e) => {
 
 
   return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
-     <div className="dark:bg-gray-600 w-3/4 bg-white p-4 m-6 position-relative overflow-auto max-h-screen min-h-min min-w-fit"> 
+    <div className="modal-overlay" onClick={handleOverlayClick} style={{zIndex:998}}>
+     <div className="dark:bg-gray-600 w-3/4 bg-gray-100 p-4 m-6 position-relative overflow-auto max-h-screen min-h-min min-w-fit"> 
         
         <button className="modal-close text-gray-500 dark:text-white" onClick={() => {onGpClose()}} classn="ml-60  pl-5 pr-5 font-bold bg-[#00cec9] text-[#255f5a] rounded-md">
           Close

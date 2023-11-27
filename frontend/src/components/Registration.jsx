@@ -320,7 +320,7 @@ const RegistrationPage = () => {
           Social-Network
         </Link>
         <span>
-        <Link to="/login" className="font-medium text-primary-500 text-2xl hover:underline dark:text-primary-500 absolute right-10 top-0 mt-0 mr-0">
+        <Link to="/login" className="font-medium text-gray-600 text-2xl hover:underline dark:text-primary-500 absolute right-10 top-0 mt-0 mr-0">
                 Log in
         </Link>
         </span>

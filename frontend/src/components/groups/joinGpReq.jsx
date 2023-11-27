@@ -56,7 +56,7 @@ function JoinGpReq ( props ) {
   };
 
     return (
-    <div className="notification-item text-gray-600 font-normal text-sm mb-1.5 dark:text-gray-400 bg-[#9dd6f7]" style={{zIndex:998, visibility:`${props.joinGrVisible ? 'visible' : 'hidden'}`}}>
+    <div className="notification-item text-gray-600 font-normal text-sm mb-1.5 dark:text-gray-400 bg-[#9dd6f7]" style={{zIndex:999, visibility:`${props.joinGrVisible ? 'visible' : 'hidden'}`}}>
       <br></br>
       <br></br>
       <br></br>

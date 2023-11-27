@@ -27,6 +27,16 @@ code {
   display: none; /* Safari and Chrome */
 }
 
+
+/* =====> Start of Home styling <====== */
+
+.Learn{
+ display:block;
+}
+
+
+/* =====> End of Home styling <====== */
+
 /* =====> start of Feed styling <====== */
 .cube{
   background-color: "gray-100";
@@ -579,3 +589,60 @@ background-color: #2f5d78;
     
 
     /* end of group profile */
+
+/* ======> Start of Chat messages <======== */
+/* this is the chat container */
+messages-content {
+  display: flex;
+  flex-direction: column;
+  height: 322px;
+  overflow-y: scroll;
+  clear: both;
+  FONT-VARIANT: JIS04;
+  border-radius: 10px 10px 10px 0;
+  background: rgba(0, 0, 0, 0.3);
+  font-size: 0.4em;
+  line-height: 1.2;
+  position: relative;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+  margin-right: 0;
+  padding-right: -4%;
+  padding-left: 1%;
+  width: 98%;
+  padding-top: 12%;
+  padding-bottom: 9%;
+}
+
+/* logged-in user's chat message */
+.sender {
+  color: #fff;
+  text-align: left;
+  background: linear-gradient(120deg, #e4e5e6, #bebebe);
+  border-radius: 10px 10px 0 10px;
+  width: max-content;
+  padding: 5px;
+  margin-bottom: 5px;
+  font-size: 1.8em;
+}
+
+/*follower's chat message */
+.recipient {
+  width: max-content;
+  margin-left: auto;  /* align the left edge to the right (push to the right) */
+  color: #fff;
+  text-align: left;
+  background: linear-gradient(120deg, #d8edfa, #6fd5f1);
+  border-radius: 10px 10px 10px 0;
+  margin-bottom: 5px;
+  padding: 5px;
+  font-size: 1.8em;
+}
+
+/* chat message author*/
+.cName {
+  font-size: 0.40em;
+  padding-left: 8px;
+}
+
+
+/* ======> End of Chat messages <======== */

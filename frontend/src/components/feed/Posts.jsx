@@ -119,7 +119,7 @@ const Posts = ({sPost, page, username, groupID}) => {
       <div className="">
         {pData ? 
           <div className="">
-            <div id="odd" className="cube float-left w-1/2">
+            <div id="odd" className="mt-2 cube rounded-md float-left w-1/2">
             {pData.map((post, index) => 
               (index%2 > 0 && post != {} &&
                 <div key={post.postId} className="m-2 ">
@@ -184,7 +184,7 @@ const Posts = ({sPost, page, username, groupID}) => {
                 </div>
                 
                 {post.url.length>0 && 
-                  <img src={post.url} alt="" className="cube h-72 m-auto justify-center text-center xl:h-96"/>}
+                  <img src={post.url} alt="" className="cube rounded-md h-72 m-auto justify-center text-center xl:h-96"/>}
 {/* ==============> Start post image file <==================== */}
                 {post.file.length>0 && 
                   <img src={post.file} alt="" className="h-72 m-auto justify-center text-center xl:h-96"/>}
