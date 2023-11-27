@@ -591,27 +591,6 @@ background-color: #2f5d78;
     /* end of group profile */
 
 /* ======> Start of Chat messages <======== */
-/* this is the chat container */
-messages-content {
-  display: flex;
-  flex-direction: column;
-  height: 322px;
-  overflow-y: scroll;
-  clear: both;
-  FONT-VARIANT: JIS04;
-  border-radius: 10px 10px 10px 0;
-  background: rgba(0, 0, 0, 0.3);
-  font-size: 0.4em;
-  line-height: 1.2;
-  position: relative;
-  text-shadow: 0 1px 1px rgb(0 0 0 / 20%);
-  margin-right: 0;
-  padding-right: -4%;
-  padding-left: 1%;
-  width: 98%;
-  padding-top: 12%;
-  padding-bottom: 9%;
-}
 
 /* logged-in user's chat message */
 .sender {
