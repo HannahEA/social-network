@@ -140,10 +140,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			//ws - new connection pointer
 			reciever[ws] = user.NickName
 
-			//pending follow requests moved to login.go
-
-			// //get user's pending follow requests
-			// fmt.Println("The offline requests are for influencer: ", user.NickName)
+			//pending follow requests moved to login.goconsole.log(chatId, " chatId")
 			countPending, slicePending := service.repo.GetPendingFollowRequests(user.NickName)
 
 			//instantiate the OfflineFollowNotif struct to be sent via ws
@@ -172,11 +169,21 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				OfflineJoinGrRequests: sliceJoinReq,
 			}
 
+			//get user's pending event invites
+			countEvtInvites, sliceEventInvites := service.repo.GetPendingEventInvites(user.NickName)
+
+			//instantiate the NewEventNotif struct to be sent to f.e.
+			var offlineEventsInvites = OfflineEventsInvites{
+				NumEvtsPending:    countEvtInvites,
+				OfflEventsInvites: sliceEventInvites,
+			}
+
 			webMessage := WebsocketMessage{
 				Presences:                presences,
 				OfflineFollowNotif:       offlineFollowNotif,
 				OfflineGroupInvites:      offlineGroupInvites,
 				OfflineJoinGroupRequests: offlineJoinGroupRequests,
+				OfflineEventsInvites:     offlineEventsInvites,
 				Type:                     "connect",
 			}
 
@@ -408,7 +415,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 
 		case "newGroup":
 			var newGp NewGroup
-			status := "memberPending"
 
 			//populate the NewGroup struct
 			jsonErr := json.Unmarshal(b, &newGp)
@@ -427,7 +433,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			//insert group members into the GroupMembers table
 			for i := 0; i < len(newGp.GpMembers); i++ {
 
-				err = service.repo.InsertGrpMember(newGp, i, status)
+				err = service.repo.InsertGrpMember(newGp, i)
 				if err != nil {
 					fmt.Println("error inserting grpMember: ", newGp.GpMembers[i])
 				}
@@ -482,7 +488,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			} //end of inserting new group members in the GroupMembers table
 
 		case "joinGroupReply":
-
+			//reply to creator's invite
 			var joinGrpReply JoinGroupReply
 
 			//populate the JoinGroupReply struct
@@ -570,6 +576,42 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{SendAllGroups: sendAllGps, Type: sendAllGps.Type}, Connections: reciever})
 				}
 			}
+
+		//start of get all group events
+		case "getGpEvents":
+			//this is a request to send all group's events
+			var sGpEvents SendGpEvents
+			var oEvent OneEvent
+
+			jsonErr := json.Unmarshal(b, &oEvent)
+			if jsonErr != nil {
+				fmt.Println("error unmarshalling getGpEvents: ", jsonErr)
+			}
+
+			evtCount, evtSlice := service.repo.GetOneGroupEvents(oEvent.EvtMember, oEvent.GrpID, oEvent.GrpName)
+
+			//populate the SendGpEvents struct
+			sGpEvents.Requestor = oEvent.EvtMember
+			sGpEvents.NbEvents = evtCount
+			sGpEvents.SliceOfEvents = evtSlice
+			sGpEvents.Type = "sendGpEvents"
+
+			fmt.Println("the SendGpEvents data sent to f.e. ===>", sGpEvents)
+
+			//send group events to front end
+			online := false
+			fmt.Println("Printing to get rid of the error", online)
+			reciever := make(map[*websocket.Conn]string)
+			//find member's channel
+			for conn, client := range Clients {
+				if client == sGpEvents.Requestor {
+					reciever[conn] = client
+					online = true
+					service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{SendGpEvents: sGpEvents, Type: sGpEvents.Type}, Connections: reciever})
+				}
+			}
+
+		//end of get all group events
 
 		case "allJoinGrRequests":
 			//user requests group creator for permission to join group
@@ -702,6 +744,100 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				fmt.Println("Entering the new group offline branch")
 				//new group member is off-line
 				//offline countAlerts are sent from case: "connect"
+			}
+
+		case "newEvent":
+			var newEv NewEventNotif
+			status := "participantPending"
+
+			//populate the newEv struct with f.e. data
+			jsonErr := json.Unmarshal(b, &newEv)
+
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: newEv")
+			}
+			//insert new event data in the 'Events' table
+			eID, err := service.repo.InsertNewEvent(newEv)
+			if err != nil {
+				fmt.Println("error inserting new gp data", err)
+			}
+
+			newEv.ID = eID
+
+			fmt.Println("newEv:", newEv)
+
+			//insert event members into the EventsParticipants table
+			for i := 0; i < len(newEv.GrpMembers); i++ {
+				if newEv.GrpMembers[i] == "" {
+					continue
+				}
+
+				err = service.repo.InsertEvtMember(newEv, i, status)
+				if err != nil {
+					fmt.Println("error inserting evtMember: ", newEv.GrpMembers[i])
+				}
+
+				//return new event notification information
+				newEvNotif, err1 := service.repo.CheckEvParticipantOnline(newEv.EvtName, newEv.EvtDescr, newEv.ID, newEv.GrpMembers[i], newEv.EvtCreator, newEv.GrpID)
+				if err1 != nil {
+					fmt.Println("error returning newEvNotif data: ", err1)
+				}
+
+				//add missing info to the newEvNotif struct
+				//the type is: newEventNotif
+				newEvNotif.EvtDateTime = newEv.EvtDateTime
+				newEvNotif.GrpCreator = newEv.GrpCreator
+				newEvNotif.GrpDescr = newEv.GrpDescr
+				newEvNotif.GrpName = newEv.GrpName
+				newEvNotif.GrpMembers = newEv.GrpMembers
+
+				//return group's events
+				evtCount, evtSlice := service.repo.GetOneGroupEvents(newEv.GrpMembers[i], newEv.GrpID, newEv.GrpName)
+
+				//add group events slice to newEvNotif struct
+				newEvNotif.NbEvents = evtCount
+				newEvNotif.SliceOfEvents = evtSlice
+
+				fmt.Println("The new event notification sent to f.e.: ", newEvNotif)
+
+				//check if the event participant is online and send notification
+				if newEvNotif.EvtMemberStatus == "participantPending" && newEvNotif.EvtMemberLogged == "Yes" {
+					//send new group notification to member
+					online := false
+					fmt.Println("Printing to get rid of the error", online)
+					reciever := make(map[*websocket.Conn]string)
+					//find member's channel
+					for conn, client := range Clients {
+						if client == newEvNotif.EvtMember {
+							reciever[conn] = client
+							online = true
+							service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{NewEventNotif: newEvNotif, Type: newEvNotif.Type}, Connections: reciever})
+						}
+					}
+				} else if newEvNotif.EvtMemberStatus == "participantPending" && newEvNotif.EvtMemberLogged == "No" {
+					fmt.Println("Entering the new event offline branch")
+					//new event participant is off-line
+					//offline countAlerts are sent from case: "connect"
+				}
+
+			} //end of inserting new event participants in the EventsParticipants table
+
+		case "attendEventReply":
+			var evReply EvtReply
+
+			//populate the newEv struct with f.e. data
+			jsonErr := json.Unmarshal(b, &evReply)
+
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: attendEventReply")
+			}
+
+			fmt.Println("the event reply from f.e. is =====>", evReply)
+
+			err := service.repo.InsertEventPartReply(evReply)
+			if err != nil {
+				fmt.Println("error inserting event participant's reply: ", err)
+
 			}
 
 		} //end of 'switch for message type'
@@ -1045,8 +1181,9 @@ func (repo *dbStruct) InsertNewGroup(g NewGroup) (int, error) {
 
 }
 
-// Populate new group's GroupMembers table
-func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int, status string) error {
+//Populate new group's GroupMembers table
+func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int) error {
+	var status string
 	//retrieve creator's user name
 	creator, err := repo.GetUserByEmail(newGp.Creator)
 	if err != nil {
@@ -1062,6 +1199,15 @@ func (repo *dbStruct) InsertGrpMember(newGp NewGroup, i int, status string) erro
 		fmt.Println("error preparing statement to insert group members", err)
 		return err
 	}
+
+	//group creator is automatically a group member
+	if newGp.GpMembers[i] == creatorUN {
+		status = "Yes"
+	} else {
+		status = "memberPending"
+	}
+
+	fmt.Println("the index, gpMember and status are: ", i, newGp.GpMembers[i], status)
 
 	_, err = stmt.Exec(newGp.ID, creatorUN, newGp.GpMembers[i], status)
 	if err != nil {
@@ -1091,8 +1237,8 @@ func (repo *dbStruct) InsertJoinRequest(joinReq OneJoinGroupRequest, status stri
 	return nil
 }
 
-// check if a user is online or offline,
-// used for group and event notifications
+//check if a user is online or offline,
+//used for group notifications
 func (repo *dbStruct) CheckUserOnline(grNm string, grDescr string, grId int, user string, creator string) (NewGroupNotif, error) {
 	//instantiate the NewGroupNotif struct
 	var newGpNotif NewGroupNotif
@@ -1260,10 +1406,11 @@ func (repo *dbStruct) GetExistingGroups() (string, []NewGroup) {
 		oneGr.Type = "arrayOfGroups"
 
 		//for each group, build an array of group members from the 'GroupMembers' table
+		//I restrict the query to members that have already joined
 		query2 := `
-				SELECT member FROM GroupMembers WHERE grpID = ?
+				SELECT member FROM GroupMembers WHERE grpID = ? and status = ?
 		`
-		rows2, err2 := repo.db.Query(query2, oneGr.ID)
+		rows2, err2 := repo.db.Query(query2, oneGr.ID, "Yes")
 		if err2 != nil {
 			fmt.Println("GetExistingGroups error querying the list of group members: ", err2)
 			return "0", allGroups
@@ -1508,4 +1655,295 @@ func (repo *dbStruct) GetGroupFromGroupName(groupName string) (NewGroup, error) 
 	group.ID = id
 	group.GpMembers = members
 	return group, nil
+}
+//populate the Events table
+func (repo *dbStruct) InsertNewEvent(e NewEventNotif) (int, error) {
+	fmt.Printf("from inside the InsertNewEvent the TYPE of grpID = %T", e.GrpID)
+	//populate the db table 'Events'
+	stmnt, err := repo.db.Prepare("INSERT OR IGNORE INTO Events (groupID, groupName, organizer, title, description, day_time) VALUES (?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		fmt.Println("Error preparing insert stmt for new event: ", err)
+		return 0, err
+	}
+	_, err = stmnt.Exec(e.GrpID, e.GrpName, e.EvtCreator, e.EvtName, e.EvtDescr, e.EvtDateTime)
+	if err != nil {
+		fmt.Println("Error inserting new event into DB: ", err)
+		return 0, err
+	}
+
+	//return the auto-generated 'eventID'
+	rows, err := repo.db.Query("SELECT seq FROM sqlite_sequence WHERE name = 'Events'")
+	if err != nil {
+		fmt.Println("Error returning 'new event id'", err)
+		return 0, err
+	}
+	for rows.Next() {
+		err := rows.Scan(&e.ID)
+		if err != nil {
+			fmt.Println("event ID sqlite_sequence: row scan error", err)
+			return 0, err
+		}
+	}
+	return e.ID, nil
+
+}
+
+//Populate new event's EventsParticipants table
+func (repo *dbStruct) InsertEvtMember(newEv NewEventNotif, i int, status string) error {
+	fmt.Printf("from inside the InsertEvtMember the TYPE of eventID = %T", newEv.ID)
+
+	//prepare the query
+	stmt, err := repo.db.Prepare("INSERT OR IGNORE into EventsParticipants (eventID, groupID, organizer, participant, option) values(?, ?, ?, ?, ?)")
+	if err != nil {
+		fmt.Println("error preparing statement to insert event participants", err)
+		return err
+	}
+
+	_, err = stmt.Exec(newEv.ID, newEv.GrpID, newEv.EvtCreator, newEv.GrpMembers[i], status)
+	if err != nil {
+		fmt.Println("error inserting event participant", err)
+		return err
+	}
+
+	return nil
+}
+
+//check if a user is online or offline,
+//used for event notifications
+func (repo *dbStruct) CheckEvParticipantOnline(EvtName string, EvtDescr string, ID int, gMember string, EvtCreator string, GrpID int) (NewEventNotif, error) {
+	//instantiate the NewGroupNotif struct
+	var newEvNotif NewEventNotif
+
+	//return 'loggedIn' value for event participant
+	err1 := repo.db.QueryRow("SELECT loggedIn from Users where nickName = ?", gMember).Scan(&newEvNotif.EvtMemberLogged)
+	if err1 != nil {
+		fmt.Println("error returning loggedIn data", err1)
+		return newEvNotif, err1
+	}
+
+	//return 'member status' value for member
+	err2 := repo.db.QueryRow("SELECT option from EventsParticipants where participant = ? AND eventID = ? ", gMember, ID).Scan(&newEvNotif.EvtMemberStatus)
+	if err2 != nil {
+		fmt.Println("error returning participant status data", err2)
+		return newEvNotif, err2
+	}
+
+	//return avatar URL and image for creator
+	err3 := repo.db.QueryRow("SELECT avatarURL, imageFile, loggedIn from Users where nickName = ?", EvtCreator).Scan(&newEvNotif.EvtCreatorURL, &newEvNotif.EvtCreatorImage, &newEvNotif.EvtCreatorLogged)
+	if err3 != nil {
+		fmt.Println("error returning URL, image, logged in for EvtCreator: ", err3)
+		return newEvNotif, err3
+	}
+
+	newEvNotif.EvtCreator = EvtCreator
+	newEvNotif.EvtMember = gMember
+	newEvNotif.EvtName = EvtName
+	newEvNotif.EvtDescr = EvtDescr
+	newEvNotif.GrpID = GrpID
+	newEvNotif.Type = "newEventNotif"
+
+	return newEvNotif, nil
+
+}
+
+//event invites sent to offline users
+//also used to populate event's group profile when visible
+func (repo *dbStruct) GetPendingEventInvites(member string) (string, []NewEventNotif) {
+	var ePending []NewEventNotif
+	var eCount string
+	var aMember string
+	var gpMembers []string
+
+	fmt.Println("From inside GetPendingEventInvites, the user name is: ", member)
+
+	var oneGroupPending NewEventNotif
+	//populate all 'oneGroupPending' fields
+
+	//first, returns avatar from 'Users' and participant info from 'EventsMembers' table
+	query := `
+			SELECT U.avatarURL, U.imageFile, E.eventID, E.groupID, E.organizer, E.participant, E.option
+			FROM Users U
+			INNER JOIN EventsParticipants E ON U.nickName = E.organizer
+			WHERE E.participant = ? AND E.option = 'participantPending' AND U.nickName != E.participant
+		`
+	rows, err := repo.db.Query(query, member)
+	if err != nil {
+		fmt.Println("error querying pending event invites for offline participant", err)
+		return "", ePending
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+
+		err := rows.Scan(&oneGroupPending.EvtCreatorURL, &oneGroupPending.EvtCreatorImage, &oneGroupPending.ID, &oneGroupPending.GrpID, &oneGroupPending.EvtCreator, &oneGroupPending.EvtMember, &oneGroupPending.EvtMemberStatus)
+		if err != nil {
+			fmt.Println("GetPendingEventsRequests for offline user scan Error", err, oneGroupPending)
+			return "", ePending
+		}
+
+		//Then get event name, evt description, evt date and time
+		err3 := repo.db.QueryRow("SELECT groupID, groupName, title, description, day_time from Events where eventID = ?", oneGroupPending.ID).Scan(&oneGroupPending.GrpID, &oneGroupPending.GrpName, &oneGroupPending.EvtName, &oneGroupPending.EvtDescr, &oneGroupPending.EvtDateTime)
+		if err3 != nil {
+			fmt.Println("error returning event details: ", err3)
+			return "", ePending
+		}
+
+		//Next get group creator, group name and description
+		err4 := repo.db.QueryRow("SELECT creator, title, description from Groups where groupID = ?", oneGroupPending.GrpID).Scan(&oneGroupPending.GrpCreator, &oneGroupPending.GrpName, &oneGroupPending.GrpDescr)
+		if err4 != nil {
+			fmt.Println("error returning group creator description and gpMembers: ", err4)
+			return "", ePending
+		}
+
+		//make array of group members from the 'GroupMembers' table.
+		//Only members that have already joined are included
+		query2 := `
+				SELECT member FROM GroupMembers WHERE grpID = ? and status = ?
+		`
+		rows2, err5 := repo.db.Query(query2, oneGroupPending.GrpID, "Yes")
+		if err5 != nil {
+			fmt.Println("GetPendingEventInvites error querying the list of group members: ", err5)
+			return "", ePending
+		}
+
+		defer rows2.Close()
+
+		for rows2.Next() {
+			err3 := rows2.Scan(&aMember)
+			if err3 != nil {
+				fmt.Println("GetPendingEventInvites error scanning one group member: ", err3)
+				return "", ePending
+			}
+
+			gpMembers = append(gpMembers, aMember)
+		}
+
+		//populate the oneGroupPending struct with the slice of gp members
+		oneGroupPending.GrpMembers = gpMembers
+		fmt.Print("group's members are: ", oneGroupPending.GrpMembers)
+
+		//populate remaining fields for oneGroupPending struct
+		oneGroupPending.EvtMemberLogged = "No"
+		oneGroupPending.Type = "connect"
+
+		fmt.Println("One pending new event for offline user: ", oneGroupPending)
+
+		//add oneGroupPending to slice of pending events
+		ePending = append(ePending, oneGroupPending)
+
+		fmt.Println("Slice of pending events invites for offline user", ePending)
+		oneGroupPending = NewEventNotif{}
+
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return "", ePending
+	}
+
+	eCount = strconv.Itoa(len(ePending))
+
+	return eCount, ePending
+}
+
+//insert the event participant's reply into EventParticipants table
+func (repo *dbStruct) InsertEventPartReply(evReply EvtReply) error {
+	fmt.Println("the eventReply data received from f.e.: ", evReply)
+
+	//retrieve event id from Events table
+	var evId int
+	err3 := repo.db.QueryRow("SELECT eventID from Events where title = ?", evReply.EvtName).Scan(&evId)
+	if err3 != nil {
+		fmt.Println("error retrieving event id: ", err3)
+		return err3
+	}
+
+	fmt.Println("the event id where we add event reply to db:", evId)
+
+	//if member wishes to attend turn option field in EventsParticipants table into "going"
+	if evReply.Reply == "going" {
+		_, err := repo.db.Exec("UPDATE EventsParticipants SET option = ? WHERE eventID = ? AND participant = ?", evReply.Reply, evId, evReply.EvtMember)
+		if err != nil {
+			fmt.Println("error inserting attend event reply", err)
+			return err
+		}
+	} else if evReply.Reply == "not going" {
+		//If member does not wish to attend delete his record from EventsParticipants table
+		fmt.Println("Member declined")
+		stmnt, err := repo.db.Prepare("DELETE FROM EventsParticipants WHERE eventID = ? AND participant = ?")
+		if err != nil {
+			fmt.Println("error preparing the delete statement to remove participant that declined to attend event", err)
+			return err
+		}
+		fmt.Println("after prepare delete request")
+		_, err = stmnt.Exec(evId, evReply.EvtMember)
+		if err != nil {
+			fmt.Println("error deleting record from EventsParticipants")
+			return err
+		}
+	}
+	return nil
+
+}
+
+//get all events for one group
+func (repo *dbStruct) GetOneGroupEvents(EvtMember string, GrpID int, GrpName string) (string, []OneEvent) {
+	var eSlice []OneEvent
+	var eCount string
+
+	fmt.Println("the inputs to GetOneGroupEvents are ------------->>", EvtMember, GrpID, GrpName)
+
+	//returns option and event ID from 'EventsMembers' table
+	query := `
+			SELECT DISTINCT eventID, option FROM EventsParticipants WHERE groupID = ? AND participant= ?
+		`
+	rows, err := repo.db.Query(query, GrpID, EvtMember)
+	if err != nil {
+		fmt.Println("error querying pending evt option and evt ID for one group", err)
+		return "", eSlice
+	}
+
+	defer rows.Close()
+
+	//========
+
+	// Create a map to track unique event IDs
+	// uniqueEventIDs := make(map[int]bool)
+
+	for rows.Next() {
+		var oneEv OneEvent // Initialize oneEv here, inside the loop
+
+		err := rows.Scan(&oneEv.ID, &oneEv.EvtOption)
+		if err != nil {
+			fmt.Println("GetOneGroupEvents scan Error", err, oneEv)
+			return "", eSlice
+		}
+
+		err4 := repo.db.QueryRow("SELECT organizer, title, description, day_time from Events where eventID = ?", oneEv.ID).Scan(&oneEv.EvtCreator, &oneEv.EvtName, &oneEv.EvtDescr, &oneEv.EvtDateTime)
+		if err4 != nil {
+			fmt.Println("error querying event details: ", err4)
+		}
+
+		fmt.Println("One event data: ", oneEv)
+
+		oneEv.EvtMember = EvtMember
+		oneEv.GrpName = GrpName
+		oneEv.GrpID = GrpID
+		oneEv.Type = "sendGpEvents"
+		eSlice = append(eSlice, oneEv)
+
+		fmt.Println("Slice of events for one group", eSlice)
+		oneEv = OneEvent{}
+
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return "", eSlice
+	}
+
+	eCount = strconv.Itoa(len(eSlice))
+
+	return eCount, eSlice
 }

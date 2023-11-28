@@ -27,6 +27,35 @@ code {
   display: none; /* Safari and Chrome */
 }
 
+
+/* =====> Start of Home styling <====== */
+
+.Learn{
+ display:block;
+}
+
+
+/* =====> End of Home styling <====== */
+
+/* =====> start of Feed styling <====== */
+.cube{
+  background-color: "gray-100";
+  background-image:url("https://www.transparenttextures.com/patterns/dark-denim-3.png");
+}
+
+#addPost{
+  background-color: "gray-100";
+  background-image:url("https://www.transparenttextures.com/patterns/dark-denim-3.png");
+}
+
+#postContent{
+  resize:'none';
+  
+}
+
+
+/* =====> End of Feed styling <====== */
+
 /* ====> Start of User Info Modal stylng <=== */
 
 /*===> Styles for the modal overlay <===*/
@@ -40,12 +69,12 @@ code {
   align-items: center;
   justify-content: center;
   background-color: #000000b3; /* Semi-transparent black overlay */
-  z-index: 1000; /* Adjust the z-index as needed */
+  z-index: 998; 
   }
   
   /* Styles for the modal content */
   #modalContainerOuter {
-    width: 400px;
+    width: 750px;
     border-radius: 8px;
     overflow: hidden;
   }
@@ -53,6 +82,7 @@ code {
   /* Styles for the modal content */
   #modalContainer {
     height: 700px;
+    width: 500px;
     border-radius: 8px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
     padding: 16px;
@@ -214,14 +244,21 @@ hr.dottedL{
 
 /* align buttons */
 #newGpSubmit{
+  position:absolute;
   top:250px;
-  left:115px;
+  left:125px;
 }
 
-#joinGpSubmit{
+/* align new Event button */
+#newEvSubmit{
+  top:250px;
+  left:165px;
+}
+
+/* #joinGpSubmit{
   bottom:4px;
   left:115px;
-}
+} */
 
 .addToGroup{
   color:#4b93bd;
@@ -246,6 +283,7 @@ hr.dottedL{
     position:absolute;
     top: 5px;
     left: 10px;
+    z-index: 999;
   }
 
     /* ====> End of notifications popup <====== */
@@ -280,10 +318,9 @@ position: relative
   display: flex;
   align-items: center;
   justify-content: center;
-  position: absolute;
   margin-top: 4px;
   margin-right: 10px;
-  left: 11px;
+  margin-left: 5px;
 }
 
 /* to style the notification */
@@ -296,6 +333,7 @@ position: relative
   width: 300px;
   height: 200px;
   visibility: hidden;
+  z-index: 999;
 }
 
 #msg{
@@ -316,9 +354,130 @@ position: relative
   left: 18px;
 }
 
-#btnNotifOK{
-  position: absolute;
+/* start of event notification */
+
+/* the event appearing inside the group profile immediately after it was created */
+/* the div containing .addEvent */
+#showEvts{
+  margin-top: 10px;
+  /* display:flex; */
+}
+
+/*historical events appearing inside the group profile */
+/* the div containing .addAllEvents */
+#showAllEvts{
+  /* margin-top: 10px; */
+  display:flex;
+  /* background-color: white; */
+}
+
+/* div containing a row of events */
+.event-row{
+  margin-top: 10px;
+  margin-left: 40px;
+  width: auto;
+  display:flex;
+}
+
+
+
+
+/* Event details inside the group profile */
+.addEvt{
+  /* background-color: #d8edfa; */
+  position: relative;
+  /* box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  border-radius: 10px; */
+  overflow: hidden;
+  margin-top:15px;
+  margin-bottom: 20px;
+  margin-left: 5px;
+  width: 1400px;
+  height: 210px;
+  align-content:center;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+/* to style the notification */
+.evtNotification-item {
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  width: 300px;
+  height: 200px;
+  visibility: hidden;
+  align-content:center;
+  flex-direction: column;
+  z-index: 999;
+}
+
+/* event date and time */
+#grpT{
+  position:absolute;
+  top: 120px;
+  left: 18px;
+}
+
+/* event btn ok */
+#btnEventOK{
+  margin-top:10px;
+  margin-left:35px;
+  margin-right:30px;
   color: white;
+  top: 150px;
+  left: 80px;
+  border-radius: 6px;
+  width: 100px;
+  height: 40px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  flex-direction:column;
+  justify-content:center;
+}
+
+#btnEventOK:hover{
+  background-color: #2f5d78;
+  }
+
+/* event btn decline */
+#btnEventNO{
+  color: white;
+  top: 150px;
+  border-radius: 6px;
+  width: 100px;
+  height: 40px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  flex-direction:column;
+  justify-content:center;
+}
+
+#btnEventNO:hover{
+background-color: #2f5d78;
+}
+
+#btnViewEvent{
+  color: #82cbf5;
+  top: 150px;
+  left: 35px;
+  margin-top: 110px;
+  margin-left: 90px;
+  border-radius: 6px;
+  width: 100px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+  justify-content:center;
+}
+
+
+#btnViewEvent:hover{
+  background-color: #4383a8;
+  }
+
+/* end of event notification */
+
+#btnNotifOK{
+  position:absolute;
+  color: #5dbaf0;
   top: 150px;
   left: 35px;
   border-radius: 6px;
@@ -331,8 +490,8 @@ position: relative
   }
 
 #btnNotifNO{
-  position: absolute;
-  color: white;
+  position:absolute;
+  color: #5dbaf0;
   top: 150px;
   left: 160px;
   border-radius: 6px;
@@ -379,19 +538,111 @@ background-color: #2f5d78;
     /* start of group profile */
 
     /* addMember contains invite follower, make a post, create event */
-    #addMember{
-      /* position:relative; */
-      /* height: auto;
-      width: auto; */
+    .pTitle{
+      width: 200px;
+    }
+
+    .pContent{
+      width: 250px;
+      height: 27px;
+      resize:none;
+    }
+
+    .pTags{
+      width: 170px;
     }
 
     #joinGpSubmit{
       position: relative;
+      align-content: center;
       width: 37%;
       margin: 0 auto;
-      top:25px;
-      left:72px;
-      bottom: 4px;
+      top:130px;
+      bottom:6px;
     }
 
+    .addEvent{
+      /* position: relative; */
+      box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top:10px;
+      margin-left:50px;
+      margin-bottom: 20px;
+      width: 300px;
+      height: 200px;
+      background-color: #d8edfa;
+    }
+
+    .addAllEvents{
+      /* position: relative; */
+      /* justify-content:space-around; */
+      box-shadow: 0 0 10px rgba(0,0,0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      margin-right: 40px;
+      width: 300px;
+      height: 200px;
+      background-color: #d8edfa;
+    }
+    
+
     /* end of group profile */
+
+/* ======> Start of Chat messages <======== */
+/* this is the chat container */
+messages-content {
+  display: flex;
+  flex-direction: column;
+  height: 322px;
+  overflow-y: scroll;
+  clear: both;
+  FONT-VARIANT: JIS04;
+  border-radius: 10px 10px 10px 0;
+  background: rgba(0, 0, 0, 0.3);
+  font-size: 0.4em;
+  line-height: 1.2;
+  position: relative;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+  margin-right: 0;
+  padding-right: -4%;
+  padding-left: 1%;
+  width: 98%;
+  padding-top: 12%;
+  padding-bottom: 9%;
+}
+
+/* logged-in user's chat message */
+.sender {
+  color: #fff;
+  text-align: left;
+  background: linear-gradient(120deg, #e4e5e6, #bebebe);
+  border-radius: 10px 10px 0 10px;
+  width: max-content;
+  padding: 5px;
+  margin-bottom: 5px;
+  font-size: 1.8em;
+}
+
+/*follower's chat message */
+.recipient {
+  width: max-content;
+  margin-left: auto;  /* align the left edge to the right (push to the right) */
+  color: #fff;
+  text-align: left;
+  background: linear-gradient(120deg, #d8edfa, #6fd5f1);
+  border-radius: 10px 10px 10px 0;
+  margin-bottom: 5px;
+  padding: 5px;
+  font-size: 1.8em;
+}
+
+/* chat message author*/
+.cName {
+  font-size: 0.40em;
+  padding-left: 8px;
+}
+
+
+/* ======> End of Chat messages <======== */

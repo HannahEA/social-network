@@ -57,7 +57,7 @@ function NewGroupNotification ( props ) {
 
     //return isVisible ? (
     return (
-    <div className="z-999 notification-item text-gray-600 font-normal text-sm mb-1.5 dark:text-gray-400 bg-[#9dd6f7]" style={{visibility:`${props.grNotifVisible ? 'visible' : 'hidden'}`}}>
+    <div className="notification-item text-gray-600 font-normal text-sm mb-1.5 dark:text-gray-400 bg-[#9dd6f7]" style={{zIndex:999, visibility:`${props.grNotifVisible ? 'visible' : 'hidden'}`}}>
       <p id="msg"><span className="font-semibold text-gray-700 dark:text-white">{props.groupData.creator} </span>has invited you to join the group: </p>
       <br></br>
       <br></br>

@@ -15,12 +15,14 @@ import Detail from "./usersInfo/Detail.jsx";
 import Alerts from "./notifications/countAlerts.jsx";
 import Notification from "./notifications/notification.jsx";
 import NewGroupNotification from "./groups/newGroupNotification.jsx";
+import EventNotif from "./groups/eventNotif.jsx";
 import JoinGpReq from "./groups/joinGpReq.jsx"
 import GroupProfile from "./groups/groupProfile.jsx";
-import GrProfileCard from "./groups/grProfileCard.jsx"
+import GrProfileCard from "./groups/grProfileCard.jsx";
+import NewEventProfile from "./groups/newEventProfile.jsx";
+import AllEventsProfiles from "./groups/allEventsProfiles.jsx";
 import { Notyf } from "notyf";
 // import { FunctionsRounded } from "@material-ui/icons";
-
 
 
 //Environment variable from the docker-compose.yml file.
@@ -35,7 +37,7 @@ const Feed = () => {
   const { websocketRef, isWebSocketConnected} = useWebSocket();
   //const{isWebSocketConnected} = useWebSocket()
   //the different kinds of websocket messages
-  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, offlineGroupInvites:{}, sendAllGroups:{}, oneJoinGroupRequest:{}, offlineJoinGroupRequests:{} })
+  const allData = useRef({userInfo: {}, chats:[], presences:[], followNotif:{}, followReply:{}, offlineFollowNotif:{}, newGroupNotif:{}, newEventNotif:{}, offlineGroupInvites:{}, sendAllGroups:{}, sendGpEvents:{}, oneJoinGroupRequest:{}, offlineJoinGroupRequests:{}, offlineEventsInvites:{}})
   // const [chatData, setChatData] = useState({chats:[], presences:[]})
   useEffect( () => {
   
@@ -50,19 +52,22 @@ const Feed = () => {
           allData.current.offlineFollowNotif = message.offlineFollowNotif
           allData.current.offlineGroupInvites = message.offlineGroupInvites
           allData.current.offlineJoinGroupRequests = message.offlineJoinGroupRequests
+          allData.current.offlineEventsInvites = message.offlineEventsInvites
 
           //to prevent getting 'undefined' when there are no notifications
           let numFollowPending = parseInt(allData.current.offlineFollowNotif.numFollowPending, 10) || 0;
           let numGroupPending =  parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10) || 0;
           let numJoinGroupPending = parseInt(allData.current.offlineJoinGroupRequests.numGrpsPending, 10) || 0;
+          let numEventsInvites = parseInt(allData.current.offlineEventsInvites.numEvtsPending, 10) || 0;
           //all pending alerts is the sum of the above
-          let allNotifications = numFollowPending + numGroupPending + numJoinGroupPending
+          let allNotifications = numFollowPending + numGroupPending + numJoinGroupPending + numEventsInvites
           console.log("all notifications are: ", allNotifications)
-          //check if there are pending follow notifs or group invites
+          //check if there are pending follow notifs or group invites or join group requests or events invites
           if (allNotifications > 0) {
             console.log("notifications count: ", allData.current.offlineFollowNotif.numFollowPending)
             console.log("new groups count: ", allData.current.offlineGroupInvites.numGrpsPending)
             console.log("new join groups count: ", allData.current.offlineJoinGroupRequests.numGrpsPending)
+            console.log("new events invites count: ",allData.current.offlineEventsInvites.numEvtsPending)
             //if yes, display the red alert
             showRedDot();
             //change corresponding state variables
@@ -75,12 +80,14 @@ const Feed = () => {
             if(numJoinGroupPending > 0){
               setPendingJoinGroups(allData.current.offlineJoinGroupRequests.offlineJoinGrRequests)
             }
+            if(numEventsInvites > 0){
+              setEventsInvites(allData.current.offlineEventsInvites.offlEventsInvites)
+            }
 
           }else{
-           console.log("numPending is zero, Nan or undefined", allData.current.offlineFollowNotif.numPending);
+           console.log("numPending is zero, Nan or undefined", allNotifications);
            hideRedDot();
            let aDiv = document.querySelector("#aCounter");
-           hideRedDot()
            aDiv.style.visibility = "hidden";
           }
           
@@ -106,8 +113,10 @@ const Feed = () => {
           allData.current.presences = message.presences
           
           AddUserToChatList({type: message.type, allData: allData.current})
-
-        } else if (message.type == "chat") {
+        }else if (message.type == "chat") {
+          //change current user state variable
+          console.log("the message includes sender?", message)
+          setRequestBy(message.sender)
           console.log("chat recieved", message)
 
           allData.current.chat = message.chat
@@ -142,7 +151,7 @@ const Feed = () => {
           if (message.chat.chatID == chatId && type == "groupChat" && chatOpen == "flex") {
             console.log("printing chat")
             // if the converstion id of the chat matches the open chat, then print the chat
-            PrintNewChat({chat: message.chat})
+            PrintNewChat({chat: message.chat, who: allData.current.userInfo.username})
           } else {
             // post request- add chat notification to db server side
             console.log("chat sent with request for group notif", message.chat)
@@ -167,7 +176,37 @@ const Feed = () => {
           allData.current.newGroupNotif = message.newGroupNotif
           showGroupInvites();
           console.log("newGroupNotif received by member: ", allData.current.newGroupNotif)
-        } else if (message.type == "sendAllGroups"){
+        } else if (message.type == "newEventNotif"){
+          allData.current.newEventNotif = message.newEventNotif
+          setRequestBy(allData.current.newEventNotif.evtMember)
+          setSelectedGroup((prevState) => ({
+            ...prevState,
+            id: allData.current.newEventNotif.grpID,
+            creator: allData.current.newEventNotif.grpCreator,
+            gpMembers: allData.current.newEventNotif.grpMembers,
+            grpDescr: allData.current.newEventNotif.grpDescr,
+            grpName: allData.current.newEventNotif.grpName,
+            type: allData.current.newEventNotif.type
+          })
+          )
+          setEventsInvites(allData.current.newEventNotif.sliceOfEvents)
+          showEventInvites();
+          console.log("newEventNotif received by member: ", allData.current.newEventNotif)
+          //update the 'groupEvents' state variable used in <GroupProfile> component
+            setGroupEvents((prevState) => ({
+             ...prevState,
+             requestor: allData.current.newEventNotif.evtMember,
+             nbEvents: allData.current.newEventNotif.nbEvents,
+             sliceOfEvents: allData.current.newEventNotif.sliceOfEvents,
+             type: allData.current.newEventNotif.type
+            })
+            )
+            //state variable to display events inside <AllEventsProfiles> component
+            setShowEvents(true)
+        
+        }
+        
+        else if (message.type == "sendAllGroups"){
             
             allData.current.sendAllGroups = message.sendAllGroups
           //update the state variable 'setGroupsList'
@@ -181,6 +220,25 @@ const Feed = () => {
             )
           )
             setRequestBy(allData.current.sendAllGroups.requestor) 
+
+        } else if (message.type == "sendGpEvents")  {
+
+          allData.current.sendGpEvents = message.sendGpEvents
+
+          //update the 'groupEvents' state variable
+          setGroupEvents((prevState) => ({
+            ...prevState,
+               requestor: allData.current.sendGpEvents.requestor,
+               nbEvents: allData.current.sendGpEvents.nbEvents,
+               sliceOfEvents: allData.current.sendGpEvents.sliceOfEvents,
+               type: allData.current.sendGpEvents.type
+          })
+          )
+          //requestor is the user's nickName
+          setRequestBy(allData.current.sendGpEvents.requestor)
+          //show events
+          setShowEvents(true)
+         
         }else if (message.type == "oneJoinGroupRequest"){
           //send join group request to group creator
           allData.current.oneJoinGroupRequest = message.oneJoinGroupRequest
@@ -194,14 +252,11 @@ const Feed = () => {
 }  
 })
 
-// const hideRedDot = () => {
-//   setRedDotVisible(false)
-// }
+
   const location = useLocation();
   const email = location.state?.email || ""; // Access the passed email
   const userAvatar = location.state?.avatar || ""
   const userInfo = location.state?.userInfo || {}
-  // const offlineFollowNotif = location.state?.offlineFollowNotif || {}
   const [usersList, setUsersList] = useState([]);
   const [isUsersListVisible, setIsUsersListVisible] = useState(false);
   const usersListRef = useRef(null);
@@ -212,16 +267,26 @@ const Feed = () => {
   const [groupsModalVisible, setGroupsModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const[isGroupsVisible, setIsGroupsVisible] = useState(false);
+  const [isEventVisible, setIsEventVisible] = useState(false);
   const [isJoinGroupVisible, setIsJoinGroupVisible] = useState(false);
   const [redDotVisible, setRedDotVisible] = useState(false);
   const[isPendingListVisible, setIsPendingListVisible] = useState(false);
   const[pendingNotif, setPendingNotif] = useState([]);
   const[pendingGroups, setPendingGroups] = useState([]);
   const[pendingJoinGroups, setPendingJoinGroups] = useState([]);
+  const[eventsInvites, setEventsInvites] = useState([]);
+  const [showNewEvt, setShowNewEvt] = useState(false);
+  const [showEvents, setShowEvents] = useState(false);
   const[groupsList, setGroupsList] = useState({
     requestor: "",
     nbGroups: "",
     sliceOfGroups: [],
+    type: ""
+  })
+  const[groupEvents, setGroupEvents] = useState({
+    requestor: "",
+    nbEvents: "",
+    sliceOfEvents: [],
     type: ""
   })
   const [selectedGroup, setSelectedGroup] = useState({
@@ -233,6 +298,7 @@ const Feed = () => {
     type: ""
   });
   const [requestBy, setRequestBy] = useState("");
+  const [newGrpEvt, setNewGrpEvt] = useState({["type"]: "newEvent"}); //used for event notif
   const [greenDotVisible, setGreenDotVisible] = useState(false);
   allData.current.userInfo = userInfo
   // allData.current.offlineFollowNotif = offlineFollowNotif
@@ -250,15 +316,91 @@ const Feed = () => {
   const [imageFile, setImageFile] = useState("");
   const notyf = new Notyf();
 
+  //greeting for logged-in user
+  const greeting = () => {
+    var date = new Date();
+    //date.toLocaleString('en-UK', {hour: 'numierc', minute: 'numeric', hour12: true })
+    console.log("the day time is", date)
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    var good = ampm == 'am' ? 'Good morning' : 'Good afternoon'
+    //const strGreet = good + ' ' + userInfo.firstName + ' , you logged-in at ' + hours + ':' + minutes + ' ' + ampm + ' ';
+    const strGreet = good + ' ' + userInfo.firstName + ' ';
+    return strGreet;
+  }
+
+  console.log("the user info: ======>", userInfo)
+
   // Function to show Notifications for online users
   const showNotification = () => {
     setIsVisible(true);
   };
 
   // Function to show Notifications for online users
+  //provided they are not the group creator
   const showGroupInvites = () => {
-    setIsGroupsVisible(true);
+    if(allData.current.newGroupNotif.creator != allData.current.newGroupNotif.member){
+      setIsGroupsVisible(true);
+    }
+   
   };
+  
+  //function to show events notifications for online participant //removed: && selectedGroup.id != allData.current.newEventNotif.grpID
+  const showEventInvites = () => {
+    if(allData.current.newEventNotif.evtCreator != allData.current.newEventNotif.evtMember  && isGroupProfileVisible == false ){
+      setIsEventVisible(true);
+    }
+   
+  }
+
+  //function to hide events notifications for online participant
+  //invoked when user klicks the 'go to event' button
+    const hideEventInvites = () => {
+      setIsEventVisible(false);
+    }
+
+   //function to display group profile page for 
+   //offline event participants
+    const handleOpenGpProfile = () => {
+      //change group member state variable
+      setGroupMember(true)
+      //show group profile
+      setGroupProfileVisible(true);
+      //hide offline alerts drop-down
+      togglePendingListVisible()
+    }; 
+
+  //function to set group state variable for offline event participants
+  //and request all group events via ws 
+      const handleSelectGrp = (e) => {
+        console.log("the group data: ", e)
+        setSelectedGroup((prevState) => ({
+          ...prevState,
+          id: e.grpID,
+          creator: e.grpCreator,
+          gpMembers: e.grpMembers,
+          grpDescr: e.grpDescr,
+          grpName: e.grpName,
+          type: e.type
+        })
+        )
+      //request group events through ws
+        const getGpEvents = {
+          grpID: e.grpID,
+          grpName: e.grpName,
+          evtMember: e.evtMember,
+          type: "getGpEvents"
+        }
+        console.log("the group events request sent to the b.e.: ", getGpEvents);
+  
+        websocketRef.current.send(
+          JSON.stringify(getGpEvents)
+        )
+        }
 
   // Function to show join group request notifications for online group creators
   const showJoinGroupRequests = () => {
@@ -277,7 +419,9 @@ const Feed = () => {
 
     //Toggle visibility of the list of pending notifications
 const togglePendingListVisible = () => {
-  setIsPendingListVisible(!isPendingListVisible);
+  //hide user profile if visible
+  setViewProfile(false);
+  setIsPendingListVisible(! isPendingListVisible);
 }
 
 const handleOfflFollowAccept = (f) => {
@@ -542,9 +686,11 @@ const handleClickUsersList = () => {
 
 const [viewProfile, setViewProfile] = useState(false)
   const openProfile = () => {
-   
+    //show or hide user profile when clicking button
+    setViewProfile(! viewProfile)
 
-    setViewProfile(true) 
+    //have removed the below as it cleared the feed page
+    /*setViewProfile(true) 
     let main = document.querySelector('main')
     let length = main.children.length
 
@@ -556,7 +702,7 @@ const [viewProfile, setViewProfile] = useState(false)
         let child = main.childNodes[2]
         child.remove()
       } 
-    }
+    }*/
   }
 
 
@@ -743,7 +889,7 @@ const [viewProfile, setViewProfile] = useState(false)
       <div className="content-container">{/* <TopNavigation /> */}</div>
       <ThemeIcon isDarkTheme={isDarkTheme} setDarkTheme={setDarkTheme} />
       <nav className="bg-white border-b border-gray-200 px-4 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
-        <div className="flex flex-wrap justify-between items-center" id="bellDotsAvatar">
+        <div className="mt-2 flex flex-wrap justify-between items-center" id="bellDotsAvatar">
           <div className="flex justify-start items-center">
             <button
               data-drawer-target="drawer-navigation"
@@ -767,43 +913,15 @@ const [viewProfile, setViewProfile] = useState(false)
               </svg>
               <span className="sr-only">Toggle sidebar</span>
             </button>
-            <div className="content-container flex justify-between mr-7 ml-3">
+            <div className="content-container flex justify-between mt-2 mr-7 ml-3">
               <TopNavigation />
             </div>
-            <a href="" className="flex items-center justify-between ml-3 mr-3">
+            <a href="" className="flex items-center justify-between ml-3 mr-3 mt-1">
               <img src="https://flowbite.s3.amazonaws.com/logo.svg" className="mr-4 h-8" alt="Social-Network Logo" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Social-Network </span>
             </a>
-            <form action="#" method="GET" className="hidden md:block md:pl-2">
-              <label htmlFor="topbar-search" className="sr-only">
-                Search
-              </label>
-              <div className="relative md:w-64">
-                <div className="flex items-center pl-3 pointer-events-none">
-                  <svg
-                    className="w-5 h-5 text-gray-500 dark:text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                    />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  name="email"
-                  id="topbar-search"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                  placeholder="Search"
-                />
-              </div>
-            </form>
           </div>
-          <div className="flex items-center static lg:order-2">
+          <div className="flex items-center lg:order-2">
             <button
               type="button"
               data-drawer-toggle="drawer-navigation"
@@ -822,6 +940,7 @@ const [viewProfile, setViewProfile] = useState(false)
             {/* Notifications */}
             <div id="notificationsBell">
             <button
+              // id="aCounter"
               onCick={togglePendingListVisible}
               type="button"
               data-dropdown-toggle="notification-dropdown"
@@ -833,196 +952,25 @@ const [viewProfile, setViewProfile] = useState(false)
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
             </button>
-            {/* {console.log("the numPending :====>",allData)} */}
-            {/* <div className="counter" style={{visibility:`${parseInt(allData.current.offlineFollowNotif.numPending, 10) > 0 ? 'visible' : 'hidden'}`}}> */}
-            <div className="counter" id="aCounter">
+            <div className="counter" id="aCounter" onClick={togglePendingListVisible}>
             <button onClick={togglePendingListVisible} id="offlineNotifBtn">
                        {redDotVisible && (
                       <Alerts 
                         setDotVisible={setRedDotVisible}
                         dotVisible={redDotVisible}
-                        countFollowNotifs={(parseInt(allData.current.offlineFollowNotif.numFollowPending, 10)||0) + (parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10)||0) + (parseInt(allData.current.offlineJoinGroupRequests.numGrpsPending, 10) ||0)}
+                        countFollowNotifs={(parseInt(allData.current.offlineFollowNotif.numFollowPending, 10)||0) + (parseInt(allData.current.offlineGroupInvites.numGrpsPending, 10)||0) + (parseInt(allData.current.offlineJoinGroupRequests.numGrpsPending, 10) ||0) + (parseInt(allData.current.offlineEventsInvites.numEvtsPending, 10) || 0)}
                         pendingFolNotif={allData.current.offlineFollowNotif.pendingFollows}
                         pendingGroupInvites={allData.current.offlineGroupInvites}
                         pendingJoinGroups={allData.current.offlineJoinGroupRequests}
+                        eventsInvites={allData.current.offlineEventsInvites}
                       />
                       )}
             {console.log("follows inside alerts div",allData.current.offlineFollowNotif.numPending)}
             {console.log("group invites inside alerts div",allData.current.offlineGroupInvites)}
             {console.log("join group requests pending: ",allData.current.offlineJoinGroupRequests)}
+            {console.log("events invites inside alerts div", allData.current.offlineEventsInvites)}
             </button>
             </div> 
-         
-
-            </div>
-          {/* offline dropdown list moved to id="offlineNotif" */}
-
-            {/* Apps */}
-            <button
-              type="button"
-              data-dropdown-toggle="apps-dropdown"
-              className="p-2 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-            >
-              <span className="sr-only">View notifications</span>
-              {/* Icon */}
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
-            </button>
-            {/* Dropdown menu */}
-            <div
-              className="hidden overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:bg-gray-700 dark:divide-gray-600"
-              id="apps-dropdown"
-            >
-              <div className="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300">
-                Apps
-              </div>
-              <div className="grid grid-cols-3 gap-4 p-4">
-                <a href="#" className="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
-                  <svg
-                    aria-hidden="true"
-                    className="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <div className="text-sm text-gray-900 dark:text-white">Sales</div>
-                </a>
-                <a href="#" className="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
-                  <svg
-                    aria-hidden="true"
-                    className="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-                  </svg>
-                  <div className="text-sm text-gray-900 dark:text-white">Users</div>
-                </a>
-                <a href="#" className="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
-                  <svg
-                    aria-hidden="true"
-                    className="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v7h-2l-1 2H8l-1-2H5V5z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <div className="text-sm text-gray-900 dark:text-white">Inbox</div>
-                </a>
-                <a href="#" className="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
-                  <svg
-                    aria-hidden="true"
-                    className="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <div className="text-sm text-gray-900 dark:text-white">Profile</div>
-                </a>
-                <a href="#" className="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
-                  <svg
-                    aria-hidden="true"
-                    className="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <div className="text-sm text-gray-900 dark:text-white">Settings</div>
-                </a>
-                <a href="#" className="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
-                  <svg
-                    aria-hidden="true"
-                    className="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
-                    <path
-                      fillRule="evenodd"
-                      d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <div className="text-sm text-gray-900 dark:text-white">Products</div>
-                </a>
-                <a href="#" className="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
-                  <svg
-                    aria-hidden="true"
-                    className="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <div className="text-sm text-gray-900 dark:text-white">Pricing</div>
-                </a>
-                <a href="#" className="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
-                  <svg
-                    aria-hidden="true"
-                    className="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.207.293a1 1 0 00-1.414 0l-6 6a1 1 0 101.414 1.414l6-6a1 1 0 000-1.414zM12.5 10a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <div className="text-sm text-gray-900 dark:text-white">Billing</div>
-                </a>
-                <a href="#" className="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
-                  <svg
-                    aria-hidden="true"
-                    className="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  <div className="text-sm text-gray-900 dark:text-white">Logout</div>
-                </a>
-              </div>
             </div>
             <button
               type="button"
@@ -1033,7 +981,7 @@ const [viewProfile, setViewProfile] = useState(false)
             >
               <span className="sr-only">Open user menu</span>
               <img
-                className={`w-10 h-10 rounded-full border-2 border-solid border-[#57aada] dark:border-white`}
+                className={`w-10 h-10 rounded-full border-2 border-solid border-gray-300 dark:border-white`}
                 src={userAvatar}
                 alt="user photo"
               />
@@ -1044,91 +992,9 @@ const [viewProfile, setViewProfile] = useState(false)
               id="dropdown"
             >
               <div className="py-3 px-4">
-                <span className="block text-sm font-semibold text-gray-900 dark:text-white">First Last</span>
+                <span className="block text-sm font-semibold text-gray-900 dark:text-white">Email:</span>
                 <span className="block text-sm text-gray-900 truncate dark:text-white">{email}</span>
               </div>
-              <ul className="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
-                <li>
-                  <a
-                    href="#"
-                    className="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
-                  >
-                    My profile
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
-                  >
-                    Account settings
-                  </a>
-                </li>
-              </ul>
-              <ul className="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                  >
-                    <svg className="mr-2 w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        fillRule="evenodd"
-                        d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    My likes
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                  >
-                    <svg className="mr-2 w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-                    </svg>
-                    My groups
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="flex justify-between items-center py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                  >
-                    <span className="flex items-center">
-                      <svg
-                        aria-hidden="true"
-                        className="mr-2 w-5 h-5 text-primary-600 dark:text-primary-500"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Pro version
-                    </span>
-                    <svg
-                      aria-hidden="true"
-                      className="w-5 h-5 text-gray-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </a>
-                </li>
-              </ul>
               <ul className="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
                 <li onClick={deleteCookie}>
                   <a className="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
@@ -1144,7 +1010,7 @@ const [viewProfile, setViewProfile] = useState(false)
         aria-label="Sidenav"
         id="drawer-navigation"
       >
-        <div className="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
+        <div className="overflow-y-auto py-6 px-3 h-full bg-white dark:bg-gray-800">
           <form action="#" method="GET" className="md:hidden mb-2">
             <label htmlFor="sidebar-search" className="sr-only">
               Search
@@ -1267,141 +1133,10 @@ const [viewProfile, setViewProfile] = useState(false)
                 </li>
               </ul>
             </li>
-            <li>
-              <button
-                type="button"
-                className="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                aria-controls="dropdown-sales"
-                data-collapse-toggle="dropdown-sales"
-              >
-                <svg
-                  aria-hidden="true"
-                  className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span className="flex-1 ml-3 text-left whitespace-nowrap">Posts</span>
-                <svg aria-hidden="true" className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-              <ul id="dropdown-sales" className="hidden py-2 space-y-2">
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                  >
-                    Products
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                  >
-                    Billing
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                  >
-                    Invoice
-                  </a>
-                </li>
-              </ul>
-            </li>
-            <li>
-              <button
-                type="button"
-                className="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                aria-controls="dropdown-sales"
-                data-collapse-toggle="dropdown-sales"
-              >
-                <svg
-                  aria-hidden="true"
-                  className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span className="flex-1 ml-3 text-left whitespace-nowrap">Notifications</span>
-                <svg aria-hidden="true" className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-              <ul id="dropdown-sales" className="hidden py-2 space-y-2">
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                  >
-                    Products
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                  >
-                    Billing
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                  >
-                    Invoice
-                  </a>
-                </li>
-              </ul>
-            </li>
-          </ul>
+           
+           </ul>
           <ul className="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
-            <li>
-              <a
-                href="#"
-                className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-              >
-                <svg
-                  aria-hidden="true"
-                  className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z" />
-                  <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
-                </svg>
-                <span className="flex-1 ml-3 whitespace-nowrap ">Messages</span>
-                <span className="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-primary-800 bg-primary-100 dark:bg-primary-200 dark:text-primary-800">
-                  4
-                </span>
-              </a>
-            </li>
+ 
             <li>
               <a>
               <button
@@ -1462,7 +1197,7 @@ const [viewProfile, setViewProfile] = useState(false)
             // 'ref' makes a link to the element that contains the list of users.
             // Together with conditional css styling it ensures that the element is altered independently
             ref={usersListRef}
-              className={`users-list absolute top-[430px] right-4 z-50 my-4 w-56 text-base list-none bg-[#a5dcfc] rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 ${isUsersListVisible ? 'visible' : 'hidden'}`}
+              className={`users-list absolute top-[290px] right-4 z-50 my-4 w-56 text-base list-none bg-[#a5dcfc] rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 ${isUsersListVisible ? 'visible' : 'hidden'}`}
               id="dropdownUsers"
             >
               <ul className="py-0 text-gray-700 dark:text-gray-200">
@@ -1588,7 +1323,7 @@ const [viewProfile, setViewProfile] = useState(false)
                         <path fill="#192f5d" d="M0 0h98.8v70H0z" transform="scale(3.9385)" />
                         <path
                           fill="#fff"
-                          d="M8.2 3l1 2.8HAth8na2Win2L9.7 7.5l.9 2.7-2.4-1.7L6 10.2l.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7L74 8.5l-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 7.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 24.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 21.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 38.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 35.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 52.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 49.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm-74.1 7l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7H65zm16.4 0l1 2.8H86l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm-74 7l.8 2.8h3l-2.4 1.7.9 2.7-2.4-1.7L6 66.2l.9-2.7-2.4-1.7h3zm16.4 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8H45l-2.4 1.7 1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9zm16.4 0l1 2.8h2.8l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h3zm16.5 0l.9 2.8h2.9l-2.3 1.7.9 2.7-2.4-1.7-2.3 1.7.9-2.7-2.4-1.7h2.9zm16.5 0l.9 2.8h2.9L92 63.5l1 2.7-2.4-1.7-2.4 1.7 1-2.7-2.4-1.7h2.9z"
+                          d="M0 10h247v10H0zm0 20h247v10H0zm0 20h247v10H0zm0 20h247v10H0zm0 20h247v10H0zm0 20h247v10H0z"
                           transform="scale(3.9385)"
                         />
                       </g>
@@ -1676,35 +1411,30 @@ const [viewProfile, setViewProfile] = useState(false)
           </div>
         </div>
       </aside>
-      <main className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
+      <main id="session" className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
+      {console.log("allData inputted to <Chat>PPPPPPPPPPPPPPPPPP>>>>>>>>>", allData)}
         <Chat websocketRef={websocketRef} isWebSocketConnected={ isWebSocketConnected} allData={allData}/>
         {viewProfile&& <Profile/>}
         <div></div>
-        <h1 className="text-black dark:text-white" >Profile Picture Upload</h1>
-        <form className="text-black dark:text-white" id="uploadForm" encType="multipart/form-data">
-          <input type="file" accept="image/*" onChange={handleAvatarChange} />
-          <button className="text-black dark:text-white" type="submit" onClick={uploadAvatar}>
-            Upload
-          </button>
-        </form>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div className="  dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
+          <div className=" cube dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img
               //className="w-16 h-16 mb-2 rounded-full border-2 border-solid border-white-500"
-              className={`w-16 h-16 rounded-full border-2 border-solid border-[#57aada] dark:border-[#f8fafc]`}
+              className={`w-3/4 h-4/5 border-2 border-solid border-gray-300 dark:border-[#f8fafc]`}
               //src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
               src={userAvatar}
               alt="user photo"
+              style={{width:204, height:204 }}
             />
-            <div className="flex justify-center items-center flex-col">
-              <p>Followers: 0</p>
-              <p>Posts: 0</p>
-              <p>Email: {email}</p>
+            <div className="flex justify-center items-center flex-col" onLoad={greeting}>
+            <p className="mt-1 text-lg text-[#3f9fd6] dark:text-white"><strong>{greeting()}</strong>🙂</p>
+              {/* <p>Followers: {allData.current.userInfo.followers.join(' ')}</p> */}
+              {/* <p>Posts: 0</p> */}
+              {/* <p>Email: {email}</p> */}
             </div>
           </div>
           {/* Start of new group notification */}
-          <div id="showGroupNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+          <div id="showGroupNotif" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
          {console.log("the state variable of groupVisible: ", isGroupsVisible)}
           {isGroupsVisible && (
           <NewGroupNotification 
@@ -1716,8 +1446,35 @@ const [viewProfile, setViewProfile] = useState(false)
           </div>
         {/* End of new group notification */}
 
+        {/*  Start of event notification */}
+
+        <div id="showEventNotif" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+         {console.log("the state variable of isEventVisible: ", isEventVisible)}
+          {isEventVisible && (
+          <EventNotif
+            close={() => {hideEventInvites()}}
+            viewGpModal={setGroupsModalVisible}
+            viewUserInfo={() => {handleCloseModal()}}
+            setEventVisible={setIsEventVisible}
+            eventVisible={isEventVisible}
+            setGrp={setSelectedGroup}
+            theGroup={selectedGroup}
+            eventData={allData.current.newEventNotif}
+            setGrpMember={setGroupMember}
+            grpMember={groupMember}
+            setGrpProfileVisible={setGroupProfileVisible}
+            grpProfileVisible={isGroupProfileVisible}
+            setEvt={setNewGrpEvt}
+            theEvt={newGrpEvt}
+            eParticipant={requestBy}
+          />
+          )}
+          </div>
+
+        {/* End of event notification */}
+
         {/* Start of join group request notification */}
-          <div id="joinGpReq" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+          <div id="joinGpReq" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
           {console.log("the state variable of isJoinGroupVisible: ", isJoinGroupVisible)}
           {isJoinGroupVisible && (
             <JoinGpReq 
@@ -1732,7 +1489,7 @@ const [viewProfile, setViewProfile] = useState(false)
 
 
         {/* Start of follow notification */}
-          <div id="showNotif" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+          <div id="showNotif" className=" cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
           {isVisible && (
           <Notification 
             setIsVisible={setIsVisible}
@@ -1780,7 +1537,13 @@ const [viewProfile, setViewProfile] = useState(false)
         followers={allData.current.followers}
         request={requestBy}
         theGroup={selectedGroup}
-        creator={email}
+        creator={allData.current.userInfo.username}
+        setEvt={setNewGrpEvt}
+        theEvt={newGrpEvt}
+        gEvents={groupEvents}
+        showNewEvt={showNewEvt}
+        setShowNewEvt={setShowNewEvt}
+        showEvents={showEvents}
         >
           {selectedGroup && (
             <GrProfileCard
@@ -1790,12 +1553,11 @@ const [viewProfile, setViewProfile] = useState(false)
           )}
         </GroupProfile>
       )}
-
        {/* End of GroupProfile */}
 
      {/* Start of show groupsModal*/}
           
-      <div id="showGroups" className="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
+      <div id="showGroups" className="cube border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" >
     {groupsModalVisible && (console.log("the allData in feed: ", allData.current))}
       {(groupsModalVisible && groupsList && requestBy) && (
         <GroupsModal 
@@ -1809,13 +1571,15 @@ const [viewProfile, setViewProfile] = useState(false)
         creator={email}
         request={requestBy}
         allGroups={groupsList}
+
         >
         </GroupsModal>
       )}
       </div>
       {/* End of show groupsModal */}
+      <div className="cube relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" ></div>
           
-      <div className="relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" id="offlineNotif">
+      <div className="cube relative border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64" id="offlineNotif">
               {/*Start of offline Notifications Dropdown menu */}
       <div
           className={`top-10 overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700 ${isPendingListVisible ? 'visible' : 'hidden'}`}
@@ -1974,14 +1738,13 @@ const [viewProfile, setViewProfile] = useState(false)
                   <div
                     className="block py-2 px-4 text-sm hover:bg-[#7ca3ba] dark:hover:bg-[#7096ac] dark:text-gray-600 dark:hover:text-white dark:bg-[#a5dcfc]"
                   >
-                    {pendingNotif.map((f)=> (
-                      <li key={f.followID}>
+                    {eventsInvites.map((e)=> (
+                      <li key={e.id}>
                        <a href="#" className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
                       <div className="flex-shrink-0">
                       <img
                         className="w-11 h-11 rounded-full"
-                        //src={(f.followerURL).substring(0,3)==="" && (f.followerImage).substring(0.3)==="" ? "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj" :(f.followerURL).substring(0,3)==="htt" ? f.followerURL : f.followerImage}
-                        src={f.followerURL || f.followerImage || "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"}
+                        src={e.evtCreatorURL || e.evtCreatorImage || "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj"}
                       alt="eventInvite"
                       />
                       <div className="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 bg-gray-900 rounded-full border border-white dark:border-gray-700">
@@ -1998,14 +1761,13 @@ const [viewProfile, setViewProfile] = useState(false)
                       </div>
                       <div className="pl-3 w-full">
                       <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
-                        <span className="font-semibold text-gray-900 dark:text-white">{f.followerUN} </span>
-                          has invited you to event {f.influencerUN}
+                        <span className="font-semibold text-gray-900 dark:text-white">{e.grpName} </span>
+                          has a new event: <span className="font-semibold text-gray-900 dark:text-white">{e.evtName}</span>
                       </div>
                       </div>
                     </a>
                     <div className="text-xs font-medium text-primary-600 dark:text-primary-500">                  
-                        <a onClick={()=>(handleOfflFollowAccept(f))} style={{cursor: 'pointer'}} class="offlineAccept">Accept</a>
-                        <a onClick={()=>(handleOfflFollowDecline(f))} style={{cursor: 'pointer'}} class="offineDecline"> Decline</a>
+                        <a onClick={()=>(handleSelectGrp(e), handleOpenGpProfile())} style={{cursor: 'pointer'}} class="offlineAccept">View event</a>
                     </div>
                     </li>
                     ))}
@@ -2020,15 +1782,15 @@ const [viewProfile, setViewProfile] = useState(false)
         </div>
         <div
           id="submitPosts"
-          className="bg-white border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 dark:bg-gray-800 mb-4"
+          className="bg-white border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 dark:bg-gray-800 mb-4"
         >
-          <div className="  dark:bg-gray-800 dark:text-white flex justify-left items-left flex-col" id="addPost">
+          <div className=" rounded-md dark:bg-gray-800 dark:text-white flex justify-left items-left flex-col" id="addPost">
             <h3 className="pl-5 mt-3 font-bold text-xl text-[#5aadde]  ">Update Feed</h3>
             <form onSubmit={submitPost}>
               <span className="flex p-2.5 pl-5">
                 <p className="flex-row mr-5 font-bold text-[#5aadde]">Title</p>
                 <input
-                  className="flex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
+                  className="bg-gray-100 rounded-md lex-row border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
                   type="text"
                   value={Title}
                   onChange={handleTitle}
@@ -2040,7 +1802,7 @@ const [viewProfile, setViewProfile] = useState(false)
                 <input
                   type="text"
                   id="postTags"
-                  className="flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
+                  className=" bg-gray-100 rounded-md flex-row mr-5 border-b-2 border-green shadow-md dark:bg-gray-800 dark:text-white focus:outline-none"
                 />
                 <button
                   onClick={addTag}
@@ -2055,7 +1817,7 @@ const [viewProfile, setViewProfile] = useState(false)
               <div className="flex justify-right items-right flex-col">
                 <p className="p-2.5 pl-5 font-bold text-[#5aadde]">Content</p>
                 <textarea
-                  className="m-5 mt-0 mb-2.5 mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none"
+                  className="bg-gray-100 m-5 mt-0 mb-2.5 rounded-md mlength-10 border-b-2 shadow-md border-green dark:bg-gray-800 dark:text-white focus:outline-none"
                   name="postContent"
                   id="postContent"
                   cols="8"
@@ -2063,6 +1825,7 @@ const [viewProfile, setViewProfile] = useState(false)
                   maxLength="100"
                   value={Content}
                   onChange={handleContent}
+                  style={{width:600+"px", marginLeft:75+"px"}}
                 ></textarea>
               </div>
 
@@ -2095,14 +1858,14 @@ const [viewProfile, setViewProfile] = useState(false)
                null
               }
               </ul>
-              <div className="flex">
+              <div className="flex p-2.5 pl-5">
+                <p className="flex-row font-bold text-[#5aadde]">Image</p>
                 <input
                   type="text"
                   name="imageUrl"
                   id="imageUrl"
                   placeholder="Enter image URL"
-                  className="ml-5 m-2.5 pl-5 pr-5 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  // value={imageURL}
+                  className="bg-gray-100 m-2.5 pl-5 pr-5 shadow-md border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white"
                   onChange={handlePostImage}
                 />
                 <label

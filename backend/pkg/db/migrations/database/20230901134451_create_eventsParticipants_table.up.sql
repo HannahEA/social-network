@@ -2,8 +2,12 @@
 CREATE TABLE IF NOT EXISTS "EventsParticipants" ( 
             "inviteID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             "eventID" INTEGER,
-            "participantID" INTEGER,
+            "groupID" INTEGER,
+            "organizer" TEXT,
+            "participant" TEXT,
             "option" TEXT,
            FOREIGN KEY(eventID)REFERENCES Events(eventID),
-           FOREIGN KEY(participantID)REFERENCES Users(id)
+           FOREIGN KEY(organizer)REFERENCES Users(nickName),
+           FOREIGN KEY(participant)REFERENCES Users(nickName),
+           FOREIGN KEY(groupID)REFERENCES Events(groupID)
            );

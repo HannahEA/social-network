@@ -119,21 +119,21 @@ const Posts = ({sPost, page, username, groupID}) => {
       <div className="">
         {pData ? 
           <div className="">
-            <div id="odd" className="float-left w-1/2">
+            <div id="odd" className="mt-2 cube rounded-md float-left w-1/2">
             {pData.map((post, index) => 
               (index%2 > 0 && post != {} &&
                 <div key={post.postId} className="m-2 ">
                   <div className=" border-solid rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800" >
-                  <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
+                  <div className="cube flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
                   <h2 className="text-l text-left dark:text-white m-6">{post.author}</h2>  
                   <h2 className="text-l text-right dark:text-white m-6">{post.date}</h2>
                 </div>
                 
                 {post.url.length>0 && 
-                  <img src={post.url} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
+                  <img src={post.url} alt="" className="h-75 w-75 m-auto justify-center text-center xl:h-96"/>}
 {/* ==============> Start post image file <==================== */}
                 {post.file.length>0 && 
-                  <img src={post.file} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
+                  <img src={post.file} alt="" className="h-75 w-75 m-auto justify-center text-center xl:h-96"/>}
 {/* ==============> End post image file <==================== */}
                 <div className="flex justify-start items-start" >
                   <div className="flex flex-col m-4">
@@ -143,7 +143,7 @@ const Posts = ({sPost, page, username, groupID}) => {
                   <h2 className="text-md m-4 mr-2 dark:text-white">{post.content}</h2>
                 </div>
                 <hr className="w-10/12 m-auto border-gray dark:border-gray-700"/>
-                <div id = "CommentsContainer" className="bg-white dark:bg-gray-800 ">
+                <div id = "CommentsContainer" className=" dark:bg-gray-800 ">
                   
                   <div className="flex justify-start items-center">
                     <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className=" flex items-center text-l font-bold m-4 mb-2 text-blue-400 ">
@@ -158,8 +158,8 @@ const Posts = ({sPost, page, username, groupID}) => {
                       </svg>
                     </button>
                     
-                    <div id="submitComment" className=" grow">
-                      <input onChange={(e)=>handleContent(e)} name={commentContent} className="w-7/12 m-4 mb-2 border-b-2 border-gray focus:outline-none dark:bg-gray-800 dark:text-white" type="text" />
+                    <div id="submitComment" className="grow">
+                      <input onChange={(e)=>handleContent(e)} name={commentContent} className="round-md bg-gray-100 w-7/12 m-4 mb-2 border-b-2 border-gray focus:outline-none dark:bg-gray-800 dark:text-white" type="text" />
                       <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit" className="m-2 mb-2 p-2 pt-1 pb-1 text-xs rounded-lg font-bold bg-blue-600 text-white">Submit</button>
                     </div>
                     
@@ -170,24 +170,24 @@ const Posts = ({sPost, page, username, groupID}) => {
                 </div>
             ))}
             </div>
-            <div id="even" className="float-left w-1/2">
+            <div id="even" className="float-left w-1/2 rounded-md">
               
                 {pData.map((post, index) => (index%2 == 0 && post != {} && (
               
               <div key={post.postId} className="m-2  ">
                 <div>
                 
-                <div className="  leftborder border-solid rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800" >
-                <div className="flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
-                <h2 className="text-l text-left dark:text-white m-6">{post.author}</h2>  
-                <h2 className="text-l text-right dark:text-white m-6">{post.date}</h2>
+                <div className=" cube leftborder border-solid border-gray-300 dark:border-gray-700 dark:bg-gray-800 rounded-md" style={{height: 655+"px", width: 805+"px"}}>
+                <div className="cube flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
+                <h2 className=" text-l text-left dark:text-white m-6">{post.author}</h2>  
+                <h2 className=" text-l text-right dark:text-white m-6">{post.date}</h2>
                 </div>
                 
                 {post.url.length>0 && 
-                  <img src={post.url} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
+                  <img src={post.url} alt="" className="cube rounded-md h-72 m-auto justify-center text-center xl:h-96"/>}
 {/* ==============> Start post image file <==================== */}
                 {post.file.length>0 && 
-                  <img src={post.file} alt="" className="h-72 w-full m-auto justify-center text-center xl:h-96"/>}
+                  <img src={post.file} alt="" className="h-72 m-auto justify-center text-center xl:h-96"/>}
 {/* ==============> End post image file <==================== */}
 
                 <div id= "postContent" className="flex justify-start items-start" >
@@ -198,9 +198,9 @@ const Posts = ({sPost, page, username, groupID}) => {
                   <h2 className="text-md m-4 mr-2 dark:text-white">{post.content}</h2>
                 </div>
                 <hr className="w-10/12 m-auto border-gray dark:border-gray-700"/>
-                <div id = "CommentsContainer" className="bg-white dark:bg-gray-800 ">
+                <div id = "CommentsContainer" className="cube bg-white dark:bg-gray-800 ">
                   
-                  <div className="flex justify-start items-center">
+                  <div className=" flex justify-start items-center">
                     <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className=" flex items-center text-l font-bold m-4 mb-2 text-blue-400 ">
                       Comments 
                     <svg  aria-hidden="true" value="5" className="w-4 h-4 ml-2 pointer-events-none" fill="black" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -214,7 +214,7 @@ const Posts = ({sPost, page, username, groupID}) => {
                     </button>
                     
                     <div id="submitComment" className=" grow">
-                      <input onChange={(e)=>handleContent(e)} name={commentContent} className="w-7/12 m-4 mb-2 border-b-2 border-gray focus:outline-none dark:bg-gray-800 dark:text-white" type="text" />
+                      <input onChange={(e)=>handleContent(e)} name={commentContent} className="w-7/12 m-4 mb-2 border-b-2 border-gray focus:outline-none bg-gray-100 dark:bg-gray-800 dark:text-white" type="text" />
                       <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit" className="m-2 mb-2 p-2 pt-1 pb-1 text-xs rounded-lg font-bold bg-blue-600 text-white">Submit</button>
                     </div>
                     

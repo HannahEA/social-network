@@ -56,12 +56,12 @@ type AllDbMethods interface {
 	AddLoggedInFlag(userID int, flag string) error
 	ReturnId(email string) (int, error)
 	GetUserByEmail(email string) (User, error)
-	GetUserByNickName(nickName string) (User, error) 
+	GetUserByNickName(nickName string) (User, error)
 	FindByUsername(name string) *User
 	DeleteCookieDB(cookieValue string) (int64, error)
 	//post database queries
-	AddPostToDB(data Post) (int,error)
-	AddPostViewersToDB(data Post, id int) error 
+	AddPostToDB(data Post) (int, error)
+	AddPostViewersToDB(data Post, id int) error
 	GetPublicPosts(user *User) ([]Post, error)
 	UploadVisibilityValue(data ProfileVisibilityData) (string, error)
 	GetUsersData(email string) ([]AllUsersData, error)
@@ -88,13 +88,19 @@ type AllDbMethods interface {
 	GetAllUserPosts(user *User) ([]Post, error)
 	//Groups
 	InsertNewGroup(g NewGroup) (int, error)
-	InsertGrpMember(newGp NewGroup, i int, status string) error
-	InsertGrpInvite(gpInv NewGroupNotif, status string) error 
+	Inse NewEventNotifertNewEvent() (int, error)
+	InsertGrpMember(newGp NewGroup, i int) error
+	InsertEvtMember(newEv NewEventNotif, i int, status string) error
+	InsertGrpInvite(gpInv NewGroupNotif, status string) error
 	InsertJoinRequest(joinReq OneJoinGroupRequest, status string) error
 	CheckUserOnline(grpName string, grpDescr string, grpID int, user string, creator string) (NewGroupNotif, error)
+	CheckEvParticipantOnline(EvtName string, EvtDescr string, ID int, gMember string, EvtCreator string, GrpID int) (NewEventNotif, error)
 	GetPendingGroupInvites(member string) (int, []NewGroupNotif)
+	GetPendingEventInvites(member string) (string, []NewEventNotif)
 	InsertGroupMemberReply(joinGrpReply JoinGroupReply) error
+	InsertEventPartReply(evReply EvtReply) error
 	GetExistingGroups() (string, []NewGroup)
+	GetOneGroupEvents(EvtMember string, GrpID int, GrpName string) (string, []OneEvent) 
 	GetPendingJoinGroupRequests(creator string) (string, []OneOfflineJoinGroupRequest)
 	getUserAvatar(nkName string) (NewGroupNotif, error)
 	GetGroupComments(post Post) ([]Comment, error) 

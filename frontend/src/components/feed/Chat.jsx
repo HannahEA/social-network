@@ -56,7 +56,7 @@ let awaitConvo = async(data) =>  {
       //print chat history 
       if (convo.chats) {
         convo.chats.forEach((chat) => {
-        PrintNewChat({chat: chat})
+        PrintNewChat({chat: chat, who: name})
         })
       }
         
@@ -158,36 +158,66 @@ const EditToUserList = ({allData}) => {
   
 }
   
- 
-
-const PrintNewChat = ({chat}) => {
+// original function by Hannah & Helena's styling
+const PrintNewChat = ({chat, who}) => {
   
   let chats = document.getElementById("chats")
   let newChat = document.createElement('div')
   let name = document.createElement("p")
   if (chats.classList.contains('hidden') == false ) {
-    let nameval = chat.username
-    name.innerHTML = nameval
-    name.classList.add('font-bold', 'text-sm', 'ml-2','dark:text-white')
+  let nameval = chat.username
+  if (nameval == who) {
+      newChat.classList.add("sender", "flex", "flex-col")
+  }else{
+     //if chat is by any other user
+      newChat.classList.add("recipient", "flex", "flex-col", "flex-end")
+  }
     let message = document.createElement("p")
-    message.classList.add('text-sm', 'ml-4', 'dark:text-white')
+    message.classList.add('text-sm', 'font-bold', 'ml-2')
     message.innerHTML = chat.message
-    newChat.classList.add("flex", "flex-row")
-    newChat.append(name)
+    name = document.createElement("p")
+    name.classList.add('cName', 'font-bold', 'text-sm')
+    name.innerHTML = nameval
     newChat.append(message)
+    newChat.append(name)
     chats.append(newChat)
   }
-  
-  
 }
 
-const RequestChatNotification = ({chat, username}) => {
-   chat.type = document.getElementById("chats").getAttribute("chattype")
+//including chat formatting by Helena
+/*const PrintNewChat = ({chat, who}) => {
+  //let theUser = allData.userInfo.username
+  console.log("chat from PrintNewChat", chat)
+  let chats = document.getElementById("chats")
+  let newChat = document.createElement('div')
+  let name = document.createElement("p")
+  if (chats.classList.contains('hidden') == false ) {
+    let nameval = chat.username
+    //if chat is by logged-on user
+  if (nameval == who) {
+    newChat.classList.add("sender", "flex", "flex-col")
+  }else{
+    //if chat is by any other user
+    newChat.classList.add("recipient", "flex", "flex-col", "flex-end")
+  }
+  let message = document.createElement("p")
+    message.classList.add('text-sm', 'font-bold', 'ml-2')
+    message.innerHTML = chat.message
+    name = document.createElement("p")
+    name.classList.add('cName', 'font-bold', 'text-sm')
+    name.innerHTML = nameval
+
+    newChat.append(message)
+    newChat.append(name)
+    chats.append(newChat)
+
+  }
    
-   console.log("adding chat Notification", chat.type)
-  // chat.status = "delivered"
- 
-  chat.member = username
+}*/
+
+const RequestChatNotification = ({chat}) => {
+  console.log("adding chat Notification")
+  chat.status = "delivered"
   fetch(`${apiURL}/chat`, {
     method: "POST",
     headers: {
@@ -252,6 +282,8 @@ const ChangeChatNotification = ({usernames}) => {
 
 const RemoveChatNotification = ({username, name}) => {
   let notif  = false
+  console.log("receiver, username and name inside RemoveChatNotification", username, name)
+  
   let users = document.getElementById("offline")
   for (let i = 0; i<2 ; i++) {
      for(const child of users.children) {
@@ -326,6 +358,7 @@ const RemoveChatNotification = ({username, name}) => {
    setChatMessage(event.target.value)
  }
 
+//  Original function by Hannah & Helena's styling
  const sendChatMessage = () => {
    console.log("...sending chat", chatMessage)
    if (websocketRef.current && isWebSocketConnected) {
@@ -345,50 +378,85 @@ const RemoveChatNotification = ({username, name}) => {
 
        
        let chat = document.createElement('div')
-       let name = document.createElement("p")
-       
-       name.innerHTML = allData.current.userInfo.username
-       name.classList.add('font-bold', 'text-sm', 'ml-2')
+       chat.classList.add("sender", "flex", "flex-col")
        let message = document.createElement("p")
-       message.classList.add('text-sm', 'ml-4')
+       message.classList.add('text-sm', 'font-bold', 'ml-2')
        message.innerHTML = chatMessage
-       chat.classList.add("flex", "flex-row")
-       chat.append(name)
+       let name = document.createElement("p")
+       name.innerHTML = allData.current.userInfo.username
+       name.classList.add('cName', 'font-bold', 'text-sm')
        chat.append(message)
+       chat.append(name)
        chats.append(chat)
        setChatMessage("")
  
    } 
   
  }
+
+//  Including chat formatting by Helena
+/*const sendChatMessage = () => {
+  console.log("...sending chat", chatMessage)
+  if (websocketRef.current && isWebSocketConnected) {
+   let chats = document.getElementById("chats")
+   console.log(allData.current.conversation, "converation")
+    websocketRef.current.send(
+      JSON.stringify({
+        message: chatMessage,
+        type: "chat",
+        username: allData.current.userInfo.username,
+        reciever: allData.current.conversation.reciever,
+        chatID: chats.getAttribute("name")
+         
+      })
+    )
+      console.log("chat message sent")
+
+      
+      let chat = document.createElement('div')
+      chat.classList.add("sender", "flex", "flex-col")
+      let message = document.createElement("p")
+      message.classList.add('text-sm', 'font-bold', 'ml-2')
+      message.innerHTML = chatMessage
+      let name = document.createElement("p")
+      name.innerHTML = allData.current.userInfo.username
+      name.classList.add('cName', 'font-bold', 'text-sm')
+      chat.append(message)
+      chat.append(name)
+      chats.append(chat)
+      setChatMessage("")
+
+  } 
+ 
+}*/
  
  
  return (
     <div>
         <button onClick={handleOpenChat} id="messages" className="fixed items-center text-base
-        transition duration-75 group bg-[#f4b08e] hover:bg-[#f4a279] 
-        shadow-lg dark:text-white dark:hover:bg-[#b68b76] 
-        first-letter:[box-shadow:0_3px_0_0_#f4a279] 
-        [box-shadow:0_3px_0_0_#b68b76]
+        transition duration-75 group bg-gray-500 hover:bg-gray-400 
+        shadow-lg dark:text-white dark:hover:bg-gray-300 
+        first-letter:[box-shadow:0_3px_0_0_gray-100] 
+        [box-shadow:0_3px_0_0_gray-300]
          text-white font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2" > Messages
         <div className="hidden bg-red-300 rounded-lg absolute -top-4 right-2 w-8 h-8 " id="notifIcon">
           <img src="https://www.svgrepo.com/show/533249/message-circle-notification.svg" alt=""  className=" w-5 absolute top-1 right-1"/>
         </div>
         </button>
-        <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 w-96 bg-white dark:bg-gray-300" id="chatOpen">
+        <div className="hidden flex-row fixed bottom-16 right-6 border-solid border z-10 rounded-lg h-1/2 bg-white dark:bg-gray-300" id="chatOpen" style={{width:400+"px"}}>
         
         <div id = "chatContainer" className="flex flex-col justify-end align-center w-2/3 overflow-scroll dark:bg-gray-400 ">
           
           <div id="chats" name="chats" className="flex flex-col overflow-scroll">
           
           </div>
-          <input id="chatInput" type="text" onChange={handleChatMessage} value={chatMessage} className=" hidden bottom-4 bg-[#eacfc2] border-none m-2 p-3 w-9/10 h-2" placeholder="Type message.." name="msg" required/>
+          <input id="chatInput" type="text" onChange={handleChatMessage} value={chatMessage} className=" hidden bottom-4 bg-gray-100 border-none m-2 p-3 w-9/10 h-2" placeholder="Type message.." name="msg" required/>
 
-          <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden mb-2 ml-20 w-1/3 bg-[#ecbba3] rounded-lg text-white shadow-md"><strong>Send</strong></button>
+          <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden mb-2 ml-20 w-1/3 bg-gray-400 rounded-lg text-white shadow-md"><strong>Send</strong></button>
 
         </div>
-        <aside className="dark:bg-gray-400 flex flex-col h-full w-1/3 border-solid border text-left p-2 overflow-scroll" id="chatUsers">
-        <div id="online"></div>
+        <aside className="dark:bg-gray-400 flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
+        <div id="online" className="dark:bg-gray-500 rounded-md "></div>
         <div id= "offline"></div>
         <div id="groupChats"></div>
         </aside>

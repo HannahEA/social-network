@@ -9,7 +9,7 @@ const notyf = new Notyf(); // Create a single instance of Notyf
 
 
 
-function GroupsModal({onClose, setGrpProfileVisible, setGrp, grpProfileVisible, setGrpMember, grpMember, followers, creator, allGroups, request}){
+function GroupsModal({onClose, setGrpProfileVisible, setGrp, grpProfileVisible, setGrpMember, grpMember, followers, creator, allGroups, request }){
 
 console.log("the request inside 'GroupsModal': ",request)
 
@@ -24,7 +24,7 @@ console.log("the request inside 'GroupsModal': ",request)
 
     //store new group form inputs
     const [newGroupInputs, setNewGroupInputs] = useState({["type"]: "newGroup"});
-    const [gpMembers, setGpMembers] = useState([]);
+    const [gpMembers, setGpMembers] = useState([request]);
     //store join group form selections
     const[gpList, setGpList] = useState([])
     var joinGpInfo
@@ -126,6 +126,7 @@ console.log("the request inside 'GroupsModal': ",request)
 
       // //make the group profile page visible
       const handleOpenGpProfile = () => {
+        setGrpMember(true);
         setGrpProfileVisible(true);
         onClose()
       };
@@ -143,7 +144,19 @@ console.log("the request inside 'GroupsModal': ",request)
           type: grp.type
         }
         )
-      ) 
+      )
+      //request group events through ws
+      const getGpEvents = {
+        grpID: grp.id,
+        grpName: grp.grpName,
+        evtMember: request,
+        type: "getGpEvents"
+      }
+      console.log("the group events request sent to the b.e.: ", getGpEvents);
+
+      websocketRef.current.send(
+        JSON.stringify(getGpEvents)
+      )
       }
 
 
@@ -185,15 +198,11 @@ console.log("the request inside 'GroupsModal': ",request)
     };
 
     console.log("printing outside of the component 'gpList' to be sent to the b.e.:++++++++>", gpList);
-
-    
-    
-
       
       return (
-        <div id="modalOverly" className="modal-overlay" onClick={handleOverlayClick}>
-          <div id="modalContainerOuter">
-          <div id="modalContainer" className="bg-[#a8daf7] relative top-1 x-3 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(60%-1rem)] gpsModal-content dark:bg-[#81b7d7]">
+        <div id="modalOverly" className="z-5 modal-overlay" onClick={handleOverlayClick} style={{zIndex:998}}>
+          <div id="modalContainerOuter" style={{height:770+"px", width:400+"px"}}>
+          <div id="modalContainer" className="bg-[#a8daf7] relative top-1 x-2 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(60%-1rem)] gpsModal-content dark:bg-[#81b7d7]">
             <button className="hover:bg-[#7acaf8] hover:text-gray-200 hover:shadow-gray-400 dark:hover:bg-[#65c3f9] shadow-md z-50 pb-3 pt-3 modal-close dark:text-white ml-60 pr-3 pl-3 font-bold bg-[#c7e6f8] dark:bg-[#57aada]  text-[#57aada] rounded-md" onClick={() => {onClose()}}>
               Close
             </button>
@@ -225,7 +234,7 @@ console.log("the request inside 'GroupsModal': ",request)
                 </div>
                 <div>
                 <input type="submit" id="newGpSubmit" value="Create group"
-                  className="cursor-pointer absolute justify-center flex items-center p-2 w-[calc(35%-1rem)] text-base font-medium text-white 
+                  className="mt-2 cursor-pointer absolute justify-center flex items-center p-2 w-[calc(35%-1rem)] text-base font-medium text-white 
                   rounded-lg transition duration-75 group bg-[#57aada] dark:bg-[#4e99c4] hover:bg-[#4c97c2] hover:text-[#c2e5f9]
                   shadow-lg dark:text-white dark:hover:bg-[#64afda]
                   [box-shadow:0_3px_0_0_#407da1]"
@@ -248,14 +257,15 @@ console.log("the request inside 'GroupsModal': ",request)
                 {console.log("allGroups inside the GroupsModal component: ", allGroups)}
                   <ul>
                     {(parseInt(allGroups.nbGroups, 10) || 0) === 0 ? (
-                      <label className="allGroups dark:text-[#3f82a9]">There are no groups available</label>
+                      <label className="allGroups text-[#4893be] dark:text-[#3f82a9]">There are no groups available</label>
                       ) : (
                         allGroups.sliceOfGroups.map((grp) => (
                         <span key={grp.id}>
                         <li className="py-2 px-2 text-ml hover:bg-[#c7e6f8] dark:hover:bg-[#5a9fc6] dark:hover:text-[#2f627f] flex space-x-4">
                         
                         {console.log("the value of grpMemberis: ",grpMember)}
-                        {grp.gpMembers === null || grp.gpMembers.includes(request) === false ?  (
+                        {console.log("the value of request, creator, and grp.gpMembers is: ",request, grp.creator, grp.gpMembers)}
+                        {request != grp.creator && grp.gpMembers === null || request != grp.creator && grp.gpMembers.includes(request) === false ?  (
                         <input
                         name={grp.id}
                         type="checkbox"
@@ -264,13 +274,13 @@ console.log("the request inside 'GroupsModal': ",request)
                         />
             
                         ) : (
-                        <div className="isMember "></div>
+                        <div className="isMember flex space-x-4"></div>
                         )}
                         <p
                         style={{ cursor: 'pointer' }}
                         id="selectedGrp"
                         onClick={() => {
-                          {console.log("who ids the group creator", grp.creator, request)}
+                          {console.log("who is the group creator", grp.creator, request)}
                         grp.gpMembers === null || (grp.creator != request && grp.gpMembers.includes(request) === false) ? setGrpMember(false): setGrpMember(true)
                         handleOpenGpProfile();
                         handleSelectGrp(grp);
@@ -288,7 +298,7 @@ console.log("the request inside 'GroupsModal': ",request)
 
                   <div>
                   <br></br>
-                  <input type="submit" id="joinGpSubmit" value="Join group"
+                  <input type="submit" id="joinGpSubmit" value="Join group" style={{marginBottom:10+"px"}}
                   className="cursor-pointer absolute justify-center flex items-center p-2 w-[calc(35%-1rem)] text-base font-medium text-white 
                   rounded-lg transition duration-75 group bg-[#66c3f8] dark:bg-[#4e99c4]  hover:bg-[#4c97c2] hover:text-[#c2e5f9]
                   shadow-lg dark:text-white dark:hover:bg-[#62bef3]
