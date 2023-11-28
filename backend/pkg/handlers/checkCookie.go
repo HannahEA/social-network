@@ -127,8 +127,8 @@ func (repo *dbStruct) checkCookieDB(cookieValue string) int {
 
 }
 
-func (repo *dbStruct) GetFollowing(username string) ([]any, error) {
-	var following []any
+func (repo *dbStruct) GetFollowing(username string) ([]interface{}, error) {
+	var following []interface{}
 	rows, err2 := repo.db.Query(`SELECT influencerUserName FROM Followers WHERE followerUserName = ? AND accepted = 'Yes'`, username)
 	if err2 != nil {
 		fmt.Println("Get following: query error", err2)
@@ -145,8 +145,8 @@ func (repo *dbStruct) GetFollowing(username string) ([]any, error) {
 	}
 	return following, nil
 }
-func (repo *dbStruct) GetFollowers(username string) ([]any, error) {
-	var followers []any
+func (repo *dbStruct) GetFollowers(username string) ([]interface{}, error) {
+	var followers []interface{}
 	rows, err2 := repo.db.Query(`SELECT followerUserName FROM Followers WHERE influencerUserName  = ? AND accepted = 'Yes'`, username)
 	if err2 != nil {
 		fmt.Println("GetFollowers: query error", err2)
