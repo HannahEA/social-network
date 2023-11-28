@@ -15,7 +15,7 @@ const GetConversation = ({reciever, name, allData, type}) => {
     send.classList.remove("hidden")
     // remove notification icon
     // chat box is open, notif icon is present
-    RemoveChatNotification({username: reciever, name:name})
+    RemoveChatNotification({username: reciever, name:name, type:type})
     const sender = allData.userInfo.username
     const getConversation = {
         reciever: reciever,
@@ -237,7 +237,7 @@ const RequestChatNotification = ({chat}) => {
 
   } )
 }
-const ChangeMessageNotification = ({chat}) => {
+const ChangeMessageNotification = ({chat, show}) => {
   let Icon = document.getElementById("notifIcon")
     // if the chat box is not open
     // and if the chat notif icon is not present and theres a new chat 
@@ -245,22 +245,23 @@ const ChangeMessageNotification = ({chat}) => {
       console.log("adding icon")
       //add the chat notif icon
       Icon.style.display = "flex"
-    } else if (Icon.style.display == "flex"){
+    } else if (Icon.style.display == "flex" && show != 'yes'){
       // remove the chat notif icon
       Icon.style.display = "none"
     }
 }
 
 
-const ChangeChatNotification = ({usernames}) => {
+const ChangeChatNotification = ({usernames, type}) => {
     //range through offline users
     let users = document.getElementById("offline")
-    for (let i = 0; i<2 ; i++) {
+    for (let i = 0; i<3 ; i++) {
       for(const child of users.children) {
         for(var j = 0; j < usernames.length; j++) {
            //if the button is for the reicipient of the chat message
            if ( child.innerHTML == usernames[j][0]) {
-            if (child.children.length == 0 &&(usernames.length == 1 ||   usernames[j][2] != '0')){
+             console.log(child.innerHTML, usernames[j][0])
+            if (type == 'private' && (child.children.length == 0)&&(usernames.length == 1 ||   usernames[j][2] != '0')){
                 //if you open the chat box for the first time add icon to all OR if the chatbox is open and a new chat is sent add icon 
                 console.log("!chat icon: adding")
                 //if the chat notif icon is not present and theres a new chat
@@ -270,22 +271,39 @@ const ChangeChatNotification = ({usernames}) => {
                 dot.classList.add('w-3', 'h-3', 'top-1', 'right-2', 'rounded-xl', 'bg-red-200')
                 child.append(dot)
                 break
+              }else if (type == 'group' && (child.children.length == 0) &&(usernames.length == 1 ||   usernames[j][1] != '0')) {
+                //if you open the chat box for the first time add icon to all OR if the chatbox is open and a new chat is sent add icon 
+                console.log("!chat icon: adding", child.children.length, usernames.length, usernames[j][0])
+                //if the chat notif icon is not present and theres a new chat
+                //add the chat notif icon
+                let dot = document.createElement("div")
+                dot.setAttribute("id", "red-dot")
+                dot.classList.add('w-3', 'h-3', 'top-1', 'right-2', 'rounded-xl', 'bg-red-200')
+                child.append(dot)
+                break
+  
               }
-            }
+              console.log("!chat icon: adding", child.children.length, usernames.length, usernames[j][0])
+            } 
          }
       }
       //repeat for online users
-      users = document.getElementById("online")
+      if (i == 0) {
+        users = document.getElementById("online")
+      } else if (i == 1) {
+        users = document.getElementById("groupChats")
+      }
+      
     }  
 } 
 
 
-const RemoveChatNotification = ({username, name}) => {
+const RemoveChatNotification = ({username, name, type}) => {
   let notif  = false
   console.log("receiver, username and name inside RemoveChatNotification", username, name)
   
   let users = document.getElementById("offline")
-  for (let i = 0; i<2 ; i++) {
+  for (let i = 0; i<3 ; i++) {
      for(const child of users.children) {
         //if the button is the one you pressed on 
         let user = child.innerHTML
@@ -304,13 +322,19 @@ const RemoveChatNotification = ({username, name}) => {
         }
         
       }
-      users = document.getElementById("online")
+      if(i == 0 ) {
+        users = document.getElementById("online")
+      }
+      if (i == 1) {
+        users = document.getElementById("groupChats")
+      }
   }
   console.log("delete notif from ", username, " to ", name)
   let chat = {
     username: username,
     reciever: name,
-    status: "seen"
+    status: "seen",
+    type: type
   }
   if (notif == true) {
     fetch(`${apiURL}/chat`, {
@@ -343,6 +367,7 @@ const RemoveChatNotification = ({username, name}) => {
    let chat = document.getElementById("chatOpen")
    if (chat.style.display == "flex") {
     chat.style.display = "none"
+    // ChangeMessageNotification({chat:{}})
    } else {
     //remove chat notif if its present 
      ChangeMessageNotification({})

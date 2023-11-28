@@ -100,8 +100,19 @@ const Feed = () => {
           for (const user of message.presences.clients) {
             console.log("no. of chats", user)
             if (user[2] != '0') {
-              ChangeChatNotification({ usernames:message.presences.clients})
-              ChangeMessageNotification({chat: message.chat})
+              ChangeChatNotification({ usernames:message.presences.clients, type: 'private'})
+              ChangeMessageNotification({chat: message.chat, show: 'yes'})
+              break
+            }
+          }
+         }
+         if (message.presences.groups) {
+          for (const user of message.presences.groups) {
+            console.log("no. of groups", user)
+            if (user[1] != '0') {
+              console.log('adding group chat notif icon')
+              ChangeChatNotification({ usernames:message.presences.groups, type:'group'})
+              ChangeMessageNotification({chat: message.chat, show: 'yes'})
               break
             }
           }
@@ -155,7 +166,7 @@ const Feed = () => {
           } else {
             // post request- add chat notification to db server side
             console.log("chat sent with request for group notif", message.chat)
-            // RequestChatNotification({chat: message.chat, username: allData.current.userInfo.username})
+            RequestChatNotification({chat: message.chat, username: allData.current.userInfo.username})
             // add notification icon to the relevant chat or to the messages button
             console.log("add notif icon")
             let chatBox = document.getElementById("chatOpen")
@@ -690,7 +701,7 @@ const [viewProfile, setViewProfile] = useState(false)
     setViewProfile(! viewProfile)
 
     //have removed the below as it cleared the feed page
-    /*setViewProfile(true) 
+    setViewProfile(true) 
     let main = document.querySelector('main')
     let length = main.children.length
 
@@ -702,7 +713,7 @@ const [viewProfile, setViewProfile] = useState(false)
         let child = main.childNodes[2]
         child.remove()
       } 
-    }*/
+    }
   }
 
 

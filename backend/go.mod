@@ -9,13 +9,4 @@ require (
 	golang.org/x/crypto v0.9.0
 )
 
-require (
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-)
-
-require (
-	github.com/golang-migrate/migrate/v4 v4.16.2
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
-)
+require github.com/golang-migrate/migrate/v4 v4.16.2

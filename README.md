@@ -67,13 +67,15 @@ DANGEROUSLY_DISABLE_HOST_CHECK=true
    npm install react scripts
 
 3. To run the GO back-end server:
+   check that this line is contained within the sqlite.go OpenDatabase finction:
+   ### `sqliteDatabase, err := sql.Open("sqlite3", filename+"?_journal_mode=WAL")`
    cd backend
    go run server.go
 
 4. To run the React front-end server, in a separate VSC terminal window type:
    cd frontend
    npm start
-
+~
 # VSC commands to merge your branch to master:
 1. git checkout master
 2. git add . (Necessary if you need to commit changes in your branch first)

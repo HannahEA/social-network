@@ -55,8 +55,8 @@ type AllUsersData struct {
 	Age        string `json:"age"`
 	Gender     string `json:"gender"`
 	Email      string `json:"email"`
-	Followers  []any  `json:"followers"`
-	Following  []any  `json:"following"`
+	Followers  []interface{} `json:"followers"`
+	Following  []interface{}  `json:"following"`
 }
 
 type RegistrationData struct {
