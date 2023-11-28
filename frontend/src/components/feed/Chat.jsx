@@ -216,7 +216,7 @@ const PrintNewChat = ({chat, who}) => {
 }*/
 
 const RequestChatNotification = ({chat}) => {
-  console.log("adding chat Notification")
+  console.log("adding chat Notification", chat)
   chat.status = "delivered"
   fetch(`${apiURL}/chat`, {
     method: "POST",

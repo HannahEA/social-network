@@ -22,6 +22,7 @@ func OpenDatabase(filename string) *sql.DB {
 	// 	file.Close()
 	// }
 
+	//prevents sqlite from locking: +"?_journal_mode=WAL"
 	sqliteDatabase, err := sql.Open("sqlite3", filename+"?_journal_mode=WAL")
 	if err != nil {
 		log.Fatal(err.Error())
