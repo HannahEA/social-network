@@ -21,7 +21,7 @@ func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r
 
 	// check if it it a request to add a chat notification
 	if chat.Status == "delivered" {
-		fmt.Println("new chat notification---------", chat.Type, chat.Status)
+		fmt.Println("new chat notification for chat.member-------", chat.Type, chat.Status, chat.Member)
 
 		// add chat notification to database
 		if chat.Type == "privateChat" {
