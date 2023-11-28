@@ -101,6 +101,7 @@ type Comment struct {
 	PostID    int    `json:"postId"`
 	AuthorID  int    `json:"authorId"`
 	Author    string `json:"author"`
+	ImageURL     string `json:"url"`
 	Content   string `json:"content"`
 	Date      string `string:"date"`
 	Page      string `json:"page"`

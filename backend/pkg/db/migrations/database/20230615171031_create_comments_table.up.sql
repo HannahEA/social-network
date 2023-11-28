@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS "Comments" (
 			"postID" INTEGER NOT NULL,
 			"authorID" INTEGER NOT NULL,
 			"author" TEXT NOT NULL,
+			"imageURL" TEXT,
 			"content" TEXT NOT NULL, 
 			"creationDate" TIMESTAMP,
 		FOREIGN KEY(postID)REFERENCES Posts(postID),
