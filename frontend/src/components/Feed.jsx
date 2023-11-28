@@ -651,14 +651,23 @@ const handleClickUsersList = () => {
 }
 
   
-
+/*const showProfile = () =>{
+    //show or hide user profile when clicking button
+    setViewProfile(! viewProfile)
+}*/
 
 // OPEN PROFILE
 
 const [viewProfile, setViewProfile] = useState(false)
+
   const openProfile = () => {
-    //show or hide user profile when clicking button
-    setViewProfile(! viewProfile)
+setViewProfile(! viewProfile)
+
+    /*if (viewProfile == true){
+      showProfile();
+    }else{
+      navigate("/feed");
+    }*/
 
     //have removed the below as it cleared the feed page
     /*setViewProfile(true) 
