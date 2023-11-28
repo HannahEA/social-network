@@ -35,10 +35,10 @@ func NewService(repo AllDbMethods) AllHandlersMethods {
 }
 
 type AllDbMethods interface {
-	//registration
+	// registration
 	IsEmailNicknameTaken(email string, nickname string) bool
 	RegisterUser(data RegistrationData) (int, error)
-	//login
+	// login
 	ValidateLogin(email, password string) (bool, error)
 	GetUserEmail(userId string) (string, error)
 	AddSession(w http.ResponseWriter, sessionName string, user *User)
@@ -47,7 +47,7 @@ type AllDbMethods interface {
 	InsertFollowReply(followData FollowReply) error
 	InsertSession(u *User, session *http.Cookie) *Session
 	IsUserAuthenticated(w http.ResponseWriter, u *User) error
-	//logout
+	// logout
 	DeleteSession(w http.ResponseWriter, cookieValue string) error
 	GetUserByCookie(cookieValue string) *User
 	NewUser() *User
@@ -59,7 +59,7 @@ type AllDbMethods interface {
 	GetUserByNickName(nickName string) (User, error)
 	FindByUsername(name string) *User
 	DeleteCookieDB(cookieValue string) (int64, error)
-	//post database queries
+	// post database queries
 	AddPostToDB(data Post) (int, error)
 	AddPostViewersToDB(data Post, id int) error
 	GetPublicPosts(user *User) ([]Post, error)
@@ -67,9 +67,9 @@ type AllDbMethods interface {
 	GetUsersData(email string) ([]AllUsersData, error)
 	GetAlmostPrivatePosts(user *User) ([]Post, error)
 	GetPrivatePosts(user *User) ([]Post, error)
-	GetFollowing(username string) ([]any, error)
-	GetFollowers(username string) ([]any, error)
-	//comment database queries
+	GetFollowing(username string) ([]interface{}, error)
+	GetFollowers(username string) ([]interface{}, error)
+	// comment database queries
 	AddCommentToDB(data Post) error
 	GetComments(data Post) ([]Comment, error)
 	getAvatar(email string) (string, error)
@@ -86,7 +86,7 @@ type AllDbMethods interface {
 	ClientsFollowingUser(user *User) map[*websocket.Conn]string
 	IsClientOnline(rows *sql.Rows, user *User) [][]string
 	GetAllUserPosts(user *User) ([]Post, error)
-	//Groups
+	// Groups
 	InsertNewGroup(g NewGroup) (int, error)
 	InsertNewEvent(e NewEventNotif) (int, error)
 	InsertGrpMember(newGp NewGroup, i int) error
@@ -100,13 +100,24 @@ type AllDbMethods interface {
 	InsertGroupMemberReply(joinGrpReply JoinGroupReply) error
 	InsertEventPartReply(evReply EvtReply) error
 	GetExistingGroups() (string, []NewGroup)
-	GetOneGroupEvents(EvtMember string, GrpID int, GrpName string) (string, []OneEvent) 
+	GetOneGroupEvents(EvtMember string, GrpID int, GrpName string) (string, []OneEvent)
 	GetPendingJoinGroupRequests(creator string) (string, []OneOfflineJoinGroupRequest)
 	getUserAvatar(nkName string) (NewGroupNotif, error)
 	GetGroupComments(post Post) ([]Comment, error)
 	GetGroupPosts(id int) ([]Post, error)
 	AddGroupPostToDB(post Post) error
 	AddGroupCommentToDB(post Post) error
+	AddGroupChatToDB(groupName string, id int, member string)
+	GetGroupNameFromId(id int) string
+	FullGroupChatList(user *User) [][]string
+	CheckForGroupNotification(groupId int, username string) (bool, int, error)
+	FindGroupChat(chat Chat) (Conversation, int)
+	GetGroupChatHistory(groupID int) []Chat
+	GetGroupFromGroupName(groupname string) (NewGroup, error)
+	AddNewGroupChatNotif(groupId int, recip string, sender string)
+	CheckGroupChatNotification(grouId int, member string) (int, error)
+	AddGroupMessageToDB(chat Chat, id int)
+	DeleteGroupChatNotifDB(recipient string, groupID int) (int64, error) 
 }
 
 // The dabataseStruct

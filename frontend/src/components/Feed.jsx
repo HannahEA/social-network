@@ -100,33 +100,73 @@ const Feed = () => {
           for (const user of message.presences.clients) {
             console.log("no. of chats", user)
             if (user[2] != '0') {
-              ChangeChatNotification({ usernames:message.presences.clients})
-              ChangeMessageNotification({chat: message.chat})
+              ChangeChatNotification({ usernames:message.presences.clients, type:'private'})
+              ChangeMessageNotification({chat: message.chat, show: 'yes'})
+              break
+            }
+          }
+         }
+         if (message.presences.groups) {
+          for (const user of message.presences.groups) {
+            console.log("no. of groups", user)
+            if (user[1] != '0') {
+              console.log('adding group chat notif icon')
+              ChangeChatNotification({ usernames:message.presences.groups, type:'group'})
+              ChangeMessageNotification({chat: message.chat, show: 'yes'})
               break
             }
           }
          }
           
          
-        } else if (message.type == "user update") {
+        } else if (message.type == "user update"|| message.type == "group chat update") {
           console.log("message type", message.type)
           allData.current.presences = message.presences
+          
           AddUserToChatList({type: message.type, allData: allData.current})
         }else if (message.type == "chat") {
           //change current user state variable
           console.log("the message includes sender?", message)
           setRequestBy(message.sender)
           console.log("chat recieved", message)
+
+          allData.current.chat = message.chat
           //check which chat is open in the chatbox by checking the chats div name which should be the converstion id
-          let chatOpen= document.getElementById('chatOpen').style.display
-          // console.log(chatId, " chatId")
-          if (chatOpen== "flex") {
+          let chatId = document.getElementById('chats').getAttribute('name')
+          console.log(chatId, " chatId")
+          let type = document.getElementById('chats').getAttribute('chattype')
+          let chatOpen = document.getElementById("chatOpen").style.display
+          if (message.chat.chatID == chatId && type == "privateChat" && chatOpen == "flex") {
+            console.log("printing chat")
+            // if the converstion id of the chat matches the open chat, then print the chat
+            PrintNewChat({chat: message.chat})
+          } else {
+            // post request- add chat notification to db server side
+            RequestChatNotification({chat: allData.current.chat, username: allData.current.userInfo.username})
+            // add notification icon to the relevant chat or to the messages button
+            console.log("add notif icon")
+            let chatBox = document.getElementById("chatOpen")
+            if (chatBox.style.display != "flex") {
+              console.log("chat box is not open", chatBox.display)
+              ChangeMessageNotification({chat: allData.current.chat}) 
+            }
+              ChangeChatNotification({usernames:[[allData.current.chat.username]], type: 'private'})
+            } 
+          } else if (message.type == "groupMessage"){
+            console.log("group message received", message)
+          //check which chat is open in the chatbox by checking the chats div name which should be the converstion id
+          let chatId = document.getElementById('chats').getAttribute('name')
+          console.log(chatId, " chatId")
+          let type = document.getElementById('chats').getAttribute('chattype')
+          let chatOpen = document.getElementById("chatOpen").style.display
+          if (message.chat.chatID == chatId && type == "groupChat" && chatOpen == "flex") {
             console.log("printing chat")
             // if the converstion id of the chat matches the open chat, then print the chat
             PrintNewChat({chat: message.chat, who: allData.current.userInfo.username})
           } else {
             // post request- add chat notification to db server side
-            RequestChatNotification({chat: message.chat})
+            console.log("chat sent with request for group notif", message.chat)
+            RequestChatNotification({chat: message.chat, username: allData.current.userInfo.username})
             // add notification icon to the relevant chat or to the messages button
             console.log("add notif icon")
             let chatBox = document.getElementById("chatOpen")
@@ -134,9 +174,9 @@ const Feed = () => {
               console.log("chat box is not open", chatBox.display)
               ChangeMessageNotification({chat: message.chat}) 
             }
-              ChangeChatNotification({usernames:[[message.chat.username]]})
+              ChangeChatNotification({usernames:[[message.chat.reciever]], type: 'group'})
             } 
-          } else if (message.type == "followNotif"){
+          }else if (message.type == "followNotif"){
           //send follow notification request to online user
           console.log("follow notification:\n", message.followNotif)
           allData.current.followNotif = message.followNotif
@@ -661,7 +701,7 @@ const [viewProfile, setViewProfile] = useState(false)
     setViewProfile(! viewProfile)
 
     //have removed the below as it cleared the feed page
-    /*setViewProfile(true) 
+    setViewProfile(true) 
     let main = document.querySelector('main')
     let length = main.children.length
 
@@ -673,7 +713,7 @@ const [viewProfile, setViewProfile] = useState(false)
         let child = main.childNodes[2]
         child.remove()
       } 
-    }*/
+    }
   }
 
 

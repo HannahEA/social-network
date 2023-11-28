@@ -55,8 +55,8 @@ type AllUsersData struct {
 	Age        string `json:"age"`
 	Gender     string `json:"gender"`
 	Email      string `json:"email"`
-	Followers  []any  `json:"followers"`
-	Following  []any  `json:"following"`
+	Followers  []interface{} `json:"followers"`
+	Following  []interface{}  `json:"following"`
 }
 
 type RegistrationData struct {
@@ -160,6 +160,7 @@ type WebsocketMessage struct {
 type Presences struct {
 	//logged in users nicknames
 	Clients  [][]string `json:"clients"`
+	Groups   [][]string `json:"groups"`
 	LoggedIn []string   `json:"loggedIn"`
 }
 
@@ -170,6 +171,7 @@ type Conversation struct {
 	//chat reciever username
 	Participant2   string `json:"reciever"`
 	ConversationId string `json:"converstionID"`
+	Type           string `json:"type"`
 }
 
 type Chat struct {
@@ -178,9 +180,11 @@ type Chat struct {
 	Sender string `json:"username"`
 	//chat reciever username
 	Reciever       string `json:"reciever"`
+	Member         string `json:"member"`
 	Date           string `json:"date"`
 	ChatId         string `json:"chatID"`
 	ConversationId string `json:"convoID"`
+	Type           string `json:"type"`
 	Status         string `json:"status"`
 }
 

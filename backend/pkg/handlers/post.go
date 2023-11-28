@@ -18,7 +18,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	//We get the cookie
+	// We get the cookie
 	c, err := r.Cookie("user_session")
 	if err != nil {
 		fmt.Println("Cookie is empty", err)
@@ -38,8 +38,8 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 
 	if data.PostType == "newPost" {
 		if data.GroupId > 0 {
-			//submitting post at group profile page
-			//add post to db
+			// submitting post at group profile page
+			// add post to db
 			posts := []Post{}
 			err := service.repo.AddGroupPostToDB(data)
 			if err != nil {
@@ -61,8 +61,8 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			// get latest post and send back to client side with group id
 			json.NewEncoder(w).Encode(posts[0])
 		} else {
-			//submitting post at feed
-			//return id of the new post
+			// submitting post at feed
+			// return id of the new post
 			id, err := service.repo.AddPostToDB(data)
 			if err != nil {
 				log.Println(err)
@@ -101,10 +101,9 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			fmt.Println("Sending latest post")
 			json.NewEncoder(w).Encode(posts[0])
 		}
-
 	} else if data.PostType == "getPosts" {
 		posts := []Post{}
-		//use cookie to get user
+		// use cookie to get user
 		if data.Page == "groupProfile" {
 			fmt.Println("getting posts for Group Profile", data.GroupId)
 			// get group posts
@@ -117,7 +116,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 					return
 				}
 			}
-			//get group comments
+			// get group comments
 			comments := []Comment{}
 			for i, post := range posts {
 				comments, err = service.repo.GetGroupComments(post)
@@ -136,7 +135,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 
 		} else {
 			if data.Page == "myProfile" {
-				//profile page
+				// profile page
 				// query database for all posts by this user
 				userPosts, err := service.repo.GetAllUserPosts(user)
 
@@ -145,7 +144,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 					fmt.Println("Post Handler: GetAllUserPosts error: ", err)
 				}
 			} else if data.Page == "feed" {
-				//feed page
+				// feed page
 				fmt.Println("getting Public posts")
 				publicPosts, err := service.repo.GetPublicPosts(user)
 				posts = publicPosts
@@ -161,7 +160,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 					http.Error(w, "Failed to get private post", http.StatusInternalServerError)
 					return
 				}
-				//search post table for almost private posts this user has been allowed to see and append to list
+				// search post table for almost private posts this user has been allowed to see and append to list
 				almPrivatePosts, err3 := service.repo.GetAlmostPrivatePosts(user)
 				if err3 != nil {
 					log.Println(err3)
@@ -195,7 +194,6 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 			comments, err = service.repo.GetGroupComments(data)
 		} else {
 			comments, err = service.repo.GetComments(data)
-
 		}
 		if err != nil {
 			log.Println(err)
@@ -222,9 +220,7 @@ func (service *AllDbMethodsWrapper) PostHandler(w http.ResponseWriter, r *http.R
 				return
 			}
 		}
-
 	}
-
 }
 
 func ScanPosts(rows *sql.Rows) ([]Post, error) {
@@ -247,20 +243,19 @@ func ScanPosts(rows *sql.Rows) ([]Post, error) {
 		if parseError != nil {
 			log.Fatal("getPublicPosts: parse creationDate Error")
 		}
-		//get the current date
+		// get the current date
 		currTime := time.Now()
 		currDate := currTime.Format("2006-01-02")
-		//get the date the post was created
+		// get the date the post was created
 		postDate = postTime.Format("2006-01-02")
-		//if the post was created today
+		// if the post was created today
 		if currDate == postDate {
-			//send the time insted of the date
+			// send the time insted of the date
 
 			postDate = postTime.Format("3:04PM")
-
 		}
 
-		//tags
+		// tags
 		tags := strings.Split(category, ",")
 		posts = append([]Post{{
 			PostID:    postID,
@@ -309,7 +304,6 @@ func (repo *dbStruct) GetAlmostPrivatePosts(user *User) ([]Post, error) {
 	}
 
 	return posts, nil
-
 }
 
 func (repo *dbStruct) GetPrivatePosts(user *User) ([]Post, error) {
@@ -318,7 +312,6 @@ func (repo *dbStruct) GetPrivatePosts(user *User) ([]Post, error) {
 	followers, err := repo.GetFollowers(user.NickName)
 	if err != nil {
 		fmt.Println("error getting followers: ", err)
-
 	}
 	fmt.Println("who user follows this user?", followers)
 	placeholders := make([]string, len(followers))
@@ -340,11 +333,11 @@ func (repo *dbStruct) GetPrivatePosts(user *User) ([]Post, error) {
 
 	return posts, nil
 }
+
 func (repo *dbStruct) GetAllUserPosts(user *User) ([]Post, error) {
 	posts := []Post{}
 	query := `SELECT postID, author, title, content, category, imageURL, imageFile, creationDate FROM Posts WHERE author = ?`
 	rows, err := repo.db.Query(query, user.NickName)
-
 	if err != nil {
 		return posts, fmt.Errorf("DB Query error: %+v", err)
 	}
@@ -360,12 +353,12 @@ func (repo *dbStruct) GetAllUserPosts(user *User) ([]Post, error) {
 func (repo *dbStruct) AddPostToDB(post Post) (int, error) {
 	// time
 	date := time.Now()
-	//cookie
+	// cookie
 	cookieArr := strings.Split(post.Cookie, "=")
 	cookieID := cookieArr[1]
-	//user info
+	// user info
 	user := repo.GetUserByCookie(cookieID)
-	//category
+	// category
 	categories := strings.Join(post.Category, ",")
 	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
 	if err != nil {
@@ -420,17 +413,16 @@ func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 		if parseError != nil {
 			log.Fatal("getPublicPosts: parse commentDate Error")
 		}
-		//get the current date
+		// get the current date
 		currTime := time.Now()
 		currDate := currTime.Format("2006-01-02")
-		//get the date the post was created
+		// get the date the post was created
 		commentDate = cTime.Format("2006-01-02")
-		//if the post was created today
+		// if the post was created today
 		if currDate == commentDate {
-			//send the time insted of the date
+			// send the time insted of the date
 
 			commentDate = cTime.Format("3:04PM")
-
 		}
 		comments = append([]Comment{{
 			CommentID: commentID,
@@ -446,16 +438,15 @@ func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 		return comments, err
 	}
 	return comments, nil
-
 }
 
 func (repo *dbStruct) AddCommentToDB(post Post) error {
 	// time
 	date := time.Now()
-	//cookie
+	// cookie
 	cookieArr := strings.Split(post.Cookie, "=")
 	cookieID := cookieArr[1]
-	//user info
+	// user info
 	user := repo.GetUserByCookie(cookieID)
 
 	_, err := repo.db.Exec("INSERT INTO Comments ( postID, authorID, author, imageURL, content, creationDate) VALUES ( ?, ?, ?, ?, ?, ?)", post.PostID, user.id, user.NickName, post.ImageURL, post.Content, date)
@@ -469,14 +460,14 @@ func (repo *dbStruct) AddCommentToDB(post Post) error {
 func (repo *dbStruct) AddGroupPostToDB(post Post) error {
 	// time
 	date := time.Now()
-	//cookie
+	// cookie
 	cookieArr := strings.Split(post.Cookie, "=")
 	cookieID := cookieArr[1]
-	//user info
+	// user info
 	user := repo.GetUserByCookie(cookieID)
-	//category
+	// category
 	categories := strings.Join(post.Category, ",")
-	var visibility = "Public"
+	visibility := "Public"
 	_, err := repo.db.Exec("INSERT INTO GroupPosts (groupID, authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", post.GroupId, user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, visibility)
 	if err != nil {
 		fmt.Println("error executing query: ", err)
@@ -510,20 +501,19 @@ func (repo *dbStruct) GetGroupPosts(id int) ([]Post, error) {
 		if parseError != nil {
 			return posts, fmt.Errorf("getGroupPosts: parse creationDate Error")
 		}
-		//get the current date
+		// get the current date
 		currTime := time.Now()
 		currDate := currTime.Format("2006-01-02")
-		//get the date the post was created
+		// get the date the post was created
 		postDate = postTime.Format("2006-01-02")
-		//if the post was created today
+		// if the post was created today
 		if currDate == postDate {
-			//send the time insted of the date
+			// send the time insted of the date
 
 			postDate = postTime.Format("3:04PM")
-
 		}
 
-		//tags
+		// tags
 		tags := strings.Split(category, ",")
 		posts = append([]Post{{
 			PostID:    postID,
@@ -544,10 +534,10 @@ func (repo *dbStruct) GetGroupPosts(id int) ([]Post, error) {
 func (repo *dbStruct) AddGroupCommentToDB(post Post) error {
 	// time
 	date := time.Now()
-	//cookie
+	// cookie
 	cookieArr := strings.Split(post.Cookie, "=")
 	cookieID := cookieArr[1]
-	//user info
+	// user info
 	user := repo.GetUserByCookie(cookieID)
 
 	_, err := repo.db.Exec("INSERT INTO GroupComments ( groupID, postID, authorID, author, imageURL, content, creationDate) VALUES ( ?, ?, ?, ?, ?, ?, ?)", 1, post.PostID, user.id, user.NickName, post.ImageURL, post.Content, date)
@@ -579,17 +569,16 @@ func (repo *dbStruct) GetGroupComments(post Post) ([]Comment, error) {
 		if parseError != nil {
 			log.Fatal("addGroupComments: parse commentDate Error")
 		}
-		//get the current date
+		// get the current date
 		currTime := time.Now()
 		currDate := currTime.Format("2006-01-02")
-		//get the date the post was created
+		// get the date the post was created
 		commentDate = cTime.Format("2006-01-02")
-		//if the post was created today
+		// if the post was created today
 		if currDate == commentDate {
-			//send the time insted of the date
+			// send the time insted of the date
 
 			commentDate = cTime.Format("3:04PM")
-
 		}
 		comments = append([]Comment{{
 			CommentID: commentID,
@@ -605,5 +594,4 @@ func (repo *dbStruct) GetGroupComments(post Post) ([]Comment, error) {
 		return comments, err
 	}
 	return comments, nil
-
 }

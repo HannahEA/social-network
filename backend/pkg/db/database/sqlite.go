@@ -22,16 +22,15 @@ func OpenDatabase(filename string) *sql.DB {
 	// 	file.Close()
 	// }
 
-	//sqliteDatabase, err := sql.Open("sqlite3", filename+"?_journal_mode=WAL")
-	sqliteDatabase, err := sql.Open("sqlite3", filename)
+	sqliteDatabase, err := sql.Open("sqlite3", filename+"?_journal_mode=WAL")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	return sqliteDatabase
 }
 
-//code from: https://github.com/golang-migrate/migrate#readme
-//apply migration
+// code from: https://github.com/golang-migrate/migrate#readme
+// apply migration
 func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 	//create a driver instance for the SQLite database
 	driver, err := sqlite3.WithInstance(sql3, &sqlite3.Config{})
