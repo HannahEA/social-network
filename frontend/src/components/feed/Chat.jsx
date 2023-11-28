@@ -254,6 +254,7 @@ const ChangeMessageNotification = ({chat, show}) => {
 
 const ChangeChatNotification = ({usernames, type}) => {
     //range through offline users
+    console.log(type)
     let users = document.getElementById("offline")
     for (let i = 0; i<3 ; i++) {
       for(const child of users.children) {
@@ -283,7 +284,7 @@ const ChangeChatNotification = ({usernames, type}) => {
                 break
   
               }
-              console.log("!chat icon: adding", child.children.length, usernames.length, usernames[j][0])
+              console.log("!chat icon: adding", type, child.children.length, usernames.length, usernames[j][0])
             } 
          }
       }

@@ -100,7 +100,7 @@ const Feed = () => {
           for (const user of message.presences.clients) {
             console.log("no. of chats", user)
             if (user[2] != '0') {
-              ChangeChatNotification({ usernames:message.presences.clients, type: 'private'})
+              ChangeChatNotification({ usernames:message.presences.clients, type:'private'})
               ChangeMessageNotification({chat: message.chat, show: 'yes'})
               break
             }
@@ -150,7 +150,7 @@ const Feed = () => {
               console.log("chat box is not open", chatBox.display)
               ChangeMessageNotification({chat: allData.current.chat}) 
             }
-              ChangeChatNotification({usernames:[[allData.current.chat.username]]})
+              ChangeChatNotification({usernames:[[allData.current.chat.username]], type: 'private'})
             } 
           } else if (message.type == "groupMessage"){
             console.log("group message received", message)
@@ -174,7 +174,7 @@ const Feed = () => {
               console.log("chat box is not open", chatBox.display)
               ChangeMessageNotification({chat: message.chat}) 
             }
-              ChangeChatNotification({usernames:[[message.chat.reciever]]})
+              ChangeChatNotification({usernames:[[message.chat.reciever]], type: 'group'})
             } 
           }else if (message.type == "followNotif"){
           //send follow notification request to online user
