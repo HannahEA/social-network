@@ -43,9 +43,12 @@ let awaitConvo = async(data) =>  {
       let convo = await data
       // revive converstion object with sender, reciever and conversation id
         //id should be attached to all chats
-      if (convo.type = "private") {
+      
         let chat = document.getElementById("chats")
       chat.setAttribute("name", convo.conversation.converstionID)
+      //to diffrentiate between group chat and private chat when you are sending a message
+      chat.setAttribute("chattype", convo.type)
+      console.log("all data conversation:", reciever, convo.conversation.converstionID)
       allData.conversation = {reciever: reciever, id:convo.conversation.converstionID} 
       //cear chat container 
       let chats = document.getElementById("chats")
@@ -56,29 +59,27 @@ let awaitConvo = async(data) =>  {
         PrintNewChat({chat: chat})
         })
       }
-      } else {
-        //group chat
-      }
-      
-      
-      
-    }
-    awaitConvo(data)    
+        
+    
   }
+    awaitConvo(data)    
+  
+}
 const AddUserToChatList = ({type, allData})=>  {
 
   if (type == "user update" ) {
     //update not full list 
     EditToUserList({allData: allData}) 
   }
-  // create presence set css based on online offline
-  let style = "flex items-center p-2 w-full text-base font-medium rounded-md transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" 
+  // create presence set csss based on online offline
+  let style = "flex items-left text-start p-1 w-full  font-medium text-sm rounded-md transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" 
  
   if (allData.presences.clients && type != "group chat update") {
     console.log("private chat update")
     allData.presences.clients.forEach((p)=> {
       if (p[0] != allData.userInfo.username) {
         let button = document.createElement('button')
+        let br = document.createElement('hr')
         button.addEventListener("click", () => {
           GetConversation({reciever: p[0], name: allData.userInfo.username, allData: allData, type:"private"})
         }
@@ -90,24 +91,28 @@ const AddUserToChatList = ({type, allData})=>  {
           //add styling to button
           button.classList.add("text-gray-900" )
           online.append(button)
+          online.append(br)
         } else {
           let offline = document.getElementById('offline')
           //add styling to button 
           button.classList.add("text-gray-300")
+          
           offline.append(button)
+          offline.append(br)
         }
         
       }
     } )
   }
-   if (type != "user update")  {
+   if (type != "user update" && allData.presences.groups)  {
     console.log("group chat update")
     //add group chat button
     allData.presences.groups.forEach((g)=>{
       let button = document.createElement('button')
+      let br = document.createElement('hr')
         button.addEventListener("click", () => {
-            console.log(allData.newGroupNotif, 'add user to chat')
-            GetConversation({reciever: allData.newGroupNotif.grpName, name: allData.userInfo.username, allData: allData, type:"groupChat"})
+            console.log(g[0], 'add user to chat')
+            GetConversation({reciever: g[0], name: allData.userInfo.username, allData: allData, type:"groupChat"})
           }
         )
           button.className = style
@@ -116,6 +121,7 @@ const AddUserToChatList = ({type, allData})=>  {
           let groups = document.getElementById('groupChats') 
          
           groups.append(button)
+          groups.append(br)
     })
     
   }
@@ -175,9 +181,13 @@ const PrintNewChat = ({chat}) => {
   
 }
 
-const RequestChatNotification = ({chat}) => {
-  console.log("adding chat Notification")
-  chat.status = "delivered"
+const RequestChatNotification = ({chat, username}) => {
+   chat.type = document.getElementById("chats").getAttribute("chattype")
+   
+   console.log("adding chat Notification", chat.type)
+  // chat.status = "delivered"
+ 
+  chat.member = username
   fetch(`${apiURL}/chat`, {
     method: "POST",
     headers: {
@@ -241,7 +251,7 @@ const ChangeChatNotification = ({usernames}) => {
 
 
 const RemoveChatNotification = ({username, name}) => {
-  
+  let notif  = false
   let users = document.getElementById("offline")
   for (let i = 0; i<2 ; i++) {
      for(const child of users.children) {
@@ -255,6 +265,7 @@ const RemoveChatNotification = ({username, name}) => {
           // if the chat notif icon is already present 
           if (child.children.length == 1) {
             //remove the icon 
+            notif = true
             console.log('removing chat notif icon')
             child.children[0].remove()
           }
@@ -269,7 +280,8 @@ const RemoveChatNotification = ({username, name}) => {
     reciever: name,
     status: "seen"
   }
-  fetch(`${apiURL}/chat`, {
+  if (notif == true) {
+    fetch(`${apiURL}/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -287,6 +299,8 @@ const RemoveChatNotification = ({username, name}) => {
     }
 
   } )
+  }
+  
 }
 
  const Chat = ({websocketRef, isWebSocketConnected, allData}) => {
@@ -320,7 +334,7 @@ const RemoveChatNotification = ({username, name}) => {
      websocketRef.current.send(
        JSON.stringify({
          message: chatMessage,
-         type: "chat",
+         type: chats.getAttribute("chattype"),
          username: allData.current.userInfo.username,
          reciever: allData.current.conversation.reciever,
          chatID: chats.getAttribute("name")
@@ -373,7 +387,7 @@ const RemoveChatNotification = ({username, name}) => {
           <button id="sendButton" onClick={() => {sendChatMessage()}} className="hidden mb-2 ml-20 w-1/3 bg-[#ecbba3] rounded-lg text-white shadow-md"><strong>Send</strong></button>
 
         </div>
-        <aside className="dark:bg-gray-400 flex flex-col h-full w-1/3 border-solid border text-center p-2" id="chatUsers">
+        <aside className="dark:bg-gray-400 flex flex-col h-full w-1/3 border-solid border text-left p-2 overflow-scroll" id="chatUsers">
         <div id="online"></div>
         <div id= "offline"></div>
         <div id="groupChats"></div>

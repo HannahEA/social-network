@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -194,7 +195,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			// less connections than before - logout
 			// which clients are following this user? return list of clients
 
-		case "chat":
+		case "privateChat":
 			var chat Chat
 			// Unmarshal full message as JSON and map it to a Message object
 			// err := ws.ReadJSON(&msg)
@@ -235,6 +236,69 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					service.repo.AddChatNotification(chat, count)
 				}
 			}
+		case "groupChat":
+			var chat Chat
+			// Unmarshal full message as JSON and map it to a Message object
+			// err := ws.ReadJSON(&msg)
+			jsonErr := json.Unmarshal(b, &chat)
+			fmt.Println("group chat message", chat)
+			if jsonErr != nil {
+				fmt.Println("there is an error with json msg: Websocket")
+				break
+			}
+			//get list of all members and group id
+			group, err := service.repo.GetGroupFromGroupName(chat.Reciever)
+			if err != nil {
+				fmt.Println("Websocket group chat: GetGroupFromGroupName err:", err)
+			}
+			// add chat to database
+			service.repo.AddGroupMessageToDB(chat, group.ID)
+			//check which members are online \
+			reciever := make(map[*websocket.Conn]string)
+			var offline []string
+			var count int
+			for _, member := range group.GpMembers {
+				count = 0
+				for conn, name := range Clients {
+					count++
+					if member == name && member != chat.Sender {
+						fmt.Println("which group members are online?", member, name)
+						reciever[conn] = name
+						chat.Member = name
+						break
+					} else if member != chat.Sender && member != name && count == len(Clients) {
+						fmt.Println("group message offline member:", member)
+						offline = append(offline, member)
+					}
+				}
+			}
+			// send to members that are online, with type groupchatmessage
+			fmt.Println("group chat message sent to reciever", chat)
+			if len(reciever) > 0 {
+				service.repo.BroadcastToChannel(
+					BroadcastMessage{
+						WebMessage: WebsocketMessage{
+							Chat: chat,
+							Type: "groupMessage"},
+						Connections: reciever,
+					},
+				)
+			}
+
+			//add notif for offline members with no existing notif
+			for _, member := range offline {
+
+				notifCount, err := service.repo.CheckGroupChatNotification(group.ID, member)
+				if err != nil && notifCount == -1 {
+					fmt.Println("Websocket group chat: CheckGroupChatNotification err:", err)
+					continue
+				}
+				if notifCount == 0 {
+					fmt.Println("adding new group chat notif to db")
+					service.repo.AddNewGroupChatNotif(group.ID, member, chat.Sender)
+				}
+			}
+
 		case "followingRequest":
 
 			var fInfo Follow
@@ -370,10 +434,10 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				//create group chat
 				m, err := service.repo.GetUserByEmail(newGp.Creator)
 				if err != nil {
-					fmt.Println("AddGroupChatMemeberToDB:", err)
+					fmt.Println("Websocket new group case:", err)
 					m.NickName = ""
 				}
-				service.repo.AddGroupChatMemeberToDB(newGp.GrpName, newGp.ID, m.NickName)
+				service.repo.AddGroupChatToDB(newGp.GrpName, newGp.ID, m.NickName)
 				//send group chat info to  group creator
 				reciever := make(map[*websocket.Conn]string)
 				reciever[ws] = newGp.Creator
@@ -438,7 +502,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				// if user has accepted the invite then add to group chat
 				id, _ := strconv.Atoi(joinGrpReply.GroupID)
 				groupName := service.repo.GetGroupNameFromId(id)
-				service.repo.AddGroupChatMemeberToDB(groupName, id, joinGrpReply.Member)
+				// service.repo.AddGroupChatMemeberToDB(groupName, id, joinGrpReply.Member)
 				//send group chat info to  group member
 				reciever := make(map[*websocket.Conn]string)
 				online := false
@@ -766,11 +830,8 @@ func (r *dbStruct) FullGroupChatList(user *User) [][]string {
 		err = rows.Scan(&title)
 		var group []string
 		group = append(group, title)
-		chat := Chat{
-			Sender:   user.NickName,
-			Reciever: title,
-		}
-		_, count, err := r.CheckForGroupNotification(chat)
+		groupInfo, err := r.GetGroupFromGroupName(title)
+		_, count, err := r.CheckForGroupNotification(groupInfo.ID, user.NickName)
 		if err != nil {
 			fmt.Println("FullGroupChatList:", err)
 		}
@@ -1336,7 +1397,7 @@ func (repo *dbStruct) getUserAvatar(nkName string) (NewGroupNotif, error) {
 	return theInvite, nil
 }
 
-func (repo *dbStruct) AddGroupChatMemeberToDB(groupName string, id int, member string) {
+func (repo *dbStruct) AddGroupChatToDB(groupName string, id int, member string) {
 	fmt.Println("adding group chat member to groupChat db----------")
 
 	query1 := ` INSERT INTO GroupChats (groupID, groupName, participant) VALUES (?, ?, ?)`
@@ -1364,4 +1425,87 @@ func (repo *dbStruct) GetGroupNameFromId(id int) string {
 	}
 	err = rows.Close()
 	return groupName
+}
+
+func (repo *dbStruct) AddGroupMessageToDB(chat Chat, id int) {
+	fmt.Println("adding group message to db")
+	query := `INSERT INTO GroupMessageHistory (chatMessage, sender, groupID, creationDate) VALUES (?,?,?,?)  `
+	// stmt, err := repo.db.Prepare(query)
+	// if err != nil {
+	// 	fmt.Println("AddGroupMessageToDB: Prepare Error", err)
+	// }
+	date := time.Now()
+	_, err := repo.db.Exec(query, chat.Message, chat.Sender, id, date)
+	if err != nil {
+		fmt.Println("AddGroupMessageToDB: Exec Error", err)
+	}
+}
+
+func (repo *dbStruct) AddNewGroupChatNotif(groupId int, recip string, sender string) {
+	query := `INSERT INTO ChatNotifications (sender, recipient, groupChatID, count) VALUES (?,?,?,?) `
+	stmt, err := repo.db.Prepare(query)
+	if err != nil {
+		fmt.Println("AddGroupChatNotif: Prepare Error", err)
+	}
+
+	_, err = stmt.Exec(sender, recip, groupId, 1)
+	if err != nil {
+		fmt.Println("AddGroupChatNotif: Exec Error", err)
+	}
+
+}
+
+func (repo *dbStruct) CheckGroupChatNotification(groupId int, member string) (int, error) {
+	var count int
+
+	query := `SELECT count FROM ChatNotifications WHERE groupChatID = ? AND recipient = ?`
+	rows, err := repo.db.Query(query, groupId, member)
+	if err != nil {
+		fmt.Println("GetGroupFromGroupName: Scan Error", err)
+		return count, err
+	}
+	for rows.Next() {
+		err = rows.Scan(&count)
+		if err != nil {
+			fmt.Println("GetGroupFromGroupName: Scan Error", err)
+			return 0, err
+		}
+	}
+	return count, nil
+}
+func (repo *dbStruct) GetGroupFromGroupName(groupName string) (NewGroup, error) {
+	var group NewGroup
+	var id int
+	query := `SELECT groupID FROM Groups WHERE title = ?`
+	rows, err := repo.db.Query(query, groupName)
+	if err != nil {
+		fmt.Println("GetGroupFromGroupName: Scan Error", err)
+		return group, err
+	}
+	for rows.Next() {
+		err = rows.Scan(&id)
+		if err != nil {
+			fmt.Println("GetGroupFromGroupName: Scan Error", err)
+			return group, err
+		}
+	}
+	var members []string
+	query2 := `SELECT member FROM GroupMembers WHERE grpID = ?`
+	rows2, err := repo.db.Query(query2, id)
+	if err != nil {
+		fmt.Println("GetGroupFromGroupName: Scan Error", err)
+		return group, err
+	}
+	for rows2.Next() {
+		var member string
+		err = rows2.Scan(&member)
+		if err != nil {
+			fmt.Println("GetGroupFromGroupName: Scan Error", err)
+			return group, err
+		}
+		members = append(members, member)
+	}
+	group.ID = id
+	group.GpMembers = members
+	return group, nil
 }

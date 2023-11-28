@@ -101,12 +101,16 @@ type AllDbMethods interface {
 	GetGroupPosts(id int) ([]Post, error) 
 	AddGroupPostToDB(post Post) (error) 
 	AddGroupCommentToDB(post Post) error
-	AddGroupChatMemeberToDB(groupName string, id int, member string) 
+	AddGroupChatToDB(groupName string, id int, member string) 
 	GetGroupNameFromId(id int) string
 	FullGroupChatList(user *User) [][]string
-	CheckForGroupNotification(chat Chat) (bool, int, error)
-	FindGroupChat(chat Chat) Conversation
-	GetGroupChatHistory(convo Conversation) []Chat  
+	CheckForGroupNotification(groupId int, username string) (bool, int, error)
+	FindGroupChat(chat Chat) (Conversation, int)
+	GetGroupChatHistory(groupID int) []Chat
+	GetGroupFromGroupName(groupname string) (NewGroup, error) 
+	AddNewGroupChatNotif(groupId int, recip string, sender string)
+	CheckGroupChatNotification(grouId int, member string) (int, error)
+	AddGroupMessageToDB(chat Chat, id int) 
 }
 
 // The dabataseStruct

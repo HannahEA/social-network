@@ -22,19 +22,33 @@ func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r
 
 	// check if it it a request to add a chat notification
 	if chat.Status == "delivered" {
-		fmt.Println("new chat notification---------")
-		// add chat notification to database
-		oldChats, count, err := service.repo.CheckForNotification(chat)
-		//add new notif to database or add 1 to count
-		if !oldChats || oldChats && err == nil {
-			fmt.Println("succesfully checked for notification")
-			fmt.Println("notif added")
-			service.repo.AddChatNotification(chat, count)
-			response["status"] = "notification added"
-			response["notifCount"] = count + 1
-		} else {
+		fmt.Println("new chat notification---------", chat.Type, chat.Status)
 
-			response["status"] = "notification error"
+		// add chat notification to database
+		if chat.Type == "privateChat" {
+			oldChats, count, err := service.repo.CheckForNotification(chat)
+			//add new notif to database or add 1 to count
+			if !oldChats || oldChats && err == nil {
+				fmt.Println("succesfully checked for notification")
+				fmt.Println("notif added")
+				service.repo.AddChatNotification(chat, count)
+				response["status"] = "notification added"
+				response["notifCount"] = count + 1
+			} else {
+
+				response["status"] = "notification error"
+			}
+		} else if chat.Type == "groupChat" {
+			fmt.Println("groupchat notif request")
+			group, err := service.repo.GetGroupFromGroupName(chat.Reciever)
+			if err != nil {
+				fmt.Println("ChatHandler:  GetGroupFromGroupName:", err)
+			}
+			countNotif, err := service.repo.CheckGroupChatNotification(group.ID, chat.Member)
+			fmt.Println("how many group chat notifications exist with these two people", countNotif)
+			if countNotif == 0 {
+				service.repo.AddNewGroupChatNotif(group.ID, chat.Member, chat.Sender)
+			}
 		}
 
 	} else if chat.Status == "seen" {
@@ -45,23 +59,31 @@ func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r
 			response["status"] = "notification removed"
 		} else {
 			response["status"] = "error removing notification"
-			
+
 		}
 
 	} else if chat.Type == "private" {
 		// new chat box has been opened get convoersation id
 		// delete any notifs for this chat from notif table
-		
+
 		conversation := service.repo.FindConversation(chat)
 		//get chat history
 		chats := service.repo.GetChatHistory(conversation)
 		response["conversation"] = conversation
 		response["chats"] = chats
-		response["type"] = "private"
+		response["type"] = "privateChat"
 	} else {
-		//get group chat id 
-		//get chat history
-		//response type = groupchat
+		fmt.Println("requesting group chat history")
+		//get group conversation id by groupname - chat.recipient
+		convo, groupID := service.repo.FindGroupChat(chat)
+		fmt.Println("group chat info", convo, groupID)
+		//get chat history and other group members using the id
+		chats := service.repo.GetGroupChatHistory(groupID)
+		fmt.Println("groupchats", chats)
+		//response type = groupchat so that you know what table to query when messages are sent by the user in this chat
+		response["conversation"] = convo
+		response["chats"] = chats
+		response["type"] = "groupChat"
 	}
 	w.Header().Set("Content-Type", "application/json")
 	jsonErr := json.NewEncoder(w).Encode(response)
@@ -87,7 +109,7 @@ func (repo *dbStruct) FindConversation(chat Chat) Conversation {
 	}
 
 	if count == 0 {
-		
+
 		//add conversation to db
 		repo.NewPrivateChatToDB(chat)
 	}
@@ -98,7 +120,6 @@ func (repo *dbStruct) FindConversation(chat Chat) Conversation {
 		fmt.Println("FindConversation: convoID Query Error", err3, chat)
 	}
 
-	
 	var conversationId string
 	for row.Next() {
 		err := row.Scan(&conversationId)
@@ -141,7 +162,6 @@ func (r *dbStruct) GetChatHistory(convo Conversation) []Chat {
 		return chats
 	}
 
-	
 	var chat Chat
 	for row.Next() {
 		err := row.Scan(&chat.ConversationId, &chat.Message, &chat.Sender, &chat.Date)
@@ -170,8 +190,8 @@ func (r *dbStruct) AddChatToDatabase(chat Chat) {
 
 func (r *dbStruct) CheckForNotification(chat Chat) (bool, int, error) {
 	count := 0
-	fmt.Println("checking for notifictations");
-	rows, err := r.db.Query(`SELECT count FROM Notifications WHERE (sender, recipient, type) = (?,?,?) `, chat.Sender, chat.Reciever, "chat")
+	fmt.Println("checking for notifictations")
+	rows, err := r.db.Query(`SELECT count FROM ChatNotifications WHERE (sender, recipient, type) = (?,?,?) `, chat.Sender, chat.Reciever, "chat")
 	if err != nil {
 		log.Println(err)
 		fmt.Println("failed to check Notification count in Database")
@@ -193,7 +213,7 @@ func (r *dbStruct) AddChatNotification(chat Chat, count int) {
 	if count == 0 {
 		fmt.Println("Adding new notification to database")
 		count++
-		_, err := r.db.Exec("INSERT INTO Notifications (sender, recipient, type, count) VALUES (?, ?, ?, ?)", chat.Sender, chat.Reciever, "chat", count)
+		_, err := r.db.Exec("INSERT INTO ChatNotifications (sender, recipient, type, count) VALUES (?, ?, ?, ?)", chat.Sender, chat.Reciever, "chat", count)
 		if err != nil {
 			log.Println(err)
 			fmt.Println("failed to add Notification to Database")
@@ -234,10 +254,10 @@ func (repo *dbStruct) DeleteChatNotifDB(chat Chat) (int64, error) {
 
 }
 
-func (r *dbStruct) CheckForGroupNotification(chat Chat) (bool, int, error) {
+func (r *dbStruct) CheckForGroupNotification(groupId int, username string) (bool, int, error) {
 	count := 0
-	fmt.Println("checking for notifictations");
-	rows, err := r.db.Query(`SELECT count FROM Notifications WHERE (sender, recipient, type) = (?,?,?) `, chat.Sender, chat.Reciever, "groupChat")
+	fmt.Println("checking for notifictations")
+	rows, err := r.db.Query(`SELECT count FROM ChatNotifications WHERE (groupChatID, recipient) = (?,?) `, groupId, username)
 	if err != nil {
 		log.Println(err)
 		fmt.Println("failed to check Notification count in Database")
@@ -249,27 +269,28 @@ func (r *dbStruct) CheckForGroupNotification(chat Chat) (bool, int, error) {
 		//get notification count
 		err := rows.Scan(&count)
 		if err != nil {
-			return true, count, err
+			return true, 1, err
 		}
 	}
 	return true, count, nil
 }
 
-func (repo *dbStruct) FindGroupChat(chat Chat) Conversation{
+func (repo *dbStruct) FindGroupChat(chat Chat) (Conversation, int) {
 
-	query2 := `SELECT conversationID FROM GroupChats WHERE title = ?`
+	query2 := `SELECT conversationID, groupID FROM GroupChats WHERE groupName = ?`
 	row, err3 := repo.db.Query(query2, chat.Reciever)
 	if err3 != nil {
 		fmt.Println("FindGroupChat: convoID Query Error", err3, chat)
 	}
 
-	
 	var conversationId string
+	var groupID int
 	for row.Next() {
-		err := row.Scan(&conversationId)
+		err := row.Scan(&conversationId, &groupID)
 		if err != nil {
 			fmt.Println("FindConversation: Scan Error", err, chat)
 		}
+		break
 	}
 	convo := Conversation{
 		Participant1:   chat.Sender,
@@ -277,11 +298,37 @@ func (repo *dbStruct) FindGroupChat(chat Chat) Conversation{
 		ConversationId: conversationId,
 	}
 
-	return convo
+	return convo, groupID
 
 }
 
-func (r * dbStruct) GetGroupChatHistory(convo Conversation) []Chat {
+func (r *dbStruct) GetGroupChatHistory(groupID int) []Chat {
 	var chats []Chat
+
+	rows, err := r.db.Query(`SELECT chatMessage, sender FROM GroupMessageHistory WHERE groupID = ?`, groupID)
+	fmt.Println("completed query for group chats")
+	if err != nil {
+		fmt.Println("GetGroupChatHistory Query:", err)
+		return chats
+	}
+	var chat Chat
+	var message string
+	var sender string
+	fmt.Println("... will scanning group chat messages")
+	for rows.Next() {
+		fmt.Println("scanning group chat messages")
+		err = rows.Scan(&message, &sender)
+		if err != nil {
+			fmt.Println("GetGroupChatHistory Scan:", err)
+			return chats
+		}
+		fmt.Println("group chat message", message)
+		chat = Chat{
+			Message: message,
+			Sender:  sender,
+		}
+		chats = append(chats, chat)
+		chat = Chat{}
+	}
 	return chats
 }

@@ -29,8 +29,8 @@ func OpenDatabase(filename string) *sql.DB {
 	return sqliteDatabase
 }
 
-//code from: https://github.com/golang-migrate/migrate#readme
-//apply migration
+// code from: https://github.com/golang-migrate/migrate#readme
+// apply migration
 func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 	//create a driver instance for the SQLite database
 	driver, err := sqlite3.WithInstance(sql3, &sqlite3.Config{})
@@ -100,15 +100,15 @@ func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 	CREATE TABLE IF NOT EXISTS Users (
 		"id" INTEGER PRIMARY KEY AUTOINCREMENT,
 		"firstName" TEXT ,
-		"lastName" TEXT,				
+		"lastName" TEXT,
 		"nickName" TEXT,
 		"age" INTEGER,
 		"gender" TEXT ,
-		"email" TEXT NOT NULL UNIQUE, 
+		"email" TEXT NOT NULL UNIQUE,
 		"password" BLOB NOT NULL,
 		"avatarURL" STRING,
 		"imageFile" BLOB,
-		"aboutMe" BLOB 
+		"aboutMe" BLOB
 			);
 			`)
 
@@ -120,10 +120,10 @@ func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 
 	// sessions table
 	_, err1 := sqliteDatabase.Exec(`
-			CREATE TABLE IF NOT EXISTS "Sessions" ( 
+			CREATE TABLE IF NOT EXISTS "Sessions" (
 				"userID" INTEGER NOT NULL,
 				"cookieName" TEXT NOT NULL,
-				"cookieValue" STRING NOT NULL PRIMARY KEY, 
+				"cookieValue" STRING NOT NULL PRIMARY KEY,
 				FOREIGN KEY(userID)REFERENCES Users(id)
 				);`)
 
@@ -135,7 +135,7 @@ func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 	// category table
 	_, err2 := sqliteDatabase.Exec(`
 				CREATE TABLE IF NOT EXISTS "Category" (
-					"postID" INTEGER REFERENCES Post(postID), 
+					"postID" INTEGER REFERENCES Post(postID),
 					"category" TEXT NOT NULL
 					);`)
 
@@ -146,12 +146,12 @@ func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 
 	// Create Post table if none exists
 	_, err3 := sqliteDatabase.Exec(`
-	CREATE TABLE IF NOT EXISTS "Posts" ( 
-		"postID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+	CREATE TABLE IF NOT EXISTS "Posts" (
+		"postID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 		"authorID" INTEGER NOT NULL,
 		"Author" TEXT,
-		"title" TEXT NOT NULL, 
-		"content" TEXT NOT NULL, 
+		"title" TEXT NOT NULL,
+		"content" TEXT NOT NULL,
 		"category" TEXT NOT NULL,
 		"creationDate" TIMESTAMP,
 		"cookieID" BLOB,
@@ -165,12 +165,12 @@ func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 	}
 
 	// comments table
-	_, err4 := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "Comments" ( 
-			"commentID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+	_, err4 := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "Comments" (
+			"commentID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 			"postID" INTEGER NOT NULL,
 			"authorID" INTEGER NOT NULL,
 			"author" TEXT NOT NULL,
-			"content" TEXT NOT NULL, 
+			"content" TEXT NOT NULL,
 			"creationDate" TIMESTAMP,
 		FOREIGN KEY(postID)REFERENCES Posts(postID),
 		FOREIGN KEY(authorID)REFERENCES Users(id)
@@ -182,7 +182,7 @@ func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 	}
 
 	// Notifications table
-	_, err5 := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "Notifications" ( 
+	_, err5 := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "Notifications" (
 			"notificationID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 			"sender" TEXT,
 			"recipient" TEXT,
@@ -201,14 +201,14 @@ func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 	}
 
 	// Chats table
-	_, err6 := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "Chats" ( 
+	_, err6 := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "Chats" (
 				"chatID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 				"userID" TEXT NOT NULL,
 				"user" TEXT NOT NULL,
 				"toPublic" TEXT NOT NULL,
 				"toInfluencer" TEXT NOT NULL,
 				"toFollower" TEXT NOT NULL,
-				"creationDate" TIMESTAMP, 
+				"creationDate" TIMESTAMP,
 				FOREIGN KEY(user)REFERENCES Users(nickName),
 				FOREIGN KEY(userID)REFERENCES Users(id)
 				);`)
@@ -219,13 +219,13 @@ func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 	}
 
 	// MessageHistory table
-	_, err7 := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "MessageHistory" ( 
+	_, err7 := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "MessageHistory" (
 					"messageID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 					"chatID" INTEGER,
 					"chatMessage" STRING NOT NULL,
 					"sender" TEXT,
 					"recipient" TEXT,
-					"creationDate" TIMESTAMP, 
+					"creationDate" TIMESTAMP,
 					"emoji" BLOB,
 					FOREIGN KEY(chatID)REFERENCES Chats(chatID),
 					FOREIGN KEY(sender)REFERENCES Users(nickName),
@@ -238,7 +238,7 @@ func MigrateDatabe(sql3 *sql.DB, filePath string) error {
 	}
 
 	_, err8 := sqliteDatabase.Exec(`CREATE TABLE IF NOT EXISTS "Followers" (
-						"userID" INTEGER, 
+						"userID" INTEGER,
 						"followerID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 						"followerFName" TEXT NOT NULL,
 						"followerLName" TEXT NOT NULL,
