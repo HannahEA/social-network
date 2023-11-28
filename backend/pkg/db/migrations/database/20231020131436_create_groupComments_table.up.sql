@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS "GroupComments" (
             "postID" INTEGER NOT NULL,
 			"authorID" INTEGER NOT NULL,
 			"author" TEXT NOT NULL,
+			"imageURL" TEXT,
 			"content" TEXT NOT NULL, 
 			"creationDate" TIMESTAMP,
 		FOREIGN KEY(postID)REFERENCES GroupPosts(postID),

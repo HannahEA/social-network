@@ -89,29 +89,22 @@ const Posts = ({sPost, page, username, groupID}) => {
     fetchPosts()
   }, [sPost])
 
-
-  const [commentContent, setCommentContent] = useState({
-    url:"",
-    comment:""
-  })
+//user's new comment state variable
+  const [commentContent, setCommentContent] = useState({})
 
   const [Id, setId] = useState(0)
   
   const [newComment, setNewComment] = useState("")
 
+  //get user's new comment and its url
   const handleContent = (event) => {
-    // setCommentContent(event.target.value)
-    setCommentContent((prevState) => ({
-      ...prevState,
-      url:event.url.value,
-      comment:event.comment.value
+    const {name, value} = event.target;
+    setCommentContent({
+      ...commentContent,
+      [name]:value
     })
-    
-    )
-
-
-
   }
+
   const handleGetComments = (event) => {
     // console.log(event.target.value)
     const Id = event.target.value.toString()
@@ -122,14 +115,21 @@ const Posts = ({sPost, page, username, groupID}) => {
       comments.style.display = "flex"
     }
   }
+
+  //send user's comment data to the back end
   const handleSendComment = (event) => {
+
     event.preventDefault();
-    //postID set
-    let newComment = SubmitComment(commentContent, parseInt(event.target.value), page)
+
+    let newComment = SubmitComment(commentContent, parseInt(commentContent.idPost), page)
+
     let allInput = document.querySelectorAll("input")
     allInput.forEach(singleInput => singleInput.value = '')
     setNewComment(newComment)
+    // Display a success notification
+    notyf.success("New comment created");
   }
+
     return (
       <div className="">
         {pData ? 
@@ -159,21 +159,38 @@ const Posts = ({sPost, page, username, groupID}) => {
                 </div>
                 <hr className="w-10/12 m-auto border-gray dark:border-gray-700"/>
                 <div id = "CommentsContainer" className="cube bg-white dark:bg-gray-800 ">
-                  <div className=" flex justify-start items-center">
-                      <p className="ml-4 flex-row font-bold text-[#5aadde]">Comment</p>
+                   {/* Start of comment form */}
+                   <form name="submitComment" className="grow flex justify-start items-center" onSubmit={handleSendComment}>
+                  
+                      <p className="ml-4 flex-row font-bold text-blue-400">Comment</p>
                       <input
                       type="text"
-                      name={commentContent.url}
+                      name="url"
                       id="cImageUrl"
-                      placeholder="Enter comment URL"
+                      placeholder="Comment URL"
                       className="bg-gray-100 m-2.5 pl-5 pr-5 shadow-md border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white w-5/12"
-                      onChange={(e)=>handleContent(e)}
+                      onChange={handleContent}
                       />
-                      <div id="submitComment" className=" grow">
-                      <input placeholder="Enter comment" onChange={(e)=>handleContent(e)} name={commentContent.comment} className=" bg-gray-100 m-2.5 pl-5 pr-5 shadow-md border-gray-300 rounded-md focus:outline-none w-5/12 mb-2 border-b-2 border-gray dark:bg-gray-800 dark:text-white" type="text" />
-                      <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit" className="m-2 mb-2 p-2 pt-1 pb-1 text-xs rounded-lg font-bold bg-blue-600 text-white">Submit</button>
-                      </div>
-                  </div>
+
+                      <input 
+                      placeholder="Comment text" 
+                      onChange={handleContent} 
+                      name="content"
+                      // name={commentContent} 
+                      className=" bg-gray-100 m-2.5 pl-5 pr-5 shadow-md border-gray-300 rounded-md focus:outline-none w-5/12 mb-2 border-b-2 border-gray dark:bg-gray-800 dark:text-white" type="text" 
+                      required
+                      />
+                      <button onClick={handleContent} name="idPost" value={post.postId} className="m-2 mb-2 p-2 pt-1 pb-1 text-xs rounded-lg font-bold bg-blue-500 text-white"
+                      style={{height:23+"px", paddingLeft:5+"px", paddingRight:5+"px", marginRight:15+"px"}}
+                      >
+                      Add comment
+                      <input type="submit" className="text-xs rounded-lg opecity-0 bg-blue-600 text-blue-600"
+                      style={{height:2+"px", marginRight:20+"px"}}
+                      />
+                      </button>
+
+                  </form>
+                   {/* End of comment form */}
                   <div className=" flex justify-start items-center">
                   <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className=" flex items-center text-l font-bold m-4 mb-2 text-blue-400 ">
                       View comments 
@@ -220,22 +237,42 @@ const Posts = ({sPost, page, username, groupID}) => {
                   <h2 className="text-md m-4 mr-2 dark:text-white">{post.content}</h2>
                 </div>
                 <hr className="w-10/12 m-auto border-gray dark:border-gray-700"/>
+               
                 <div id = "CommentsContainer" className="cube bg-white dark:bg-gray-800 ">
-                  <div className=" flex justify-start items-center">
-                      <p className="ml-4 flex-row font-bold text-[#5aadde]">Comment</p>
-                      <input
-                      type="text"
-                      name="cImageUrl"
-                      id="cImageUrl"
-                      placeholder="Enter comment URL"
-                      className="bg-gray-100 m-2.5 pl-5 pr-5 shadow-md border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white w-5/12"
-                      onChange={(e)=>handleContent(e)}
-                      />
-                      <div id="submitComment" className=" grow">
-                      <input placeholder="Enter comment" onChange={(e)=>handleContent(e)} name={commentContent} className=" bg-gray-100 m-2.5 pl-5 pr-5 shadow-md border-gray-300 rounded-md focus:outline-none w-5/12 mb-2 border-b-2 border-gray dark:bg-gray-800 dark:text-white" type="text" />
-                      <button onClick={(e) => handleSendComment(e)} value={post.postId} type="submit" className="m-2 mb-2 p-2 pt-1 pb-1 text-xs rounded-lg font-bold bg-blue-600 text-white">Submit</button>
-                      </div>
-                  </div>
+
+                   {/* Start of comment form */}
+                   <form name="submitComment" className="grow flex justify-start items-center" onSubmit={handleSendComment}>
+                  
+                  <p className="ml-4 flex-row font-bold text-blue-400">Comment</p>
+                  <input
+                  type="text"
+                  name="url"
+                  id="cImageUrl"
+                  placeholder="Comment URL"
+                  className="bg-gray-100 m-2.5 pl-5 pr-5 shadow-md border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-gray-600 dark:bg-gray-800 dark:text-white w-5/12"
+                  onChange={handleContent}
+                  />
+
+                  <input 
+                  placeholder="Comment text" 
+                  onChange={handleContent} 
+                  name="content"
+                  // name={commentContent} 
+                  className=" bg-gray-100 m-2.5 pl-5 pr-5 shadow-md border-gray-300 rounded-md focus:outline-none w-5/12 mb-2 border-b-2 border-gray dark:bg-gray-800 dark:text-white" type="text" 
+                  required
+                  />
+                  <button onClick={handleContent} name="idPost" value={post.postId} className="m-2 mb-2 p-2 pt-1 pb-1 text-xs rounded-lg font-bold bg-blue-500 text-white"
+                  style={{height:23+"px", paddingLeft:5+"px", paddingRight:5+"px", marginRight:15+"px"}}
+                  >
+                  Add comment
+                  <input type="submit" className="text-xs rounded-lg opecity-0 bg-blue-600 text-blue-600"
+                  style={{height:2+"px", marginRight:20+"px"}}
+                  />
+                  </button>
+
+              </form>
+                   {/* End of comment form */}
+
                   <div className=" flex justify-start items-center">
                   <button onClick={(e) =>handleGetComments(e)} value={post.postId} type="submit" className=" flex items-center text-l font-bold m-4 mb-2 text-blue-400 ">
                       View comments 
@@ -265,11 +302,12 @@ const Posts = ({sPost, page, username, groupID}) => {
  }
 
 const SubmitComment = (comment, postId, page) => {
-  console.log(comment, postId)
+  console.log("the comment, postID, page inside SubmitComment", comment, postId, page)
  
  const newComment = {
     postId: postId,
-    content: comment,
+    url: comment.url,
+    content: comment.content,
     type: "newComment",
     page: page,
  }
@@ -337,10 +375,11 @@ const Comments = ({postID, newComment, page}) => {
       {cData.length > 0 ? ( cData.map( comment => (
         <div key={comment.commentId} className="flex flex-row ml-4 mb-2"> 
           <div className="flex flex-col">
-            <h2 className="text-l font-bold">{comment.author}</h2>
+            <h2 className="text-l"><strong>{comment.author}</strong>: {comment.content}</h2>
             <h2 className="text-sm">{comment.Date}</h2> 
+            {comment.url.length>0 && 
+                  <img src={comment.url} alt="" className="h-75 w-75 m-auto justify-center text-center xl:h-96"/>}
           </div>
-          <h2 className="ml-4" >{comment.content}</h2>
         </div>
         ))):
         <h2 className="text-l text-center font-bold">No Comments</h2>

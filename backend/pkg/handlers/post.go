@@ -401,16 +401,17 @@ func (repo *dbStruct) AddPostViewersToDB(data Post, id int) error {
 
 func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 	comments := []Comment{}
-	rows, err := repo.db.Query(`SELECT commentID, author, content, creationDate FROM comments WHERE postID = ? `, post.PostID)
+	rows, err := repo.db.Query(`SELECT commentID, author, imageURL, content, creationDate FROM comments WHERE postID = ? `, post.PostID)
 	if err != nil {
 		return comments, fmt.Errorf("GetComments DB Query error %+v", err)
 	}
 	var commentID int
 	var commentDate string
 	var author string
+	var imageURL string
 	var content string
 	for rows.Next() {
-		err := rows.Scan(&commentID, &author, &content, &commentDate)
+		err := rows.Scan(&commentID, &author, &imageURL, &content, &commentDate)
 		if err != nil {
 			return comments, fmt.Errorf("GetComments rows.Scan error %+v", err)
 		}
@@ -435,6 +436,7 @@ func (repo *dbStruct) GetComments(post Post) ([]Comment, error) {
 			CommentID: commentID,
 			PostID:    post.PostID,
 			Author:    author,
+			ImageURL:  imageURL,
 			Content:   content,
 			Date:      commentDate,
 		}}, comments...)
@@ -456,7 +458,7 @@ func (repo *dbStruct) AddCommentToDB(post Post) error {
 	//user info
 	user := repo.GetUserByCookie(cookieID)
 
-	_, err := repo.db.Exec("INSERT INTO Comments ( postID, authorID, author, content, creationDate) VALUES ( ?, ?, ?, ?, ?)", post.PostID, user.id, user.NickName, post.Content, date)
+	_, err := repo.db.Exec("INSERT INTO Comments ( postID, authorID, author, imageURL, content, creationDate) VALUES ( ?, ?, ?, ?, ?, ?)", post.PostID, user.id, user.NickName, post.ImageURL, post.Content, date)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf("failed to add Comment to Database")
@@ -548,7 +550,7 @@ func (repo *dbStruct) AddGroupCommentToDB(post Post) error {
 	//user info
 	user := repo.GetUserByCookie(cookieID)
 
-	_, err := repo.db.Exec("INSERT INTO GroupComments ( groupID, postID, authorID, author, content, creationDate) VALUES ( ?, ?, ?, ?, ?, ?)", 1, post.PostID, user.id, user.NickName, post.Content, date)
+	_, err := repo.db.Exec("INSERT INTO GroupComments ( groupID, postID, authorID, author, imageURL, content, creationDate) VALUES ( ?, ?, ?, ?, ?, ?, ?)", 1, post.PostID, user.id, user.NickName, post.ImageURL, post.Content, date)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf("failed to add GroupComment to Database")
@@ -558,16 +560,17 @@ func (repo *dbStruct) AddGroupCommentToDB(post Post) error {
 
 func (repo *dbStruct) GetGroupComments(post Post) ([]Comment, error) {
 	comments := []Comment{}
-	rows, err := repo.db.Query(`SELECT commentID, author, content, creationDate FROM GroupComments WHERE postID = ?`, post.PostID)
+	rows, err := repo.db.Query(`SELECT commentID, author, imageURL, content, creationDate FROM GroupComments WHERE postID = ?`, post.PostID)
 	if err != nil {
 		return comments, fmt.Errorf("GetGroupComments DB Query error %+v", err)
 	}
 	var commentID int
 	var commentDate string
+	var imageURL string
 	var author string
 	var content string
 	for rows.Next() {
-		err := rows.Scan(&commentID, &author, &content, &commentDate)
+		err := rows.Scan(&commentID, &author, &imageURL, &content, &commentDate)
 		if err != nil {
 			return comments, fmt.Errorf("GetGroupComments rows.Scan error %+v", err)
 		}
@@ -592,6 +595,7 @@ func (repo *dbStruct) GetGroupComments(post Post) ([]Comment, error) {
 			CommentID: commentID,
 			PostID:    post.PostID,
 			Author:    author,
+			ImageURL:  imageURL,
 			Content:   content,
 			Date:      commentDate,
 		}}, comments...)
