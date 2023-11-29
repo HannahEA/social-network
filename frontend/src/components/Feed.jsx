@@ -838,14 +838,17 @@ setViewProfile(! viewProfile)
   };
 
   const handlePostViewers = (event) => {
+    console.log("postViewers before ", postViewers, event.target.name)
     let i = postViewers.indexOf(event.target.name)
     if ( i > -1) {
       let v = postViewers
       v.splice(i, 1)
       setPostViewers( v)
     } else {
-      setPostViewers([...postViewers, event.target.name])
+      let v = [...postViewers, event.target.name]
+      setPostViewers(v)
     } 
+    console.log("postViewers after", postViewers)
   }
   // const handleTag = (event) => {
   //   setTag(event.target.value);
@@ -1869,7 +1872,7 @@ setViewProfile(! viewProfile)
               {Visibility == "Almost Private" && allData.current.followers?
               allData.current.followers.map( (follower, index) => (
                 <li key={index}>
-                  <input type="checkbox" name={follower} onClick={(e) => {handlePostViewers(e)}}/>
+                  <input type="checkbox" name={follower} onClick={handlePostViewers}/>
                   <label htmlFor={follower}>{follower}</label>
                 </li>
               )
