@@ -87,7 +87,7 @@ const handleLearn = ( )=> {
                   </svg>
                   <div className="text-sm text-gray-500 dark:text-white" style={{height:52+"px", width:560+"px", zIndex:100 }}>
                   Created by <br></br>
-                  Helena Sedmak, Hannah Alemu, Connor Hanks
+                  Helena Sedmak & Hannah Alemu
                 </div>
                 </a>
               </div>

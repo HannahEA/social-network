@@ -613,7 +613,6 @@ const handleClickUsersList = () => {
   };
 
 
-
   const handleCloseModal = () => {
     setSelectedUser(null);
     setIsModalVisible(false);
@@ -691,39 +690,43 @@ const handleClickUsersList = () => {
 }
 
   
-/*const showProfile = () =>{
+const showProfile = () =>{
     //show or hide user profile when clicking button
-    setViewProfile(! viewProfile)
-}*/
+    setViewProfile(true);
+}
 
 // OPEN PROFILE
 
 const [viewProfile, setViewProfile] = useState(false)
 
   const openProfile = () => {
-setViewProfile(! viewProfile)
-
-    /*if (viewProfile == true){
+    //setViewProfile(! viewProfile);
+    if (viewProfile == true){
       showProfile();
     }else{
-      navigate("/feed");
-    }*/
-
-    //have removed the below as it cleared the feed page
-    setViewProfile(true) 
-    let main = document.querySelector('main')
-    let length = main.children.length
-
-    console.log("main child", main.children)
-    for (let i = 0; i<length; i++) {
-      console.log(i)
-      if (i>1){
-        console.log("what i'm removing", main.children[2] )
-        let child = main.childNodes[2]
-        child.remove()
-      } 
+      closeProfile();
     }
+
+    setViewProfile(true) 
+    let main = document.querySelector('#session')
+    main.style.display = 'none'
+    // let length = main.children.length
+
+    // console.log("main child", main.children)
+    // for (let i = 0; i<length; i++) {
+    //   console.log(i)
+    //   if (i>1){
+    //     console.log("what i'm removing", main.children[2] )
+    //     let child = main.childNodes[2]
+    //     child.remove()
+    //   } 
+    // }
   }
+
+  //close user profile
+  const closeProfile = () => {
+    setViewProfile(false);
+  };
 
 
 
@@ -1434,11 +1437,17 @@ setViewProfile(! viewProfile)
           </div>
         </div>
       </aside>
-      <main id="session" className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
+      <main className="p-4 pb-[8rem] md:ml-64 h-auto pt-20">
       {console.log("allData inputted to <Chat>PPPPPPPPPPPPPPPPPP>>>>>>>>>", allData)}
         <Chat websocketRef={websocketRef} isWebSocketConnected={ isWebSocketConnected} allData={allData}/>
-        {viewProfile&& <Profile/>}
-        <div></div>
+        {viewProfile&& 
+        <Profile
+            setIsVisible={setIsVisible}
+            notifVisible={isVisible}
+            message={allData.current.followNotif.notifMsg}
+            ID={allData.current.followNotif.followID}
+        />}
+        <div id="session" >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div className=" cube dark:bg-gray-900 dark:text-white profile-info flex flex-row gap-4 md:gap-0 md:flex-col justify-center items-center border-2 border-dashed bg-white border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <img
@@ -1908,6 +1917,7 @@ setViewProfile(! viewProfile)
         </div>
         <div className="bg-white dark:bg-gray-800">
           <Posts sPost={sPost} page={"feed"} username={""}/>
+        </div>
         </div>
       </main>
     </div>
