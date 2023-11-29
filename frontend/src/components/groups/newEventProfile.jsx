@@ -1,5 +1,6 @@
 import React from 'react';
 import { useWebSocket } from '../WebSocketProvider';
+
 //this is the event profile shown on the group profile page
 //after event organizer has pressed 'create event' button
 

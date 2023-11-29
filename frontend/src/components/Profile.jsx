@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import { SubmitPost, Tags, Posts } from "./feed/Posts";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useLocation } from "react-router-dom";
+import Notification from './notifications/notification';
 import { Notyf } from "notyf";
 
 const notyf = new Notyf();
@@ -43,7 +44,7 @@ const apiURL = process.env.REACT_APP_API_URL;
 //     });
 // };
 
-const Profile = () => {
+const Profile = (props) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [aboutMe, setAboutMe] = useState("");
@@ -254,7 +255,18 @@ const Profile = () => {
 
               </div>
             </div>
-            
+            <div id="notification">
+             {props.notifVisible && (
+             <Notification 
+             setIsVisible={props.setIsVisible}
+              notifVisible={props.notifVisible}
+              message={props.message}
+              ID={props.ID}
+              />
+             
+              
+             )}
+            </div>
           </div>
           <Posts page={"myProfile"}/>
         </div>
