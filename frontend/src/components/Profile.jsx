@@ -61,6 +61,13 @@ const Profile = () => {
   const [isHovering, setIsHovering] = useState(null);//to show follower and follow names
   const [hoverData, setHoverData] = useState([]);
 
+  //close user profile
+  /*const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      props.onClose();
+    }
+  };*/
+
 
   //renders user's list of followers and following
   const handleMouseOver = (id, data) => {
@@ -174,11 +181,11 @@ const Profile = () => {
     checkCookie();
   }, []);
 
-  
+  //onClick={handleOverlayClick} 
   return (
 
-        <div className="min-h-screen bg-gray-100 dark:bg-[#000000b3] py-8" style={{zIndex:988}}>
-          <div className=" max-w-md mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+        <div id="modalOverly" className="z-5 min-h-screen bg-gray-100 dark:bg-[#000000b3] py-8" style={{zIndex:988}}>
+          <div className=" max-w-md mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 " style={{zIndex:998}}>
             <div className="flex items-center justify-center mb-4">
               <div className="w-24 h-24 border-gradient border-4 border-gray-300 rounded-[50%] overflow-hidden">
                 <img className="w-full h-full object-cover" src={image} alt="" />

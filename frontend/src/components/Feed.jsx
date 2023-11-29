@@ -613,7 +613,6 @@ const handleClickUsersList = () => {
   };
 
 
-
   const handleCloseModal = () => {
     setSelectedUser(null);
     setIsModalVisible(false);
@@ -691,25 +690,23 @@ const handleClickUsersList = () => {
 }
 
   
-/*const showProfile = () =>{
+const showProfile = () =>{
     //show or hide user profile when clicking button
-    setViewProfile(! viewProfile)
-}*/
+    setViewProfile(true);
+}
 
 // OPEN PROFILE
 
 const [viewProfile, setViewProfile] = useState(false)
 
   const openProfile = () => {
-setViewProfile(! viewProfile)
-
-    /*if (viewProfile == true){
+    //setViewProfile(! viewProfile);
+    if (viewProfile == true){
       showProfile();
     }else{
-      navigate("/feed");
-    }*/
+      closeProfile();
+    }
 
-    //have removed the below as it cleared the feed page
     setViewProfile(true) 
     let main = document.querySelector('main')
     let length = main.children.length
@@ -724,6 +721,11 @@ setViewProfile(! viewProfile)
       } 
     }
   }
+
+  //close user profile
+  const closeProfile = () => {
+    setViewProfile(false);
+  };
 
 
 

@@ -33,7 +33,7 @@ function Card(props){
 
 return(
 
-    <div className="card" >
+    <div className="card" style={{zIndex:998}}>
         <div className="top" >
             <img className="circle-img"  src={(props.avt).substring(0,3)==="" && (props.img).substring(0.3)==="" ? "https://yt3.googleusercontent.com/-CFTJHU7fEWb7BYEb6Jh9gm1EpetvVGQqtof0Rbh-VQRIznYYKJxCaqv_9HeBcmJmIsp2vOO9JU=s900-c-k-c0x00ffffff-no-rj" :(props.avt).substring(0,3)==="htt" ? props.avt:props.img} alt="contact_img" style={{opacity:1}}/>
             {/* <img className="circle-img"  src={props.avt} alt="contact_img" /> */}
