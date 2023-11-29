@@ -272,6 +272,15 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 						fmt.Println("which group members are online?", member, name)
 						reciever[conn] = name
 						chat.Member = name
+						service.repo.BroadcastToChannel(
+							BroadcastMessage{
+								WebMessage: WebsocketMessage{
+									Chat: chat,
+									Type: "groupMessage"},
+								Connections: reciever,
+							},
+						)
+						reciever = make(map[*websocket.Conn]string)
 						break
 					} else if member != chat.Sender && member != name && count == len(Clients) {
 						fmt.Println("group message offline member:", member)
@@ -280,17 +289,17 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 				}
 			}
 			// send to members that are online, with type groupchatmessage
-			fmt.Println("group chat message sent to reciever", chat)
-			if len(reciever) > 0 {
-				service.repo.BroadcastToChannel(
-					BroadcastMessage{
-						WebMessage: WebsocketMessage{
-							Chat: chat,
-							Type: "groupMessage"},
-						Connections: reciever,
-					},
-				)
-			}
+			// fmt.Println("group chat message sent to reciever", chat)
+			// if len(reciever) > 0 {
+			// 	service.repo.BroadcastToChannel(
+			// 		BroadcastMessage{
+			// 			WebMessage: WebsocketMessage{
+			// 				Chat: chat,
+			// 				Type: "groupMessage"},
+			// 			Connections: reciever,
+			// 		},
+			// 	)
+			// }
 
 			//add notif for offline members with no existing notif
 			for _, member := range offline {
@@ -1656,6 +1665,7 @@ func (repo *dbStruct) GetGroupFromGroupName(groupName string) (NewGroup, error) 
 	group.GpMembers = members
 	return group, nil
 }
+
 //populate the Events table
 func (repo *dbStruct) InsertNewEvent(e NewEventNotif) (int, error) {
 	fmt.Printf("from inside the InsertNewEvent the TYPE of grpID = %T", e.GrpID)
