@@ -291,8 +291,9 @@ func (repo *dbStruct) GetPublicPosts(user *User) ([]Post, error) {
 }
 
 func (repo *dbStruct) GetAlmostPrivatePosts(user *User) ([]Post, error) {
+	fmt.Println("finding almost private posts for", user.NickName)
 	posts := []Post{}
-	query := `SELECT P.postID, P.author, P.title, P.content, P.category, P.imageURL, P.imageFile, P.creationDate FROM Posts P JOIN PostViewers ON P.postID = PostViewers.postID WHERE PostViewers.username = ?`
+	query := `SELECT P.postID, P.author, P.title, P.content, P.category, P.imageURL, P.imageFile, P.creationDate FROM Posts P JOIN PostViewers ON P.postID = PostViewers.postID WHERE PostViewers.userName = ?`
 
 	rows, err := repo.db.Query(query, user.NickName)
 	if err != nil {
@@ -359,31 +360,31 @@ func (repo *dbStruct) AddPostToDB(post Post) (int, error) {
 	// user info
 	user := repo.GetUserByCookie(cookieID)
 	// category
-	categories := strings.Join(post.Category, ",")
+	categories := strings.Join(post.Category, ",")	
+	
 	_, err := repo.db.Exec("INSERT INTO Posts ( authorId, Author, title, content, category, imageURL, imageFile, creationDate, cookieID, postVisibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user.id, user.NickName, post.Title, post.Content, categories, post.ImageURL, post.ImageFile, date, cookieID, post.Visibility)
 	if err != nil {
 		fmt.Println("error executing query: ", err)
 	}
+	var id int
 
-	rows, err := repo.db.Query(`Select last_insert_rowid()`)
+	 err = repo.db.QueryRow("SELECT seq FROM sqlite_sequence WHERE name = ?", "Posts").Scan(&id)
 	if err != nil {
 		log.Println(err)
-		return 0, fmt.Errorf("failed to add Post to Database")
+		return 0, fmt.Errorf("failed to get post id ")
 	}
-	var id int
-	for rows.Next() {
-		err := rows.Scan(&id)
-		if err != nil {
-			log.Println(err)
-			return 0, fmt.Errorf("failed to add Post to Database")
-		}
-	}
+
+		
+		fmt.Println("found an id", id)
+
+	
 	return id, nil
 }
 
 func (repo *dbStruct) AddPostViewersToDB(data Post, id int) error {
 	for _, name := range data.Viewers {
-		_, err := repo.db.Exec("INSERT INTO PostViewers (postId, username) VALUES (?, ?)", id, name)
+		fmt.Println("adding post viewer", name, "post id", id)
+		_, err := repo.db.Exec("INSERT INTO PostViewers (postId, userName) VALUES (?, ?)", id, name)
 		if err != nil {
 			log.Println(err)
 			return fmt.Errorf("failed to add PostViewers to Database")
