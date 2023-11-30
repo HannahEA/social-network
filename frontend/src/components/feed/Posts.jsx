@@ -217,7 +217,7 @@ const Posts = ({sPost, page, username, groupID}) => {
               <div key={post.postId} className="m-2  ">
                 <div>
                 
-                <div className=" cube leftborder border-solid border-gray-300 dark:border-gray-700 dark:bg-gray-800 rounded-md" style={{height: 655+"px", width: 805+"px"}}>
+                <div className=" cube leftborder border-solid border-gray-300 dark:border-gray-700 dark:bg-gray-800 rounded-md" >
                 <div className="cube flex justify-between items-center  font-bold bg-white dark:bg-gray-800">
                 <h2 className=" text-l text-left dark:text-white m-6">{post.author}</h2>  
                 <h2 className=" text-l text-right dark:text-white m-6">{post.date}</h2>
