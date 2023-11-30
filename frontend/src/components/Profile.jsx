@@ -5,6 +5,12 @@ import { SubmitPost, Tags, Posts } from "./feed/Posts";
 import { TopNavigation, ThemeIcon } from "./TopNavigation.jsx";
 import { useLocation } from "react-router-dom";
 import Notification from './notifications/notification';
+import EventNotif from "./groups/eventNotif.jsx";
+import NewGroupNotification from "./groups/newGroupNotification.jsx";
+import JoinGpReq from "./groups/joinGpReq.jsx";
+import GrProfileCard from "./groups/grProfileCard.jsx";
+import GroupProfile from "./groups/groupProfile.jsx";
+
 import { Notyf } from "notyf";
 
 const notyf = new Notyf();
@@ -263,9 +269,69 @@ const Profile = (props) => {
               message={props.message}
               ID={props.ID}
               />
-             
-              
-             )}
+              )}
+              {props.eventVisible && (
+                <EventNotif
+            close={props.close}
+            viewGpModal={props.viewGpModal}
+            viewUserInfo={props.viewUserInfo}
+            setEventVisible={props.setEventVisible}
+            eventVisible={props.eventVisible}
+            setGrp={props.setGrp}
+            theGroup={props.theGroup}
+            eventData={props.eventData}
+            setGrpMember={props.setGrpMember}
+            grpMember={props.grpMember}
+            setGrpProfileVisible={props.setGrpProfileVisible}
+            grpProfileVisible={props.grpProfileVisible}
+            setEvt={props.setEvt}
+            theEvt={props.theEvt}
+            eParticipant={props.eParticipant}
+          />
+              )}
+
+        {(props.isGroupProfileVisible && props.requestBy)&& (
+        <GroupProfile 
+        grpMember={props.gMember}
+        onGpClose={props.onGpClose} 
+        onShowGroup={props.onShowGroup}
+        followers={props.followers}
+        request={props.request}
+        theGroup={props.tGroup}
+        creator={props.creator}
+        setEvt={props.sEvt}
+        theEvt={props.tEvt}
+        gEvents={props.gEvents}
+        showNewEvt={props.showNewEvt}
+        setShowNewEvt={props.setShowNewEvt}
+        showEvents={props.showEvents}
+        >
+          {props.theGroup && (
+            <GrProfileCard
+              setGrp={props.selGrp}
+              theGroup={props.theSelectGroup}
+            />
+          )}
+          </GroupProfile>
+      )}
+
+          {props.grNotifVisible && (
+          <NewGroupNotification 
+            setGroupsVisible={props.setIsGroupsVisible}
+            grNotifVisible={props.isGroupsVisible}
+            groupData={props.groupData}
+          />
+          )}
+          
+
+          {props.joinGrVisible && (
+            <JoinGpReq 
+              setJoinGpVisible={props.setJoinGpVisible}
+              joinGrVisible={props.joinGrVisible}
+              joinRequest={props.joinRequest}
+            />
+          )}
+
             </div>
           </div>
           <Posts page={"myProfile"}/>
