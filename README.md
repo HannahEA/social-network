@@ -15,8 +15,8 @@ systemctl status docker
 ```
 2. In VSC terminal access 'social-network' root folder and type: 
 ```bash
-~$ systemctl start docker 
-~$ sudo docker-compose up
+systemctl start docker 
+sudo docker-compose up
 ```
 
 3. When images have been built and the containers are running, go to browser url address and type: 
@@ -27,8 +27,8 @@ http//localhost:3000
 # To exit Docker 
 1. In VSC terminal type: 
 ```bash 
-~$ CTRL + C 
-~$ sudo docker-compose down
+CTRL + C 
+sudo docker-compose down
 ```
 
 2. To remove images type: 
@@ -70,8 +70,8 @@ DANGEROUSLY_DISABLE_HOST_CHECK=true
 
 2. To install node files and create the package-lock.json and package.json files:
 ```bash
-~$ cd frontend
-~$ npm install react scripts
+cd frontend
+npm install react scripts
 ```
 
 
@@ -83,15 +83,15 @@ sqliteDatabase, err := sql.Open("sqlite3", filename+"?_journal_mode=WAL")
 
 3. To run the GO back-end server:
 ```bash
-~$ cd backend
-~$ go run server.go
+cd backend
+go run server.go
 ```
 
 
 4. To run the React front-end server, in a separate VSC terminal window type:
 ```bash
-~$ cd frontend
-~$ npm start
+cd frontend
+npm start
 ```
 
 
