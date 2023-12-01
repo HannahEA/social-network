@@ -688,6 +688,10 @@ const [viewProfile, setViewProfile] = useState(false)
     setViewProfile(true) 
     let main = document.querySelector('#session')
     main.style.display = 'none'
+    let group = document.getElementById('groupsButton')
+    let users = document.getElementById('seeAllUsersButton')
+    group.style.display = 'none'
+    users.style.display = 'none'
   }
 
   //close user profile
@@ -1067,7 +1071,7 @@ const [viewProfile, setViewProfile] = useState(false)
            </ul>
           <ul className="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
  
-            <li>
+            <li id="groupsButton">
               <a>
               <button
                 onClick={()=>(handleGroupsClick())}
@@ -1090,7 +1094,7 @@ const [viewProfile, setViewProfile] = useState(false)
                 </button>
               </a>
             </li>
-            <li>
+            <li id = "seeAllUsersButton">
             {/* Start of the drop-down menu for All users except logged-in user */}
             <a>
             <button
@@ -1161,6 +1165,53 @@ const [viewProfile, setViewProfile] = useState(false)
             notifVisible={isVisible}
             message={allData.current.followNotif.notifMsg}
             ID={allData.current.followNotif.followID}
+
+            close={() => {hideEventInvites()}}
+            viewGpModal={setGroupsModalVisible}
+            viewUserInfo={() => {handleCloseModal()}}
+            setEventVisible={setIsEventVisible}
+            eventVisible={isEventVisible}
+            setGrp={setSelectedGroup}
+            theGroup={selectedGroup}
+            eventData={allData.current.newEventNotif}
+            setGrpMember={setGroupMember}
+            grpMember={groupMember}
+            setGrpProfileVisible={setGroupProfileVisible}
+            grpProfileVisible={isGroupProfileVisible}
+            setEvt={setNewGrpEvt}
+            theEvt={newGrpEvt}
+            eParticipant={requestBy}
+
+            setGroupsVisible={setIsGroupsVisible}
+            grNotifVisible={isGroupsVisible}
+            groupData={allData.current.newGroupNotif}
+
+            setJoinGpVisible={setIsJoinGroupVisible}
+            joinGrVisible={isJoinGroupVisible}
+            joinRequest={allData.current.oneJoinGroupRequest}
+
+
+        isGroupProfileVisible={isGroupProfileVisible} 
+        requestBy={requestBy}
+        gMember={groupMember}
+        onGpClose={() => {handleGpCloseModal()}} 
+        onShowGroup={() => {handleGpCloseModal()}}
+        followers={allData.current.followers}
+        request={requestBy}
+        tGroup={selectedGroup}
+        creator={allData.current.userInfo.username}
+        sEvt={setNewGrpEvt}
+        tEvt={newGrpEvt}
+        gEvents={groupEvents}
+        showNewEvt={showNewEvt}
+        setShowNewEvt={setShowNewEvt}
+        showEvents={showEvents}
+
+        selGrp={setSelectedGroup}
+        theSelectGroup={selectedGroup}
+            
+
+
         />}
         <div id="session" >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">

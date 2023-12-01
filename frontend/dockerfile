@@ -1,9 +1,11 @@
 # FROM node:20-alpine3.18
 # I am running Node.js v18.16.0 locally, but am using a slightly older but well-established 
 # and tested 'node' image to minimize any unforeseen complications.
-FROM node:14-alpine
+FROM node:21-alpine3.17
 # Set the working directory inside the container
 WORKDIR /frontend
+# Install git
+RUN apk update && apk add --no-cache git
 # Copy package.json and package-lock.json separately to leverage Docker caching
 COPY package*.json ./
 # Install dependencies

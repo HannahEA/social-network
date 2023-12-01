@@ -50,7 +50,7 @@ func (service *AllDbMethodsWrapper) ConversationHandler(w http.ResponseWriter, r
 		}
 
 	} else if chat.Status == "seen" {
-		if chat.Type == "privateChat" {
+		if chat.Type == "private" {
 			fmt.Println("removing chat notification", chat.Type)
 			// check notification table for chat notif with the sender and receiver sent from the backend and delete it
 			rowsAffected, err := service.repo.DeleteChatNotifDB(chat)
