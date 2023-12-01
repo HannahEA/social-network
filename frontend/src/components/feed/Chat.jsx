@@ -464,7 +464,7 @@ const RemoveChatNotification = ({username, name, type}) => {
         shadow-lg dark:text-white dark:hover:bg-gray-300 
         first-letter:[box-shadow:0_3px_0_0_gray-100] 
         [box-shadow:0_3px_0_0_gray-300]
-         text-white font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2" > Messages
+         text-white font-bold bottom-3 right-6 w-40 p-2 rounded-md m-2" style{{zIndex:999}}> Messages
         <div className="hidden bg-red-300 rounded-lg absolute -top-4 right-2 w-8 h-8 " id="notifIcon">
           <img src="https://www.svgrepo.com/show/533249/message-circle-notification.svg" alt=""  className=" w-5 absolute top-1 right-1"/>
         </div>
