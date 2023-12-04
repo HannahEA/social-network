@@ -727,8 +727,6 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 			groupInvite.CreatorImage = theAvtr.CreatorImage
 			//re-assign value for creator field to invitedBy
 			groupInvite.Creator = groupInvite.InvitedBy
-			//assign same type as for new group
-			groupInvite.Type = "newGroupNotif"
 			groupInvite.CreatorLogged = "Yes"
 			groupInvite.MemberLogged = askWho.LoggedIn
 			groupInvite.MemberStatus = "memberPending"
@@ -746,7 +744,7 @@ func (service *AllDbMethodsWrapper) HandleConnections(w http.ResponseWriter, r *
 					if client == groupInvite.Member {
 						reciever[conn] = client
 						online = true
-						service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{NewGroupNotif: groupInvite, Type: groupInvite.Type}, Connections: reciever})
+						service.repo.BroadcastToChannel(BroadcastMessage{WebMessage: WebsocketMessage{NewGroupNotif: groupInvite, Type: "newGroupNotif"}, Connections: reciever})
 					}
 				}
 			} else if groupInvite.MemberStatus == "memberPending" && groupInvite.MemberLogged == "No" {

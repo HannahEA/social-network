@@ -681,6 +681,7 @@ const [viewProfile, setViewProfile] = useState(false)
     //setViewProfile(! viewProfile);
     if (viewProfile == true){
       showProfile();
+
     }else{
       closeProfile();
     }
@@ -1181,16 +1182,16 @@ const [viewProfile, setViewProfile] = useState(false)
             setEvt={setNewGrpEvt}
             theEvt={newGrpEvt}
             eParticipant={requestBy}
-
+            //new group and member group invite notif
             setGroupsVisible={setIsGroupsVisible}
             grNotifVisible={isGroupsVisible}
             groupData={allData.current.newGroupNotif}
-
-            setJoinGpVisible={setIsJoinGroupVisible}
-            joinGrVisible={isJoinGroupVisible}
+            //join group request notif for group creator
+            setJoinGVisible={setIsJoinGroupVisible}
+            joinGVisible={isJoinGroupVisible}
             joinRequest={allData.current.oneJoinGroupRequest}
 
-
+        
         isGroupProfileVisible={isGroupProfileVisible} 
         requestBy={requestBy}
         gMember={groupMember}
@@ -1337,6 +1338,7 @@ const [viewProfile, setViewProfile] = useState(false)
         showNewEvt={showNewEvt}
         setShowNewEvt={setShowNewEvt}
         showEvents={showEvents}
+        setJoinGpVisible={setIsJoinGroupVisible}
         >
           {selectedGroup && (
             <GrProfileCard
