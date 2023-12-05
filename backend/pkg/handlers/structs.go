@@ -42,21 +42,21 @@ type ProfileVisibilityData struct {
 }
 
 type AllUsersData struct {
-	ID         int    `json:"id"`
-	NickName   string `json:"username"`
-	Avatar     string `json:"avatar"`
-	Image      string `json:"image"`
-	ProfVisib  string `json:"profVisib"`
-	AboutMe    string `json:"aboutMe"`
-	LoggedIn   string `json:"loggedIn"`
-	Influencer int    `json:"influencer"`
-	FirstName  string `json:"firstName"`
-	LastName   string `json:"lastName"`
-	Age        string `json:"age"`
-	Gender     string `json:"gender"`
-	Email      string `json:"email"`
+	ID         int           `json:"id"`
+	NickName   string        `json:"username"`
+	Avatar     string        `json:"avatar"`
+	Image      string        `json:"image"`
+	ProfVisib  string        `json:"profVisib"`
+	AboutMe    string        `json:"aboutMe"`
+	LoggedIn   string        `json:"loggedIn"`
+	Influencer int           `json:"influencer"`
+	FirstName  string        `json:"firstName"`
+	LastName   string        `json:"lastName"`
+	Age        string        `json:"age"`
+	Gender     string        `json:"gender"`
+	Email      string        `json:"email"`
 	Followers  []interface{} `json:"followers"`
-	Following  []interface{}  `json:"following"`
+	Following  []interface{} `json:"following"`
 }
 
 type RegistrationData struct {
@@ -101,7 +101,7 @@ type Comment struct {
 	PostID    int    `json:"postId"`
 	AuthorID  int    `json:"authorId"`
 	Author    string `json:"author"`
-	ImageURL     string `json:"url"`
+	ImageURL  string `json:"url"`
 	Content   string `json:"content"`
 	Date      string `string:"date"`
 	Page      string `json:"page"`
@@ -258,18 +258,18 @@ type NewGroup struct {
 // this struct is used for new groups
 //and for when a grup member invites her follower to join a group
 type NewGroupNotif struct {
-	GrpName       string `json:"grpName"`
-	GrpDescr      string `json:"grpDescr"`
-	GrpID         int    `json:"grpID"`
-	Creator       string `json:"creator"`
-	Member        string `json:"member"`
-	InvitedBy     string `json:"invitedBy"`
-	CreatorURL    string `json:"creatorURL"`
-	CreatorImage  string `json:"creatorImage"`
-	CreatorLogged string `json:"creatorLogged"`
-	MemberLogged  string `json:"memberLogged"`
-	MemberStatus  string `json:"memberStatus"`
-	Type          string `json:"type"`
+	GrpName        string `json:"grpName"`
+	GrpDescr       string `json:"grpDescr"`
+	GrpID          int    `json:"grpID"`
+	Creator        string `json:"creator"`
+	Member         string `json:"member"`
+	InvitedBy      string `json:"invitedBy"`
+	CreatorURL     string `json:"creatorURL"`
+	CreatorImage   string `json:"creatorImage"`
+	CreatorLogged  string `json:"creatorLogged"`
+	MemberLogged   string `json:"memberLogged"`
+	MemberStatus   string `json:"memberStatus"`
+	Type           string `json:"type"`
 }
 
 // follow notification reply by private influencer

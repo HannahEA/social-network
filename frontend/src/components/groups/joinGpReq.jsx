@@ -5,7 +5,7 @@ import { useWebSocket } from "../WebSocketProvider.jsx";
 
 function JoinGpReq ( props ) {
     {console.log("join group request inside JoinGpReq component:", props.joinRequest)}
-    {console.log("show the props inside NewGroupNotification: ",props)}
+    {console.log("show the props inside JoinGrNotification: ", props)}
 
 
     const { websocketRef, isWebSocketConnected} = useWebSocket();

@@ -317,20 +317,19 @@ const Profile = (props) => {
 
           {props.grNotifVisible && (
           <NewGroupNotification 
-            setGroupsVisible={props.setIsGroupsVisible}
-            grNotifVisible={props.isGroupsVisible}
+            setGroupsVisible={props.setGroupsVisible}
+            grNotifVisible={props.grNotifVisible}
             groupData={props.groupData}
           />
           )}
-          
 
-          {props.joinGrVisible && (
+          {props.joinGVisible && (
             <JoinGpReq 
-              setJoinGpVisible={props.setJoinGpVisible}
-              joinGrVisible={props.joinGrVisible}
+              setJoinGpVisible={props.setJoinGVisible}
+              joinGrVisible={props.joinGVisible}
               joinRequest={props.joinRequest}
             />
-          )}
+            )}
 
             </div>
           </div>

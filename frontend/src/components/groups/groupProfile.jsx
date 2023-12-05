@@ -13,7 +13,7 @@ import "notyf/notyf.min.css";
 const notyf = new Notyf(); // Create a single instance of Notyf
 
 
-function GroupProfile({ children, showNewEvt, setShowNewEvt, showEvents, grpMember, onGpClose, followers, request, theGroup, creator, setEvt, theEvt, gEvents }) {
+function GroupProfile({ children, showNewEvt, setShowNewEvt, showEvents, grpMember, onGpClose, followers, request, theGroup, creator, setEvt, theEvt, gEvents, setJoinGpVisible }) {
 {console.log("the group events inside the GroupProfile component: +++++> ",gEvents)}
 
 // const [newGrpEvt, setNewGrpEvt] = useState({["type"]: "newEvent"});
